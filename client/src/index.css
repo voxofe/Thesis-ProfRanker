@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    @font-face {
+      font-family: ZonaPro;
+      src: url("./assets/fonts/ZonaPro-Regular.otf");
+      font-weight: normal;
+    }
+  
+    @font-face {
+      font-family: ZonaPro;
+      src: url("./assets/fonts/ZonaPro-Bold.otf");
+      font-weight: bold;
+    }
+  
+    @font-face {
+      font-family: ZonaPro;
+      src: url("./assets/fonts/ZonaPro-Light.otf");
+      font-weight: 100;
+    }
+}
