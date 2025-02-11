@@ -1,90 +1,68 @@
-
-import React, { useState } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { useFormData } from '../contexts/FormDataContext';
 import PersonalInfoSection from './PersonalInfoSection';
-import PhdSection from './PhdSection'
+import PhdSection from './PhdSection';
 import ScientificFieldSection from './ScientificFieldSection';
 import BioSection from './BioSection';
-import PublicationSection from './PublicationsSections';
+import PapersSection from './PapersSection';
+import axios from 'axios';
+
 
 export default function Form({academicYear}) {
 
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        scientificField: '',
-        coursePlanDocument: null,
-        phdDocument: null,
-        phdAcquisitionDate: '',
-        phdIsFromForeignInstitue: false,
-        doatapDocument: null,
-        publicationsAndPresentations: [],
-        workExperience: 0,
-        cvDocument: null,
-        hasParticipatedInPastProgram: false,
-        militaryObligationsDocument: null,
-        
-    });
+    const { formData } = useFormData();
     
-    const handleChange = (field, value) => {
-        setFormData((prevData) => ({
-            ...prevData,
-            [field]: value,
-        }));
-    };
     
-    const handleFileChange = (field, file) => {
-        setFormData((prevData) => ({
-            ...prevData,
-            [field]: file,
-        }));
-    };
-
-    const handleFileDelete = (field) => {
-        setFormData((prevData) => ({
-            ...prevData,
-            [field]: null,
-        }));
-        console.log(`File for field "${field}" has been deleted.`);
-    };
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form data submitted:', formData);
-
+        console.log(formData);
+        const formDataToSend = new FormData();
+        
+        // Append text fields
+        Object.keys(formData).forEach((key) => {
+            if (formData[key] && typeof formData[key] !== "object") {
+                formDataToSend.append(key, formData[key]);
+            }
+        });
+    
+        // Append files
+        ["coursePlanDocument", "phdDocument", "doatapDocument", "militaryObligationsDocument", "cvDocument"].forEach(field => {
+            if (formData[field]) {
+                formDataToSend.append(field, formData[field]);
+            }
+        });
+    
+        // Convert papers to a JSON string and append it to the FormData
+        formDataToSend.append("papers", JSON.stringify(formData.papers));
+    
+        try {
+            const response = await axios.post('http://127.0.0.1:8000/api/submit/', formDataToSend, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'  // Content type for file uploads
+                }
+            });
+    
+            console.log('Form submitted successfully:', response.data);
+            alert("Form submitted successfully!");
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            alert("Failed to submit the form.");
+        }
     };
-
+    
+    
     return (
-        <form  onSubmit={handleSubmit}>
-            <PersonalInfoSection 
-                formData={formData}
-                onChange={handleChange}
-            />
-            <ScientificFieldSection             
-                formData={formData}
-                onChange={handleChange}
-                onFileChange={handleFileChange}
-                onDelete={handleFileDelete}
-            />
-            <PhdSection             
-                formData={formData}
-                onChange={handleChange}
-                onFileChange={handleFileChange}
-                onDelete={handleFileDelete}
-            />
-            <BioSection             
-                formData={formData}
-                onChange={handleChange}
-                onFileChange={handleFileChange}
-                onDelete={handleFileDelete}
-                academicYear={academicYear}
-            />
+        <form  className="grid grid-cols-1 gap-y-5"onSubmit={handleSubmit}>
+            <PersonalInfoSection />
+            <ScientificFieldSection />
+            <PhdSection />
+            <PapersSection />
+            <BioSection academicYear={academicYear}/>
 
-            <div className="mt-6 flex items-center justify-end gap-x-6 pt-6">
+            <div className="mt-1 flex items-center justify-center sm:justify-end gap-x-6 sm:py-4">
                 <button
                     type="submit"
-                    className="rounded-md bg-patras-buccaneer px-3 py-2 text-sm font-semibold text-white shadow-sm
+                    className="rounded-md bg-patras-buccaneer  px-3 py-2 text-sm font-semibold text-white shadow-sm
                     hover:bg-patras-sanguineBrown 
                     focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
@@ -92,6 +70,6 @@ export default function Form({academicYear}) {
                 </button>
             </div>
         </form>
-    )
+    );
 }
 

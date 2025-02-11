@@ -29,7 +29,7 @@ export default function Upload(props) {
     };
 
     return (
-        <div className={`mb-3 ${props.disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : ""} h-full`}>
+        <div className={`mb-5 ${props.disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : ""} `}>
             <label htmlFor={props.icon} className="block text-sm/6 font-medium text-gray-900">
                 {props.label}
             </label>
@@ -58,7 +58,6 @@ export default function Upload(props) {
                         }}
                     />
                 }
-
                 <div className="text-center">
                     {/* File Icon */}
                     {!props.uploadedFile ? 
@@ -72,13 +71,12 @@ export default function Upload(props) {
                             className="mx-auto h-12 w-12 text-patras-buccaneer"
                         />
                     }
-
                     {/* File Name or Upload Button */}
                     {props.uploadedFile ? 
                         <p className="text-gray-800 mt-3 text-sm font-medium">
                             {props.uploadedFile.name}
                         </p>
-                     : 
+                    : 
                         <div className="flex text-sm/6 text-gray-600 mt-3">
                             <label
                                 htmlFor={props.id}
@@ -97,24 +95,19 @@ export default function Upload(props) {
                                     disabled={props.disabled}
                                 />
                             </label>
-                            
                         </div>
                     }
-
-                    {!props.uploadedFile ? (
+                    {!props.uploadedFile ? 
                         <div>
                             <span className="text-sm pl-1 mb-10">ή σύρετε και αφήστε</span>
                             <p className="pt-2 text-xs/5 text-gray-600">PDF, DOC, DOCX, ODT</p>
                         </div>
-                    ):
-                     (
-                       
+                    :
                         <p className="text-sm pt-[14px] mb-[20px] text-patras-buccaneer">
                             {props.id==="milatary-obligations-upload" ? "Η υπεύθυνη δήλωση": props.content.charAt(0).toUpperCase() + props.content.slice(1)} ανέβηκε επιτυχώς
                         </p>
-                     )
-                    }
                     
+                    }
                 </div>
             </div>
         </div>

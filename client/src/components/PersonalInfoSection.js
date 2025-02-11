@@ -1,13 +1,13 @@
 import React from 'react';
+import { useFormData } from '../contexts/FormDataContext';
 import InputField from './InputField';
 
-export default function PersonalInfoSection({formData, onChange}){
+export default function PersonalInfoSection(){
     
-    return(
-        
-        <div className="py-5 grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-3 border-b border-gray-900/10  ">
+    const {formData, handleChange}  = useFormData();
 
-            {/* Column 1*/}
+    return(
+        <div className="py-5 grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-3 border-b border-gray-900/10  ">
             <div className="sm:col-span-1">
                 {/* First Name */}
                 <InputField  
@@ -17,12 +17,10 @@ export default function PersonalInfoSection({formData, onChange}){
                     type="text" 
                     autoComplete="given-name"
                     value={formData.firstName}
-                    onChange = {(value) => onChange("firstName", value)}
+                    onChange = {(value) => handleChange("firstName", value)}
                     required= {true}
                 />      
             </div>
-
-            {/* Column 2*/}
             <div className="sm:col-span-1">
                 {/* Last Name */}
                 <InputField 
@@ -32,12 +30,10 @@ export default function PersonalInfoSection({formData, onChange}){
                     type="text" 
                     autoComplete="family-name"
                     value={formData.lastName}
-                    onChange = {(value) => onChange("lastName", value)}
+                    onChange = {(value) => handleChange("lastName", value)}
                     required= {true}
                 />
             </div> 
-
-            {/* Column 3*/}
             <div className="sm:col-span-1">
                 {/* Email */}
                 <InputField 
@@ -47,11 +43,10 @@ export default function PersonalInfoSection({formData, onChange}){
                     type="email" 
                     autoComplete="email"
                     value={formData.email}
-                    onChange = {(value) => onChange("email", value)}
+                    onChange = {(value) => handleChange("email", value)}
                     required= {true}
                 /> 
             </div> 
-
         </div>       
-    )
+    );
 }

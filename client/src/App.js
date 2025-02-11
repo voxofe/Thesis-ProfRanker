@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { FormDataProvider } from './contexts/FormDataContext';
 import Form from './components/Form';
 import Header from './components/Header';
 
 export default function App() {
 
-  const academicYear = "2024-2025"
+    const academicYear = "2024-2025";
 
-  return (
-    <div className="flex justify-center min-h-screen ">
-      <div className="max-w-[1200px] px-20 py-7 ">
-        <Header academicYear={academicYear}/>
-        <Form academicYear={academicYear}/>
-        {/* <Footer /> */}
-      </div>
-    </div>
-  );
-    
-
+    return (
+        <FormDataProvider>
+            <div className="flex justify-center min-h-screen">
+                <div className="max-w-[1272px] px-10 sm:px-10 py-7 grid grid-cols-1 gap-y-2">
+                    <Header academicYear={academicYear} />
+                    <Form academicYear={academicYear} />
+                    {/* <Footer /> */}
+                </div>
+            </div>
+        </FormDataProvider>
+    );
 }

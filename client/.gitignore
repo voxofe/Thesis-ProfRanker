@@ -23,4 +23,7 @@ yarn-debug.log*
 yarn-error.log*
 
 /src/assets/fonts
-/src/components/temp
+src/assets/data
+
+.env
+

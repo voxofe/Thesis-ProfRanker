@@ -1,16 +1,16 @@
+import React from 'react';
 import InputField from './InputField';
+import { useFormData } from '../contexts/FormDataContext';
 import Upload from './Upload';
 import Checkbox from "./Checkbox";
 
-export default function PersonalInfoSection({formData, onChange, onFileChange, onDelete}){
+export default function PersonalInfoSection(){
 
+    const {formData, handleChange, handleFileChange, handleFileDelete} = useFormData();
     const today = new Date().toISOString().split("T")[0];
 
     return(
-
         <div className="py-5 grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2 border-b border-gray-900/10  ">
-
-            {/* Column 1*/}
             <div className="sm:col-span-1">
                 {/* PHD Upload*/}
                 <Upload 
@@ -21,14 +21,10 @@ export default function PersonalInfoSection({formData, onChange, onFileChange, o
                     name="phd-upload"
                     accept=".pdf,.doc,.docx, .odt"
                     uploadedFile={formData.phdDocument}
-                    onChange={(e) => onFileChange('phdDocument', e)}
-                    onDelete={() => onDelete("phdDocument")}
+                    onChange={(e) => handleFileChange('phdDocument', e)}
+                    onDelete={() => handleFileDelete("phdDocument")}
                     required= {true}  
-                /> 
-            </div>             
-
-            {/* Column 2*/}
-            <div className="sm:col-span-1 ">
+                />
                 {/* PHD Acquisition Date*/}
                 <InputField
                     label="Ημερομηνία λήψης διδακτορικού τίτλου"
@@ -39,16 +35,18 @@ export default function PersonalInfoSection({formData, onChange, onFileChange, o
                     min="2011-01-01"
                     defaultValue={today}
                     value={formData.phdAcquisitionDate}
-                    onChange = {(value) => onChange("phdAcquisitionDate", value)}
+                    onChange = {(value) => handleChange("phdAcquisitionDate", value)}
                     required={true}
-                />                
+                />    
+            </div>             
+            <div className="sm:col-span-1 ">             
                 {/* Foreign Ιnstitute Checkbox*/}
-                <Checkbox  className="pt-2"
+                <Checkbox  className=""
                     label="Kατοχή τίτλου από Ίδρυμα του εξωτερικού (αναγνωρισμένο από τον ΔΟΑΤΑΠ)"
                     id="foreign-institute"
                     name="foreign-institute"
-                    checked={formData.phdIsFromForeignInstitue}
-                    onChange={(value) => onChange('phdIsFromForeignInstitue', value)}
+                    checked={formData.phdIsFromForeignInstitute}
+                    onChange={(value) => handleChange('phdIsFromForeignInstitute', value)}
                 />  
                 {/* DOATAP Upload*/}
                 <Upload className="pt-[40px]"
@@ -59,12 +57,12 @@ export default function PersonalInfoSection({formData, onChange, onFileChange, o
                     name="doatap-upload"
                     accept=".pdf,.doc,.docx, .odt"
                     uploadedFile={formData.doatapDocument}
-                    onChange={(e) => onFileChange('doatapDocument', e)}
-                    onDelete={() => onDelete("doatapDocument")}
-                    disabled={!formData.phdIsFromForeignInstitue}
-                    required={formData.phdIsFromForeignInstitue}
+                    onChange={(e) => handleFileChange('doatapDocument', e)}
+                    onDelete={() => handleFileDelete("doatapDocument")}
+                    disabled={!formData.phdIsFromForeignInstitute}
+                    required={formData.phdIsFromForeignInstitute}
                 />                   
             </div>
         </div>       
-    )
+    );
 }

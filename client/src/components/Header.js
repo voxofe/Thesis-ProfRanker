@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import logo from '../assets/images/patras-university-logo.png'
+import React from 'react';
+import logo from '../assets/images/patras-university-logo.png';
 
 export default function Header({academicYear}) {
 
@@ -8,7 +8,7 @@ export default function Header({academicYear}) {
             <div className="shrink-0 ">
                 <img
                     src={logo}
-                    alt="Header Image"
+                    alt="University of Patras logo"
                     className="h-24 w-24 "
                 />
             </div>
@@ -17,6 +17,6 @@ export default function Header({academicYear}) {
                 <p className="mt-1 text-base lg:text-lg text-gray-600">Πρόσκληση απόκτησης διδακτικής-ακαδημαϊκής εμπειρίας για νέους επιστήμονες, κατόχους διδακτορικού</p>
             </div>
         </div>
-    )
+    );
 }
 

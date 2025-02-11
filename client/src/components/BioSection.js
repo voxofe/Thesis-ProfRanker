@@ -1,13 +1,15 @@
+import React from 'react';
+import { useFormData } from '../contexts/FormDataContext';
 import InputField from './InputField';
 import Upload from './Upload';
 import Checkbox from "./Checkbox";
 
-export default function BioSection({formData, onChange, onFileChange, onDelete, academicYear}){
+export default function BioSection({academicYear}){
+
+    const {formData, handleChange, handleFileChange, handleFileDelete} = useFormData();
 
     return(
-        <div className="py-5 grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2 border-b border-gray-900/10  ">
-
-            {/* Column 1*/}
+        <div className="py-5 grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 border-b border-gray-900/10  ">
             <div className="sm:col-span-1 flex flex-col gap-2">
                 {/* CV Upload*/}
                 <Upload 
@@ -18,41 +20,10 @@ export default function BioSection({formData, onChange, onFileChange, onDelete, 
                     name="cv-upload"    
                     accept=".pdf,.doc,.docx, .odt"
                     uploadedFile={formData.cvDocument}
-                    onChange={(e) => onFileChange('cvDocument', e)}
-                    onDelete={() => onDelete("cvDocument")}
+                    onChange={(e) => handleFileChange('cvDocument', e)}
+                    onDelete={() => handleFileDelete("cvDocument")}
                     required= {true}  
-                /> 
-                {/* Work Experience */}
-                <InputField label="Χρόνια μεταδιδακτορικής εργασιακής εμπειρίας (εξαιρείται η διδακτική εμπερία)" 
-                    id="experience-years" 
-                    name="experience-years"                    
-                    type= "number"
-                    min="0"
-                    max="14"
-                    defaultValue = {0}
-                    value={formData.workExperience}
-                    onChange = {(value) => onChange("workExperience", value)}
-                    required={true}
-                />  
-
-
-            </div>             
-
-            {/* Column 2*/}
-            <div className="sm:col-span-1 flex flex-col gap-2">
-                {/* Military Obligations Upload*/}
-                <Upload className=""
-                    icon = "document-text"
-                    label="Υπεύθυνη Δήλωση εκπλήρωσης Στρατιωτικών Υποχρεώσεων ή απαλλαγής από αυτών ή αναβολής για το ακαδημαϊκό έτος 2024-2025 "
-                    content="την υπεύθυνη δήλωση"
-                    id="milatary-obligations-upload"
-                    name="milary-obligations-upload"
-                    accept=".pdf,.doc,.docx, .odt"
-                    uploadedFile={formData.militaryObligationsDocument}
-                    onChange={(e) => onFileChange('militaryObligationsDocument', e)}
-                    onDelete={() => onDelete("militaryObligationsDocument")}
-                    required={true}
-                />                
+                />
                 {/* Νot Participated Checkbox*/}
                 <Checkbox  className=""
                     label="Δεν έχω επιλεγεί σε 
@@ -63,11 +34,37 @@ export default function BioSection({formData, onChange, onFileChange, onDelete, 
                             2020‐2021) του ΕΠ ΑΝΑΔ ΕΔΒΜ 2014‐2020."
                     id="not-participated"
                     name="not-participated"
-                    checked={formData.hasParticipatedInPastProgram}
-                    onChange={(value) => onChange('hasParticipatedInPastProgram', value)}
-                />  
-                 
+                    checked={formData.hasNotParticipatedInPastProgram}
+                    onChange={(value) => handleChange('hasNotParticipatedInPastProgram', value)}
+                /> 
+            </div>             
+            <div className="sm:col-span-1 flex flex-col gap-2">
+                {/* Military Obligations Upload*/}
+                <Upload className=""
+                    icon = "document-text"
+                    label={`Υπεύθυνη Δήλωση εκπλήρωσης Στρατιωτικών Υποχρεώσεων ή νόμιμης απαλλαγής από αυτών ή αναβολής για το ακαδημαϊκό έτος ${academicYear}`}
+                    content="την υπεύθυνη δήλωση"
+                    id="milatary-obligations-upload"
+                    name="milary-obligations-upload"
+                    accept=".pdf,.doc,.docx, .odt"
+                    uploadedFile={formData.militaryObligationsDocument}
+                    onChange={(e) => handleFileChange('militaryObligationsDocument', e)}
+                    onDelete={() => handleFileDelete("militaryObligationsDocument")}
+                    required={true}
+                />                
+                {/* Work Experience */}
+                <InputField label="Χρόνια μεταδιδακτορικής εργασιακής εμπειρίας (εξαιρείται η διδακτική εμπερία)" 
+                    id="experience-years" 
+                    name="experience-years"                    
+                    type= "number"
+                    min="0"
+                    max="14"
+                    defaultValue = {0}
+                    value={formData.workExperience}
+                    onChange = {(value) => handleChange("workExperience", value)}
+                    required={true}
+                />    
             </div>
         </div>       
-    )
+    );
 }
