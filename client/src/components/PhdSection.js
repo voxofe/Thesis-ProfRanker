@@ -4,7 +4,7 @@ import { useFormData } from '../contexts/FormDataContext';
 import Upload from './Upload';
 import Checkbox from "./Checkbox";
 
-export default function PersonalInfoSection(){
+export default function PhdSection(){
 
     const {formData, handleChange, handleFileChange, handleFileDelete} = useFormData();
     const today = new Date().toISOString().split("T")[0];
