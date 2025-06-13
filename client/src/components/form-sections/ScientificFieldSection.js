@@ -1,7 +1,7 @@
 import React from 'react';
-import { useFormData } from '../contexts/FormDataContext';
-import InputField from './InputField';
-import Upload from './Upload';
+import { useFormData } from '../../contexts/FormDataContext';
+import InputField from '../InputField';
+import Upload from '../Upload';
 
 export default function ScientificFieldSection() {
 

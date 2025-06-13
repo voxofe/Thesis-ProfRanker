@@ -1,8 +1,8 @@
 import React from 'react';
-import InputField from './InputField';
-import { useFormData } from '../contexts/FormDataContext';
-import Upload from './Upload';
-import Checkbox from "./Checkbox";
+import InputField from '../InputField';
+import { useFormData } from '../../contexts/FormDataContext';
+import Upload from '../Upload';
+import Checkbox from "../Checkbox";
 
 export default function PhdSection(){
 

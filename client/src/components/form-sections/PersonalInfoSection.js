@@ -1,6 +1,6 @@
 import React from 'react';
-import { useFormData } from '../contexts/FormDataContext';
-import InputField from './InputField';
+import { useFormData } from '../../contexts/FormDataContext';
+import InputField from '../InputField';
 
 export default function PersonalInfoSection(){
     

@@ -1,8 +1,8 @@
 import React from 'react';
-import { useFormData } from '../contexts/FormDataContext';
-import InputField from './InputField';
-import Upload from './Upload';
-import Checkbox from "./Checkbox";
+import { useFormData } from '../../contexts/FormDataContext';
+import InputField from '../InputField';
+import Upload from '../Upload';
+import Checkbox from "../Checkbox";
 
 export default function BioSection({academicYear}){
 

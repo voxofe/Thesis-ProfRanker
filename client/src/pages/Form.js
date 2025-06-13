@@ -1,10 +1,10 @@
 import React from 'react';
 import { useFormData } from '../contexts/FormDataContext';
-import PersonalInfoSection from './PersonalInfoSection';
-import PhdSection from './PhdSection';
-import ScientificFieldSection from './ScientificFieldSection';
-import BioSection from './BioSection';
-import PapersSection from './PapersSection';
+import PersonalInfoSection from '../components/form-sections/PersonalInfoSection';
+import PhdSection from '../components/form-sections/PhdSection';
+import ScientificFieldSection from '../components/form-sections/ScientificFieldSection';
+import BioSection from '../components/form-sections/BioSection';
+import PapersSection from '../components/form-sections/PapersSection';
 import axios from 'axios';
 
 

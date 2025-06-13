@@ -1,6 +1,6 @@
 import React from "react";
-import { useFormData } from "../contexts/FormDataContext.js";
-import Paper from "./Paper.js";
+import { useFormData } from "../../contexts/FormDataContext.js";
+import Paper from "../Paper.js";
 
 export default function PaperSection() {
     const { formData, handleChange } = useFormData();

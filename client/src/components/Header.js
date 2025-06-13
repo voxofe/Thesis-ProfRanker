@@ -4,7 +4,7 @@ import logo from '../assets/images/patras-university-logo.png';
 export default function Header({academicYear}) {
 
     return (
-        <div className="flex flex-col sm:flex-row justify-center items-center sm:justify-center sm:items-center gap-6 border-b border-t border-gray-900/10 py-6">
+        <div className="max-h-[400px] sm:h-[140px] flex flex-col sm:flex-row justify-center items-center sm:justify-center sm:items-center gap-6 border-b border-t border-gray-900/10 py-6">
             <div className="shrink-0 ">
                 <img
                     src={logo}
