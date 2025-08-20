@@ -55,27 +55,6 @@ function AppContent() {
     );
   }
 
-  // Helper function to check if user can access certain routes
-  const canAccessScoreTotal = () => {
-    // Only logged-in users can access this function now
-    const userRole = currentUser?.role;
-    if (userRole === "admin") {
-      // Admins can always see score total
-      return true;
-    }
-    if (userRole === "applicant" || userRole === "guest") {
-      // Applicants and guests can see score total after deadline
-      return isAfterDeadline;
-    }
-
-    return false;
-  };
-
-  console.log("Can Access Score Total:", canAccessScoreTotal(), {
-    userRole: currentUser?.role,
-    isAfterDeadline,
-  });
-
   return (
     <div className="flex justify-center min-h-screen min-w-screen">
       <div className="w-[1270px] px-7 py-4 flex flex-col min-h-screen">
@@ -88,10 +67,8 @@ function AppContent() {
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/" element={<Navigate to="/home" replace />} />
 
-                {/* Score Total Route - conditional access */}
-                {canAccessScoreTotal() ? (
-                  <Route path="/score/total" element={<RankingPage />} />
-                ) : null}
+                <Route path="/score/total" element={<RankingPage />} />
+
 
                 {(currentUser?.role === "guest" ||
                   currentUser?.role === "applicant") && (
@@ -111,14 +88,6 @@ function AppContent() {
                 {(currentUser?.role === "applicant" ||
                   currentUser?.role === "admin") && (
                   <Route path="/score/applicant/:id" element={<ApplicantScorePage />} />
-                )}
-
-                {/* Admin routes */}
-                {currentUser?.role === "admin" && (
-                  <Route
-                    path="/score/admin"
-                    element={<ApplicantScorePage role="admin" />}
-                  />
                 )}
 
                 <Route
