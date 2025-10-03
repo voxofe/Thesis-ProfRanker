@@ -9,10 +9,10 @@ export const ValidationProvider = ({ children }) => {
   const { formData } = useFormData();
   const [stepValidation, setStepValidation] = useState({
     1: false, // Personal Info
-    2: false, // PhD
-    3: false, // Papers
-    4: false, // Scientific Field
-    5: true, // Teaching Plan (empty step)
+    2: false, // Scientific Field
+    3: false, // Course Plan (empty step)
+    4: false, // PhD
+    5: true, // Papers
     6: false, // Final Info
   });
 
@@ -76,9 +76,11 @@ export const ValidationProvider = ({ children }) => {
     };
 
     const validateScientificField = () => {
-      return !!(
-        formData.scientificField?.trim() && formData.coursePlanDocument
-      );
+      return !!formData.positionId;
+    };
+
+    const validateCoursePlan = () => {
+      return true; // Not yet implemented
     };
 
     const validateFinalInfo = () => {
@@ -92,10 +94,10 @@ export const ValidationProvider = ({ children }) => {
 
     setStepValidation({
       1: validatePersonalInfo(),
-      2: validatePhd(),
-      3: validatePapers(),
-      4: validateScientificField(),
-      5: true, // Teaching plan step is always valid (empty)
+      2: validateScientificField(),
+      3: validateCoursePlan(),
+      4: validatePhd(),
+      5: validatePapers(),
       6: validateFinalInfo(),
     });
   }, [formData]);

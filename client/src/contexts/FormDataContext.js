@@ -17,7 +17,6 @@ export const FormDataProvider = ({ children }) => {
       phdTitle: "",
       phdAcquisitionDate: "",
       phdIsFromForeignInstitute: false,
-      scientificField: "",
       workExperience: 0,
       hasNotParticipatedInPastProgram: false,
       cvDocument: null,
@@ -26,19 +25,26 @@ export const FormDataProvider = ({ children }) => {
       coursePlanDocument: null,
       militaryObligationsDocument: null,
       papers: [],
+      positionId: "",
     };
 
     // Auto-fill with existing form data if user is applicant and has submitted before
     if (currentUser?.role === "applicant" && currentUser?.form) {
+      const form = currentUser.form;
       return {
         ...baseData,
-        ...currentUser.form,
-        // Preserve existing file names from backend (strings) but allow new uploads (File objects)
-        cvDocument: currentUser.form.cvDocument || null,
-        phdDocument: currentUser.form.phdDocument || null,
-        doatapDocument: currentUser.form.doatapDocument || null,
-        coursePlanDocument: currentUser.form.coursePlanDocument || null,
-        militaryObligationsDocument: currentUser.form.militaryObligationsDocument || null,
+        phdTitle: form.phdTitle ?? "",
+        phdAcquisitionDate: form.phdAcquisitionDate ?? "",
+        phdIsFromForeignInstitute: form.phdIsFromForeignInstitute ?? false,
+        workExperience: form.workExperience ?? 0,
+        hasNotParticipatedInPastProgram: form.hasNotParticipatedInPastProgram ?? false,
+        positionId: form.positionId ?? "", // positionId from backend
+        cvDocument: form.cvDocument ?? null,
+        phdDocument: form.phdDocument ?? null,
+        doatapDocument: form.doatapDocument ?? null,
+        coursePlanDocument: form.coursePlanDocument ?? null,
+        militaryObligationsDocument: form.militaryObligationsDocument ?? null,
+        papers: form.papers ?? [],
       };
     }
 

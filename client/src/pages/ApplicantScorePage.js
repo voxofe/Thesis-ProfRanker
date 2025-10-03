@@ -1,38 +1,97 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import PapersDrawer from "../components/PapersDrawer";
+import CoursesDrawer from "../components/CoursesDrawer";
 import { useAuth } from "../contexts/AuthContext";
-import { useParams } from "react-router-dom"; // <-- import this
+import { useParams } from "react-router-dom";
+import { usePositions } from "../contexts/PositionsContext";
 
 export default function ApplicantScorePage() {
-  console.log("ApplicantScorePage rendered");
   const { currentUser } = useAuth();
-  const { id } = useParams(); // <-- get id from URL
+  const { id } = useParams();
+  const { positions = [] } = usePositions();
   const [applicantData, setApplicantData] = useState();
   const [loading, setLoading] = useState(false);
+
+  // const fmtDate = (d) => {
+  //   if (!d) return "";
+  //   const dt = typeof d === "string" ? new Date(d) : d;
+  //   return dt.toLocaleDateString("el-GR", {
+  //     year: "numeric",
+  //     month: "long",
+  //     day: "numeric",
+  //   });
+  // };
 
   useEffect(() => {
     if (id && currentUser) {
       setLoading(true);
-      console.log("currentUser", currentUser);
       const token = localStorage.getItem("token");
       axios
-        .get(`http://127.0.0.1:8000/api/applicant/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        .get(`http://127.0.0.1:8000/api/applicant/${id}?times=10`, {
+          headers: { Authorization: `Bearer ${token}` },
         })
-        .then((response) => {
-          setApplicantData(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching applicant data:", error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+        .then((res) => setApplicantData(res.data))
+        .catch((err) => console.error("Error fetching applicant data:", err))
+        .finally(() => setLoading(false));
     }
-  }, [id, currentUser]); // <-- depend on id
+  }, [id, currentUser]);
+
+  // Try to resolve position info (school, courses) by scientificField name (fallback to data if present)
+  const matchedPosition = useMemo(() => {
+    const sf = applicantData?.scientificField;
+    if (!sf) return null;
+    return positions.find((p) => p.scientificField === sf) || null;
+  }, [positions, applicantData?.scientificField]);
+
+  // Normalize to DD-MM-YYYY (accepts "DD-MM-YYYY", "DD-MM-YYYY HH:MM", ISO strings, or Date)
+  const toDDMMYYYY = (v) => {
+    if (!v) return "";
+    if (typeof v === "string") {
+      const m = v.match(/^(\d{2})-(\d{2})-(\d{4})/);
+      if (m) return `${m[1]}-${m[2]}-${m[3]}`; // already formatted, strip time if any
+      const d = new Date(v);
+      if (!isNaN(d)) {
+        const dd = String(d.getDate()).padStart(2, "0");
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const yyyy = d.getFullYear();
+        return `${dd}-${mm}-${yyyy}`;
+      }
+      return v;
+    }
+    if (v instanceof Date && !isNaN(v)) {
+      const dd = String(v.getDate()).padStart(2, "0");
+      const mm = String(v.getMonth() + 1).padStart(2, "0");
+      const yyyy = v.getFullYear();
+      return `${dd}-${mm}-${yyyy}`;
+    }
+    return "—";
+  };
+
+  const schoolName = applicantData?.school || matchedPosition?.school || "—";
+  const departmentName = applicantData?.department || matchedPosition?.department || "—";
+
+  const courses = useMemo(() => {
+    if (Array.isArray(applicantData?.courses) && applicantData.courses.length)
+      return applicantData.courses;
+    if (Array.isArray(matchedPosition?.courses)) return matchedPosition.courses;
+    return [];
+  }, [applicantData?.courses, matchedPosition?.courses]);
+
+  // Prefer server-formatted fields from views.py
+  const startDate = applicantData?.positionStartDate || matchedPosition?.startDate || "";
+  const endDate = applicantData?.positionEndDate || matchedPosition?.endDate || "";
+  const submitDate =
+    applicantData?.submitDate ||
+    applicantData?.submittedAt ||
+    applicantData?.submissionDate ||
+    "";
+
+  const postdocYears =
+    applicantData?.workExperienceYears ??
+    applicantData?.postdocYears ??
+    applicantData?.yearsOfPostdoc ??
+    null;
 
   if (loading) {
     return (
@@ -44,7 +103,7 @@ export default function ApplicantScorePage() {
 
   return (
     <div className="grid grid-cols-1 gap-y-5 pt-5">
-      <h1 className="text-2xl border-b pb-2 text-gray-700">
+      <h1 className="text-2xl text-center border-b pb-2 text-gray-700">
         Αποτελέσματα αίτησης υποψηφίου
       </h1>
 
@@ -67,9 +126,6 @@ export default function ApplicantScorePage() {
                 <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
                   Ημερομηνία λήψης Διδακτορικού Τίτλου
                 </th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Επιστημονικό Πεδίο
-                </th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider">
                   Mεταδιδακτορική εργασιακή εμπειρία
                 </th>
@@ -86,11 +142,8 @@ export default function ApplicantScorePage() {
                 <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
                   {applicantData?.phdTitle}
                 </td>
-                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
-                  {applicantData?.phdAcquisitionDate}
-                </td>
-                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
-                  {applicantData?.scientificField}
+                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                  {toDDMMYYYY(applicantData?.phdAcquisitionDate)}
                 </td>
                 <td className="px-6 py-4 text-patras-buccaneer text-center align-middle">
                   {applicantData?.workExperience
@@ -100,6 +153,66 @@ export default function ApplicantScorePage() {
                           : "χρόνια"
                       }`
                     : "Καμία"}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Position Info Section */}
+        <h1 className="text-xl font-light mb-3">Στοιχεία θέσης</h1>
+        <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
+          <table className="min-w-full bg-white/25">
+            <thead className="bg-patras-buccaneer">
+              <tr>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                  Σχολή
+                </th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                  Τμήμα
+                </th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                  Επιστημονικό Πεδίο
+                </th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                  Έναρξη Αιτήσεων
+                </th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                  Λήξη Αιτήσεων
+                </th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                  Υποβολή Αίτησης
+                </th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider">
+                  Μαθήματα
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                  {schoolName}
+                </td>
+                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                  {departmentName}
+                </td>
+                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                  {applicantData?.scientificField || "—"}
+                </td>
+                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                  {toDDMMYYYY(startDate)}
+                </td>
+                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                  {toDDMMYYYY(endDate)}
+                </td>
+                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                  {toDDMMYYYY(submitDate)}
+                </td>
+                <td className="px-6 py-4 text-center align-middle">
+                  <CoursesDrawer
+                    courses={courses}
+                    scientificField={applicantData?.scientificField || matchedPosition?.scientificField}
+                  />
                 </td>
               </tr>
             </tbody>

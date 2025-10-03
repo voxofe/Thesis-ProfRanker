@@ -36,7 +36,6 @@ export const AuthProvider = ({ children }) => {
   
   const getUser = () => {
     const token = localStorage.getItem("token");
-    console.log("getting user");
 
     if (token === "legacy-token") {
       setCurrentUser(legacyUser);
@@ -58,7 +57,6 @@ export const AuthProvider = ({ children }) => {
     })
       .then((response) => {
         setCurrentUser(response.data);
-        console.log("User fetched:", response.data);
       })
       .catch((error) => {
         console.error("Error fetching user data:", error);

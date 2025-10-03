@@ -4,8 +4,10 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import Header from "./components/Header";
+import BackLink from "./components/BackLink";
 import HomePage from "./pages/HomePage";
 import Form from "./pages/Form";
 import ApplicantScorePage from "./pages/ApplicantScorePage";
@@ -18,15 +20,19 @@ import {
 } from "./contexts";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-
-import { deadlineDate } from "./constants";
+import { PositionsProvider } from "./contexts/PositionsContext";
+import { PreviousLocationProvider } from "./contexts/PreviousLocationContext";
 
 export default function App() {
   return (
     <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
+      <PositionsProvider>
+        <Router>
+          <PreviousLocationProvider>
+            <AppContent />
+          </PreviousLocationProvider>
+        </Router>
+      </PositionsProvider>
     </AuthProvider>
   );
 }
@@ -34,15 +40,14 @@ export default function App() {
 function AppContent() {
   const academicYear = "2021-2022";
   const { isLoggedIn, currentUser, isLoading } = useAuth();
-
-  // Mock deadline date - in production this would come from a config or API
-  const isAfterDeadline = new Date() > deadlineDate;
+  const location = useLocation();
+  const shouldShowBackLink = location.pathname !== "/" && location.pathname !== "/home" && location.pathname !== "/login" && location.pathname !== "/register";
 
   // Show loading screen while authentication is being determined
   if (isLoading) {
     return (
       <div className="flex justify-center min-h-screen min-w-screen">
-        <div className="w-[1270px] px-7 py-4 flex flex-col min-h-screen">
+        <div className="w-[1300px] px-7 py-4 flex flex-col min-h-screen">
           <Header academicYear={academicYear} />
           <div className="flex flex-1 justify-center items-center py-4">
             <div className="text-center">
@@ -59,6 +64,12 @@ function AppContent() {
     <div className="flex justify-center min-h-screen min-w-screen">
       <div className="w-[1270px] px-7 py-4 flex flex-col min-h-screen">
         <Header academicYear={academicYear} />
+        {/* Back link shown below header on non-home routes */}
+        {shouldShowBackLink && (
+          <div className="mt-4">
+            <BackLink />
+          </div>
+        )}
         <div className="flex-1 pt-5">
           <Routes>
             {isLoggedIn ? (

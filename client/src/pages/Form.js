@@ -7,9 +7,11 @@ import PhdSection from "../components/form-sections/PhdSection";
 import ScientificFieldSection from "../components/form-sections/ScientificFieldSection";
 import BioSection from "../components/form-sections/BioSection";
 import PapersSection from "../components/form-sections/PapersSection";
+import CoursePlanSection from "../components/form-sections/CoursePlanSection";
 import Stepper from "../components/Stepper";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
+
 
 export default function Form({ academicYear }) {
   const { formData } = useFormData();
@@ -37,7 +39,13 @@ export default function Form({ academicYear }) {
     {
       id: 3,
       title: "Σχεδιάγραμμα Διδασκαλίας",
-      component: () => <></>,
+      component: (props) => (
+        <CoursePlanSection
+          formData={formData}
+          handleFileChange={props.handleFileChange}
+          handleFileDelete={props.handleFileDelete}
+        />
+      ),
     },
     {
       id: 4,

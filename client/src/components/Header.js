@@ -1,14 +1,10 @@
 import React from "react";
 import { useAuth } from "../contexts/AuthContext";
 import logo from "../assets/images/patras-university-logo.png";
-import { useNavigate } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 
 export default function Header({ academicYear }) {
   const { currentUser, isLoggedIn, logout } = useAuth();
-  const userInitials =
-    (currentUser?.firstName?.charAt(0)?.toUpperCase() || "") +
-    (currentUser?.lastName?.charAt(0)?.toUpperCase() || "");
-  const navigate = useNavigate();
 
   const rolesInGreek = {
     admin: "Διαχειριστής",
@@ -16,17 +12,37 @@ export default function Header({ academicYear }) {
     guest: "Επισκέπτης"
   };
 
+  // Normalize Greek to plain uppercase (remove tonos/dialytika)
+  const normalizeGreek = (s) =>
+    (s ?? "")
+      .toLocaleUpperCase("el-GR")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")                    // remove combining marks
+      .replace(/[\u0384\u0385\u1fbd\u1fbf-\u1ffe]/g, ""); // remove Greek tonos chars
+
+  const getInitials = (firstName, lastName) => {
+    const a = normalizeGreek(firstName).trim();
+    const b = normalizeGreek(lastName).trim();
+    const inits = `${a.charAt(0) || ""}${b.charAt(0) || ""}`;
+    return inits || "NU"; // fallback
+  };
+
+  // Replace your current initials computation with:
+  const initials = getInitials(currentUser?.firstName, currentUser?.lastName);
+
+  const location = useLocation();
+
   return (
     <header className="w-full rounded-xl border border-gray-200 shadow-lg">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
-        {/* Left: Logo */}
-        <button onClick={() => navigate("/")} className="flex items-center">
+        {/* Left: Logo (clickable anchor so middle-click opens in new tab) */}
+        <Link to="/" className="flex items-center">
           <img
             src={logo}
             alt="University of Patras logo"
             className="max-h-24 w-auto object-contain"
           />
-        </button>
+        </Link>
         {/* Center: Title and Subtitle */}
         <div className="flex-1 flex flex-col items-center justify-center">
           <h1 className="text-xl lg:text-xl font-semibold text-gray-700 text-center">
@@ -41,7 +57,7 @@ export default function Header({ academicYear }) {
           <div className="flex items-center gap-4 bg-patras-albescentWhite/5 px-4 py-2 rounded-xl border border-gray-200 shadow-lg">
             {/* Avatar */}
             <div className="flex items-center justify-center w-10 h-10 rounded-full bg-patras-buccaneer shadow">
-              <span className="text-white font-bold text-lg">{userInitials}</span>
+              <span className="text-white font-bold text-lg">{initials}</span>
             </div>
             {/* User Info */}
             <div className="flex flex-col leading-tight items-start">

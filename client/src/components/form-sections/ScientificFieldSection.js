@@ -1,183 +1,113 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { useFormData } from "../../contexts/FormDataContext";
-import InputField from "../InputField";
-import Upload from "../Upload";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import Tooltip from "../Tooltip";
-
-const TOURISM_COURSES = [
-  {
-    title: "Διοίκηση Τουριστικών Επιχειρήσεων",
-    description:
-      "Εισαγωγή στις αρχές διοίκησης και λειτουργίας τουριστικών επιχειρήσεων, στρατηγικός σχεδιασμός και διαχείριση ανθρώπινων πόρων.",
-  },
-  {
-    title: "Τουριστική Πολιτική και Ανάπτυξη",
-    description:
-      "Μελέτη των πολιτικών τουριστικής ανάπτυξης, βιώσιμος τουρισμός και επιπτώσεις στην τοπική οικονομία και κοινωνία.",
-  },
-  {
-    title: "Διαδικτυακό Μάρκετινγκ στον Τουρισμό",
-    description:
-      "Σύγχρονες τεχνικές ψηφιακού μάρκετινγκ για τουριστικές επιχειρήσεις, social media, SEO και online booking platforms.",
-  },
-  {
-    title: "Βιώσιμος Τουρισμός",
-    description:
-      "Αρχές και πρακτικές βιώσιμης τουριστικής ανάπτυξης, περιβαλλοντική προστασία και κοινωνική ευθύνη.",
-  },
-];
-
-const ENGLISH_COURSES = [
-  {
-    title: "Αγγλική Γραμματεία και Φιλολογία",
-    description:
-      "Μελέτη της αγγλικής λογοτεχνίας από την κλασική περίοδο έως τη σύγχρονη εποχή, ανάλυση κειμένων και λογοτεχνικών κινημάτων.",
-  },
-  {
-    title: "Σύγχρονη Αγγλική Γλώσσα",
-    description:
-      "Εμβάθυνση στη σύγχρονη αγγλική γλώσσα, γραμματική, σύνταξη, λεξιλόγιο και γλωσσολογικές θεωρίες.",
-  },
-  {
-    title: "Αγγλικός Πολιτισμός και Ιστορία",
-    description:
-      "Διερεύνηση του αγγλοσαξονικού πολιτισμού, ιστορία, παραδόσεις και κοινωνικές εξελίξεις.",
-  },
-  {
-    title: "Μεθοδολογία Διδασκαλίας Αγγλικών",
-    description:
-      "Σύγχρονες μέθοδοι διδασκαλίας της αγγλικής γλώσσας, εκπαιδευτικά εργαλεία και αξιολόγηση μάθησης.",
-  },
-];
+import { usePositions } from "../../contexts/PositionsContext";
+import Tooltip from "../Tooltip.jsx";
+import PositionSelect from "../PositionSelect";
 
 export default function ScientificFieldSection() {
-  const { formData, handleChange, handleFileChange, handleFileDelete } =
-    useFormData();
+  const { formData, handleChange } = useFormData();
+  const { positions, loading } = usePositions();
+
+  const selectedPosition = useMemo(
+    () => positions.find((p) => String(p.id) === String(formData.positionId)) || null,
+    [positions, formData.positionId]
+  );
+
+  useEffect(() => {
+    if (selectedPosition) {
+      if (formData.school !== selectedPosition.school) handleChange("school", selectedPosition.school);
+      if (formData.department !== selectedPosition.department) handleChange("department", selectedPosition.department);
+      if (formData.scientificField !== selectedPosition.scientificField)
+        handleChange("scientificField", selectedPosition.scientificField);
+    } else {
+      if (formData.school) handleChange("school", "");
+      if (formData.department) handleChange("department", "");
+      if (formData.scientificField) handleChange("scientificField", "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPosition]);
+
+  // Keep only active positions for the selector
+  const activePositions = useMemo(() => {
+    const today = new Date();
+    const todayYMD = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    return (positions || []).filter((p) => {
+      if (typeof p?.isActive === "boolean") return p.isActive;
+      // Fallback if backend older and doesn't send isActive
+      if (!p?.startDate || !p?.endDate) return false;
+      const s = new Date(p.startDate);
+      const e = new Date(p.endDate);
+      if (isNaN(s) || isNaN(e)) return false;
+      return s <= todayYMD && e >= todayYMD;
+    });
+  }, [positions]);
 
   return (
     <div className="space-y-6">
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-auto">
-        {/* Left Column - Scientific Field Selection */}
-        <div className="h-full flex flex-col">
-          <div className="flex-1 flex flex-col space-y-4">
-            {/* Scientific Field Dropdown */}
-            <div className="flex-shrink-0">
-              <InputField
-                label="Επιστημονικό Πεδίο"
-                id="scientific-field"
-                name="scientific-field"
-                optns={[
-                  { label: "Τουρισμός", value: "Τουρισμός" },
-                  { label: "Αγγλικά", value: "Αγγλικά" },
-                ]}
-                isDropdown={true}
-                value={formData.scientificField}
-                onChange={(value) => handleChange("scientificField", value)}
-                required={true}
-              />
-            </div>
+      <div className="grid grid-cols-1 gap-8 h-auto mb-2">
+        <PositionSelect
+          positions={activePositions}
+          value={formData.positionId}
+          onChange={(posId) => handleChange("positionId", posId)}
+          label="Θέση ( Σχολή - Τμήμα - Επιστημονικό Πεδίο )"
+          disabled={loading || activePositions.length === 0}
+          maxResults={50}
+          required={true}
+        />
+      </div>
 
-            {/* Courses List - Takes remaining space */}
-            <div className="flex-1 flex flex-col min-h-0">
-              <label
-                htmlFor="course-list"
-                className="block text-sm font-medium text-gray-900 mb-2"
-              >
-                Μαθήματα του Επιστημονικού Πεδίου
-              </label>
-              <div
-                id="course-list"
-                className="w-full overflow-y-auto rounded-md border border-gray-300 bg-white p-4 text-gray-700 h-64"
-              >
-                {formData.scientificField ? (
-                  <div className="space-y-2">
-                    <ul className="space-y-2">
-                      {formData.scientificField === "Τουρισμός" ? (
-                        <>
-                          {TOURISM_COURSES.map((course, index) => (
-                            <li
-                              key={index}
-                              className="flex items-center justify-between p-2 bg-yellow-50 rounded border-l-4 border-yellow-200 group"
-                            >
-                              <span className="text-sm flex-1">
-                                {course.title}
-                              </span>
-                              <Tooltip content={course.description}>
-                                <InformationCircleIcon className="h-4 w-4 text-yellow-600 cursor-help ml-2 flex-shrink-0 hover:text-yellow-700 transition-colors" />
-                              </Tooltip>
-                            </li>
-                          ))}
-                        </>
-                      ) : formData.scientificField === "Αγγλικά" ? (
-                        <>
-                          {ENGLISH_COURSES.map((course, index) => (
-                            <li
-                              key={index}
-                              className="flex items-center justify-between p-2 bg-yellow-50 rounded border-l-4 border-yellow-200 group"
-                            >
-                              <span className="text-sm flex-1">
-                                {course.title}
-                              </span>
-                              <Tooltip content={course.description}>
-                                <InformationCircleIcon className="h-4 w-4 text-yellow-600 cursor-help ml-2 flex-shrink-0 hover:text-yellow-700 transition-colors" />
-                              </Tooltip>
-                            </li>
-                          ))}
-                        </>
-                      ) : null}
-                    </ul>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-500">
-                    <div className="text-center">
-                      <div className="text-sm">
-                        Παρακαλώ επιλέξτε επιστημονικό πεδίο
-                      </div>
-                      <div className="text-xs mt-1">
-                        για να δείτε τα διαθέσιμα μαθήματα
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Optional chips summary ... */}
 
-        {/* Right Column - Course Plan Upload */}
-        <div className="rounded-lg h-full flex flex-col">
-          <div className="flex-1 flex flex-col justify-center">
-            <div className="space-y-4">
-              <div className="text-sm text-gray-600 bg-white p-4 rounded-md border border-gray-300">
-                <strong>Οδηγίες σχεδιαγράμματος διδασκαλίας:</strong>
-                <ul className="mt-2 space-y-1 text-xs">
-                  <li>
-                    • Ανεβάστε το σχεδιάγραμμα διδασκαλίας για όλα τα μαθήματα
-                  </li>
-                  <li>
-                    • Το αρχείο πρέπει να είναι σε μορφή PDF, DOC, DOCX ή ODT
-                  </li>
-                  <li>• Περιλάβετε λεπτομερή περιγραφή της μεθοδολογίας</li>
-                </ul>
-              </div>
+      <label className="block text-sm font-medium mb-1">
+        Μαθήματα Επιστημονικού Πεδίου:{" "}
+        <span className="text-patras-buccaneer">
+          {selectedPosition?.scientificField ?? ""}
+        </span>
+      </label>
 
-              <Upload
-                icon="document-text"
-                label="Σχεδιάγραμμα Διδασκαλίας"
-                content="το σχεδιάγραμμα διδασκαλίας"
-                id="course-plan-upload"
-                name="course-plan-upload"
-                accept=".pdf,.doc,.docx, .odt"
-                uploadedFile={formData.coursePlanDocument}
-                onChange={(e) => handleFileChange("coursePlanDocument", e)}
-                onDelete={() => handleFileDelete("coursePlanDocument")}
-                required={true}
-              />
-            </div>
-          </div>
-        </div>
+      <div className="w-full overflow-x-auto">
+        <table className="min-w-full border border-gray-300 rounded-lg bg-white">
+          <thead>
+            <tr className="bg-gray-100 text-xs text-gray-700">
+              <th className="px-2 py-2 border">Κωδικός</th>
+              <th className="px-2 py-2 border">Όνομα</th>
+              <th className="px-2 py-2 border">Περιγραφή</th>
+              <th className="px-2 py-2 border">Εξάμηνο</th>
+              <th className="px-2 py-2 border">Διδακτικές Μονάδες</th>
+              <th className="px-2 py-2 border">ECTS</th>
+              <th className="px-2 py-2 border">Θεωρία</th>
+              <th className="px-2 py-2 border">Εργαστήριο</th>
+              <th className="px-2 py-2 border">Κατηγορία</th>
+            </tr>
+          </thead>
+          <tbody>
+            {selectedPosition && selectedPosition.courses?.length > 0 ? (
+              selectedPosition.courses.map((course) => (
+                <tr key={course.id} className="text-sm text-gray-800 text-center">
+                  <td className="px-2 py-2 border">{course.code}</td>
+                  <td className="px-2 py-2 border">{course.name}</td>
+                  <td className="px-2 py-2 border">
+                    <Tooltip content={course.description}>
+                      <span className="underline cursor-pointer text-patras-buccaneer">Περιγραφή</span>
+                    </Tooltip>
+                  </td>
+                  <td className="px-2 py-2 border">{course.semester}</td>
+                  <td className="px-2 py-2 border">{course.teachingUnits}</td>
+                  <td className="px-2 py-2 border">{course.ects}</td>
+                  <td className="px-2 py-2 border">{course.theory_hours}</td>
+                  <td className="px-2 py-2 border">{course.lab_hours}</td>
+                  <td className="px-2 py-2 border">{course.category}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={9} className="text-center text-gray-500 py-6">
+                  Επιλέξτε Θέση για να δείτε τα διαθέσιμα μαθήματα
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
