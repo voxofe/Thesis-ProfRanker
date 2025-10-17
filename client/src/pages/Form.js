@@ -68,6 +68,10 @@ export default function Form({ academicYear }) {
   const isLastStep = currentStep === steps.length;
   const isFirstStep = currentStep === 1;
 
+  // Only these steps need overflow-visible (add more IDs if needed)
+  const stepsNeedingOverflow = new Set([4]);
+  const contentOverflow =  stepsNeedingOverflow.has(currentStep) ? "overflow-visible" : "overflow-y-auto";
+
   const handleStepClick = (step) => {
     // Only allow navigation to accessible steps
     if (canAccessStep(step)) {
@@ -234,7 +238,7 @@ export default function Form({ academicYear }) {
 
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 h-[450px] flex flex-col">
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className={`flex-1 ${contentOverflow} p-6`}>
           <CurrentStepComponent academicYear={academicYear} />
         </div>
       </div>

@@ -1,9 +1,9 @@
 import axios from "axios";
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate, useLocation, useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { usePositions } from "../contexts/PositionsContext";
-import RankingFilterModal from "./RankingFilterModal";
+import RankingFilterModal from "../components/RankingFilterModal";
 import Checkbox from "../components/Checkbox";
 
 const columns = [
@@ -55,8 +55,7 @@ export default function RankingPage() {
     pointsMin: "",
     pointsMax: "",
   });
-  const navigate = useNavigate();
-  const location = useLocation();
+
   const [searchParams, setSearchParams] = useSearchParams();
   const { currentUser } = useAuth();
   const { positions = [] } = usePositions();
@@ -241,6 +240,7 @@ export default function RankingPage() {
 
   // Applicant: checkbox to show only their position's applications
   const [showMyPosition, setShowMyPosition] = useState(false);
+  
   const filteredByMyPosition = useMemo(() => {
     if (isApplicant && showMyPosition && myPositionId) {
       return sortedUsers.filter(u => String(u.positionId) === String(myPositionId));

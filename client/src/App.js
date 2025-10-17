@@ -12,28 +12,32 @@ import HomePage from "./pages/HomePage";
 import Form from "./pages/Form";
 import ApplicantScorePage from "./pages/ApplicantScorePage";
 import RankingPage from "./pages/RankingPage";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import {
   FormDataProvider,
   AuthProvider,
   useAuth,
   ValidationProvider,
+  PositionsProvider,
+  PreviousLocationProvider,
+  CreatePositionValidationProvider
 } from "./contexts";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import { PositionsProvider } from "./contexts/PositionsContext";
-import { PreviousLocationProvider } from "./contexts/PreviousLocationContext";
+
 
 export default function App() {
   return (
-    <AuthProvider>
-      <PositionsProvider>
-        <Router>
-          <PreviousLocationProvider>
-            <AppContent />
-          </PreviousLocationProvider>
-        </Router>
-      </PositionsProvider>
-    </AuthProvider>
+    <CreatePositionValidationProvider>
+      <AuthProvider>
+        <PositionsProvider>
+          <Router>
+            <PreviousLocationProvider>
+              <AppContent />
+            </PreviousLocationProvider>
+          </Router>
+        </PositionsProvider>
+      </AuthProvider>
+    </CreatePositionValidationProvider>
   );
 }
 
@@ -101,10 +105,17 @@ function AppContent() {
                   <Route path="/score/applicant/:id" element={<ApplicantScorePage />} />
                 )}
 
-                <Route
-                  path="/register-admin"
-                  element={<Register isAdmin={true} />}
-                />
+                {/* Admin-only routes */}
+                {currentUser?.role === "admin" && (
+                  <>
+                    <Route path="/register-admin" element={<Register isAdmin={true} />} />
+                    <Route path="/create-position" element={
+                      <React.Suspense fallback={<div>Φόρτωση...</div>}>
+                        {React.createElement(require("./pages/CreatePosition").default)}
+                      </React.Suspense>
+                    } />
+                  </>
+                )}
 
                 {/* Fallback for logged in users */}
                 <Route path="*" element={<Navigate to="/home" replace />} />

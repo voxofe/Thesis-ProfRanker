@@ -1,9 +1,16 @@
 module.exports = {
-  purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
+  // purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
+    // Flowbite (npm + pnpm)
+    "./node_modules/flowbite/**/*.js",
+    "./node_modules/flowbite-react/**/*.{js,jsx,ts,tsx}",
+
+    // pnpm hoisting paths (important with pnpm)
+    "./node_modules/.pnpm/**/node_modules/flowbite/**/*.js",
+    "./node_modules/.pnpm/**/node_modules/flowbite-react/**/*.{js,jsx,ts,tsx}",
   ],
-  theme: {
+    theme: {
     extend: {
 
       colors: {
@@ -27,5 +34,6 @@ module.exports = {
   },
   plugins: [
     require('@tailwindcss/forms'),
+    require('flowbite/plugin')
   ],
 }

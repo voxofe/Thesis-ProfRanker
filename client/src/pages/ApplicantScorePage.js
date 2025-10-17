@@ -87,12 +87,6 @@ export default function ApplicantScorePage() {
     applicantData?.submissionDate ||
     "";
 
-  const postdocYears =
-    applicantData?.workExperienceYears ??
-    applicantData?.postdocYears ??
-    applicantData?.yearsOfPostdoc ??
-    null;
-
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-y-5 pt-5">

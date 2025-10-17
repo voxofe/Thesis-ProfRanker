@@ -18,7 +18,7 @@ export default function PaperSection() {
   };
 
   return (
-    <div>
+    <div className="overflow-hidden"> 
       <legend className="text-sm/6 font-semibold text-gray-900">
         Ακαδημαϊκές Εργασίες (Δημοσιεύσεις / Ανακοινώσεις σε συνέδρια)
       </legend>

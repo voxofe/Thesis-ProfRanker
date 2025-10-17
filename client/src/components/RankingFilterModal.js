@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import InputField from "../components/InputField";
-import Checkbox from "../components/Checkbox";
+import InputField from "./InputField";
 
 export default function RankingFilterModal({
   open,
@@ -214,7 +213,7 @@ export default function RankingFilterModal({
                 value={localFilters.pointsMin}
                 onChange={(v) => handleInput("pointsMin", v)}
                 onBlur={() => handleInput("pointsMin", localFilters.pointsMin)}
-                style="w-24"
+                className="w-24"
                 placeholder="Ελάχιστο"
               />
               <span className="mx-2 text-gray-500">-</span>
@@ -227,7 +226,7 @@ export default function RankingFilterModal({
                 value={localFilters.pointsMax}
                 onChange={(v) => handleInput("pointsMax", v)}
                 onBlur={() => handleInput("pointsMax", localFilters.pointsMax)}
-                style="w-24"
+                className="w-24"
                 placeholder="Μέγιστο"
               />
             </div>

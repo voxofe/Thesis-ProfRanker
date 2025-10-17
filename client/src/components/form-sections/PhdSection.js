@@ -3,6 +3,7 @@ import InputField from "../InputField";
 import { useFormData } from "../../contexts/FormDataContext";
 import Upload from "../Upload";
 import Checkbox from "../Checkbox";
+import FlowbiteDateField from "../FlowbiteDateField";
 
 export default function PhdSection() {
   const { formData, handleChange, handleFileChange, handleFileDelete } =
@@ -10,7 +11,7 @@ export default function PhdSection() {
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 overflow-visible">
       {/* PhD Document Upload */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-4">
@@ -43,7 +44,15 @@ export default function PhdSection() {
 
           <div></div>
 
-          <InputField
+          <FlowbiteDateField
+            label="Ημερομηνία λήψης διδακτορικού τίτλου"
+            value={formData.phdAcquisitionDate}
+            onChange={(value) => handleChange("phdAcquisitionDate", value)}
+            minDate="2011-01-01"
+            maxDate={today}
+            required={true}
+          />
+          {/* <InputField
             label="Ημερομηνία λήψης διδακτορικού τίτλου"
             id="date-field"
             name="date-field"
@@ -54,7 +63,7 @@ export default function PhdSection() {
             value={formData.phdAcquisitionDate}
             onChange={(value) => handleChange("phdAcquisitionDate", value)}
             required={true}
-          />
+          /> */}
         </div>
       </div>
 

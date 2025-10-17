@@ -38,7 +38,7 @@ export default function InputField(props) {
   };
 
   return (
-    <div className={`${props.style} mb-5`}>
+    <div className={`${props.style} mb-5 relative overflow-visible`}>
       <label
         htmlFor={props.id}
         className={`block text-sm/6 font-medium ${
@@ -50,7 +50,7 @@ export default function InputField(props) {
           <span className="text-red-500 ml-1">*</span>
         )}
       </label>
-      <div className="mt-2">
+      <div className="mt-2 ">
         {props.isDropdown ? (
           <select
             id={props.id}

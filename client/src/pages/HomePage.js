@@ -1,12 +1,10 @@
 import React, { useMemo, useCallback } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 import HomePagePanel from "../components/HomePagePanel";
 import { usePositions } from "../contexts/PositionsContext";
 
 export default function HomePage() {
   const { currentUser } = useAuth();
-  const navigate = useNavigate();
   const { positions = [], loading } = usePositions();
 
   const activePositions = useMemo(() => {
@@ -160,7 +158,15 @@ export default function HomePage() {
       </ul>
     </>
   );
-
+  const createPositionPopup = (
+    <>
+      <span className="pb-2">Δημιουργία ή επεξεργασία θέσης</span>
+      <ul className="space-y-1">
+        <li>• Δημιουργήστε νέα θέση για το πρόγραμμα</li>
+        <li>• Ορίστε επιστημονικό πεδίο, σχολή, τμήμα και προθεσμίες</li>
+      </ul>
+    </>
+  );
   // Panels for applicant and guest
   if (userRole === "applicant" || userRole === "guest") {
     return (
@@ -242,20 +248,28 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <HomePagePanel
-            title="Γενική Κατάταξη"
-            description="Δείτε τη γενική κατάταξη όλων των αιτούντων σε όλα τα επιστημονικά πεδία."
-            buttonText="Δείτε Κατάταξη"
-            buttonAction={() => navigate("/score/total")}
+            title="Δημιουργία Θέσεων"
+            description="Δημιουργήστε μια νέα θέση/επιστημονικό πεδίο για το πρόγραμμα."
+            buttonText="+ Νέα Θέση"
+            to="/create-position"
             showInfoMark={true}
-            infoPopup={rankingInfoPopup}
+            infoPopup={createPositionPopup}
           />
           <HomePagePanel
             title="Διαχείριση Διαχειριστών"
             description="Δημιουργήστε νέο λογαριασμό διαχειριστή με ειδικά δικαιώματα."
             buttonText="Δημιουργία Διαχειριστή"
-            buttonAction={() => navigate("/register-admin")}
+            to="/register-admin"
             showInfoMark={true}
             infoPopup={registerAdminPopup}
+          />
+          <HomePagePanel
+            title="Γενική Κατάταξη"
+            description="Δείτε τη γενική κατάταξη όλων των αιτούντων σε όλα τα επιστημονικά πεδία."
+            buttonText="Δείτε Κατάταξη"
+            to="/score/total"
+            showInfoMark={true}
+            infoPopup={rankingInfoPopup}
           />
         </div>
       </div>

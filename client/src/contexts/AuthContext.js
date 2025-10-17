@@ -1,5 +1,5 @@
 import axios from "axios";
-import { createContext, useState, useContext, useEffect, useRef } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 import { legacyUser } from "../dummyApplicantData";
 
 const AuthContext = createContext({

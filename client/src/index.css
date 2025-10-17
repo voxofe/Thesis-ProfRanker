@@ -2,6 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  /* hit ONLY the readonly <input> inside your Flowbite Datepicker */
+  .pr-datepicker input[type="text"][readonly] {
+    @apply bg-white text-gray-900
+           rounded-md px-3 py-1.5 text-base sm:text-sm/6
+           outline outline-1 -outline-offset-1 outline-patras-buccaneer
+           focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer
+           focus:ring-0 /* prevent extra blue ring from forms plugin */
+           placeholder-gray-400
+           border-0 /* we’re using outline like your InputField */
+           dark:bg-white dark:text-black;
+  }
+
+  /* keep space for the left calendar icon (Flowbite adds it) */
+  .pr-datepicker input[type="text"][readonly] {
+    @apply pl-10;
+  }
+
+  /* disabled look (matches your InputField) */
+  .pr-datepicker input[type="text"][readonly][disabled] {
+    @apply bg-gray-100 text-gray-500 outline-gray-200 cursor-not-allowed opacity-60 select-none;
+  }
+
+  /* optional: enforce no gray wash/tint if something else bleeds in */
+  .pr-datepicker input[type="text"][readonly] {
+    background-color: white !important;
+    opacity: 1 !important;
+  }
+}
+
 /* @layer base {
   @font-face {
     font-family: ZonaPro;

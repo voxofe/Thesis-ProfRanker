@@ -1,7 +1,7 @@
 import React from "react";
 import { useAuth } from "../contexts/AuthContext";
 import logo from "../assets/images/patras-university-logo.png";
-import { useLocation, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function Header({ academicYear }) {
   const { currentUser, isLoggedIn, logout } = useAuth();
@@ -29,8 +29,6 @@ export default function Header({ academicYear }) {
 
   // Replace your current initials computation with:
   const initials = getInitials(currentUser?.firstName, currentUser?.lastName);
-
-  const location = useLocation();
 
   return (
     <header className="w-full rounded-xl border border-gray-200 shadow-lg">
