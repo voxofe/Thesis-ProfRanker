@@ -85,7 +85,7 @@ export default function PhdSection() {
           />
 
           {formData.phdIsFromForeignInstitute && (
-            <div className="mt-4 p-4 bg-white rounded-md border border-blue-200">
+            <div className="mt-4 p-4 bg-white rounded-md border border-blue-200 overflow-y-auto">
               <Upload
                 icon="document-text"
                 label="Έγγραφο Αναγνώρισης ΔΟΑΤΑΠ"

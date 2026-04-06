@@ -2,6 +2,14 @@ import axios from "axios";
 import { createContext, useState, useContext, useEffect } from "react";
 import { legacyUser } from "../dummyApplicantData";
 
+const API_BASE_URL = (
+  process.env.REACT_APP_API_URL ||
+  "http://127.0.0.1:8000"
+).replace(
+  /\/+$/,
+  ""
+);
+
 const AuthContext = createContext({
   currentUser: {
     id: 1,
@@ -50,7 +58,7 @@ export const AuthProvider = ({ children }) => {
 
     return axios({
       method: "GET",
-      url: "http://127.0.0.1:8000/api/users/getByToken",
+      url: `${API_BASE_URL}/api/users/getByToken`,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -75,8 +83,6 @@ export const AuthProvider = ({ children }) => {
   const refreshUser = () => getUser();
   
   const login = async (email, password) => {
-    setIsLoading(true);
-
     if (email === "a" && password === "a") {
       const token = "legacy-token";
       localStorage.setItem("token", token);
@@ -85,7 +91,7 @@ export const AuthProvider = ({ children }) => {
 
     return axios({
       method: "POST",
-      url: "http://127.0.0.1:8000/api/user/login",
+      url: `${API_BASE_URL}/api/user/login`,
       data: { email, password },
     })
       .then((response) => {
@@ -93,10 +99,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem("token", token);
         getUser();
       })
-      .catch((error) => {
-        setIsLoading(false);
-        return Promise.reject(error);
-      });
+      .catch((error) => Promise.reject(error));
   };
 
   /**
@@ -108,7 +111,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (firstName, lastName, email, password) => {
     return axios({
       method: "POST",
-      url: "http://127.0.0.1:8000/api/user/register",
+      url: `${API_BASE_URL}/api/user/register`,
       data: { firstName, lastName, email, password },
     })
       .then((response) => {
@@ -128,7 +131,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     return axios({
       method: "POST",
-      url: "http://127.0.0.1:8000/api/user/register-admin",
+      url: `${API_BASE_URL}/api/user/register-admin`,
       data: { firstName, lastName, email, password },
       headers: {
         Authorization: `Bearer ${token}`,

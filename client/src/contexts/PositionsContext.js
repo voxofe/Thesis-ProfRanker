@@ -1,5 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
+const API_BASE_URL = (
+  process.env.REACT_APP_API_URL ||
+  "http://127.0.0.1:8000"
+).replace(
+  /\/+$/,
+  ""
+);
+
 const PositionsContext = createContext();
 
 export const usePositions = () => useContext(PositionsContext);
@@ -10,12 +18,12 @@ export const PositionsProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    fetch("http://127.0.0.1:8000/api/positions", {
+    fetch(`${API_BASE_URL}/api/positions`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => res.json())
       .then((data) => {
-        setPositions(data);
+        setPositions(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch(() => setLoading(false));

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 /**
  * InputField component for rendering input fields or dropdowns.
@@ -22,6 +22,7 @@ import React from "react";
  * @returns {JSX.Element} The rendered input field or dropdown.
  */
 export default function InputField(props) {
+  const [showPassword, setShowPassword] = useState(false);
   const baseStyle =
     "block w-full rounded-md px-3 py-1.5 text-base outline outline-1 -outline-offset-1 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-offset-0 sm:text-sm/6";
 
@@ -37,6 +38,9 @@ export default function InputField(props) {
     return enabledStyle;
   };
 
+  const isPassword = props.type === "password";
+  const inputType = isPassword && showPassword ? "text" : props.type;
+
   return (
     <div className={`${props.style} mb-5 relative overflow-visible`}>
       <label
@@ -50,7 +54,7 @@ export default function InputField(props) {
           <span className="text-red-500 ml-1">*</span>
         )}
       </label>
-      <div className="mt-2 ">
+      <div className="mt-2 relative">
         {props.isDropdown ? (
           <select
             id={props.id}
@@ -72,15 +76,58 @@ export default function InputField(props) {
             onBlur={props.onBlur}
             id={props.id}
             name={props.name}
-            type={props.type}
+            type={inputType}
             autoComplete={props.autoComplete}
             min={props.min}
             max={props.max}
             value={props.value}
             onChange={(e) => props.onChange(e.target.value)}
             disabled={props.disabled}
-            className={getInputStyle()}
+            className={`${getInputStyle()} ${isPassword ? "pr-10" : ""}`}
           />
+        )}
+        {isPassword && !props.disabled && !props.isDropdown && (
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-patras-buccaneer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer"
+            aria-label={showPassword ? "Απόκρυψη κωδικού" : "Εμφάνιση κωδικού"}
+          >
+            {showPassword ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+                aria-hidden="true"
+              >
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+                aria-hidden="true"
+              >
+                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.77 21.77 0 0 1 5.06-6.94" />
+                <path d="M1 1l22 22" />
+                <path d="M9.88 9.88A3 3 0 0 0 12 15a3 3 0 0 0 2.12-.88" />
+                <path d="M14.12 14.12A3 3 0 0 0 12 9a3 3 0 0 0-2.12.88" />
+                <path d="M8.46 6.46A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.77 21.77 0 0 1-2.67 4.14" />
+              </svg>
+            )}
+          </button>
         )}
       </div>
       {props.error && (

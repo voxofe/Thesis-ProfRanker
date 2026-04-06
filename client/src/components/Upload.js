@@ -7,6 +7,7 @@ import {
 
 export default function Upload(props) {
   const [isDragging, setIsDragging] = useState(false);
+  const [error, setError] = useState("");
 
   // Check if we have an existing file (filename string) or uploaded file (File object)
   const hasExistingFile =
@@ -41,15 +42,50 @@ export default function Upload(props) {
 
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
         const droppedFile = e.dataTransfer.files[0];
-        props.onChange(droppedFile);
+        if (isFileAllowed(droppedFile)) {
+          setError("");
+          props.onChange(droppedFile);
+        } else {
+          setError(getAcceptErrorMessage());
+        }
         e.dataTransfer.clearData();
       }
     }
   };
 
+  const parseAcceptList = () =>
+    (props.accept || "")
+      .split(",")
+      .map((item) => item.trim().toLowerCase())
+      .filter(Boolean);
+
+  const isFileAllowed = (file) => {
+    const acceptList = parseAcceptList();
+    if (acceptList.length === 0) return true;
+
+    const name = file?.name?.toLowerCase() || "";
+    const type = file?.type?.toLowerCase() || "";
+
+    return acceptList.some((allowed) => {
+      if (allowed.startsWith(".")) {
+        return name.endsWith(allowed);
+      }
+      if (allowed.endsWith("/*")) {
+        const prefix = allowed.replace("/*", "");
+        return type.startsWith(prefix);
+      }
+      return type === allowed;
+    });
+  };
+
+  const getAcceptErrorMessage = () => {
+    if (!props.accept) return "Μη αποδεκτός τύπος αρχείου.";
+    return `Επιτρέπονται μόνο: ${props.accept.replace(/\s+/g, "")}`;
+  };
+
   return (
     <div
-      className={`mb-5 ${
+      className={`mb-5 w-full min-w-0 ${
         props.disabled
           ? "opacity-50 cursor-not-allowed pointer-events-none"
           : ""
@@ -63,7 +99,7 @@ export default function Upload(props) {
         {props.required && <span className="text-red-500 ml-1">*</span>}
       </label>
       <div
-        className={`relative mt-2 flex justify-center rounded-lg 
+        className={`relative mt-2 flex w-full min-w-0 justify-center rounded-lg 
                     ${
                       hasAnyFile
                         ? "border-2 border-patras-buccaneer bg-white cursor-not-allowed"
@@ -97,7 +133,7 @@ export default function Upload(props) {
             }}
           />
         )}
-        <div className="text-center">
+        <div className="text-center max-w-full">
           {/* File Icon */}
           {!hasAnyFile ? (
             <DocumentTextIcon
@@ -112,15 +148,16 @@ export default function Upload(props) {
           )}
           {/* File Name or Upload Button */}
           {hasAnyFile ? (
-            <p className="text-gray-800 mt-3 text-sm font-medium">
+            <p className="text-gray-800 mt-3 text-sm font-medium break-words">
               {getDisplayName()}
             </p>
           ) : (
-            <div className="flex text-sm/6 text-gray-600 mt-3">
+            <div className="flex flex-wrap justify-center text-sm/6 text-gray-600 mt-3">
               <label
                 htmlFor={props.id}
-                className={`relative cursor-pointer rounded-md bg-white font-semibold text-patras-auChico 
-                                    focus-within:outline-none focus-within:ring-2 focus-within:ring-patras focus-within:ring-offset-2 
+                className={`relative cursor-pointer rounded-md bg-white font-semibold text-patras-auChico text-center max-w-full break-words 
+                                    focus-within:outline-none focus-within:ring-2 focus-within:ring-patras-buccaneer focus-within:ring-offset-2 
+                                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer focus-visible:ring-offset-2
                                     hover:text-white hover:bg-patras-buccaneer 
                                     ${
                                       props.disabled
@@ -128,13 +165,24 @@ export default function Upload(props) {
                                         : ""
                                     }`}
               >
-                <span className="m-2">Αναρτήστε {props.content} εδώ </span>
+                <span className="m-2 block">Αναρτήστε {props.content} εδώ </span>
                 <input
                   id={props.id}
                   name={props.name}
                   type="file"
                   className="sr-only"
-                  onChange={(e) => props.onChange(e.target.files[0])}
+                  accept={props.accept}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (isFileAllowed(file)) {
+                      setError("");
+                      props.onChange(file);
+                    } else {
+                      setError(getAcceptErrorMessage());
+                      e.target.value = "";
+                    }
+                  }}
                   disabled={props.disabled}
                 />
               </label>
@@ -148,7 +196,7 @@ export default function Upload(props) {
               </p>
             </div>
           ) : (
-            <p className="text-sm pt-[14px] mb-[20px] text-patras-buccaneer">
+            <p className="text-sm pt-[14px] mb-[20px] text-patras-buccaneer break-words">
               {hasExistingFile
                 ? `Το αρχείο "${getDisplayName()}" είναι ήδη αναρτημένο`
                 : props.id === "milatary-obligations-upload"
@@ -160,6 +208,9 @@ export default function Upload(props) {
           )}
         </div>
       </div>
+      {error && !hasAnyFile && (
+        <p className="mt-2 text-sm text-red-600">{error}</p>
+      )}
     </div>
   );
 }

@@ -6,6 +6,14 @@ import { usePositions } from "../contexts/PositionsContext";
 import RankingFilterModal from "../components/RankingFilterModal";
 import Checkbox from "../components/Checkbox";
 
+const API_BASE_URL = (
+  process.env.REACT_APP_API_URL ||
+  "http://127.0.0.1:8000"
+).replace(
+  /\/+$/,
+  ""
+);
+
 const columns = [
   { key: "firstName", label: "Όνομα" },
   { key: "lastName", label: "Επώνυμο" },
@@ -81,7 +89,7 @@ export default function RankingPage() {
     const token = localStorage.getItem("token");
     axios({
       method: "GET",
-      url: "http://localhost:8000/api/applicant/all",
+      url: `${API_BASE_URL}/api/applicant/all`,
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((response) => {

@@ -6,6 +6,14 @@ import { useAuth } from "../contexts/AuthContext";
 import { useParams } from "react-router-dom";
 import { usePositions } from "../contexts/PositionsContext";
 
+const API_BASE_URL = (
+  process.env.REACT_APP_API_URL ||
+  "http://127.0.0.1:8000"
+).replace(
+  /\/+$/,
+  ""
+);
+
 export default function ApplicantScorePage() {
   const { currentUser } = useAuth();
   const { id } = useParams();
@@ -28,7 +36,7 @@ export default function ApplicantScorePage() {
       setLoading(true);
       const token = localStorage.getItem("token");
       axios
-        .get(`http://127.0.0.1:8000/api/applicant/${id}?times=10`, {
+        .get(`${API_BASE_URL}/api/applicant/${id}?times=10`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => setApplicantData(res.data))

@@ -18,7 +18,7 @@ export default function CoursePanel({
       "semester",
       "category",
       "ects",
-      "teachingUnits",
+      "teaching_units",
       "theory_hours",
       "lab_hours",
       "description",
@@ -116,7 +116,7 @@ export default function CoursePanel({
                   label="Διδακτικές Μονάδες"
                   type="number"
                   value={c.teachingUnits}
-                  onChange={(val) => onCourseChange(idx, "teachingUnits", val)}
+                  onChange={(val) => onCourseChange(idx, "teaching_units", val)}
                   required
                   disabled={disabled} // Pass disabled prop
                 />

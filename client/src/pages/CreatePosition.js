@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth, usePositions, useCreatePositionValidation } from "../contexts";
 import InputField from "../components/InputField";
 import CustomSelect from "../components/CustomSelect";
 import CoursePanel from "../components/CoursePanel";
 import FlowbiteDateField from "../components/FlowbiteDateField";
+import Tooltip from "../components/Tooltip";
 import { useNavigate } from "react-router-dom";
 
 const SCHOOLS = [
@@ -63,6 +64,8 @@ export default function CreatePosition() {
   const [newSciFieldName, setNewSciFieldName] = useState("");
   const [notification, setNotification] = useState({ message: "", type: "" });
   const [submitting, setSubmitting] = useState(false);
+  const submitButtonRef = useRef(null);
+  const [openSubmitTip, setOpenSubmitTip] = useState(false);
 
   // access control
   useEffect(() => {
@@ -168,6 +171,7 @@ export default function CreatePosition() {
   };
 
   const isSFSelected = formData.scientificField && !isNewSciField;
+  const submitDisabled = submitting || !isValid;
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
@@ -175,6 +179,10 @@ export default function CreatePosition() {
         <h1 className="text-3xl font-semibold text-gray-800">Δημιουργία Θέσης</h1>
         <p className="text-gray-500 mt-1 text-sm">Ορίστε τα στοιχεία της νέας θέσης και τα μαθήματα της</p>
       </header>
+
+      <p className="text-sm text-gray-600 -mt-2 mb-2">
+        <span className="text-red-600">*</span> Τα πεδία με αστερίσκο είναι υποχρεωτικά
+      </p>
 
       <form
         onSubmit={handleSubmit}
@@ -260,6 +268,7 @@ export default function CreatePosition() {
               value={formData.startDate}
               onChange={(val) => setFormData({ ...formData, startDate: val })}
               minDate={todayISO()}
+              maxDate={formData.endDate || undefined}
               popupAlign="right"
               required
             />
@@ -267,7 +276,7 @@ export default function CreatePosition() {
               label="Ημερομηνία Λήξης"
               value={formData.endDate}
               onChange={(val) => setFormData({ ...formData, endDate: val })}
-              minDate={todayISO()}
+              minDate={formData.startDate || todayISO()}
               popupAlign="right"
               required
             />
@@ -276,19 +285,36 @@ export default function CreatePosition() {
 
         {/* SUBMIT */}
         <div className="pt-6 border-t text-right">
-          <button
-            type="submit"
-            disabled={submitting || !isValid}
-            className="px-6 py-2 bg-patras-buccaneer text-white font-medium rounded-lg hover:bg-patras-sanguineBrown transition disabled:opacity-60"
+          <span
+            className="inline-block"
+            ref={submitButtonRef}
+            onMouseEnter={() => submitDisabled && setOpenSubmitTip(true)}
+            onMouseLeave={() => setOpenSubmitTip(false)}
+            onFocus={() => submitDisabled && setOpenSubmitTip(true)}
+            onBlur={() => setOpenSubmitTip(false)}
           >
-            {submitting ? "Δημιουργία..." : "Δημιουργία Θέσης"}
-          </button>
+            <button
+              type="submit"
+              disabled={submitDisabled}
+              aria-disabled={submitDisabled}
+              className="px-6 py-2 bg-patras-buccaneer text-white font-medium rounded-lg hover:bg-patras-sanguineBrown transition disabled:opacity-60"
+            >
+              {submitting ? "Δημιουργία..." : "Δημιουργία Θέσης"}
+            </button>
+            <Tooltip
+              anchorRef={submitButtonRef}
+              open={openSubmitTip && submitDisabled}
+              placement="top-left"
+              className="bg-white border border-patras-buccaneer text-patras-buccaneer text-xs px-2 py-1 rounded-lg shadow-lg whitespace-nowrap min-w-max"
+            >
+              Συμπληρώστε όλα τα υποχρεωτικά πεδία για να συνεχίσετε
+            </Tooltip>
+          </span>
 
           {notification.message && (
             <p
-              className={`mt-3 text-sm font-medium ${
-                notification.type === "success" ? "text-green-600" : "text-red-600"
-              }`}
+              className={`mt-3 text-sm font-medium ${notification.type === "success" ? "text-green-600" : "text-red-600"
+                }`}
             >
               {notification.message}
             </p>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useFormData } from "../contexts/FormDataContext";
 import { useValidation } from "../contexts/ValidationContext";
@@ -9,8 +9,17 @@ import BioSection from "../components/form-sections/BioSection";
 import PapersSection from "../components/form-sections/PapersSection";
 import CoursePlanSection from "../components/form-sections/CoursePlanSection";
 import Stepper from "../components/Stepper";
+import Tooltip from "../components/Tooltip";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
+
+const API_BASE_URL = (
+  process.env.REACT_APP_API_URL ||
+  "http://127.0.0.1:8000"
+).replace(
+  /\/+$/,
+  ""
+);
 
 
 export default function Form({ academicYear }) {
@@ -23,6 +32,8 @@ export default function Form({ academicYear }) {
   const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [redirectLoading, setRedirectLoading] = useState(false);
+  const nextButtonRef = useRef(null);
+  const [openNextTip, setOpenNextTip] = useState(false);
 
   const steps = [
     {
@@ -67,11 +78,12 @@ export default function Form({ academicYear }) {
   const CurrentStepComponent = steps[currentStep - 1].component;
   const isLastStep = currentStep === steps.length;
   const isFirstStep = currentStep === 1;
+  const nextDisabled = !canProceedFromStep(currentStep);
 
   // Only these steps need overflow-visible (add more IDs if needed)
   const stepsNeedingOverflow = new Set([4]);
   const contentOverflow =  stepsNeedingOverflow.has(currentStep) ? "overflow-visible" : "overflow-y-auto";
-
+  // const contentOverflow = "overflow-y-auto";
   const handleStepClick = (step) => {
     // Only allow navigation to accessible steps
     if (canAccessStep(step)) {
@@ -138,7 +150,7 @@ export default function Form({ academicYear }) {
     // Send the form data to the server
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/submit",
+        `${API_BASE_URL}/api/submit`,
         formDataToSend,
         {
           headers: {
@@ -236,8 +248,11 @@ export default function Form({ academicYear }) {
         canAccessStep={canAccessStep}
       />
 
+      <p className="mb-2 text-sm text-gray-600">
+        <span className="text-red-600">*</span> Τα πεδία με αστερίσκο είναι υποχρεωτικά
+      </p>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 h-[450px] flex flex-col">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 min-h-[450px] flex flex-col">
         <div className={`flex-1 ${contentOverflow} p-6`}>
           <CurrentStepComponent academicYear={academicYear} />
         </div>
@@ -263,14 +278,32 @@ export default function Form({ academicYear }) {
             Υποβολή Αίτησης
           </button>
         ) : (
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={!canProceedFromStep(currentStep)}
-            className="rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
+          <span
+            className="inline-block"
+            ref={nextButtonRef}
+            onMouseEnter={() => nextDisabled && setOpenNextTip(true)}
+            onMouseLeave={() => setOpenNextTip(false)}
+            onFocus={() => nextDisabled && setOpenNextTip(true)}
+            onBlur={() => setOpenNextTip(false)}
           >
-            Επόμενο
-          </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={nextDisabled}
+              aria-disabled={nextDisabled}
+              className="rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
+            >
+              Επόμενο
+            </button>
+            <Tooltip
+              anchorRef={nextButtonRef}
+              open={openNextTip && nextDisabled}
+              placement="top-left"
+              className="bg-white border border-patras-buccaneer text-patras-buccaneer text-xs px-2 py-1 rounded-lg shadow-lg whitespace-nowrap min-w-max"
+            >
+              Συμπληρώστε όλα τα υποχρεωτικά πεδία για να συνεχίσετε
+            </Tooltip>
+          </span>
         )}
       </div>
 

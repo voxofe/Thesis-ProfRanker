@@ -1,7 +1,14 @@
 import React, { useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-export default function Tooltip({ anchorRef, open, children, offset = 8, className = "" }) {
+export default function Tooltip({
+  anchorRef,
+  open,
+  children,
+  offset = 8,
+  className = "",
+  placement = "bottom-left",
+}) {
   const [pos, setPos] = useState({ top: 0, left: 0, ready: false });
 
   useLayoutEffect(() => {
@@ -9,9 +16,14 @@ export default function Tooltip({ anchorRef, open, children, offset = 8, classNa
 
     const compute = () => {
       const r = anchorRef.current.getBoundingClientRect();
-      // Position below and slightly right of the anchor
-      const top = r.top + r.height + offset;
-      const left = r.left + 12;
+      let top = r.top + r.height + offset;
+      let left = r.left + 12;
+
+      if (placement === "top-left") {
+        top = r.top - offset;
+        left = r.left;
+      }
+
       setPos({ top, left, ready: true });
     };
 
@@ -26,11 +38,16 @@ export default function Tooltip({ anchorRef, open, children, offset = 8, classNa
 
   if (!open || !pos.ready) return null;
 
+  let transform = "translate(0, 0)";
+  if (placement === "top-left") {
+    transform = "translate(-100%, -100%)";
+  }
+
   return createPortal(
     <div
       role="tooltip"
       className={`fixed z-[9999] font-semibold ${className}`}
-      style={{ top: pos.top, left: pos.left }}
+      style={{ top: pos.top, left: pos.left, transform }}
     >
       {children}
     </div>,

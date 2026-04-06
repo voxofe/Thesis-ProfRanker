@@ -35,7 +35,7 @@ export const CreatePositionValidationProvider = ({ children }) => {
       if (!Array.isArray(formData.courses) || formData.courses.length === 0) {
         errors.courses = "At least one course is required.";
       } else {
-        formData.courses.forEach((c, i) => {
+        formData.courses.forEach((course, i) => {
           const required = [
             "code",
             "name",
@@ -45,12 +45,15 @@ export const CreatePositionValidationProvider = ({ children }) => {
             "teaching_units",
             "theory_hours",
             "lab_hours",
+            "description"
           ];
-          const missing = required.filter((k) => !c[k] || c[k] === "select");
+
+          const missing = required.filter((requiredField) => !course[requiredField] || course[requiredField] === "select");
           if (missing.length) errors[`course${i}`] = `Course #${i + 1} missing required fields.`;
         });
       }
     }
+    console.log({ formData });
 
     return errors;
   }, []);
