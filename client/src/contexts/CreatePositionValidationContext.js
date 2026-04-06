@@ -36,6 +36,12 @@ export const CreatePositionValidationProvider = ({ children }) => {
         errors.courses = "At least one course is required.";
       } else {
         formData.courses.forEach((course, i) => {
+          const numOrNull = (value) => {
+            if (value === null || value === undefined || value === "") return null;
+            const n = Number(value);
+            return Number.isFinite(n) ? n : null;
+          };
+
           const required = [
             "code",
             "name",
@@ -48,8 +54,40 @@ export const CreatePositionValidationProvider = ({ children }) => {
             "description"
           ];
 
-          const missing = required.filter((requiredField) => !course[requiredField] || course[requiredField] === "select");
+          const isMissing = (field) => {
+            const value = course[field];
+            if (value === "select") return true;
+            if (value === null || value === undefined || value === "") return true;
+            return false;
+          };
+
+          const missing = required.filter((requiredField) => isMissing(requiredField));
           if (missing.length) errors[`course${i}`] = `Course #${i + 1} missing required fields.`;
+
+          const ects = numOrNull(course.ects);
+          if (ects !== null && ects <= 0) {
+            errors[`course${i}_ects`] = "Τα ECTS πρέπει να είναι μεγαλύτερα από 0.";
+          }
+
+          const teachingUnits = numOrNull(course.teaching_units);
+          if (teachingUnits !== null && teachingUnits <= 0) {
+            errors[`course${i}_teaching_units`] = "Οι διδακτικές μονάδες πρέπει να είναι μεγαλύτερες από 0.";
+          }
+
+          const theoryHours = numOrNull(course.theory_hours);
+          const labHours = numOrNull(course.lab_hours);
+
+          if (theoryHours !== null && theoryHours < 0) {
+            errors[`course${i}_theory_hours`] = "Οι ώρες θεωρίας δεν μπορούν να είναι αρνητικές.";
+          }
+
+          if (labHours !== null && labHours < 0) {
+            errors[`course${i}_lab_hours`] = "Οι ώρες εργαστηρίου δεν μπορούν να είναι αρνητικές.";
+          }
+
+          if (theoryHours !== null && labHours !== null && theoryHours === 0 && labHours === 0) {
+            errors[`course${i}_hours`] = "Οι ώρες θεωρίας και εργαστηρίου δεν μπορούν να είναι ταυτόχρονα 0.";
+          }
         });
       }
     }

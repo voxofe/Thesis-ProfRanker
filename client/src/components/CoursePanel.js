@@ -10,7 +10,33 @@ export default function CoursePanel({
   isNewSciField,
   disabled,
   scientificFieldValue, // New prop to check the scientific field value
+  errors = {},
 }) {
+  const toNumberOrNull = (value) => {
+    if (value === "" || value === null || value === undefined) return null;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const handlePositiveNumberChange = (idx, field, value) => {
+    if (value === "") {
+      onCourseChange(idx, field, "");
+      return;
+    }
+    const n = Number(value);
+    if (!Number.isFinite(n) || n <= 0) return;
+    onCourseChange(idx, field, n);
+  };
+
+  const handleNonNegativeNumberChange = (idx, field, value) => {
+    if (value === "") {
+      onCourseChange(idx, field, "");
+      return;
+    }
+    const n = Number(value);
+    if (!Number.isFinite(n) || n < 0) return;
+    onCourseChange(idx, field, n);
+  };
   const handleClearFields = (index) => {
     const fields = [
       "name",
@@ -54,6 +80,38 @@ export default function CoursePanel({
                 disabled ? "opacity-50 pointer-events-none" : ""
               }`}
             >
+              {(() => {
+                const ectsValue = toNumberOrNull(c.ects);
+                const teachingUnitsValue = toNumberOrNull(c.teaching_units);
+                const theoryHoursValue = toNumberOrNull(c.theory_hours);
+                const labHoursValue = toNumberOrNull(c.lab_hours);
+
+                const ectsError =
+                  ectsValue !== null && ectsValue <= 0
+                    ? "Τα ECTS πρέπει να είναι μεγαλύτερα από 0."
+                    : null;
+                const teachingUnitsError =
+                  teachingUnitsValue !== null && teachingUnitsValue <= 0
+                    ? "Οι διδακτικές μονάδες πρέπει να είναι μεγαλύτερες από 0."
+                    : null;
+                const theoryHoursError =
+                  theoryHoursValue !== null && theoryHoursValue < 0
+                    ? "Οι ώρες θεωρίας δεν μπορούν να είναι αρνητικές."
+                    : null;
+                const labHoursError =
+                  labHoursValue !== null && labHoursValue < 0
+                    ? "Οι ώρες εργαστηρίου δεν μπορούν να είναι αρνητικές."
+                    : null;
+                const hoursError =
+                  theoryHoursValue !== null &&
+                  labHoursValue !== null &&
+                  theoryHoursValue === 0 &&
+                  labHoursValue === 0
+                    ? "Οι ώρες θεωρίας και εργαστηρίου δεν μπορούν να είναι ταυτόχρονα 0."
+                    : null;
+
+                return (
+                  <>
               {/* Name + Code */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div className="md:col-span-2">
@@ -103,10 +161,12 @@ export default function CoursePanel({
                 <InputField
                   label="ECTS"
                   type="number"
+                  min="1"
                   value={c.ects}
-                  onChange={(val) => onCourseChange(idx, "ects", val)}
+                  onChange={(val) => handlePositiveNumberChange(idx, "ects", val)}
                   required
                   disabled={disabled} // Pass disabled prop
+                  error={ectsError}
                 />
               </div>
 
@@ -115,28 +175,38 @@ export default function CoursePanel({
                 <InputField
                   label="Διδακτικές Μονάδες"
                   type="number"
-                  value={c.teachingUnits}
-                  onChange={(val) => onCourseChange(idx, "teaching_units", val)}
+                  min="1"
+                  value={c.teaching_units}
+                  onChange={(val) => handlePositiveNumberChange(idx, "teaching_units", val)}
                   required
                   disabled={disabled} // Pass disabled prop
+                  error={teachingUnitsError}
                 />
                 <InputField
                   label="Ώρες Θεωρίας"
                   type="number"
+                  min="0"
                   value={c.theory_hours}
-                  onChange={(val) => onCourseChange(idx, "theory_hours", val)}
+                  onChange={(val) => handleNonNegativeNumberChange(idx, "theory_hours", val)}
                   required
                   disabled={disabled} // Pass disabled prop
+                  error={theoryHoursError}
                 />
                 <InputField
                   label="Ώρες Εργαστηρίου"
                   type="number"
+                  min="0"
                   value={c.lab_hours}
-                  onChange={(val) => onCourseChange(idx, "lab_hours", val)}
+                  onChange={(val) => handleNonNegativeNumberChange(idx, "lab_hours", val)}
                   required
                   disabled={disabled} // Pass disabled prop
+                  error={labHoursError}
                 />
               </div>
+
+              {hoursError && (
+                <p className="-mt-2 mb-3 text-sm text-red-600">{hoursError}</p>
+              )}
 
               {/* Description */}
               <div className="mt-4">
@@ -184,6 +254,9 @@ export default function CoursePanel({
                   Διαγραφή
                 </button>
               </div>
+                  </>
+                );
+              })()}
             </div>
           ))
         )}

@@ -32,13 +32,11 @@ export default function ScientificFieldSection() {
     const today = new Date();
     const todayYMD = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     return (positions || []).filter((p) => {
-      if (typeof p?.isActive === "boolean") return p.isActive;
-      // Fallback if backend older and doesn't send isActive
-      if (!p?.startDate || !p?.endDate) return false;
+      if (!p?.isActive) return false;
+      if (!p?.startDate) return false;
       const s = new Date(p.startDate);
-      const e = new Date(p.endDate);
-      if (isNaN(s) || isNaN(e)) return false;
-      return s <= todayYMD && e >= todayYMD;
+      if (isNaN(s)) return false;
+      return s <= todayYMD;
     });
   }, [positions]);
 

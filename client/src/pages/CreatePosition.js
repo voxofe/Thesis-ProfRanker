@@ -5,6 +5,8 @@ import CustomSelect from "../components/CustomSelect";
 import CoursePanel from "../components/CoursePanel";
 import FlowbiteDateField from "../components/FlowbiteDateField";
 import Tooltip from "../components/Tooltip";
+import PositionSelect from "../components/PositionSelect";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const SCHOOLS = [
@@ -41,6 +43,14 @@ const DEPARTMENTS = {
   "ΕΠΙΣΤΗΜΩΝ ΑΠΟΚΑΤΑΣΤΑΣΗΣ ΥΓΕΙΑΣ": ["ΛΟΓΟΘΕΡΑΠΕΙΑΣ", "ΝΟΣΗΛΕΥΤΙΚΗΣ", "ΦΥΣΙΚΟΘΕΡΑΠΕΙΑΣ"],
 };
 
+const API_BASE_URL = (
+  process.env.REACT_APP_API_URL ||
+  "http://127.0.0.1:8000"
+).replace(
+  /\/+$/,
+  ""
+);
+
 function todayISO() {
   return new Date().toISOString().split("T")[0];
 }
@@ -49,7 +59,7 @@ export default function CreatePosition() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const { positions } = usePositions();
-  const { updateValidity, isValid } = useCreatePositionValidation();
+  const { updateValidity, isValid, validationErrors } = useCreatePositionValidation();
 
   const [formData, setFormData] = useState({
     school: "select",
@@ -64,6 +74,8 @@ export default function CreatePosition() {
   const [newSciFieldName, setNewSciFieldName] = useState("");
   const [notification, setNotification] = useState({ message: "", type: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [redirectLoading, setRedirectLoading] = useState(false);
+  const [selectedPositionId, setSelectedPositionId] = useState("");
   const submitButtonRef = useRef(null);
   const [openSubmitTip, setOpenSubmitTip] = useState(false);
 
@@ -81,10 +93,24 @@ export default function CreatePosition() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData, newSciFieldName, isNewSciField]);
 
-  // SF selection
-  const handleScientificFieldChange = (val) => {
-    if (val === "select") {
+  const inactivePositions = useMemo(
+    () => (positions || []).filter((p) => !p?.isActive),
+    [positions]
+  );
+
+  const positionOptions = useMemo(
+    () => [
+      { id: "__new__", label: "+ Νέο επιστημονικό πεδίο", __isExtra: true },
+      ...inactivePositions,
+    ],
+    [inactivePositions]
+  );
+
+  // SF selection via PositionSelect
+  const handleScientificFieldSelect = (val) => {
+    if (!val) {
       setIsNewSciField(false);
+      setSelectedPositionId("");
       setFormData((prev) => ({
         ...prev,
         scientificField: "select",
@@ -92,8 +118,12 @@ export default function CreatePosition() {
         department: "select",
         courses: [],
       }));
-    } else if (val === "__new__") {
+      return;
+    }
+
+    if (val === "__new__") {
       setIsNewSciField(true);
+      setSelectedPositionId("__new__");
       setFormData((prev) => ({
         ...prev,
         scientificField: "",
@@ -101,17 +131,19 @@ export default function CreatePosition() {
         department: "select",
         courses: [],
       }));
-    } else {
-      const matched = positions.find((p) => p.scientificField === val);
-      setIsNewSciField(false);
-      setFormData((prev) => ({
-        ...prev,
-        scientificField: val,
-        school: matched?.school || "select",
-        department: matched?.department || "select",
-        courses: matched?.courses || [],
-      }));
+      return;
     }
+
+    const matched = inactivePositions.find((p) => String(p.id) === String(val));
+    setIsNewSciField(false);
+    setSelectedPositionId(String(val));
+    setFormData((prev) => ({
+      ...prev,
+      scientificField: matched?.scientificField || "select",
+      school: matched?.school || "select",
+      department: matched?.department || "select",
+      courses: matched?.courses || [],
+    }));
   };
 
   // department options
@@ -156,7 +188,7 @@ export default function CreatePosition() {
     }));
 
   // submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = updateValidity({ ...formData, newSciFieldName: newSciFieldName.trim() }, isNewSciField);
     if (Object.keys(errors).length > 0) return;
@@ -164,17 +196,86 @@ export default function CreatePosition() {
     setSubmitting(true);
     setNotification({ message: "", type: "" });
 
-    setTimeout(() => {
-      setSubmitting(false);
+    const payload = {
+      isNewSciField,
+      scientificField: formData.scientificField,
+      newSciFieldName: newSciFieldName.trim(),
+      school: formData.school,
+      department: formData.department,
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      courses: JSON.stringify(formData.courses || []),
+    };
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios({
+        method: "POST",
+        url: `${API_BASE_URL}/api/positions/create`,
+        data: payload,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
       setNotification({ message: "Η θέση δημιουργήθηκε με επιτυχία!", type: "success" });
-    }, 1200);
+      setSubmitting(false);
+      setTimeout(() => {
+        setRedirectLoading(true);
+        setTimeout(() => {
+          navigate("/home");
+        }, 1500);
+      }, 500);
+    } catch (error) {
+      const message = error?.response?.data?.error || "Αποτυχία δημιουργίας θέσης. Παρακαλώ δοκιμάστε ξανά.";
+      setNotification({ message, type: "error" });
+      setSubmitting(false);
+    }
   };
 
   const isSFSelected = formData.scientificField && !isNewSciField;
   const submitDisabled = submitting || !isValid;
 
+  if (redirectLoading) {
+    return (
+      <div className="flex justify-center min-h-screen min-w-screen">
+        <div className="w-[1270px] px-7 py-4 flex flex-col min-h-screen">
+          <div className="flex flex-1 justify-center items-center py-4">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-patras-buccaneer"></div>
+              <p className="mt-4 text-gray-600">Φόρτωση...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
+      {submitting && (
+        <div className="flex justify-center items-center">
+          <svg
+            className="animate-spin h-6 w-6 text-patras-buccaneer"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8H4z"
+            ></path>
+          </svg>
+          <span className="ml-2 text-patras-buccaneer">Υποβολή αίτησης...</span>
+        </div>
+      )}
       <header className="text-center">
         <h1 className="text-3xl font-semibold text-gray-800">Δημιουργία Θέσης</h1>
         <p className="text-gray-500 mt-1 text-sm">Ορίστε τα στοιχεία της νέας θέσης και τα μαθήματα της</p>
@@ -193,18 +294,13 @@ export default function CreatePosition() {
           <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Βασικές Πληροφορίες</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <CustomSelect
+            <PositionSelect
+              positions={positionOptions}
+              value={isNewSciField ? "__new__" : selectedPositionId}
+              onChange={handleScientificFieldSelect}
               label="Επιστημονικό Πεδίο"
-              value={isNewSciField ? "__new__" : formData.scientificField}
-              onChange={handleScientificFieldChange}
-              options={[
-                { value: "__new__", label: "+ Νέο επιστημονικό πεδίο" },
-                ...positions
-                  .map((p) => p.scientificField)
-                  .filter((v, i, a) => a.indexOf(v) === i)
-                  .map((sf) => ({ value: sf, label: sf }))
-                  .sort((a, b) => a.label.localeCompare(b.label)),
-              ]}
+              placeholder="Αναζήτηστε με σχολή, τμήμα ή επιστημονικό πεδίο..."
+              maxResults={50}
               required
             />
 
@@ -257,6 +353,7 @@ export default function CreatePosition() {
           isNewSciField={isNewSciField}
           disabled={isSFSelected}
           scientificFieldValue={formData.scientificField}
+          errors={validationErrors}
         />
 
         {/* DATES */}

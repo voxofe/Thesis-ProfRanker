@@ -41,6 +41,14 @@ export default function PositionSelect({
   // Build labels + normalized fields once
   const enriched = useMemo(() => {
     return positions.map((p) => {
+      if (p.__isExtra) {
+        const label = p.label || p.scientificField || "";
+        return {
+          ...p,
+          _label: label,
+          _norm: normalize(label),
+        };
+      }
       const label = `${p.school} › ${p.department} › ${p.scientificField}`;
       return {
         ...p,
@@ -192,8 +200,14 @@ export default function PositionSelect({
                   onMouseEnter={() => setHighlight(idx)}
                   title={p._label}
                 >
-                  <div className="font-medium text-patras-buccaneer">{p.scientificField}</div>
-                  <div className="text-xs text-gray-600">{p.school} • {p.department}</div>
+                  {p.__isExtra ? (
+                    <div className="font-semibold text-patras-buccaneer">{p._label}</div>
+                  ) : (
+                    <>
+                      <div className="font-medium text-patras-buccaneer">{p.scientificField}</div>
+                      <div className="text-xs text-gray-600">{p.school} • {p.department}</div>
+                    </>
+                  )}
                 </button>
               ))
             )}
