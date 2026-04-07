@@ -47,8 +47,8 @@ export default function CoursesDrawer({ courses = [], scientificField }) {
                         <th className="px-2 py-2 border">Εξάμηνο</th>
                         <th className="px-2 py-2 border">Διδακτικές Μονάδες</th>
                         <th className="px-2 py-2 border">ECTS</th>
-                        <th className="px-2 py-2 border">Θεωρία</th>
-                        <th className="px-2 py-2 border">Εργαστήριο</th>
+                        <th className="px-2 py-2 border">Θεωρία (Ώρες)</th>
+                        <th className="px-2 py-2 border">Εργαστήριο (Ώρες)</th>
                         <th className="px-2 py-2 border">Κατηγορία</th>
                       </tr>
                     </thead>

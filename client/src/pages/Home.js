@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import HomePagePanel from "../components/HomePagePanel";
 import { usePositions } from "../contexts/PositionsContext";
 
-export default function HomePage() {
+export default function Home() {
   const { currentUser } = useAuth();
   const { positions = [], loading } = usePositions();
 
@@ -152,12 +152,23 @@ export default function HomePage() {
       </ul>
     </>
   );
-  const createPositionPopup = (
+  const scientificFieldsPopup = (
     <>
-      <span className="pb-2">Δημιουργία ή επεξεργασία θέσης</span>
+      <span className="pb-2">Διαχείριση Επιστημονικών Πεδίων</span>
       <ul className="space-y-1">
-        <li>• Δημιουργήστε νέα θέση για το πρόγραμμα</li>
-        <li>• Ορίστε επιστημονικό πεδίο, σχολή, τμήμα και προθεσμίες</li>
+        <li>• Προβολή όλων των επιστημονικών πεδίων</li>
+        <li>• Δημιουργία νέων πεδίων</li>
+        <li>• Επεξεργασία στοιχείων και μαθημάτων</li>
+      </ul>
+    </>
+  );
+  const positionsPanelPopup = (
+    <>
+      <span className="pb-2">Διαχείριση Θέσεων/επιστημονικών πεδίων</span>
+      <ul className="space-y-1">
+        <li>• Δείτε όλες τις θέσεις </li>
+        <li>• Επεξεργαστείτε τις προσεχείς θέσεις</li>
+        <li>• Δημιουργείτε μια νέα θέση</li>
       </ul>
     </>
   );
@@ -204,7 +215,7 @@ export default function HomePage() {
             title="Η Βαθμολογία μου"
             description="Δείτε τη βαθμολογία σας μετά από την αξιολόγηση της αίτησής σας."
             buttonText="Η Βαθμολογία μου"
-            to={userRole === "applicant" ? `/score/applicant/${currentUser.id}` : undefined}
+            to={userRole === "applicant" ? `/applicant-score/${currentUser.id}` : undefined}
             buttonDisabled={userRole === "guest"}
             colorClass={
               userRole === "guest"
@@ -219,7 +230,7 @@ export default function HomePage() {
             title="Γενική Κατάταξη"
             description="Δείτε τη γενική κατάταξη όλων των αιτούντων σε όλα τα επιστημονικά πεδία."
             buttonText="Δείτε Κατάταξη"
-            to="/score/total"
+            to="/ranking"
             showInfoMark={true}
             infoPopup={rankingInfoPopup}
           />
@@ -242,28 +253,36 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <HomePagePanel
-            title="Δημιουργία Θέσεων"
-            description="Δημιουργήστε μια νέα θέση/επιστημονικό πεδίο για το πρόγραμμα."
-            buttonText="+ Νέα Θέση"
-            to="/create-position"
-            showInfoMark={true}
-            infoPopup={createPositionPopup}
+            title="Θέσεις"
+            description="Δείτε/επεξεργαστείτε όλες τις θέσεις ή δημιουργείστε μία νέα."
+            buttonText="Διαχείριση Θέσεων"
+            to="/positions"
+            // showInfoMark={true}
+            // infoPopup={positionsPanelPopup}
+          />
+          <HomePagePanel
+            title="Επιστημονικά Πεδία"
+            description="Διαχειριστείτε τα επιστημονικά πεδία, τα μαθήματα και τις πληροφορίες τους."
+            buttonText="Διαχείριση Πεδίων"
+            to="/scientific-fields"
+            // showInfoMark={true}
+            // infoPopup={scientificFieldsPopup}
+          />
+          <HomePagePanel
+            title="Γενική Κατάταξη"
+            description="Δείτε τη γενική κατάταξη όλων των αιτούντων σε όλα τα επιστημονικά πεδία."
+            buttonText="Δείτε Κατάταξη"
+            to="/ranking"
+            // showInfoMark={true}
+            // infoPopup={rankingInfoPopup}
           />
           <HomePagePanel
             title="Διαχείριση Διαχειριστών"
             description="Δημιουργήστε νέο λογαριασμό διαχειριστή με ειδικά δικαιώματα."
             buttonText="Δημιουργία Διαχειριστή"
             to="/register-admin"
-            showInfoMark={true}
-            infoPopup={registerAdminPopup}
-          />
-          <HomePagePanel
-            title="Γενική Κατάταξη"
-            description="Δείτε τη γενική κατάταξη όλων των αιτούντων σε όλα τα επιστημονικά πεδία."
-            buttonText="Δείτε Κατάταξη"
-            to="/score/total"
-            showInfoMark={true}
-            infoPopup={rankingInfoPopup}
+            // showInfoMark={true}
+            // infoPopup={registerAdminPopup}
           />
         </div>
       </div>

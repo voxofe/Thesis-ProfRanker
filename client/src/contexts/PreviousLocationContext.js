@@ -1,26 +1,73 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { getParentPath, isChildRoute, normalizePath } from "../utils/navigationHierarchy";
 
-const PreviousLocationContext = createContext({ previous: null });
+const BackLinkQueueContext = createContext({
+  stack: [],
+  peek: null,
+  pop: () => null,
+  markBackNavigation: () => {},
+});
 
-export const usePreviousLocation = () => useContext(PreviousLocationContext);
+export const useBackLinkQueue = () => useContext(BackLinkQueueContext);
 
 export function PreviousLocationProvider({ children }) {
   const location = useLocation();
   const prevRef = useRef(null);
-  const [previous, setPrevious] = useState(null);
+  const stackRef = useRef([]);
+  const backNavRef = useRef(false);
+  const [stack, setStack] = useState([]);
 
   useEffect(() => {
-    // On every location change, update the stored previous location with the last value.
-    // We store the location object so callers can reuse pathname and search.
-    setPrevious(prevRef.current);
+    const prev = prevRef.current;
+    if (!prev || prev.pathname === location.pathname) {
+      prevRef.current = location;
+      return;
+    }
+
+    if (backNavRef.current) {
+      backNavRef.current = false;
+      prevRef.current = location;
+      return;
+    }
+
+    const prevPath = normalizePath(prev.pathname);
+    const nextPath = normalizePath(location.pathname);
+    const isChild = isChildRoute(prevPath, nextPath);
+    const isParent = getParentPath(prevPath) === nextPath;
+    if (isChild || isParent) {
+      if (stackRef.current.length) {
+        stackRef.current = [];
+        setStack([]);
+      }
+    } else {
+      const nextStack = [...stackRef.current, { pathname: prevPath, search: prev.search || "" }];
+      stackRef.current = nextStack;
+      setStack(nextStack);
+    }
+
     prevRef.current = location;
   }, [location]);
 
+  const pop = () => {
+    if (!stackRef.current.length) return null;
+    const nextStack = stackRef.current.slice(0, -1);
+    const item = stackRef.current[stackRef.current.length - 1];
+    stackRef.current = nextStack;
+    setStack(nextStack);
+    return item;
+  };
+
+  const markBackNavigation = () => {
+    backNavRef.current = true;
+  };
+
+  const peek = stack.length ? stack[stack.length - 1] : null;
+
   return (
-    <PreviousLocationContext.Provider value={{ previous }}>
+    <BackLinkQueueContext.Provider value={{ stack, peek, pop, markBackNavigation }}>
       {children}
-    </PreviousLocationContext.Provider>
+    </BackLinkQueueContext.Provider>
   );
 }
 

@@ -1,6 +1,5 @@
 import axios from "axios";
 import { createContext, useState, useContext, useEffect } from "react";
-import { legacyUser } from "../dummyApplicantData";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -44,12 +43,6 @@ export const AuthProvider = ({ children }) => {
   
   const getUser = () => {
     const token = localStorage.getItem("token");
-
-    if (token === "legacy-token") {
-      setCurrentUser(legacyUser);
-      setIsLoading(false);
-      return;
-    }
 
     if (!token) {
       setIsLoading(false);

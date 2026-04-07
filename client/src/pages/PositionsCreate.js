@@ -1,47 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth, usePositions, useCreatePositionValidation } from "../contexts";
 import InputField from "../components/InputField";
-import CustomSelect from "../components/CustomSelect";
 import CoursePanel from "../components/CoursePanel";
 import FlowbiteDateField from "../components/FlowbiteDateField";
 import Tooltip from "../components/Tooltip";
 import PositionSelect from "../components/PositionSelect";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-
-const SCHOOLS = [
-  "ΘΕΤΙΚΩΝ ΕΠΙΣΤΗΜΩΝ",
-  "ΠΟΛΥΤΕΧΝΙΚΗ",
-  "ΕΠΙΣΤΗΜΩΝ ΥΓΕΙΑΣ",
-  "ΑΝΘΡΩΠΙΣΤΙΚΩΝ & ΚΟΙΝΩΝΙΚΩΝ ΕΠΙΣΤΗΜΩΝ",
-  "ΟΙΚΟΝΟΜΙΚΩΝ ΕΠΙΣΤΗΜΩΝ & ΔΙΟΙΚΗΣΗΣ",
-  "ΓΕΩΠΟΝΙΚΩΝ ΕΠΙΣΤΗΜΩΝ",
-  "ΕΠΙΣΤΗΜΩΝ ΑΠΟΚΑΤΑΣΤΑΣΗΣ ΥΓΕΙΑΣ",
-];
-
-const DEPARTMENTS = {
-  "ΘΕΤΙΚΩΝ ΕΠΙΣΤΗΜΩΝ": ["ΒΙΟΛΟΓΙΑΣ", "ΜΑΘΗΜΑΤΙΚΩΝ", "ΓΕΩΛΟΓΙΑΣ", "ΦΥΣΙΚΗΣ", "ΕΠΙΣΤΗΜΗΣ ΤΩΝ ΥΛΙΚΩΝ", "ΧΗΜΕΙΑΣ"],
-  "ΠΟΛΥΤΕΧΝΙΚΗ": [
-    "ΑΡΧΙΤΕΚΤΟΝΩΝ ΜΗΧΑΝΙΚΩΝ",
-    "ΜΗΧΑΝΟΛΟΓΩΝ & ΑΕΡΟΝΑΥΠΗΓΩΝ ΜΗΧΑΝΙΚΩΝ",
-    "ΗΛΕΚΤΡΟΛΟΓΩΝ ΜΗΧΑΝΙΚΩΝ & ΤΕΧΝΟΛΟΓΙΑΣ ΥΠΟΛΟΓΙΣΤΩΝ",
-    "ΠΟΛΙΤΙΚΩΝ ΜΗΧΑΝΙΚΩΝ",
-    "ΜΗΧΑΝΙΚΩΝ ΗΛΕΚΤΡΟΝΙΚΩΝ ΥΠΟΛΟΓΙΣΤΩΝ & ΠΛΗΡΟΦΟΡΙΚΗΣ",
-    "ΧΗΜΙΚΩΝ ΜΗΧΑΝΙΚΩΝ",
-  ],
-  "ΕΠΙΣΤΗΜΩΝ ΥΓΕΙΑΣ": ["ΙΑΤΡΙΚΗΣ", "ΦΑΡΜΑΚΕΥΤΙΚΗΣ"],
-  "ΑΝΘΡΩΠΙΣΤΙΚΩΝ & ΚΟΙΝΩΝΙΚΩΝ ΕΠΙΣΤΗΜΩΝ": [
-    "ΕΠΙΣΤΗΜΩΝ ΤΗΣ ΕΚΠΑΙΔΕΥΣΗΣ & ΚΟΙΝΩΝΙΚΗΣ ΕΡΓΑΣΙΑΣ",
-    "ΙΣΤΟΡΙΑΣ - ΑΡΧΑΙΟΛΟΓΙΑΣ",
-    "ΕΠΙΣΤΗΜΩΝ ΤΗΣ ΕΚΠΑΙΔΕΥΣΗΣ & ΑΓΩΓΗΣ ΣΤΗΝ ΠΡΟΣΧΟΛΙΚΗ ΗΛΙΚΙΑ",
-    "ΦΙΛΟΛΟΓΙΑΣ",
-    "ΘΕΑΤΡΙΚΩΝ ΣΠΟΥΔΩΝ",
-    "ΦΙΛΟΣΟΦΙΑΣ",
-  ],
-  "ΟΙΚΟΝΟΜΙΚΩΝ ΕΠΙΣΤΗΜΩΝ & ΔΙΟΙΚΗΣΗΣ": ["ΔΙΟΙΚΗΣΗΣ ΕΠΙΧΕΙΡΗΣΕΩΝ", "ΔΙΟΙΚΗΤΙΚΗΣ ΕΠΙΣΤΗΜΗΣ & ΤΕΧΝΟΛΟΓΙΑΣ", "ΔΙΟΙΚΗΣΗΣ ΤΟΥΡΙΣΜΟΥ", "ΟΙΚΟΝΟΜΙΚΩΝ ΕΠΙΣΤΗΜΩΝ"],
-  "ΓΕΩΠΟΝΙΚΩΝ ΕΠΙΣΤΗΜΩΝ": ["ΓΕΩΠΟΝΙΑΣ", "ΑΛΙΕΙΑΣ & ΥΔΑΤΟΚΑΛΛΙΕΡΓΕΙΩΝ", "ΕΠΙΣΤΗΜΗΣ & ΤΕΧΝΟΛΟΓΙΑΣ ΤΡΟΦΙΜΩΝ", "ΑΕΙΦΟΡΙΚΗΣ ΓΕΩΡΓΙΑΣ"],
-  "ΕΠΙΣΤΗΜΩΝ ΑΠΟΚΑΤΑΣΤΑΣΗΣ ΥΓΕΙΑΣ": ["ΛΟΓΟΘΕΡΑΠΕΙΑΣ", "ΝΟΣΗΛΕΥΤΙΚΗΣ", "ΦΥΣΙΚΟΘΕΡΑΠΕΙΑΣ"],
-};
+import { useLocation, useNavigate } from "react-router-dom";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -51,33 +16,64 @@ const API_BASE_URL = (
   ""
 );
 
-function todayISO() {
-  return new Date().toISOString().split("T")[0];
-}
-
 export default function CreatePosition() {
   const { currentUser } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
-  const { positions } = usePositions();
+  const { refreshPositions } = usePositions();
   const { updateValidity, isValid, validationErrors } = useCreatePositionValidation();
 
-  const [formData, setFormData] = useState({
-    school: "select",
-    department: "select",
-    scientificField: "select",
-    startDate: "",
-    endDate: "",
-    startTime: "00:00",
-    endTime: "23:59",
-    courses: [],
-  });
+  const prefillPosition = location.state?.prefillPosition || null;
 
-  const [isNewSciField, setIsNewSciField] = useState(false);
-  const [newSciFieldName, setNewSciFieldName] = useState("");
+  const todayISO = () => new Date().toISOString().split("T")[0];
+
+  const normalizeDateValue = (value) => {
+    if (!value) return "";
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString().split("T")[0];
+    }
+    const normalizeDateOnly = (dateStr) => {
+      if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+        return `${dateStr.slice(6, 10)}-${dateStr.slice(3, 5)}-${dateStr.slice(0, 2)}`;
+      }
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+        return `${dateStr.slice(6, 10)}-${dateStr.slice(3, 5)}-${dateStr.slice(0, 2)}`;
+      }
+      if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+        return dateStr.replace(/\//g, "-");
+      }
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+      return "";
+    };
+
+    const str = String(value).trim();
+    const trimmed = str.includes("T")
+      ? str.split("T")[0]
+      : str.includes(" ")
+        ? str.split(" ")[0]
+        : str;
+    const normalized = normalizeDateOnly(trimmed);
+    if (normalized) return normalized;
+    const parsed = new Date(trimmed);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toISOString().split("T")[0];
+    }
+    return "";
+  };
+
+  const [formData, setFormData] = useState(() => ({
+    scientificFieldId: prefillPosition?.scientificFieldId || "",
+    startDate: normalizeDateValue(prefillPosition?.startDate),
+    endDate: normalizeDateValue(prefillPosition?.endDate),
+    startTime: prefillPosition?.startTime || "00:00",
+    endTime: prefillPosition?.endTime || "23:59",
+  }));
+
+  const [scientificFields, setScientificFields] = useState([]);
+  const [selectedScientificField, setSelectedScientificField] = useState(null);
   const [notification, setNotification] = useState({ message: "", type: "" });
   const [submitting, setSubmitting] = useState(false);
   const [redirectLoading, setRedirectLoading] = useState(false);
-  const [selectedPositionId, setSelectedPositionId] = useState("");
   const submitButtonRef = useRef(null);
   const [openSubmitTip, setOpenSubmitTip] = useState(false);
 
@@ -88,140 +84,113 @@ export default function CreatePosition() {
 
   // LIVE validation – run on any edit; do NOT depend on updateValidity
   useEffect(() => {
-    updateValidity(
-      { ...formData, newSciFieldName: newSciFieldName.trim() },
-      isNewSciField
-    );
+    updateValidity(formData, "position");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData, newSciFieldName, isNewSciField]);
+  }, [formData]);
 
-  const inactivePositions = useMemo(
-    () => (positions || []).filter((p) => p?.state === "completed"),
-    [positions]
-  );
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    axios({
+      method: "GET",
+      url: `${API_BASE_URL}/api/scientific-fields`,
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((response) => setScientificFields(response.data || []))
+      .catch(() => setScientificFields([]));
+  }, []);
 
-  const positionOptions = useMemo(
-    () => [
-      { id: "__new__", label: "+ Νέο επιστημονικό πεδίο", __isExtra: true },
-      ...inactivePositions,
-    ],
-    [inactivePositions]
-  );
+  const scientificFieldOptions = useMemo(() => {
+    return (scientificFields || []).map((sf) => ({
+      id: sf.id,
+      scientificField: sf.name,
+      school: sf.school,
+      department: sf.department,
+      courses: (sf.courses || []).map((course) => ({
+        ...course,
+        teaching_units: course.teaching_units ?? course.teachingUnits,
+      })),
+    }));
+  }, [scientificFields]);
 
-  // SF selection via PositionSelect
   const handleScientificFieldSelect = (val) => {
     if (!val) {
-      setIsNewSciField(false);
-      setSelectedPositionId("");
+      setSelectedScientificField(null);
       setFormData((prev) => ({
         ...prev,
-        scientificField: "select",
-        school: "select",
-        department: "select",
-        courses: [],
+        scientificFieldId: "",
       }));
       return;
     }
 
-    if (val === "__new__") {
-      setIsNewSciField(true);
-      setSelectedPositionId("__new__");
+    const matched = scientificFieldOptions.find((sf) => String(sf.id) === String(val)) || null;
+    setSelectedScientificField(matched);
+    setFormData((prev) => ({
+      ...prev,
+      scientificFieldId: String(val),
+    }));
+  };
+
+  useEffect(() => {
+    if (!prefillPosition) return;
+    if (prefillPosition.scientificFieldId) {
       setFormData((prev) => ({
         ...prev,
-        scientificField: "",
-        school: "select",
-        department: "select",
-        courses: [],
+        scientificFieldId: String(prefillPosition.scientificFieldId),
       }));
+    }
+    setFormData((prev) => ({
+      ...prev,
+      startDate: normalizeDateValue(prefillPosition.startDate) || prev.startDate,
+      endDate: normalizeDateValue(prefillPosition.endDate) || prev.endDate,
+      startTime: prefillPosition.startTime || prev.startTime,
+      endTime: prefillPosition.endTime || prev.endTime,
+    }));
+  }, [prefillPosition]);
+
+  useEffect(() => {
+    if (!formData.scientificFieldId) {
+      setSelectedScientificField(null);
       return;
     }
+    const matched = scientificFieldOptions.find((sf) => String(sf.id) === String(formData.scientificFieldId)) || null;
+    setSelectedScientificField(matched);
+  }, [formData.scientificFieldId, scientificFieldOptions]);
 
-    const matched = inactivePositions.find((p) => String(p.id) === String(val));
-    setIsNewSciField(false);
-    setSelectedPositionId(String(val));
-    setFormData((prev) => ({
-      ...prev,
-      scientificField: matched?.scientificField || "select",
-      school: matched?.school || "select",
-      department: matched?.department || "select",
-      courses: matched?.courses || [],
-    }));
-  };
-
-  // department options
-  const departmentOptions = useMemo(() => {
-    const deps = formData.school && formData.school !== "select"
-      ? DEPARTMENTS[formData.school] || []
-      : Object.values(DEPARTMENTS).flat();
-    return deps.sort((a, b) => a.localeCompare(b, "el"));
-  }, [formData.school]);
-
-  // course handlers
-  const handleCourseChange = (idx, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      courses: prev.courses.map((c, i) => (i === idx ? { ...c, [field]: value } : c)),
-    }));
-  };
-
-  const addCourse = () =>
-    setFormData((prev) => ({
-      ...prev,
-      courses: [
-        ...prev.courses,
-        {
-          code: "",
-          name: "",
-          description: "",
-          semester: "select",
-          teaching_units: "",
-          ects: "",
-          theory_hours: "",
-          lab_hours: "",
-          category: "select",
-        },
-      ],
-    }));
-
-  const removeCourse = (idx) =>
-    setFormData((prev) => ({
-      ...prev,
-      courses: prev.courses.filter((_, i) => i !== idx),
-    }));
+  const handleCourseChange = () => {};
+  const addCourse = () => {};
+  const removeCourse = () => {};
 
   // submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const errors = updateValidity({ ...formData, newSciFieldName: newSciFieldName.trim() }, isNewSciField);
+    const errors = updateValidity(formData, "position");
     if (Object.keys(errors).length > 0) return;
 
     setSubmitting(true);
     setNotification({ message: "", type: "" });
 
     const payload = {
-      isNewSciField,
-      scientificField: formData.scientificField,
-      newSciFieldName: newSciFieldName.trim(),
-      school: formData.school,
-      department: formData.department,
+      scientificFieldId: formData.scientificFieldId,
       startDate: formData.startDate,
       endDate: formData.endDate,
       startTime: formData.startTime,
       endTime: formData.endTime,
-      courses: JSON.stringify(formData.courses || []),
     };
 
     try {
       const token = localStorage.getItem("token");
       await axios({
         method: "POST",
-        url: `${API_BASE_URL}/api/positions/create`,
+        url: `${API_BASE_URL}/api/positions`,
         data: payload,
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       setNotification({ message: "Η θέση δημιουργήθηκε με επιτυχία!", type: "success" });
       setSubmitting(false);
+      if (refreshPositions) {
+        await refreshPositions();
+      }
       setTimeout(() => {
         setRedirectLoading(true);
         setTimeout(() => {
@@ -235,7 +204,6 @@ export default function CreatePosition() {
     }
   };
 
-  const isSFSelected = formData.scientificField && !isNewSciField;
   const submitDisabled = submitting || !isValid;
 
   if (redirectLoading) {
@@ -282,7 +250,7 @@ export default function CreatePosition() {
       )}
       <header className="text-center">
         <h1 className="text-3xl font-semibold text-gray-800">Δημιουργία Θέσης</h1>
-        <p className="text-gray-500 mt-1 text-sm">Ορίστε τα στοιχεία της νέας θέσης και τα μαθήματα της</p>
+        <p className="text-gray-500 mt-1 text-sm">Ορίστε τα στοιχεία της νέας θέσης και την χρονική περίδο των αιτήσεων της.</p>
       </header>
 
       <p className="text-sm text-gray-600 -mt-2 mb-2">
@@ -297,52 +265,33 @@ export default function CreatePosition() {
         <section>
           <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Βασικές Πληροφορίες</h2>
 
-          <div className={`grid grid-cols-1 ${isNewSciField ? "md:grid-cols-2" : ""} gap-6`}>
+          <div className="grid grid-cols-1 gap-6">
             <PositionSelect
-              positions={positionOptions}
-              value={isNewSciField ? "__new__" : selectedPositionId}
+              positions={scientificFieldOptions}
+              value={formData.scientificFieldId}
               onChange={handleScientificFieldSelect}
               label="Επιστημονικό Πεδίο"
               placeholder="Αναζήτηστε με σχολή, τμήμα ή επιστημονικό πεδίο..."
               maxResults={50}
+              error={validationErrors.scientificFieldId}
               required
             />
-
-            {isNewSciField && (
-              <InputField
-                label="Όνομα νέου Επιστημονικού Πεδίου"
-                value={newSciFieldName}
-                onChange={setNewSciFieldName}
-                required
-              />
-            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <CustomSelect
+            <InputField
               label="Σχολή"
-              value={formData.school}
-              onChange={(val) => setFormData((prev) => ({ ...prev, school: val, department: "select" }))}
-              options={SCHOOLS.map((s) => ({ value: s, label: s }))}
-              disabled={!isNewSciField}
+              value={selectedScientificField?.school || ""}
+              onChange={() => {}}
+              disabled
               required
             />
 
-            <CustomSelect
+            <InputField
               label="Τμήμα"
-              value={formData.department}
-              onChange={(val) =>
-                setFormData((prev) => {
-                  const updated = { ...prev, department: val };
-                  if (isNewSciField && val !== "select") {
-                    const found = Object.entries(DEPARTMENTS).find(([school, deps]) => deps.includes(val));
-                    if (found) updated.school = found[0];
-                  }
-                  return updated;
-                })
-              }
-              options={departmentOptions.map((d) => ({ value: d, label: d }))}
-              disabled={!isNewSciField}
+              value={selectedScientificField?.department || ""}
+              onChange={() => {}}
+              disabled
               required
             />
           </div>
@@ -350,13 +299,13 @@ export default function CreatePosition() {
 
         {/* COURSES */}
         <CoursePanel
-          courses={formData.courses}
+          courses={selectedScientificField?.courses || []}
           onCourseChange={handleCourseChange}
           onAddCourse={addCourse}
           onRemoveCourse={removeCourse}
-          isNewSciField={isNewSciField}
-          disabled={isSFSelected}
-          scientificFieldValue={formData.scientificField}
+          showAddButton={false}
+          disabled
+          scientificFieldValue={selectedScientificField?.scientificField || "select"}
           errors={validationErrors}
         />
 

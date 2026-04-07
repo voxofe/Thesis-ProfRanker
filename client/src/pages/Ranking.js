@@ -1,10 +1,12 @@
 import axios from "axios";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { usePositions } from "../contexts/PositionsContext";
-import RankingFilterModal from "../components/RankingFilterModal";
+import FilterModal from "../components/FilterModal";
 import Checkbox from "../components/Checkbox";
+import SortableTable from "../components/SortableTable";
+import RefreshButton from "../components/RefreshButton";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -20,7 +22,7 @@ const columns = [
   { key: "school", label: "Σχολή" },
   { key: "department", label: "Τμήμα" },
   { key: "scientificField", label: "Επιστημονικό Πεδίο" },
-  { key: "positionStartDate", label: "Έναρξη Αιτήσεων" },
+  { key: "positionStartDate", label: "Έναρξη" },
   { key: "positionEndDate", label: "Λήξη Αιτήσεων" },
   { key: "status", label: "Κατάσταση Αιτήσεων" },
   { key: "totalPoints", label: "Βαθμολόγηση (σε μόρια)" },
@@ -50,10 +52,8 @@ function getStatusBadgeClasses(status) {
   return `${base} bg-gray-100 text-gray-700 border border-gray-200`;
 }
 
-export default function RankingPage() {
+export default function Ranking() {
   const [users, setUsers] = useState([]);
-  const [sortBy, setSortBy] = useState("totalPoints");
-  const [sortDirection, setSortDirection] = useState("desc");
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
     schools: [],
@@ -66,7 +66,8 @@ export default function RankingPage() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const { currentUser } = useAuth();
-  const { positions = [] } = usePositions();
+  const { positions = [], refreshPositions } = usePositions();
+  const [refreshing, setRefreshing] = useState(false);
 
   // Roles
   const isAdmin = !!(
@@ -85,20 +86,35 @@ export default function RankingPage() {
   const myDepartment = myPosition?.department;
   const myScientificField = myPosition?.scientificField;
 
-  useEffect(() => {
+  const fetchUsers = useCallback(async () => {
     const token = localStorage.getItem("token");
-    axios({
-      method: "GET",
-      url: `${API_BASE_URL}/api/applicant/all`,
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
-      .then((response) => {
-        setUsers(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching ranking data:", error);
+    try {
+      const response = await axios({
+        method: "GET",
+        url: `${API_BASE_URL}/api/applicant/all`,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
+      setUsers(response.data);
+    } catch (error) {
+      console.error("Error fetching ranking data:", error);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        fetchUsers(),
+        refreshPositions ? refreshPositions() : Promise.resolve(),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchUsers, refreshPositions]);
 
   // Build filter options from loaded users
   const filterOptions = useMemo(() => {
@@ -159,17 +175,7 @@ export default function RankingPage() {
     });
   }, [users, filters, isAdmin]);
 
-  // Sorting
-  const handleSort = (key) => {
-    if (sortBy === key) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(key);
-      setSortDirection("asc");
-    }
-  };
-
-  const getSortedUsers = () => {
+  const getSortedUsers = (rows, sortBy, sortDirection) => {
     const byDate = (a, b, key) => {
       const da = parseDDMMYYYY(a[key]);
       const db = parseDDMMYYYY(b[key]);
@@ -180,13 +186,13 @@ export default function RankingPage() {
     };
 
     if (sortBy === "totalPoints") {
-      return [...filteredUsers].sort((a, b) =>
+      return [...rows].sort((a, b) =>
         sortDirection === "asc" ? a.totalPoints - b.totalPoints : b.totalPoints - a.totalPoints
       );
     }
 
     if (sortBy === "positionStartDate" || sortBy === "positionEndDate") {
-      return [...filteredUsers].sort((a, b) => byDate(a, b, sortBy));
+      return [...rows].sort((a, b) => byDate(a, b, sortBy));
     }
 
     if (sortBy === "status") {
@@ -196,7 +202,7 @@ export default function RankingPage() {
         if (s === "Ολοκληρωμένη") return 1;
         return 0;
       };
-      return [...filteredUsers].sort((a, b) => {
+      return [...rows].sort((a, b) => {
         const ra = rank(a);
         const rb = rank(b);
         if (ra === rb) {
@@ -212,7 +218,7 @@ export default function RankingPage() {
     }
 
     // String fields
-    return [...filteredUsers].sort((a, b) => {
+    return [...rows].sort((a, b) => {
       const valA = a[sortBy]?.toString().toLowerCase() || "";
       const valB = b[sortBy]?.toString().toLowerCase() || "";
       if (valA < valB) return sortDirection === "asc" ? -1 : 1;
@@ -220,8 +226,6 @@ export default function RankingPage() {
       return 0;
     });
   };
-
-  const sortedUsers = getSortedUsers();
 
   // Filter tags
   const filterTags = useMemo(() => {
@@ -251,10 +255,10 @@ export default function RankingPage() {
   
   const filteredByMyPosition = useMemo(() => {
     if (isApplicant && showMyPosition && myPositionId) {
-      return sortedUsers.filter(u => String(u.positionId) === String(myPositionId));
+      return filteredUsers.filter(u => String(u.positionId) === String(myPositionId));
     }
-    return sortedUsers;
-  }, [isApplicant, showMyPosition, myPositionId, sortedUsers]);
+    return filteredUsers;
+  }, [isApplicant, showMyPosition, myPositionId, filteredUsers]);
 
   // Checkbox is checked only if all three filters contain ONLY the applicant's values
   const hasMyExclusiveFilters =
@@ -292,16 +296,124 @@ export default function RankingPage() {
     });
   };
 
-  const renderSortArrow = (key) => {
-    if (sortBy !== key) return null;
-    return sortDirection === "asc" ? (
-      <span className="ml-2 text-base text-white align-middle">
-        {"\u25B2"}
-      </span>
-    ) : (
-      <span className="ml-2 text-base text-white align-middle">
-        {"\u25BC"}
-      </span>
+  const headerCellClassName = (col) => [
+    "px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider cursor-pointer select-none",
+    col.key === "firstName" || col.key === "lastName" ? "w-24" : "",
+    col.key === "status" ? "w-28" : "",
+  ].join(" ").trim();
+
+  const renderRow = (applicant, key) => {
+    const isSelf = isApplicant && applicant.id === viewerId;
+    const clickable = isAdmin || isSelf;
+    return (
+      <tr
+        // navigation is handled by per-cell <Link> so middle-click/ctrl+click open in new tab
+        onClick={undefined}
+        key={key}
+        className={[
+          clickable ? "cursor-pointer hover:bg-patras-albescentWhite/50" : "cursor-default",
+          isSelf ? "bg-patras-sanguineBrown/10 relative" : ""
+        ].join(" ")}
+      >
+        <td
+          className="text-center text-patras-buccaneer text-xs whitespace-nowrap truncate w-24"
+          title={applicant.firstName}
+        >
+          {clickable ? (
+            <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+              {applicant.firstName}
+            </Link>
+          ) : (
+            <div className="px-6 py-4">{applicant.firstName}</div>
+          )}
+        </td>
+        <td
+          className="text-center text-patras-buccaneer text-xs whitespace-nowrap truncate w-24"
+          title={applicant.lastName}
+        >
+          {clickable ? (
+            <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+              {applicant.lastName}
+            </Link>
+          ) : (
+            <div className="px-6 py-4">{applicant.lastName}</div>
+          )}
+        </td>
+        <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words">
+          {clickable ? (
+            <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+              {applicant.school}
+            </Link>
+          ) : (
+            <div className="px-6 py-4">{applicant.school}</div>
+          )}
+        </td>
+        <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words">
+          {clickable ? (
+            <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+              {applicant.department}</Link>
+          ) : (
+            <div className="px-6 py-4">{applicant.department}</div>
+          )}
+        </td>
+        <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words">
+          {clickable ? (
+            <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+              {applicant.scientificField}
+            </Link>
+          ) : (
+            <div className="px-6 py-4">{applicant.scientificField}</div>
+          )}
+        </td>
+        <td className="text-center text-patras-buccaneer text-xs whitespace-nowrap">
+          {clickable ? (
+            <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+              {applicant.positionStartDate}
+            </Link>
+          ) : (
+            <div className="px-6 py-4">{applicant.positionStartDate}</div>
+          )}
+        </td>
+        <td className="text-center text-patras-buccaneer text-xs whitespace-nowrap">
+          {clickable ? (
+            <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+              {applicant.positionEndDate}
+            </Link>
+          ) : (
+            <div className="px-6 py-4">{applicant.positionEndDate}</div>
+          )}
+        </td>
+        <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words w-28">
+          {(() => {
+            const status = getApplicationStatus(applicant.positionEndDate);
+            const content = <span className={getStatusBadgeClasses(status)}>{status}</span>;
+            return clickable ? (
+              <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+                {content}
+              </Link>
+            ) : (
+              <div className="px-6 py-4">{content}</div>
+            );
+          })()}
+        </td>
+        <td className="text-center">
+          {clickable ? (
+            <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+              <div className="flex justify-center">
+                <span className="inline-block min-w-[30px] px-3 py-1 rounded-md text-black font-semibold text-sm shadow-md ">
+                  {applicant.totalPoints}
+                </span>
+              </div>
+            </Link>
+          ) : (
+            <div className="px-6 py-4">
+              <span className="inline-block min-w-[30px] px-3 py-1 rounded-md text-black font-semibold text-sm shadow-md">
+                {applicant.totalPoints}
+              </span>
+            </div>
+          )}
+        </td>
+      </tr>
     );
   };
 
@@ -370,7 +482,7 @@ export default function RankingPage() {
       )}
 
       {/* Filter Modal */}
-      <RankingFilterModal
+      <FilterModal
         open={filterOpen}
         onClose={() => setFilterOpen(false)}
         filters={filters}
@@ -399,153 +511,21 @@ export default function RankingPage() {
           </svg>
           Φίλτρα
         </button>
-        <div className="w-full overflow-x-auto overflow-y-visible shadow-md rounded-lg border border-patras-capePalliser/50">
-        <table className="min-w-full table-fixed font-semibold bg-white/25 t-5"> {/* Changed to min-w-full */}
-          <thead className="bg-patras-buccaneer">
-            <tr>
-              {columns.map((col) => (
-                <th
-                  key={col.key}
-                  className={[
-                    "px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider cursor-pointer select-none",
-                    col.key === "firstName" || col.key === "lastName" ? "w-24" : "",
-                    col.key === "status" ? "w-28" : "",
-                  ].join(" ").trim()}
-                  onClick={() => handleSort(col.key)}
-                >
-                  {col.label}
-                  {renderSortArrow(col.key)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-patras-cameo">
-            {filteredByMyPosition.length === 0 ? (
-              <tr>
-                <td colSpan={columns.length} className="text-center text-gray-400 py-8">
-                  Δεν βρέθηκαν αποτελέσματα με βάση τα φίλτρα σας.
-                </td>
-              </tr>
-            ) : (
-              filteredByMyPosition.map((applicant) => {
-                const isSelf = isApplicant && applicant.id === viewerId;
-                const clickable = isAdmin || isSelf;
-                return (
-                  <tr
-                    // navigation is handled by per-cell <Link> so middle-click/ctrl+click open in new tab
-                    onClick={undefined}
-                    key={applicant.id}
-                    className={[
-                      clickable ? "cursor-pointer hover:bg-patras-albescentWhite/50" : "cursor-default",
-                      isSelf ? "bg-patras-sanguineBrown/10 relative" : ""
-                    ].join(" ")}
-                  >
-                        <td
-                          className="text-center text-patras-buccaneer text-xs whitespace-nowrap truncate w-24"
-                          title={applicant.firstName}
-                        >
-                          {clickable ? (
-                            <Link to={`/score/applicant/${applicant.id}`} className="block w-full h-full px-6 py-4">
-                              {applicant.firstName}
-                            </Link>
-                          ) : (
-                            <div className="px-6 py-4">{applicant.firstName}</div>
-                          )}
-                        </td>
-                    <td
-                      className="text-center text-patras-buccaneer text-xs whitespace-nowrap truncate w-24"
-                      title={applicant.lastName}
-                    >
-                      {clickable ? (
-                        <Link to={`/score/applicant/${applicant.id}`} className="block w-full h-full px-6 py-4">
-                          {applicant.lastName}
-                        </Link>
-                      ) : (
-                        <div className="px-6 py-4">{applicant.lastName}</div>
-                      )}
-                    </td>
-                    <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words">
-                      {clickable ? (
-                        <Link to={`/score/applicant/${applicant.id}`} className="block w-full h-full px-6 py-4">
-                          {applicant.school}
-                        </Link>
-                      ) : (
-                        <div className="px-6 py-4">{applicant.school}</div>
-                      )}
-                    </td>
-                    <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words">
-                      {clickable ? (
-                        <Link to={`/score/applicant/${applicant.id}`} className="block w-full h-full px-6 py-4">
-                          {applicant.department}
-                        </Link>
-                      ) : (
-                        <div className="px-6 py-4">{applicant.department}</div>
-                      )}
-                    </td>
-                    <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words">
-                      {clickable ? (
-                        <Link to={`/score/applicant/${applicant.id}`} className="block w-full h-full px-6 py-4">
-                          {applicant.scientificField}
-                        </Link>
-                      ) : (
-                        <div className="px-6 py-4">{applicant.scientificField}</div>
-                      )}
-                    </td>
-                    <td className="text-center text-patras-buccaneer text-xs whitespace-nowrap">
-                      {clickable ? (
-                        <Link to={`/score/applicant/${applicant.id}`} className="block w-full h-full px-6 py-4">
-                          {applicant.positionStartDate}
-                        </Link>
-                      ) : (
-                        <div className="px-6 py-4">{applicant.positionStartDate}</div>
-                      )}
-                    </td>
-                    <td className="text-center text-patras-buccaneer text-xs whitespace-nowrap">
-                      {clickable ? (
-                        <Link to={`/score/applicant/${applicant.id}`} className="block w-full h-full px-6 py-4">
-                          {applicant.positionEndDate}
-                        </Link>
-                      ) : (
-                        <div className="px-6 py-4">{applicant.positionEndDate}</div>
-                      )}
-                    </td>
-                    <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words w-28">
-                      {(() => {
-                        const status = getApplicationStatus(applicant.positionEndDate);
-                        const content = <span className={getStatusBadgeClasses(status)}>{status}</span>;
-                        return clickable ? (
-                          <Link to={`/score/applicant/${applicant.id}`} className="block w-full h-full px-6 py-4">
-                            {content}
-                          </Link>
-                        ) : (
-                          <div className="px-6 py-4">{content}</div>
-                        );
-                      })()}
-                    </td>
-                    <td className="text-center">
-                      {clickable ? (
-                        <Link to={`/score/applicant/${applicant.id}`} className="block w-full h-full px-6 py-4">
-                          <div className="flex justify-center">
-                            <span className="inline-block min-w-[30px] px-3 py-1 rounded-md text-black font-semibold text-sm shadow-md ">
-                              {applicant.totalPoints}
-                            </span>
-                          </div>
-                        </Link>
-                      ) : (
-                        <div className="px-6 py-4">
-                          <span className="inline-block min-w-[30px] px-3 py-1 rounded-md text-black font-semibold text-sm shadow-md">
-                            {applicant.totalPoints}
-                          </span>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+        <RefreshButton
+          onClick={handleRefresh}
+          loading={refreshing}
+          className="absolute -top-12 right-28 z-50"
+        />
+        <SortableTable
+          columns={columns}
+          rows={filteredByMyPosition}
+          getSortedRows={getSortedUsers}
+          initialSortBy="totalPoints"
+          initialSortDirection="desc"
+          headerCellClassName={headerCellClassName}
+          emptyMessage="Δεν βρέθηκαν αποτελέσματα με βάση τα φίλτρα σας."
+          renderRow={renderRow}
+        />
     </div>
     </div>
   );

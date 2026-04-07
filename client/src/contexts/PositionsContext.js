@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 
 const API_BASE_URL = (
@@ -18,7 +18,7 @@ export const PositionsProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const { isLoggedIn, isLoading: authLoading } = useAuth();
 
-  useEffect(() => {
+  const refreshPositions = useCallback(async () => {
     if (authLoading) return;
     if (!isLoggedIn) {
       setPositions([]);
@@ -28,19 +28,23 @@ export const PositionsProvider = ({ children }) => {
 
     const token = localStorage.getItem("token");
     setLoading(true);
-    fetch(`${API_BASE_URL}/api/positions`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setPositions(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/positions`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      setPositions(Array.isArray(data) ? data : []);
+    } finally {
+      setLoading(false);
+    }
   }, [authLoading, isLoggedIn]);
 
+  useEffect(() => {
+    refreshPositions();
+  }, [refreshPositions]);
+
   return (
-    <PositionsContext.Provider value={{ positions, loading }}>
+    <PositionsContext.Provider value={{ positions, loading, refreshPositions }}>
       {children}
     </PositionsContext.Provider>
   );

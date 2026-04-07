@@ -7,7 +7,7 @@ export default function CoursePanel({
   onCourseChange,
   onAddCourse,
   onRemoveCourse,
-  isNewSciField,
+  showAddButton = false,
   disabled,
   scientificFieldValue, // New prop to check the scientific field value
   errors = {},
@@ -262,7 +262,7 @@ export default function CoursePanel({
         )}
       </div>
 
-      {isNewSciField && (
+      {showAddButton && (
         <button
           type="button"
           className="rounded-md bg-patras-buccaneer px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 mt-3"

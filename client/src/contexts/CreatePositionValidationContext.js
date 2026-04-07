@@ -10,38 +10,32 @@ export const CreatePositionValidationProvider = ({ children }) => {
   const [isValid, setIsValid] = useState(false);
 
   // PURE calculator — stable identity
-  const computeErrors = useCallback((formData, isNewSciField) => {
+  const computeErrors = useCallback((formData, mode) => {
     const errors = {};
 
-    // Scientific field
-    if (isNewSciField) {
-      if (!formData.newSciFieldName || formData.newSciFieldName.trim() === "") {
-        errors.newSciFieldName = "New scientific field name is required.";
-      }
-    } else {
-      if (!formData.scientificField || formData.scientificField === "select") {
-        errors.scientificField = "Scientific field is required.";
-      }
-    }
+    if (mode === "position") {
+      if (!formData.scientificFieldId) errors.scientificFieldId = "Scientific field is required.";
+      if (!formData.startDate) errors.startDate = "Start date is required.";
+      if (!formData.endDate) errors.endDate = "End date is required.";
+      if (!formData.startTime) errors.startTime = "Start time is required.";
+      if (!formData.endTime) errors.endTime = "End time is required.";
 
-    // Base fields
-    if (!formData.school || formData.school === "select") errors.school = "School is required.";
-    if (!formData.department || formData.department === "select") errors.department = "Department is required.";
-    if (!formData.startDate) errors.startDate = "Start date is required.";
-    if (!formData.endDate) errors.endDate = "End date is required.";
-    if (!formData.startTime) errors.startTime = "Start time is required.";
-    if (!formData.endTime) errors.endTime = "End time is required.";
-
-    if (formData.startDate && formData.endDate && formData.startTime && formData.endTime) {
-      const start = new Date(`${formData.startDate}T${formData.startTime}`);
-      const end = new Date(`${formData.endDate}T${formData.endTime}`);
-      if (!isNaN(start) && !isNaN(end) && end < start) {
-        errors.dateTimeRange = "Η ημερομηνία/ώρα λήξης δεν μπορεί να είναι πριν την ημερομηνία/ώρα έναρξης.";
+      if (formData.startDate && formData.endDate && formData.startTime && formData.endTime) {
+        const start = new Date(`${formData.startDate}T${formData.startTime}`);
+        const end = new Date(`${formData.endDate}T${formData.endTime}`);
+        if (!isNaN(start) && !isNaN(end) && end < start) {
+          errors.dateTimeRange = "Η ημερομηνία/ώρα λήξης δεν μπορεί να είναι πριν την ημερομηνία/ώρα έναρξης.";
+        }
       }
     }
 
-    // Courses (only when creating a new scientific field)
-    if (isNewSciField) {
+    if (mode === "scientificField") {
+      if (!formData.scientificField || formData.scientificField.trim() === "") {
+        errors.scientificField = "Scientific field name is required.";
+      }
+      if (!formData.school || formData.school === "select") errors.school = "School is required.";
+      if (!formData.department || formData.department === "select") errors.department = "Department is required.";
+
       if (!Array.isArray(formData.courses) || formData.courses.length === 0) {
         errors.courses = "At least one course is required.";
       } else {
@@ -101,15 +95,14 @@ export const CreatePositionValidationProvider = ({ children }) => {
         });
       }
     }
-    console.log({ formData });
 
     return errors;
   }, []);
 
   // Stateful updater — stable identity
   const updateValidity = useCallback(
-    (formData, isNewSciField) => {
-      const errors = computeErrors(formData, isNewSciField);
+    (formData, mode) => {
+      const errors = computeErrors(formData, mode);
       setValidationErrors(errors);
       setIsValid(Object.keys(errors).length === 0);
       return errors;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import InputField from "./InputField";
 
-export default function RankingFilterModal({
+export default function FilterModal({
   open,
   onClose,
   filters,
@@ -9,6 +9,9 @@ export default function RankingFilterModal({
   options,
   isAdmin,
   onReset,
+  pointsLabel = "Εύρος Μορίων",
+  showStatus = true,
+  showPoints = true,
 }) {
   // Local state for multi-selects
   const [localFilters, setLocalFilters] = useState(filters);
@@ -55,39 +58,37 @@ export default function RankingFilterModal({
   const handleApply = () => {
     // sanitize points before applying
     const sanitized = { ...localFilters };
-    ["pointsMin", "pointsMax"].forEach((k) => {
-      if (sanitized[k] === "" || sanitized[k] === null || sanitized[k] === undefined) {
-        sanitized[k] = "";
-        return;
-      }
-      const n = Number(sanitized[k]);
-      if (Number.isNaN(n)) {
-        sanitized[k] = "";
-        return;
-      }
-      sanitized[k] = String(Math.max(0, Math.min(97, n)));
-    });
+    if (showPoints) {
+      ["pointsMin", "pointsMax"].forEach((k) => {
+        if (sanitized[k] === "" || sanitized[k] === null || sanitized[k] === undefined) {
+          sanitized[k] = "";
+          return;
+        }
+        const n = Number(sanitized[k]);
+        if (Number.isNaN(n)) {
+          sanitized[k] = "";
+          return;
+        }
+        sanitized[k] = String(Math.max(0, Math.min(97, n)));
+      });
+    }
     setFilters(sanitized);
     onClose();
   };
 
   const handleReset = () => {
-    setLocalFilters({
+    const baseReset = {
       schools: [],
       departments: [],
       scientificFields: [],
-      status: [],
-      pointsMin: "",
-      pointsMax: "",
-    });
-    setFilters({
-      schools: [],
-      departments: [],
-      scientificFields: [],
-      status: [],
-      pointsMin: "",
-      pointsMax: "",
-    });
+    };
+    const resetFilters = {
+      ...baseReset,
+      ...(showStatus ? { status: [] } : {}),
+      ...(showPoints ? { pointsMin: "", pointsMax: "" } : {}),
+    };
+    setLocalFilters(resetFilters);
+    setFilters(resetFilters);
     onReset?.();
     onClose();
   };
@@ -175,7 +176,7 @@ export default function RankingFilterModal({
             </div>
           </div>
           {/* Status (admin only) */}
-          {isAdmin && (
+          {showStatus && isAdmin && (
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
                 Κατάσταση Αιτήσεων
@@ -199,38 +200,40 @@ export default function RankingFilterModal({
             </div>
           )}
           {/* Points Range */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">
-              Εύρος Μορίων
-            </label>
-            <div className="flex gap-2 items-center">
-              <InputField
-                id="pointsMin"
-                name="pointsMin"
-                type="number"
-                min={0}
-                max={97}
-                value={localFilters.pointsMin}
-                onChange={(v) => handleInput("pointsMin", v)}
-                onBlur={() => handleInput("pointsMin", localFilters.pointsMin)}
-                className="w-24"
-                placeholder="Ελάχιστο"
-              />
-              <span className="mx-2 text-gray-500">-</span>
-              <InputField
-                id="pointsMax"
-                name="pointsMax"
-                type="number"
-                min={0}
-                max={97}
-                value={localFilters.pointsMax}
-                onChange={(v) => handleInput("pointsMax", v)}
-                onBlur={() => handleInput("pointsMax", localFilters.pointsMax)}
-                className="w-24"
-                placeholder="Μέγιστο"
-              />
+          {showPoints && (
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                {pointsLabel}
+              </label>
+              <div className="flex gap-2 items-center">
+                <InputField
+                  id="pointsMin"
+                  name="pointsMin"
+                  type="number"
+                  min={0}
+                  max={97}
+                  value={localFilters.pointsMin}
+                  onChange={(v) => handleInput("pointsMin", v)}
+                  onBlur={() => handleInput("pointsMin", localFilters.pointsMin)}
+                  className="w-24"
+                  placeholder="Ελάχιστο"
+                />
+                <span className="mx-2 text-gray-500">-</span>
+                <InputField
+                  id="pointsMax"
+                  name="pointsMax"
+                  type="number"
+                  min={0}
+                  max={97}
+                  value={localFilters.pointsMax}
+                  onChange={(v) => handleInput("pointsMax", v)}
+                  onBlur={() => handleInput("pointsMax", localFilters.pointsMax)}
+                  className="w-24"
+                  placeholder="Μέγιστο"
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
         <div className="flex justify-end gap-4 mt-6">
           <button

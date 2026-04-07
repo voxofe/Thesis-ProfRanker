@@ -7,13 +7,21 @@ import {
   useLocation,
 } from "react-router-dom";
 import Header from "./components/Header";
-import BackLink from "./components/BackLink";
-import HomePage from "./pages/HomePage";
-import Form from "./pages/Form";
-import ApplicantScorePage from "./pages/ApplicantScorePage";
-import RankingPage from "./pages/RankingPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Home from "./pages/Home";
+import BackLinkController from "./components/BackLinkController";
+import ApplicationForm from "./pages/ApplicationForm";
+import ApplicantScore from "./pages/ApplicantScore";
+import Ranking from "./pages/Ranking";
+import Positions from "./pages/Positions";
+import PositionsAll from "./pages/PositionsAll";
+import PositionsCreate from "./pages/PositionsCreate";
+import PositionsEdit from "./pages/PositionsEdit";
+import ScientificFields from "./pages/ScientificFields";
+import ScientificFieldsAll from "./pages/ScientificFieldsAll";
+import ScientificFieldsCreate from "./pages/ScientificFieldsCreate";
+import ScientificFieldsEdit from "./pages/ScientificFieldsEdit";
 import {
   FormDataProvider,
   AuthProvider,
@@ -21,7 +29,8 @@ import {
   ValidationProvider,
   PositionsProvider,
   PreviousLocationProvider,
-  CreatePositionValidationProvider
+  CreatePositionValidationProvider,
+  usePositions
 } from "./contexts";
 
 
@@ -44,8 +53,46 @@ export default function App() {
 function AppContent() {
   const academicYear = "2021-2022";
   const { isLoggedIn, currentUser, isLoading } = useAuth();
+  const { positions = [], loading: positionsLoading } = usePositions();
   const location = useLocation();
   const shouldShowBackLink = location.pathname !== "/" && location.pathname !== "/home" && location.pathname !== "/login" && location.pathname !== "/register";
+
+  const activePositions = React.useMemo(
+    () => (positions || []).filter((p) => p?.state === "active"),
+    [positions]
+  );
+
+  const parseDateTime = (isoDate, timeStr) => {
+    if (!isoDate) return null;
+    const [y, m, d] = isoDate.split("-").map(Number);
+    if (!y || !m || !d) return null;
+    const [hh, mm] = (timeStr || "23:59").split(":").map(Number);
+    return new Date(y, m - 1, d, hh || 0, mm || 0, 0, 0);
+  };
+
+  const applicantPosition = React.useMemo(() => {
+    const pid = currentUser?.form?.positionId;
+    if (!pid || positionsLoading) return null;
+    return activePositions.find((p) => String(p.id) === String(pid)) || null;
+  }, [currentUser, positionsLoading, activePositions]);
+
+  const applicantDeadline = React.useMemo(() => {
+    const endFromUser = currentUser?.form?.positionEndDate;
+    const endTimeFromUser = currentUser?.form?.positionEndTime;
+    if (endFromUser) return parseDateTime(endFromUser, endTimeFromUser);
+    if (applicantPosition?.endDate) return parseDateTime(applicantPosition.endDate, applicantPosition.endTime);
+    return null;
+  }, [currentUser, applicantPosition]);
+
+  const isApplicantDeadlinePassed = React.useMemo(() => {
+    if (!applicantDeadline) return false;
+    return applicantDeadline.getTime() < Date.now();
+  }, [applicantDeadline]);
+
+  const userRole = currentUser?.role;
+  const isGuestDisabled = userRole === "guest" && !positionsLoading && activePositions.length === 0;
+  const isApplicantDisabled = userRole === "applicant" && isApplicantDeadlinePassed;
+  const applicationDisabled = isGuestDisabled || isApplicantDisabled;
 
   // Show loading screen while authentication is being determined
   if (isLoading) {
@@ -71,7 +118,7 @@ function AppContent() {
         {/* Back link shown below header on non-home routes */}
         {shouldShowBackLink && (
           <div className="mt-4">
-            <BackLink />
+            <BackLinkController />
           </div>
         )}
         <div className="flex-1 pt-5">
@@ -79,10 +126,11 @@ function AppContent() {
             {isLoggedIn ? (
               <>
                 {/* Routes for logged-in users */}
-                <Route path="/home" element={<HomePage />} />
+                <Route path="/home" element={<Home />} />
                 <Route path="/" element={<Navigate to="/home" replace />} />
 
-                <Route path="/score/total" element={<RankingPage />} />
+                <Route path="/ranking" element={<Ranking />} />
+                <Route path="/score/total" element={<Navigate to="/ranking" replace />} />
 
 
                 {(currentUser?.role === "guest" ||
@@ -90,11 +138,15 @@ function AppContent() {
                   <Route
                     path="/form"
                     element={
-                      <FormDataProvider>
-                        <ValidationProvider>
-                          <Form academicYear={academicYear} />
-                        </ValidationProvider>
-                      </FormDataProvider>
+                      applicationDisabled ? (
+                        <Navigate to="/home" replace />
+                      ) : (
+                        <FormDataProvider>
+                          <ValidationProvider>
+                            <ApplicationForm academicYear={academicYear} />
+                          </ValidationProvider>
+                        </FormDataProvider>
+                      )
                     }
                   />
                 )}
@@ -102,16 +154,30 @@ function AppContent() {
                 {/* Applicant score route - accessible by applicants and admins */}
                 {(currentUser?.role === "applicant" ||
                   currentUser?.role === "admin") && (
-                  <Route path="/score/applicant/:id" element={<ApplicantScorePage />} />
+                  <>
+                    <Route path="/applicant-score/:id" element={<ApplicantScore />} />
+                    <Route path="/score/applicant/:id" element={<Navigate to="/applicant-score/:id" replace />} />
+                  </>
                 )}
 
                 {/* Admin-only routes */}
                 {currentUser?.role === "admin" && (
                   <>
                     <Route path="/register-admin" element={<Register isAdmin={true} />} />
-                    <Route path="/create-position" element={
+                    <Route path="/positions" element={<Positions />} />
+                    <Route path="/positions/all" element={<PositionsAll />} />
+                    <Route path="/positions/edit" element={<PositionsEdit />} />
+                    <Route path="/positions/create" element={
                       <React.Suspense fallback={<div>Φόρτωση...</div>}>
-                        {React.createElement(require("./pages/CreatePosition").default)}
+                        {React.createElement(require("./pages/PositionsCreate").default)}
+                      </React.Suspense>
+                    } />
+                    <Route path="/scientific-fields" element={<ScientificFields />} />
+                    <Route path="/scientific-fields/all" element={<ScientificFieldsAll />} />
+                    <Route path="/scientific-fields/edit" element={<ScientificFieldsEdit />} />
+                    <Route path="/scientific-fields/create" element={
+                      <React.Suspense fallback={<div>Φόρτωση...</div>}>
+                        {React.createElement(require("./pages/ScientificFieldsCreate").default)}
                       </React.Suspense>
                     } />
                   </>

@@ -14,7 +14,7 @@ const API_BASE_URL = (
   ""
 );
 
-export default function ApplicantScorePage() {
+export default function ApplicantScore() {
   const { currentUser } = useAuth();
   const { id } = useParams();
   const { positions = [] } = usePositions();
