@@ -67,6 +67,8 @@ export default function CreatePosition() {
     scientificField: "select",
     startDate: "",
     endDate: "",
+    startTime: "00:00",
+    endTime: "23:59",
     courses: [],
   });
 
@@ -94,7 +96,7 @@ export default function CreatePosition() {
   }, [formData, newSciFieldName, isNewSciField]);
 
   const inactivePositions = useMemo(
-    () => (positions || []).filter((p) => !p?.isActive),
+    () => (positions || []).filter((p) => p?.state === "completed"),
     [positions]
   );
 
@@ -204,6 +206,8 @@ export default function CreatePosition() {
       department: formData.department,
       startDate: formData.startDate,
       endDate: formData.endDate,
+      startTime: formData.startTime,
+      endTime: formData.endTime,
       courses: JSON.stringify(formData.courses || []),
     };
 
@@ -293,7 +297,7 @@ export default function CreatePosition() {
         <section>
           <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Βασικές Πληροφορίες</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className={`grid grid-cols-1 ${isNewSciField ? "md:grid-cols-2" : ""} gap-6`}>
             <PositionSelect
               positions={positionOptions}
               value={isNewSciField ? "__new__" : selectedPositionId}
@@ -378,6 +382,27 @@ export default function CreatePosition() {
               required
             />
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+            <InputField
+              label="Ώρα Έναρξης"
+              type="time"
+              value={formData.startTime}
+              onChange={(val) => setFormData({ ...formData, startTime: val })}
+              required
+            />
+            <InputField
+              label="Ώρα Λήξης"
+              type="time"
+              value={formData.endTime}
+              onChange={(val) => setFormData({ ...formData, endTime: val })}
+              required
+            />
+          </div>
+
+          {validationErrors?.dateTimeRange && (
+            <p className="mt-2 text-sm text-red-600">{validationErrors.dateTimeRange}</p>
+          )}
         </section>
 
         {/* SUBMIT */}

@@ -65,7 +65,7 @@ export default function Form({ academicYear }) {
     },
     {
       id: 5,
-      title: "Ακαδημαϊκές εργασίες",
+      title: "Ακαδημαϊκές Εργασίες",
       component: PapersSection,
     },
     {

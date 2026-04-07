@@ -29,6 +29,16 @@ export const CreatePositionValidationProvider = ({ children }) => {
     if (!formData.department || formData.department === "select") errors.department = "Department is required.";
     if (!formData.startDate) errors.startDate = "Start date is required.";
     if (!formData.endDate) errors.endDate = "End date is required.";
+    if (!formData.startTime) errors.startTime = "Start time is required.";
+    if (!formData.endTime) errors.endTime = "End time is required.";
+
+    if (formData.startDate && formData.endDate && formData.startTime && formData.endTime) {
+      const start = new Date(`${formData.startDate}T${formData.startTime}`);
+      const end = new Date(`${formData.endDate}T${formData.endTime}`);
+      if (!isNaN(start) && !isNaN(end) && end < start) {
+        errors.dateTimeRange = "Η ημερομηνία/ώρα λήξης δεν μπορεί να είναι πριν την ημερομηνία/ώρα έναρξης.";
+      }
+    }
 
     // Courses (only when creating a new scientific field)
     if (isNewSciField) {

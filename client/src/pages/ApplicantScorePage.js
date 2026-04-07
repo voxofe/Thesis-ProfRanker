@@ -76,6 +76,13 @@ export default function ApplicantScorePage() {
     return "—";
   };
 
+  const toDDMMYYYYHHMM = (dateStr, timeStr) => {
+    if (!dateStr) return "";
+    const base = toDDMMYYYY(dateStr);
+    if (!timeStr) return base;
+    return `${base} ${timeStr}`;
+  };
+
   const schoolName = applicantData?.school || matchedPosition?.school || "—";
   const departmentName = applicantData?.department || matchedPosition?.department || "—";
 
@@ -89,6 +96,8 @@ export default function ApplicantScorePage() {
   // Prefer server-formatted fields from views.py
   const startDate = applicantData?.positionStartDate || matchedPosition?.startDate || "";
   const endDate = applicantData?.positionEndDate || matchedPosition?.endDate || "";
+  const startTime = applicantData?.positionStartTime || matchedPosition?.startTime || "";
+  const endTime = applicantData?.positionEndTime || matchedPosition?.endTime || "";
   const submitDate =
     applicantData?.submitDate ||
     applicantData?.submittedAt ||
@@ -202,10 +211,10 @@ export default function ApplicantScorePage() {
                   {applicantData?.scientificField || "—"}
                 </td>
                 <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
-                  {toDDMMYYYY(startDate)}
+                  {toDDMMYYYYHHMM(startDate, startTime)}
                 </td>
                 <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
-                  {toDDMMYYYY(endDate)}
+                  {toDDMMYYYYHHMM(endDate, endTime)}
                 </td>
                 <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
                   {toDDMMYYYY(submitDate)}

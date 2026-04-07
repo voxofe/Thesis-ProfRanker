@@ -8,15 +8,7 @@ export default function HomePage() {
   const { positions = [], loading } = usePositions();
 
   const activePositions = useMemo(() => {
-    const today = new Date();
-    const todayYMD = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    return (positions || []).filter((p) => {
-      if (!p?.isActive) return false;
-      if (!p?.startDate) return false;
-      const s = new Date(p.startDate);
-      if (isNaN(s)) return false;
-      return s <= todayYMD;
-    });
+    return (positions || []).filter((p) => p?.state === "active");
   }, [positions]);
 
   // Memoize the formatter and the function
@@ -28,10 +20,12 @@ export default function HomePage() {
 
   const userRole = currentUser?.role;
 
-  const parseDateEndOfDay = (isoDate) => {
+  const parseDateTime = (isoDate, timeStr) => {
     if (!isoDate) return null;
     const [y, m, d] = isoDate.split("-").map(Number);
-    return new Date(y, m - 1, d, 23, 59, 59, 999); // avoid timezone off-by-one
+    if (!y || !m || !d) return null;
+    const [hh, mm] = (timeStr || "23:59").split(":").map(Number);
+    return new Date(y, m - 1, d, hh || 0, mm || 0, 0, 0);
   };
 
   // Applicant-specific: find their selected position by id (optional fallback)
@@ -44,8 +38,9 @@ export default function HomePage() {
   // Deadline taken from the applicant's own position, prefer backend value
   const applicantDeadline = useMemo(() => {
     const endFromUser = currentUser?.form?.positionEndDate;
-    if (endFromUser) return parseDateEndOfDay(endFromUser);
-    if (applicantPosition?.endDate) return parseDateEndOfDay(applicantPosition.endDate);
+    const endTimeFromUser = currentUser?.form?.positionEndTime;
+    if (endFromUser) return parseDateTime(endFromUser, endTimeFromUser);
+    if (applicantPosition?.endDate) return parseDateTime(applicantPosition.endDate, applicantPosition.endTime);
     return null;
   }, [currentUser, applicantPosition]);
 

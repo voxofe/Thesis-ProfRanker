@@ -8,6 +8,22 @@ export default function ScientificFieldSection() {
   const { formData, handleChange } = useFormData();
   const { positions, loading } = usePositions();
 
+  const formatDateTime = (dateStr, timeStr) => {
+    if (!dateStr) return "—";
+    const [y, m, d] = dateStr.split("-").map(Number);
+    if (!y || !m || !d) return dateStr;
+    const [hh, mm] = (timeStr || "").split(":").map(Number);
+    const dt = new Date(y, m - 1, d, hh || 0, mm || 0);
+    if (isNaN(dt)) return dateStr;
+    return new Intl.DateTimeFormat("el-GR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: timeStr ? "2-digit" : undefined,
+      minute: timeStr ? "2-digit" : undefined,
+    }).format(dt);
+  };
+
   const selectedPosition = useMemo(
     () => positions.find((p) => String(p.id) === String(formData.positionId)) || null,
     [positions, formData.positionId]
@@ -29,20 +45,12 @@ export default function ScientificFieldSection() {
 
   // Keep only active positions for the selector
   const activePositions = useMemo(() => {
-    const today = new Date();
-    const todayYMD = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    return (positions || []).filter((p) => {
-      if (!p?.isActive) return false;
-      if (!p?.startDate) return false;
-      const s = new Date(p.startDate);
-      if (isNaN(s)) return false;
-      return s <= todayYMD;
-    });
+    return (positions || []).filter((p) => p?.state === "active");
   }, [positions]);
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-8 h-auto mb-2">
+      <div className="grid grid-cols-1 gap-8 h-auto mb-0">
         <PositionSelect
           positions={activePositions}
           value={formData.positionId}
@@ -55,6 +63,21 @@ export default function ScientificFieldSection() {
       </div>
 
       {/* Optional chips summary ... */}
+
+      <div className="mb-4 rounded-lg border border-patras-albescentWhite/60 bg-patras-albescentWhite/30 px-4 py-3 text-sm text-patras-buccaneer">
+        <div className="flex items-center gap-2">
+          <span>Έναρξη Αιτήσεων Θέσης:</span>
+          <span className="font-semibold">
+            {formatDateTime(selectedPosition?.startDate, selectedPosition?.startTime)}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <span>Λήξη Αιτήσεων Θέσης:</span>
+          <span className="font-semibold">
+            {formatDateTime(selectedPosition?.endDate, selectedPosition?.endTime)}
+          </span>
+        </div>
+      </div>
 
       <label className="block text-sm font-medium mb-1">
         Μαθήματα Επιστημονικού Πεδίου:{" "}
