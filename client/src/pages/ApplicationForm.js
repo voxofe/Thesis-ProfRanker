@@ -239,7 +239,9 @@ export default function Form({ academicYear }) {
           {notification.message}
         </div>
       )}
-
+      <h1 className="text-2xl text-center border-b pb-2 mb-8 text-gray-700">
+        Αίτηση υποψηφιότητας 
+      </h1>
       <Stepper
         steps={steps}
         currentStep={currentStep}

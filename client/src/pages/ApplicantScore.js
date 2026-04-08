@@ -3,7 +3,7 @@ import axios from "axios";
 import PapersDrawer from "../components/PapersDrawer";
 import CoursesDrawer from "../components/CoursesDrawer";
 import { useAuth } from "../contexts/AuthContext";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { usePositions } from "../contexts/PositionsContext";
 
 const API_BASE_URL = (
@@ -20,6 +20,7 @@ export default function ApplicantScore() {
   const { positions = [] } = usePositions();
   const [applicantData, setApplicantData] = useState();
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("application");
 
   // const fmtDate = (d) => {
   //   if (!d) return "";
@@ -115,204 +116,289 @@ export default function ApplicantScore() {
     );
   }
 
+  const documentItems = [
+    { key: "cv", label: "Βιογραφικό", value: applicantData?.documents?.cv },
+    { key: "phd", label: "Διδακτορικός τίτλος", value: applicantData?.documents?.phd },
+    { key: "doatap", label: "ΔΟΑΤΑΠ", value: applicantData?.documents?.doatap },
+    { key: "coursePlan", label: "Σχεδιάγραμμα διδασκαλίας", value: applicantData?.documents?.coursePlan },
+    { key: "military", label: "Στρατιωτικές υποχρεώσεις", value: applicantData?.documents?.military },
+  ];
+
   return (
     <div className="grid grid-cols-1 gap-y-5 pt-5">
-      <h1 className="text-2xl text-center border-b pb-2 text-gray-700">
-        Αποτελέσματα αίτησης υποψηφίου
+      {/* <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b pb-2">
+        <h1 className="text-2xl text-gray-700">Η αίτηση μου</h1>
+        <Link
+          to="/form"
+          className="inline-flex items-center justify-center bg-patras-buccaneer text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors"
+        >
+          Επεξεργασία αίτησης
+        </Link>
+      </div> */}
+      <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-700">
+        Η αίτησή μου & η βαθμολογία μου
       </h1>
-
-      {/* Applicant Info Section */}
-      <div>
-        <h1 className="text-xl font-light mb-3">Στοιχεία υποψηφίου</h1>
-        <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
-          <table className="min-w-full bg-white/25">
-            <thead className="bg-patras-buccaneer">
-              <tr>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Όνομα
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Επώνυμο
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Διδακτορικός τίτλος
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Ημερομηνία λήψης διδακτορικού τίτλου
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider">
-                  Mεταδιδακτορική εργασιακή εμπειρία
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
-                  {applicantData?.firstName}
-                </td>
-                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
-                  {applicantData?.lastName}
-                </td>
-                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
-                  {applicantData?.phdTitle}
-                </td>
-                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
-                  {toDDMMYYYY(applicantData?.phdAcquisitionDate)}
-                </td>
-                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle">
-                  {applicantData?.workExperience
-                    ? `${applicantData?.workExperience} ${
-                        applicantData?.workExperience === 1
-                          ? "χρόνος"
-                          : "χρόνια"
-                      }`
-                    : "Καμία"}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* Position Info Section */}
-        <h1 className="text-xl font-light mb-3">Στοιχεία θέσης</h1>
-        <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
-          <table className="min-w-full bg-white/25">
-            <thead className="bg-patras-buccaneer">
-              <tr>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Σχολή
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Τμήμα
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Επιστημονικό πεδίο
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Έναρξη αιτήσεων
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Λήξη αιτήσεων
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Υποβολή αίτησης
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider">
-                  Μαθήματα
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
-                  {schoolName}
-                </td>
-                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
-                  {departmentName}
-                </td>
-                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
-                  {applicantData?.scientificField || "—"}
-                </td>
-                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
-                  {toDDMMYYYYHHMM(startDate, startTime)}
-                </td>
-                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
-                  {toDDMMYYYYHHMM(endDate, endTime)}
-                </td>
-                <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
-                  {toDDMMYYYYHHMM(submitDate)}
-                </td>
-                <td className="px-6 py-4 text-center align-middle">
-                  <CoursesDrawer
-                    courses={courses}
-                    scientificField={applicantData?.scientificField || matchedPosition?.scientificField}
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* Scores Section */}
-        <h1 className="text-xl font-light mb-3">Βαθμολόγηση υποψηφίου</h1>
-        <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50">
-          <table className="min-w-full bg-white/50">
-            <thead className="bg-patras-buccaneer">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">
-                  Κριτήριο
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">
-                  Βαθμολόγηση
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-patras-cameo">
-              <tr className="">
-                <td className="px-6 py-4 text-patras-buccaneer">
-                  Συνάφεια σχεδιαγράμματος διδασκαλίας και καινοτόμων
-                  μεθοδολογιών/θεωριών & βιβλιογραφίας με την περιγραφή του
-                  συνόλου των μαθημάτων του Επιστημονικού Πεδίου
-                </td>
-                <td className="px-6 py-4 text-center text-patras-buccaneer">
-                  {applicantData?.coursePlanRelevancePoints}
-                </td>
-              </tr>
-              <tr className="">
-                <td className="px-6 py-4 text-patras-buccaneer">
-                  Δομή, οργάνωση, κατανομή ύλης
-                </td>
-                <td className="px-6 py-4 text-center text-patras-buccaneer">
-                  {applicantData?.courseMaterialStructurePoints}
-                </td>
-              </tr>
-              <tr className="">
-                <td className="px-6 py-4 text-patras-buccaneer">
-                  Συνάφεια διδακτορικής διατριβής/δημοσιευμένου έργου με το
-                  επιστημονικό πεδίο
-                </td>
-                <td className="px-6 py-4 text-center text-patras-buccaneer">
-                  {applicantData?.thesisRelevancePoints}
-                </td>
-              </tr>
-              <tr className="">
-                <PapersDrawer papers={applicantData?.papers || []} />
-                <td className="px-6 py-4 text-center text-patras-buccaneer">
-                  {applicantData?.paperPoints}
-                </td>
-              </tr>
-              <tr className="">
-                <td className="px-6 py-4 text-patras-buccaneer">
-                  Μεταδιδακτορική εργασιακή εμπειρία
-                </td>
-                <td className="px-6 py-4 text-center text-patras-buccaneer">
-                  {applicantData?.workExperiencePoints}
-                </td>
-              </tr>
-              <tr className="">
-                <td className="px-6 py-4 text-patras-buccaneer">
-                  Προσαύξηση κατά 20% επί της συνολικής βαθμολογίας της
-                  υποψηφιότητας, εφόσον ο υποψήφιος δεν έχει επιλεγεί σε άλλο
-                  πρόγραμμα Απόκτησης Ακαδημαϊκής Διδακτικής Εμπειρίας, στο
-                  πλαίσιο των προηγούμενων προσκλήσεων ΕΔΒΜ 20 (ακαδ. έτος
-                  2016‐2017), ΕΔΒΜ 45 (ακαδ. έτος 2017‐2018), ΕΔΒΜ 82 (ακαδ.
-                  έτος 2018‐2019), καθώς και της ΕΔΒΜ 96 (ακαδ. έτη 2019‐2020
-                  και 2020‐2021) του ΕΠ ΑΝΑΔ ΕΔΒΜ 2014‐2020
-                </td>
-                <td className="px-6 py-4 text-center text-patras-buccaneer">
-                  {applicantData?.notPastProgramPoints}
-                </td>
-              </tr>
-              <tr className="bg-patras-buccaneer font-semibold bg-wh">
-                <td className="px-6 py-4 text-white">Συνολικά μόρια</td>
-                <td className="px-6 py-4 text-center text-white">
-                  {applicantData?.totalPoints}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <div className="flex items-center justify-center">
+        <div className="inline-flex rounded-full border border-patras-buccaneer/40 bg-white">
+          <button
+            type="button"
+            onClick={() => setActiveTab("application")}
+            className={`px-5 py-2 text-sm font-semibold rounded-full transition-colors ${
+              activeTab === "application"
+                ? "bg-patras-buccaneer text-white"
+                : "text-patras-buccaneer hover:bg-patras-albescentWhite"
+            }`}
+          >
+            Αίτηση
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("score")}
+            className={`px-5 py-2 text-sm font-semibold rounded-full transition-colors ${
+              activeTab === "score"
+                ? "bg-patras-buccaneer text-white"
+                : "text-patras-buccaneer hover:bg-patras-albescentWhite"
+            }`}
+          >
+            Βαθμολογία
+          </button>
         </div>
       </div>
+
+      {activeTab === "application" ? (
+        <div>
+          <h1 className="text-xl font-light mb-3">Στοιχεία υποψηφίου</h1>
+          <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
+            <table className="min-w-full bg-white/25">
+              <thead className="bg-patras-buccaneer">
+                <tr>
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                    Όνομα
+                  </th>
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                    Επώνυμο
+                  </th>
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                    Διδακτορικός τίτλος
+                  </th>
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                    Ημερομηνία λήψης διδακτορικού τίτλου
+                  </th>
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider">
+                    Mεταδιδακτορική εργασιακή εμπειρία
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                    {applicantData?.firstName}
+                  </td>
+                  <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                    {applicantData?.lastName}
+                  </td>
+                  <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                    {applicantData?.phdTitle}
+                  </td>
+                  <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                    {toDDMMYYYY(applicantData?.phdAcquisitionDate)}
+                  </td>
+                  <td className="px-6 py-4 text-patras-buccaneer text-center align-middle">
+                    {applicantData?.workExperience
+                      ? `${applicantData?.workExperience} ${
+                          applicantData?.workExperience === 1
+                            ? "χρόνος"
+                            : "χρόνια"
+                        }`
+                      : "Καμία"}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+            <h1 className="text-xl font-light mb-3">Στοιχεία θέσης</h1>
+            <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
+              <table className="min-w-full bg-white/25">
+                <thead className="bg-patras-buccaneer">
+                  <tr>
+                    <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                      Σχολή
+                    </th>
+                    <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                      Τμήμα
+                    </th>
+                    <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                      Επιστημονικό πεδίο
+                    </th>
+                    <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                      Έναρξη αιτήσεων
+                    </th>
+                    <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                      Λήξη αιτήσεων
+                    </th>
+                    <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                      Υποβολή αίτησης
+                    </th>
+                    <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider">
+                      Μαθήματα
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                      {schoolName}
+                    </td>
+                    <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                      {departmentName}
+                    </td>
+                    <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                      {applicantData?.scientificField || "—"}
+                    </td>
+                    <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                      {toDDMMYYYYHHMM(startDate, startTime)}
+                    </td>
+                    <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                      {toDDMMYYYYHHMM(endDate, endTime)}
+                    </td>
+                    <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                      {toDDMMYYYYHHMM(submitDate)}
+                    </td>
+                    <td className="px-6 py-4 text-center align-middle">
+                      <CoursesDrawer
+                        courses={courses}
+                        scientificField={applicantData?.scientificField || matchedPosition?.scientificField}
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h1 className="text-xl font-light mb-3">Υποβληθέντα δικαιολογητικά</h1>
+            <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
+              <table className="min-w-full bg-white/25">
+                <thead className="bg-patras-buccaneer">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                      Έγγραφο
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                      Αρχείο
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-patras-cameo">
+                  {documentItems.map((doc) => (
+                    <tr key={doc.key}>
+                      <td className="px-6 py-4 text-patras-buccaneer border-r border-patras-albescentWhite">
+                        {doc.label}
+                      </td>
+                      <td className="px-6 py-4 text-patras-buccaneer">
+                        {doc.value?.url ? (
+                          <a
+                            href={doc.value.url}
+                            className="underline text-patras-buccaneer hover:text-patras-sanguineBrown"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {doc.value?.name || "Λήψη αρχείου"}
+                          </a>
+                        ) : (
+                          "Δεν έχει υποβληθεί"
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+                ) : (
+                  <div>
+                    <h1 className="text-xl font-light pb-6"> </h1>
+                    <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50">
+                      <table className="min-w-full bg-white/50">
+                        <thead className="bg-patras-buccaneer">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                              Κριτήριο
+                            </th>
+                            <th className="px-6 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                              Βαθμολόγηση
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-patras-cameo">
+                          <tr className="">
+                            <td className="px-6 py-4 text-patras-buccaneer">
+                              Συνάφεια σχεδιαγράμματος διδασκαλίας και καινοτόμων
+                              μεθοδολογιών/θεωριών & βιβλιογραφίας με την περιγραφή του
+                              συνόλου των μαθημάτων του Επιστημονικού Πεδίου
+                            </td>
+                            <td className="px-6 py-4 text-center text-patras-buccaneer">
+                              {applicantData?.coursePlanRelevancePoints}
+                            </td>
+                          </tr>
+                          <tr className="">
+                            <td className="px-6 py-4 text-patras-buccaneer">
+                              Δομή, οργάνωση, κατανομή ύλης
+                            </td>
+                            <td className="px-6 py-4 text-center text-patras-buccaneer">
+                              {applicantData?.courseMaterialStructurePoints}
+                            </td>
+                          </tr>
+                          <tr className="">
+                            <td className="px-6 py-4 text-patras-buccaneer">
+                              Συνάφεια διδακτορικής διατριβής/δημοσιευμένου έργου με το
+                              επιστημονικό πεδίο
+                            </td>
+                            <td className="px-6 py-4 text-center text-patras-buccaneer">
+                              {applicantData?.thesisRelevancePoints}
+                            </td>
+                          </tr>
+                          <tr className="">
+                            <td className="px-6 py-4 text-patras-buccaneer">
+                              <PapersDrawer papers={applicantData?.papers || []} />
+                            </td>
+                            <td className="px-6 py-4 text-center text-patras-buccaneer">
+                              {applicantData?.paperPoints}
+                            </td>
+                          </tr>
+                          <tr className="">
+                            <td className="px-6 py-4 text-patras-buccaneer">
+                              Μεταδιδακτορική εργασιακή εμπειρία
+                            </td>
+                            <td className="px-6 py-4 text-center text-patras-buccaneer">
+                              {applicantData?.workExperiencePoints}
+                            </td>
+                          </tr>
+                          <tr className="">
+                            <td className="px-6 py-4 text-patras-buccaneer">
+                              Προσαύξηση κατά 20% επί της συνολικής βαθμολογίας της
+                              υποψηφιότητας, εφόσον ο υποψήφιος δεν έχει επιλεγεί σε άλλο
+                              πρόγραμμα Απόκτησης Ακαδημαϊκής Διδακτικής Εμπειρίας, στο
+                              πλαίσιο των προηγούμενων προσκλήσεων ΕΔΒΜ 20 (ακαδ. έτος
+                              2016‐2017), ΕΔΒΜ 45 (ακαδ. έτος 2017‐2018), ΕΔΒΜ 82 (ακαδ.
+                              έτος 2018‐2019), καθώς και της ΕΔΒΜ 96 (ακαδ. έτη 2019‐2020
+                              και 2020‐2021) του ΕΠ ΑΝΑΔ ΕΔΒΜ 2014‐2020
+                            </td>
+                            <td className="px-6 py-4 text-center text-patras-buccaneer">
+                              {applicantData?.notPastProgramPoints}
+                            </td>
+                          </tr>
+                          <tr className="bg-patras-buccaneer font-semibold bg-wh">
+                            <td className="px-6 py-4 text-white">Συνολικά μόρια</td>
+                            <td className="px-6 py-4 text-center text-white">
+                              {applicantData?.totalPoints}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
     </div>
   );
 }

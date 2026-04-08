@@ -48,7 +48,7 @@ export default function PapersDrawer({ papers }) {
     <div>
       {/* Drawer Header */}
       <div
-        className="flex items-center justify-between px-6 py-4 cursor-pointer bg-patras-[#fffbf6]"
+        className="flex items-center justify-between px-0 py-4 cursor-pointer bg-patras-[#fffbf6]"
         onClick={toggleDrawer}
       >
         <span className="flex items-center text-patras-buccaneer">
@@ -61,7 +61,7 @@ export default function PapersDrawer({ papers }) {
 
       {/* Drawer Content */}
       {isOpen && (
-        <div className="overflow-x-auto px-6 pb-4">
+        <div className="overflow-x-auto px-0 pb-4">
           <table className="min-w-full bg-[#fffbf6] border border-patras-cameo rounded-lg shadow-md">
             <thead className="bg-patras-buccaneer">
               <tr>

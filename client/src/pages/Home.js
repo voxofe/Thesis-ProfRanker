@@ -188,7 +188,7 @@ export default function Home() {
           <HomePagePanel
             title={
               userRole === "applicant"
-                ? "Η αίτησή μου"
+                ? "Επεξεργασία αίτησης"
                 : "Υποβολή αίτησης"
             }
             description={applicationDescription}
@@ -212,9 +212,9 @@ export default function Home() {
           />
 
           <HomePagePanel
-            title="Η βαθμολογία μου"
-            description="Δείτε τη βαθμολογία σας μετά από την αξιολόγηση της αίτησής σας."
-            buttonText="Η βαθμολογία μου"
+            title="Η αίτησή μου & η βαθμολογία μου"
+            description="Δείτε την υποβληθείσα αίτησή σας, τα δικαιολογητικά και τη βαθμολογία σας."
+            buttonText="Προβολή αίτησης"
             to={userRole === "applicant" ? `/applicant-score/${currentUser.id}` : undefined}
             buttonDisabled={userRole === "guest"}
             colorClass={
