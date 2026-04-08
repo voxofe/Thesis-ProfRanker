@@ -100,12 +100,13 @@ export const AuthProvider = ({ children }) => {
    * @param {string} lastName
    * @param {string} email
    * @param {string} password
+   * @param {string} gender
    */
-  const register = async (firstName, lastName, email, password) => {
+  const register = async (firstName, lastName, email, password, gender) => {
     return axios({
       method: "POST",
       url: `${API_BASE_URL}/api/user/register`,
-      data: { firstName, lastName, email, password },
+      data: { firstName, lastName, email, password, gender },
     })
       .then((response) => {
         // Return success response - navigation will be handled by the calling component

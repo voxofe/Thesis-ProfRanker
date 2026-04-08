@@ -55,7 +55,7 @@ export default function ScientificFieldSection() {
           positions={activePositions}
           value={formData.positionId}
           onChange={(posId) => handleChange("positionId", posId)}
-          label="Θέση ( Σχολή - Τμήμα - Επιστημονικό Πεδίο )"
+          label="Θέση ( Σχολή - Τμήμα - Επιστημονικό πεδίο )"
           disabled={loading || activePositions.length === 0}
           maxResults={50}
           required={true}
@@ -66,13 +66,13 @@ export default function ScientificFieldSection() {
 
       <div className="mb-4 rounded-lg border border-patras-albescentWhite/60 bg-patras-albescentWhite/30 px-4 py-3 text-sm text-patras-buccaneer">
         <div className="flex items-center gap-2">
-          <span>Έναρξη Αιτήσεων Θέσης:</span>
+          <span>Έναρξη αιτήσεων θέσης:</span>
           <span className="font-semibold">
             {formatDateTime(selectedPosition?.startDate, selectedPosition?.startTime)}
           </span>
         </div>
         <div className="flex items-center gap-2 mt-1">
-          <span>Λήξη Αιτήσεων Θέσης:</span>
+          <span>Λήξη αιτήσεων θέσης:</span>
           <span className="font-semibold">
             {formatDateTime(selectedPosition?.endDate, selectedPosition?.endTime)}
           </span>
@@ -80,7 +80,7 @@ export default function ScientificFieldSection() {
       </div>
 
       <label className="block text-sm font-medium mb-1">
-        Μαθήματα Επιστημονικού Πεδίου:{" "}
+        Μαθήματα Επιστημονικού πεδίου:{" "}
         <span className="text-patras-buccaneer">
           {selectedPosition?.scientificField ?? ""}
         </span>
@@ -94,7 +94,7 @@ export default function ScientificFieldSection() {
               <th className="px-2 py-2 border">Όνομα</th>
               <th className="px-2 py-2 border">Περιγραφή</th>
               <th className="px-2 py-2 border">Εξάμηνο</th>
-              <th className="px-2 py-2 border">Διδακτικές Μονάδες</th>
+              <th className="px-2 py-2 border">Διδακτικές μονάδες</th>
               <th className="px-2 py-2 border">ECTS</th>
               <th className="px-2 py-2 border">Θεωρία (Ώρες)</th>
               <th className="px-2 py-2 border">Εργαστήριο (Ώρες)</th>

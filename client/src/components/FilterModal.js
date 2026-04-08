@@ -9,9 +9,11 @@ export default function FilterModal({
   options,
   isAdmin,
   onReset,
-  pointsLabel = "Εύρος Μορίων",
+  pointsLabel = "Εύρος μορίων",
   showStatus = true,
   showPoints = true,
+  title = "Φίλτρα",
+  titleClassName = "text-gray-900",
 }) {
   // Local state for multi-selects
   const [localFilters, setLocalFilters] = useState(filters);
@@ -105,8 +107,8 @@ export default function FilterModal({
         >
           &times;
         </button>
-        <h2 className="text-lg font-semibold text-patras-buccaneer mb-4">
-          Φίλτρα Κατάταξης
+        <h2 className={`text-lg font-semibold mb-4 ${titleClassName}`.trim()}>
+          {title}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* School */}
@@ -156,7 +158,7 @@ export default function FilterModal({
           {/* Scientific Field */}
           <div>
             <label className="block text-sm font-medium mb-1 text-gray-700">
-              Επιστημονικό Πεδίο
+              Επιστημονικό πεδίο
             </label>
             <div className="flex flex-wrap gap-2">
               {options.scientificFields.map((sf) => (
@@ -179,7 +181,7 @@ export default function FilterModal({
           {showStatus && isAdmin && (
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Κατάσταση Αιτήσεων
+                Κατάσταση αιτήσεων
               </label>
               <div className="flex flex-wrap gap-2">
                 {options.statuses.map((status) => (

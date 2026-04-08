@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAuth, usePositions, useCreatePositionValidation } from "../contexts";
 import InputField from "../components/InputField";
 import CoursePanel from "../components/CoursePanel";
 import FlowbiteDateField from "../components/FlowbiteDateField";
-import Tooltip from "../components/Tooltip";
 import PositionSelect from "../components/PositionSelect";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -24,6 +23,7 @@ export default function CreatePosition() {
   const { updateValidity, isValid, validationErrors } = useCreatePositionValidation();
 
   const prefillPosition = location.state?.prefillPosition || null;
+  const isEditMode = Boolean(prefillPosition);
 
   const todayISO = () => new Date().toISOString().split("T")[0];
 
@@ -62,6 +62,7 @@ export default function CreatePosition() {
   };
 
   const [formData, setFormData] = useState(() => ({
+    positionId: prefillPosition?.id || "",
     scientificFieldId: prefillPosition?.scientificFieldId || "",
     startDate: normalizeDateValue(prefillPosition?.startDate),
     endDate: normalizeDateValue(prefillPosition?.endDate),
@@ -74,8 +75,15 @@ export default function CreatePosition() {
   const [notification, setNotification] = useState({ message: "", type: "" });
   const [submitting, setSubmitting] = useState(false);
   const [redirectLoading, setRedirectLoading] = useState(false);
-  const submitButtonRef = useRef(null);
-  const [openSubmitTip, setOpenSubmitTip] = useState(false);
+  const [touched, setTouched] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [dateCleared, setDateCleared] = useState({ startDate: false, endDate: false });
+
+  const markTouched = (field) =>
+    setTouched((prev) => ({ ...prev, [field]: true }));
+
+  const showError = (field) => submitted || touched[field];
+  const showDateTimeError = submitted || touched.startTime || touched.endTime;
 
   // access control
   useEffect(() => {
@@ -93,11 +101,12 @@ export default function CreatePosition() {
     axios({
       method: "GET",
       url: `${API_BASE_URL}/api/scientific-fields`,
+      params: prefillPosition ? undefined : { availableForPosition: "true" },
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((response) => setScientificFields(response.data || []))
       .catch(() => setScientificFields([]));
-  }, []);
+  }, [prefillPosition]);
 
   const scientificFieldOptions = useMemo(() => {
     return (scientificFields || []).map((sf) => ({
@@ -113,6 +122,7 @@ export default function CreatePosition() {
   }, [scientificFields]);
 
   const handleScientificFieldSelect = (val) => {
+    markTouched("scientificFieldId");
     if (!val) {
       setSelectedScientificField(null);
       setFormData((prev) => ({
@@ -135,11 +145,13 @@ export default function CreatePosition() {
     if (prefillPosition.scientificFieldId) {
       setFormData((prev) => ({
         ...prev,
+        positionId: prefillPosition.id || prev.positionId,
         scientificFieldId: String(prefillPosition.scientificFieldId),
       }));
     }
     setFormData((prev) => ({
       ...prev,
+      positionId: prefillPosition.id || prev.positionId,
       startDate: normalizeDateValue(prefillPosition.startDate) || prev.startDate,
       endDate: normalizeDateValue(prefillPosition.endDate) || prev.endDate,
       startTime: prefillPosition.startTime || prev.startTime,
@@ -163,6 +175,7 @@ export default function CreatePosition() {
   // submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitted(true);
     const errors = updateValidity(formData, "position");
     if (Object.keys(errors).length > 0) return;
 
@@ -170,6 +183,7 @@ export default function CreatePosition() {
     setNotification({ message: "", type: "" });
 
     const payload = {
+      positionId: formData.positionId || undefined,
       scientificFieldId: formData.scientificFieldId,
       startDate: formData.startDate,
       endDate: formData.endDate,
@@ -186,7 +200,7 @@ export default function CreatePosition() {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
-      setNotification({ message: "Η θέση δημιουργήθηκε με επιτυχία!", type: "success" });
+      setNotification({ message: isEditMode ? "Η θέση ενημερώθηκε με επιτυχία!" : "Η θέση δημιουργήθηκε με επιτυχία!", type: "success" });
       setSubmitting(false);
       if (refreshPositions) {
         await refreshPositions();
@@ -249,13 +263,15 @@ export default function CreatePosition() {
         </div>
       )}
       <header className="text-center">
-        <h1 className="text-3xl font-semibold text-gray-800">Δημιουργία Θέσης</h1>
-        <p className="text-gray-500 mt-1 text-sm">Ορίστε τα στοιχεία της νέας θέσης και την χρονική περίδο των αιτήσεων της.</p>
+        <h1 className="text-3xl font-semibold text-gray-800">
+          {isEditMode ? "Ενημέρωση Θέσης" : "Δημιουργία θέσης"}
+        </h1>
+        <p className="text-gray-500 mt-1 text-sm">
+          {isEditMode
+            ? "Ενημερώστε τα στοιχεία της θέσης και την χρονική περίδο των αιτήσεων της."
+            : "Ορίστε τα στοιχεία της νέας θέσης και την χρονική περίδο των αιτήσεων της."}
+        </p>
       </header>
-
-      <p className="text-sm text-gray-600 -mt-2 mb-2">
-        <span className="text-red-600">*</span> Τα πεδία με αστερίσκο είναι υποχρεωτικά
-      </p>
 
       <form
         onSubmit={handleSubmit}
@@ -263,17 +279,17 @@ export default function CreatePosition() {
       >
         {/* BASIC INFO */}
         <section>
-          <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Βασικές Πληροφορίες</h2>
+          <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Βασικές πληροφορίες</h2>
 
           <div className="grid grid-cols-1 gap-6">
             <PositionSelect
               positions={scientificFieldOptions}
               value={formData.scientificFieldId}
               onChange={handleScientificFieldSelect}
-              label="Επιστημονικό Πεδίο"
+              label="Επιστημονικό πεδίο"
               placeholder="Αναζήτηστε με σχολή, τμήμα ή επιστημονικό πεδίο..."
               maxResults={50}
-              error={validationErrors.scientificFieldId}
+              error={showError("scientificFieldId") ? validationErrors.scientificFieldId : ""}
               required
             />
           </div>
@@ -313,74 +329,87 @@ export default function CreatePosition() {
         <section>
           <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Ημερομηνίες</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FlowbiteDateField
-              label="Ημερομηνία Έναρξης"
-              value={formData.startDate}
-              onChange={(val) => setFormData({ ...formData, startDate: val })}
-              minDate={todayISO()}
-              maxDate={formData.endDate || undefined}
-              popupAlign="right"
-              required
-            />
-            <FlowbiteDateField
-              label="Ημερομηνία Λήξης"
-              value={formData.endDate}
-              onChange={(val) => setFormData({ ...formData, endDate: val })}
-              minDate={formData.startDate || todayISO()}
-              popupAlign="right"
-              required
-            />
+            <div>
+              <FlowbiteDateField
+                label="Ημερομηνία έναρξης"
+                value={formData.startDate}
+                onChange={(val) => {
+                  setFormData({ ...formData, startDate: val });
+                  if (val) {
+                    setDateCleared((prev) => ({ ...prev, startDate: false }));
+                  }
+                }}
+                onClear={() => setDateCleared((prev) => ({ ...prev, startDate: true }))}
+                minDate={todayISO()}
+                maxDate={formData.endDate || undefined}
+                popupAlign="right"
+                required
+              />
+              {dateCleared.startDate && validationErrors.startDate && (
+                <p className="-mt-3 text-sm text-red-600">{validationErrors.startDate}</p>
+              )}
+            </div>
+            <div>
+              <FlowbiteDateField
+                label="Ημερομηνία λήξης"
+                value={formData.endDate}
+                onChange={(val) => {
+                  setFormData({ ...formData, endDate: val });
+                  if (val) {
+                    setDateCleared((prev) => ({ ...prev, endDate: false }));
+                  }
+                }}
+                onClear={() => setDateCleared((prev) => ({ ...prev, endDate: true }))}
+                minDate={formData.startDate || todayISO()}
+                popupAlign="right"
+                required
+              />
+              {dateCleared.endDate && validationErrors.endDate && (
+                <p className="-mt-3 text-sm text-red-600">{validationErrors.endDate}</p>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
             <InputField
-              label="Ώρα Έναρξης"
+              label="Ώρα έναρξης"
               type="time"
               value={formData.startTime}
-              onChange={(val) => setFormData({ ...formData, startTime: val })}
+              onChange={(val) => {
+                markTouched("startTime");
+                setFormData({ ...formData, startTime: val });
+              }}
+              error={showError("startTime") ? validationErrors.startTime : ""}
               required
             />
             <InputField
-              label="Ώρα Λήξης"
+              label="Ώρα λήξης"
               type="time"
               value={formData.endTime}
-              onChange={(val) => setFormData({ ...formData, endTime: val })}
+              onChange={(val) => {
+                markTouched("endTime");
+                setFormData({ ...formData, endTime: val });
+              }}
+              error={showError("endTime") ? validationErrors.endTime : ""}
               required
             />
           </div>
 
-          {validationErrors?.dateTimeRange && (
+          {showDateTimeError && validationErrors?.dateTimeRange && (
             <p className="mt-2 text-sm text-red-600">{validationErrors.dateTimeRange}</p>
           )}
         </section>
 
         {/* SUBMIT */}
         <div className="pt-6 border-t text-right">
-          <span
-            className="inline-block"
-            ref={submitButtonRef}
-            onMouseEnter={() => submitDisabled && setOpenSubmitTip(true)}
-            onMouseLeave={() => setOpenSubmitTip(false)}
-            onFocus={() => submitDisabled && setOpenSubmitTip(true)}
-            onBlur={() => setOpenSubmitTip(false)}
+          <button
+            type="submit"
+            disabled={submitDisabled}
+            aria-disabled={submitDisabled}
+            className="px-6 py-2 bg-patras-buccaneer text-white font-medium rounded-lg hover:bg-patras-sanguineBrown transition disabled:opacity-60"
           >
-            <button
-              type="submit"
-              disabled={submitDisabled}
-              aria-disabled={submitDisabled}
-              className="px-6 py-2 bg-patras-buccaneer text-white font-medium rounded-lg hover:bg-patras-sanguineBrown transition disabled:opacity-60"
-            >
-              {submitting ? "Δημιουργία..." : "Δημιουργία Θέσης"}
-            </button>
-            <Tooltip
-              anchorRef={submitButtonRef}
-              open={openSubmitTip && submitDisabled}
-              placement="top-left"
-              className="bg-white border border-patras-buccaneer text-patras-buccaneer text-xs px-2 py-1 rounded-lg shadow-lg whitespace-nowrap min-w-max"
-            >
-              Συμπληρώστε όλα τα υποχρεωτικά πεδία για να συνεχίσετε
-            </Tooltip>
-          </span>
+            {submitting ? (isEditMode ? "Ενημέρωση..." : "Δημιουργία...") : (isEditMode ? "Ενημέρωση Θέσης" : "Δημιουργία θέσης")}
+          </button>
 
           {notification.message && (
             <p

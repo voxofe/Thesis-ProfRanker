@@ -14,11 +14,11 @@ export const CreatePositionValidationProvider = ({ children }) => {
     const errors = {};
 
     if (mode === "position") {
-      if (!formData.scientificFieldId) errors.scientificFieldId = "Scientific field is required.";
-      if (!formData.startDate) errors.startDate = "Start date is required.";
-      if (!formData.endDate) errors.endDate = "End date is required.";
-      if (!formData.startTime) errors.startTime = "Start time is required.";
-      if (!formData.endTime) errors.endTime = "End time is required.";
+      if (!formData.scientificFieldId) errors.scientificFieldId = "Απαιτείται επιλογή επιστημονικού πεδίου.";
+      if (!formData.startDate) errors.startDate = "Η ημερομηνία έναρξης είναι υποχρεωτική.";
+      if (!formData.endDate) errors.endDate = "Η ημερομηνία λήξης είναι υποχρεωτική.";
+      if (!formData.startTime) errors.startTime = "Η ώρα έναρξης είναι υποχρεωτική.";
+      if (!formData.endTime) errors.endTime = "Η ώρα λήξης είναι υποχρεωτική.";
 
       if (formData.startDate && formData.endDate && formData.startTime && formData.endTime) {
         const start = new Date(`${formData.startDate}T${formData.startTime}`);
@@ -31,13 +31,13 @@ export const CreatePositionValidationProvider = ({ children }) => {
 
     if (mode === "scientificField") {
       if (!formData.scientificField || formData.scientificField.trim() === "") {
-        errors.scientificField = "Scientific field name is required.";
+        errors.scientificField = "Το επιστημονικό πεδίο είναι υποχρεωτικό.";
       }
-      if (!formData.school || formData.school === "select") errors.school = "School is required.";
-      if (!formData.department || formData.department === "select") errors.department = "Department is required.";
+      if (!formData.school || formData.school === "select") errors.school = "Η σχολή είναι υποχρεωτική.";
+      if (!formData.department || formData.department === "select") errors.department = "Το τμήμα είναι υποχρεωτικό.";
 
       if (!Array.isArray(formData.courses) || formData.courses.length === 0) {
-        errors.courses = "At least one course is required.";
+        errors.courses = "Πρέπει να προσθέσετε τουλάχιστον ένα μάθημα.";
       } else {
         formData.courses.forEach((course, i) => {
           const numOrNull = (value) => {
@@ -66,7 +66,7 @@ export const CreatePositionValidationProvider = ({ children }) => {
           };
 
           const missing = required.filter((requiredField) => isMissing(requiredField));
-          if (missing.length) errors[`course${i}`] = `Course #${i + 1} missing required fields.`;
+          if (missing.length) errors[`course${i}`] = `Το μάθημα #${i + 1} έχει κενά υποχρεωτικά πεδία.`;
 
           const ects = numOrNull(course.ects);
           if (ects !== null && ects <= 0) {

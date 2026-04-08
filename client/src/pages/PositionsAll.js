@@ -4,7 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { usePositions } from "../contexts/PositionsContext";
 import FilterModal from "../components/FilterModal";
-import SortableTable from "../components/SortableTable";
+import SortableTable, { formatDateTimeCell } from "../components/SortableTable";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -21,7 +21,7 @@ const stateLabels = {
 };
 
 const columns = [
-  { key: "scientificField", label: "Επιστημονικό Πεδίο" },
+  { key: "scientificField", label: "Επιστημονικό πεδίο" },
   { key: "school", label: "Σχολή" },
   { key: "department", label: "Τμήμα" },
   { key: "state", label: "Κατάσταση" },
@@ -32,18 +32,21 @@ const columns = [
 
 function getStateBadgeClasses(state) {
   const base =
-    "inline-flex items-center justify-center rounded-full px-2 py-1 text-[10px] font-semibold";
+    "inline-flex items-center justify-center rounded-full px-2 py-1 text-xs font-semibold";
   if (state === "Ενεργή") return `${base} bg-yellow-100 text-yellow-800 border border-yellow-200`;
   if (state === "Ολοκληρωμένη") return `${base} bg-green-100 text-green-800 border border-green-200`;
   if (state === "Προσεχής") return `${base} bg-gray-100 text-gray-700 border border-gray-200`;
   return `${base} bg-gray-100 text-gray-700 border border-gray-200`;
 }
 
-function parseIsoDate(value) {
-  if (!value) return null;
-  const [y, m, d] = String(value).split("-").map((part) => Number(part));
+function parseIsoDateTime(dateValue, timeValue) {
+  if (!dateValue) return null;
+  const [y, m, d] = String(dateValue).split("-").map((part) => Number(part));
   if (!y || !m || !d) return null;
-  return new Date(y, m - 1, d, 0, 0, 0, 0);
+  const [hh, mm] = String(timeValue || "00:00").split(":").map((part) => Number(part));
+  const hours = Number.isFinite(hh) ? hh : 0;
+  const minutes = Number.isFinite(mm) ? mm : 0;
+  return new Date(y, m - 1, d, hours, minutes, 0, 0);
 }
 
 export default function PositionsTable() {
@@ -66,11 +69,6 @@ export default function PositionsTable() {
     currentUser?.role === "admin" ||
     currentUser?.is_staff ||
     currentUser?.is_superuser
-  );
-
-  const dateFormatter = useMemo(
-    () => new Intl.DateTimeFormat("el-GR", { year: "numeric", month: "2-digit", day: "2-digit" }),
-    []
   );
 
   useEffect(() => {
@@ -98,8 +96,8 @@ export default function PositionsTable() {
 
   const rows = useMemo(() => {
     return (positions || []).map((pos) => {
-      const startDate = parseIsoDate(pos.startDate);
-      const endDate = parseIsoDate(pos.endDate);
+      const startDate = parseIsoDateTime(pos.startDate, pos.startTime);
+      const endDate = parseIsoDateTime(pos.endDate, pos.endTime);
       return {
         id: pos.id,
         scientificField: pos.scientificField,
@@ -107,13 +105,15 @@ export default function PositionsTable() {
         department: pos.department,
         state: stateLabels[pos.state] || "—",
         applicants: applicantCounts[pos.scientificField] || 0,
-        startDate: startDate ? dateFormatter.format(startDate) : "—",
-        endDate: endDate ? dateFormatter.format(endDate) : "—",
+        startDate: pos.startDate || "",
+        endDate: pos.endDate || "",
+        startTime: pos.startTime || "",
+        endTime: pos.endTime || "",
         _startDate: startDate,
         _endDate: endDate,
       };
     });
-  }, [positions, applicantCounts, dateFormatter]);
+  }, [positions, applicantCounts]);
 
   const filterOptions = useMemo(() => {
     const schools = [...new Set(rows.map((r) => r.school).filter(Boolean))];
@@ -217,7 +217,7 @@ export default function PositionsTable() {
     const tags = [];
     filters.schools.forEach((s) => tags.push({ key: "schools", value: s, label: `Σχολή: ${s}` }));
     filters.departments.forEach((d) => tags.push({ key: "departments", value: d, label: `Τμήμα: ${d}` }));
-    filters.scientificFields.forEach((sf) => tags.push({ key: "scientificFields", value: sf, label: `Επιστημονικό Πεδίο: ${sf}` }));
+    filters.scientificFields.forEach((sf) => tags.push({ key: "scientificFields", value: sf, label: `Επιστημονικό πεδίο: ${sf}` }));
     filters.status.forEach((st) => tags.push({ key: "status", value: st, label: `Κατάσταση: ${st}` }));
     if (filters.pointsMin) tags.push({ key: "pointsMin", value: filters.pointsMin, label: `Πλήθος αιτήσεων ≥ ${filters.pointsMin}` });
     if (filters.pointsMax) tags.push({ key: "pointsMax", value: filters.pointsMax, label: `Πλήθος αιτήσεων ≤ ${filters.pointsMax}` });
@@ -246,7 +246,7 @@ export default function PositionsTable() {
   return (
     <div className="grid grid-cols-1 gap-y-5 pt-5">
       <h1 className="text-2xl text-center border-b  pb-2 mb-6 text-gray-700">
-        Θέσεις Προγράμματος
+        Θέσεις προγράμματος
       </h1>
       <div className="flex items-center justify-between ml-1 m-0 p-0">
         <div>
@@ -279,7 +279,9 @@ export default function PositionsTable() {
         setFilters={setFilters}
         options={filterOptions}
         isAdmin={isAdmin}
-        pointsLabel="Εύρος Πλήθους Αιτήσεων"
+        pointsLabel="Εύρος πλήθους αιτήσεων"
+        title="Φίλτρα Θέσεων"
+        titleClassName="text-gray-900"
         onReset={() => setFilters({
           schools: [],
           departments: [],
@@ -315,39 +317,39 @@ export default function PositionsTable() {
             const rankingLink = buildRankingLink(row);
             return (
               <tr key={key} className="hover:bg-patras-albescentWhite/50">
-                <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words">
+                <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words">
                   <Link to={rankingLink} className="block w-full h-full px-6 py-4">
                     {row.scientificField || "—"}
                   </Link>
                 </td>
-                <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words">
+                <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words">
                   <Link to={rankingLink} className="block w-full h-full px-6 py-4">
                     {row.school || "—"}
                   </Link>
                 </td>
-                <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words">
+                <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words">
                   <Link to={rankingLink} className="block w-full h-full px-6 py-4">
                     {row.department || "—"}
                   </Link>
                 </td>
-                <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words">
+                <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words">
                   <Link to={rankingLink} className="block w-full h-full px-6 py-4">
                     <span className={getStateBadgeClasses(row.state)}>{row.state}</span>
                   </Link>
                 </td>
-                <td className="text-center text-patras-buccaneer text-xs whitespace-nowrap">
+                <td className="text-center text-patras-buccaneer text-[13px] whitespace-nowrap">
                   <Link to={rankingLink} className="block w-full h-full px-6 py-4">
                     {row.applicants}
                   </Link>
                 </td>
-                <td className="text-center text-patras-buccaneer text-xs whitespace-nowrap">
+                <td className="text-center text-patras-buccaneer text-[13px] whitespace-nowrap">
                   <Link to={rankingLink} className="block w-full h-full px-6 py-4">
-                    {row.startDate}
+                    {formatDateTimeCell(row.startDate, row.startTime, "00:00")}
                   </Link>
                 </td>
-                <td className="text-center text-patras-buccaneer text-xs whitespace-nowrap">
+                <td className="text-center text-patras-buccaneer text-[13px] whitespace-nowrap">
                   <Link to={rankingLink} className="block w-full h-full px-6 py-4">
-                    {row.endDate}
+                    {formatDateTimeCell(row.endDate, row.endTime, "23:59")}
                   </Link>
                 </td>
               </tr>

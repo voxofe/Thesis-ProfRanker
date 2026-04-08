@@ -5,7 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { usePositions } from "../contexts/PositionsContext";
 import FilterModal from "../components/FilterModal";
 import Checkbox from "../components/Checkbox";
-import SortableTable from "../components/SortableTable";
+import SortableTable, { formatDateTimeCell } from "../components/SortableTable";
 import RefreshButton from "../components/RefreshButton";
 
 const API_BASE_URL = (
@@ -17,36 +17,54 @@ const API_BASE_URL = (
 );
 
 const columns = [
+  { key: "applicationId", label: "Αριθμός Αίτησης" },
   { key: "firstName", label: "Όνομα" },
   { key: "lastName", label: "Επώνυμο" },
   { key: "school", label: "Σχολή" },
   { key: "department", label: "Τμήμα" },
-  { key: "scientificField", label: "Επιστημονικό Πεδίο" },
-  { key: "positionStartDate", label: "Έναρξη" },
-  { key: "positionEndDate", label: "Λήξη Αιτήσεων" },
-  { key: "status", label: "Κατάσταση Αιτήσεων" },
+  { key: "scientificField", label: "Επιστημονικό πεδίο" },
+  { key: "submitDate", label: "Ημερομηνία Υποβολής" },
+  { key: "status", label: "Κατάσταση αιτήσεων" },
   { key: "totalPoints", label: "Βαθμολόγηση (σε μόρια)" },
 ];
 
 const statusLabels = ["Ενεργή", "Ολοκληρωμένη"];
 
-function parseDDMMYYYY(str) {
-  if (!str) return null;
-  const [datePart] = String(str).split(" ");
+function parseDDMMYYYY(dateStr, timeStr, fallbackTime = "00:00") {
+  if (!dateStr) return null;
+  const [datePart, timePart] = String(dateStr).split(" ");
   const [d, m, y] = datePart.split("-").map((v) => parseInt(v, 10));
   if (!d || !m || !y) return null;
-  return new Date(y, m - 1, d, 23, 59, 59, 999);
+  const rawTime = timeStr || timePart || fallbackTime;
+  const [hh, mm] = String(rawTime).split(":").map((v) => parseInt(v, 10));
+  const hours = Number.isFinite(hh) ? hh : 0;
+  const minutes = Number.isFinite(mm) ? mm : 0;
+  return new Date(y, m - 1, d, hours, minutes, 0, 0);
 }
 
-function getApplicationStatus(endDateStr) {
-  const end = parseDDMMYYYY(endDateStr);
+function resolveApplicationId(applicant) {
+  return applicant?.applicationId || applicant?.application_id || applicant?.id || "—";
+}
+
+function resolveSubmitDateRaw(applicant) {
+  return (
+    applicant?.submitDate ||
+    applicant?.submittedAt ||
+    applicant?.submissionDate ||
+    ""
+  );
+}
+
+
+function getApplicationStatus(endDateStr, endTimeStr) {
+  const end = parseDDMMYYYY(endDateStr, endTimeStr, "23:59");
   if (!end) return "—";
   return end >= new Date() ? "Ενεργή" : "Ολοκληρωμένη";
 }
 
 function getStatusBadgeClasses(status) {
   const base =
-    "inline-flex items-center justify-center rounded-full px-2 py-1 text-[10px] font-semibold";
+    "inline-flex items-center justify-center rounded-full px-2 py-1 text-xs font-semibold";
   if (status === "Ενεργή") return `${base} bg-yellow-100 text-yellow-800 border border-yellow-200`;
   if (status === "Ολοκληρωμένη") return `${base} bg-green-100 text-green-800 border border-green-200`;
   return `${base} bg-gray-100 text-gray-700 border border-gray-200`;
@@ -159,7 +177,7 @@ export default function Ranking() {
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
       // Role-based filter: only Ολοκληρωμένη for non-admins
-      if (!isAdmin && getApplicationStatus(u.positionEndDate) !== "Ολοκληρωμένη") return false;
+      if (!isAdmin && getApplicationStatus(u.positionEndDate, u.positionEndTime) !== "Ολοκληρωμένη") return false;
       // School
       if (filters.schools.length && !filters.schools.includes(u.school)) return false;
       // Department
@@ -167,7 +185,7 @@ export default function Ranking() {
       // Scientific Field
       if (filters.scientificFields.length && !filters.scientificFields.includes(u.scientificField)) return false;
       // Status (admin only)
-      if (isAdmin && filters.status.length && !filters.status.includes(getApplicationStatus(u.positionEndDate))) return false;
+      if (isAdmin && filters.status.length && !filters.status.includes(getApplicationStatus(u.positionEndDate, u.positionEndTime))) return false;
       // Points range
       if (filters.pointsMin && Number(u.totalPoints) < Number(filters.pointsMin)) return false;
       if (filters.pointsMax && Number(u.totalPoints) > Number(filters.pointsMax)) return false;
@@ -177,8 +195,10 @@ export default function Ranking() {
 
   const getSortedUsers = (rows, sortBy, sortDirection) => {
     const byDate = (a, b, key) => {
-      const da = parseDDMMYYYY(a[key]);
-      const db = parseDDMMYYYY(b[key]);
+      const isStart = key === "positionStartDate";
+      const fallbackTime = isStart ? "00:00" : "23:59";
+      const da = parseDDMMYYYY(a[key], isStart ? a.positionStartTime : a.positionEndTime, fallbackTime);
+      const db = parseDDMMYYYY(b[key], isStart ? b.positionStartTime : b.positionEndTime, fallbackTime);
       if (!da && !db) return 0;
       if (!da) return sortDirection === "asc" ? -1 : 1;
       if (!db) return sortDirection === "asc" ? 1 : -1;
@@ -191,13 +211,43 @@ export default function Ranking() {
       );
     }
 
+    if (sortBy === "applicationId") {
+      return [...rows].sort((a, b) => {
+        const aId = resolveApplicationId(a);
+        const bId = resolveApplicationId(b);
+        const aNum = Number(aId);
+        const bNum = Number(bId);
+        if (!Number.isNaN(aNum) && !Number.isNaN(bNum)) {
+          return sortDirection === "asc" ? aNum - bNum : bNum - aNum;
+        }
+        const valA = String(aId).toLowerCase();
+        const valB = String(bId).toLowerCase();
+        if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+        if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    if (sortBy === "submitDate") {
+      return [...rows].sort((a, b) => {
+        const aRaw = resolveSubmitDateRaw(a);
+        const bRaw = resolveSubmitDateRaw(b);
+        const da = parseDDMMYYYY(aRaw, null, "00:00");
+        const db = parseDDMMYYYY(bRaw, null, "00:00");
+        if (!da && !db) return 0;
+        if (!da) return sortDirection === "asc" ? -1 : 1;
+        if (!db) return sortDirection === "asc" ? 1 : -1;
+        return sortDirection === "asc" ? da - db : db - da;
+      });
+    }
+
     if (sortBy === "positionStartDate" || sortBy === "positionEndDate") {
       return [...rows].sort((a, b) => byDate(a, b, sortBy));
     }
 
     if (sortBy === "status") {
       const rank = (u) => {
-        const s = getApplicationStatus(u.positionEndDate);
+        const s = getApplicationStatus(u.positionEndDate, u.positionEndTime);
         if (s === "Ενεργή") return 2;
         if (s === "Ολοκληρωμένη") return 1;
         return 0;
@@ -206,8 +256,8 @@ export default function Ranking() {
         const ra = rank(a);
         const rb = rank(b);
         if (ra === rb) {
-          const da = parseDDMMYYYY(a.positionEndDate);
-          const db = parseDDMMYYYY(b.positionEndDate);
+          const da = parseDDMMYYYY(a.positionEndDate, a.positionEndTime, "23:59");
+          const db = parseDDMMYYYY(b.positionEndDate, b.positionEndTime, "23:59");
           if (!da && !db) return 0;
           if (!da) return sortDirection === "asc" ? -1 : 1;
           if (!db) return sortDirection === "asc" ? 1 : -1;
@@ -298,6 +348,7 @@ export default function Ranking() {
 
   const headerCellClassName = (col) => [
     "px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider cursor-pointer select-none",
+    col.key === "applicationId" ? "w-20" : "",
     col.key === "firstName" || col.key === "lastName" ? "w-24" : "",
     col.key === "status" ? "w-28" : "",
   ].join(" ").trim();
@@ -316,7 +367,19 @@ export default function Ranking() {
         ].join(" ")}
       >
         <td
-          className="text-center text-patras-buccaneer text-xs whitespace-nowrap truncate w-24"
+          className="text-center text-patras-buccaneer text-[13px] whitespace-nowrap truncate w-20"
+          title={String(resolveApplicationId(applicant))}
+        >
+          {clickable ? (
+            <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+              {resolveApplicationId(applicant)}
+            </Link>
+          ) : (
+            <div className="px-6 py-4">{resolveApplicationId(applicant)}</div>
+          )}
+        </td>
+        <td
+          className="text-center text-patras-buccaneer text-[13px] whitespace-nowrap truncate w-24"
           title={applicant.firstName}
         >
           {clickable ? (
@@ -328,7 +391,7 @@ export default function Ranking() {
           )}
         </td>
         <td
-          className="text-center text-patras-buccaneer text-xs whitespace-nowrap truncate w-24"
+          className="text-center text-patras-buccaneer text-[13px] whitespace-nowrap truncate w-24"
           title={applicant.lastName}
         >
           {clickable ? (
@@ -339,7 +402,7 @@ export default function Ranking() {
             <div className="px-6 py-4">{applicant.lastName}</div>
           )}
         </td>
-        <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words">
+        <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words">
           {clickable ? (
             <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
               {applicant.school}
@@ -348,7 +411,7 @@ export default function Ranking() {
             <div className="px-6 py-4">{applicant.school}</div>
           )}
         </td>
-        <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words">
+        <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words">
           {clickable ? (
             <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
               {applicant.department}</Link>
@@ -356,7 +419,7 @@ export default function Ranking() {
             <div className="px-6 py-4">{applicant.department}</div>
           )}
         </td>
-        <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words">
+        <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words">
           {clickable ? (
             <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
               {applicant.scientificField}
@@ -365,27 +428,18 @@ export default function Ranking() {
             <div className="px-6 py-4">{applicant.scientificField}</div>
           )}
         </td>
-        <td className="text-center text-patras-buccaneer text-xs whitespace-nowrap">
+        <td className="text-center text-patras-buccaneer text-[13px] whitespace-nowrap">
           {clickable ? (
             <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
-              {applicant.positionStartDate}
+              {formatDateTimeCell(resolveSubmitDateRaw(applicant), null, "00:00")}
             </Link>
           ) : (
-            <div className="px-6 py-4">{applicant.positionStartDate}</div>
+            <div className="px-6 py-4">{formatDateTimeCell(resolveSubmitDateRaw(applicant), null, "00:00")}</div>
           )}
         </td>
-        <td className="text-center text-patras-buccaneer text-xs whitespace-nowrap">
-          {clickable ? (
-            <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
-              {applicant.positionEndDate}
-            </Link>
-          ) : (
-            <div className="px-6 py-4">{applicant.positionEndDate}</div>
-          )}
-        </td>
-        <td className="text-center text-patras-buccaneer text-xs whitespace-normal break-words w-28">
+        <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words w-28">
           {(() => {
-            const status = getApplicationStatus(applicant.positionEndDate);
+            const status = getApplicationStatus(applicant.positionEndDate, applicant.positionEndTime);
             const content = <span className={getStatusBadgeClasses(status)}>{status}</span>;
             return clickable ? (
               <Link to={`/applicant-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
@@ -420,7 +474,7 @@ export default function Ranking() {
   return (
     <div className="grid grid-cols-1 gap-y-5 pt-5"> 
       <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-700">
-        Λίστα Κατάταξης Υποψηφίων
+        Λίστα κατάταξης υποψηφίων
       </h1>
 
       {/* Filters row: Checkbox + Φίλτρα button */}
@@ -489,6 +543,8 @@ export default function Ranking() {
         setFilters={setFilters}
         options={filterOptions}
         isAdmin={isAdmin}
+        title="Φίλτρα Λίστας Κατάταξης"
+        titleClassName="text-gray-900"
         onReset={() => setFilters({
           schools: [],
           departments: [],

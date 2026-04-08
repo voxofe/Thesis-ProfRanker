@@ -17,7 +17,7 @@ export const FormDataProvider = ({ children }) => {
       phdTitle: "",
       phdAcquisitionDate: "",
       phdIsFromForeignInstitute: false,
-      workExperience: 0,
+      workExperience: "",
       hasNotParticipatedInPastProgram: false,
       cvDocument: null,
       phdDocument: null,
@@ -36,7 +36,7 @@ export const FormDataProvider = ({ children }) => {
         phdTitle: form.phdTitle ?? "",
         phdAcquisitionDate: form.phdAcquisitionDate ?? "",
         phdIsFromForeignInstitute: form.phdIsFromForeignInstitute ?? false,
-        workExperience: form.workExperience ?? 0,
+        workExperience: form.workExperience ?? "",
         hasNotParticipatedInPastProgram: form.hasNotParticipatedInPastProgram ?? false,
         positionId: form.positionId ?? "", // positionId from backend
         cvDocument: form.cvDocument ?? null,

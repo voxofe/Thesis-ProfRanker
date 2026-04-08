@@ -18,7 +18,7 @@ export default function PhdSection() {
           <Upload
             compact
             icon="document-text"
-            label="Διδακτορικό Δίπλωμα"
+            label="Διδακτορικό δίπλωμα"
             content="το διδακτορικό σας"
             id="phd-upload"
             name="phd-upload"
@@ -32,7 +32,7 @@ export default function PhdSection() {
 
         <div className="grid grid-rows-[auto_1fr_auto] h-full">
           <InputField
-            label="Τίτλος Διδακτορικής Διατριβής"
+            label="Τίτλος διδακτορικής διατριβής"
             id="phd-title"
             name="phd-title"
             type="text"
@@ -70,12 +70,12 @@ export default function PhdSection() {
       {/* Foreign Institute Recognition */}
       <div className="bg-patras-goldSand/20 p-6 rounded-lg">
         <h3 className="text-base font-medium text-gray-900 mb-4">
-          Αναγνώριση από Εξωτερικό Ίδρυμα
+          Αναγνώριση από εξωτερικό ίδρυμα
         </h3>
 
         <div className="space-y-4">
           <Checkbox
-            label="Κατοχή τίτλου από Ίδρυμα του εξωτερικού (αναγνωρισμένο από τον ΔΟΑΤΑΠ)"
+            label="Κατοχή τίτλου από ίδρυμα του εξωτερικού (αναγνωρισμένο από τον ΔΟΑΤΑΠ)"
             id="foreign-institute"
             name="foreign-institute"
             checked={formData.phdIsFromForeignInstitute}
@@ -88,7 +88,7 @@ export default function PhdSection() {
             <div className="mt-4 p-4 bg-white rounded-md border border-blue-200 overflow-y-auto">
               <Upload
                 icon="document-text"
-                label="Έγγραφο Αναγνώρισης ΔΟΑΤΑΠ"
+                label="Έγγραφο αναγνώρισης ΔΟΑΤΑΠ"
                 content="το έγγραφο αναγνώρισης από τον ΔΟΑΤΑΠ"
                 id="doatap-upload"
                 name="doatap-upload"

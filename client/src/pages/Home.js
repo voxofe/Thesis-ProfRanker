@@ -188,14 +188,14 @@ export default function Home() {
           <HomePagePanel
             title={
               userRole === "applicant"
-                ? "Η Αίτησή μου"
-                : "Υποβολή Αίτησης"
+                ? "Η αίτησή μου"
+                : "Υποβολή αίτησης"
             }
             description={applicationDescription}
             buttonText={
               userRole === "applicant"
-                ? "Επεξεργασία Αίτησης"
-                : "Δημιουργία Αίτησης"
+                ? "Επεξεργασία αίτησης"
+                : "Δημιουργία αίτησης"
             }
             // Disable for guests when no active positions, or for applicants when deadline passed
             buttonAction={applicationDisabled ? undefined : undefined}
@@ -207,14 +207,14 @@ export default function Home() {
                 : "bg-patras-albescentWhite/20 border border-patras-albescentWhite"
             }
             // Hide the tooltip icon when disabled
-            showInfoMark={!applicationDisabled}
-            infoPopup={applicationInfoPopup}
+            // showInfoMark={!applicationDisabled}
+            // infoPopup={applicationInfoPopup}
           />
 
           <HomePagePanel
-            title="Η Βαθμολογία μου"
+            title="Η βαθμολογία μου"
             description="Δείτε τη βαθμολογία σας μετά από την αξιολόγηση της αίτησής σας."
-            buttonText="Η Βαθμολογία μου"
+            buttonText="Η βαθμολογία μου"
             to={userRole === "applicant" ? `/applicant-score/${currentUser.id}` : undefined}
             buttonDisabled={userRole === "guest"}
             colorClass={
@@ -222,17 +222,17 @@ export default function Home() {
                 ? "bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
                 : "bg-patras-albescentWhite/20 border border-patras-albescentWhite"
             }
-            showInfoMark={true}
-            infoPopup={scoreInfoPopup}
+            // showInfoMark={true}
+            // infoPopup={scoreInfoPopup}
           />
 
           <HomePagePanel
-            title="Γενική Κατάταξη"
+            title="Γενική κατάταξη"
             description="Δείτε τη γενική κατάταξη όλων των αιτούντων σε όλα τα επιστημονικά πεδία."
             buttonText="Δείτε Κατάταξη"
             to="/ranking"
-            showInfoMark={true}
-            infoPopup={rankingInfoPopup}
+            // showInfoMark={true}
+            // infoPopup={rankingInfoPopup}
           />
         </div>
       </div>
@@ -245,7 +245,7 @@ export default function Home() {
       <div className="max-w-4xl mx-auto p-6">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-700 mb-2">
-            Καλώς ήρθατε, Διαχειριστή
+            Καλώς ήρθατε, διαχειριστή
           </h1>
           <p className="text-gray-600 text-[17px]">
             Έχετε πλήρη πρόσβαση στο σύστημα διαχείρισης αιτήσεων
@@ -255,31 +255,31 @@ export default function Home() {
           <HomePagePanel
             title="Θέσεις"
             description="Δείτε/επεξεργαστείτε όλες τις θέσεις ή δημιουργείστε μία νέα."
-            buttonText="Διαχείριση Θέσεων"
+            buttonText="Διαχείριση θέσεων"
             to="/positions"
             // showInfoMark={true}
             // infoPopup={positionsPanelPopup}
           />
           <HomePagePanel
-            title="Επιστημονικά Πεδία"
+            title="Επιστημονικά πεδία"
             description="Διαχειριστείτε τα επιστημονικά πεδία, τα μαθήματα και τις πληροφορίες τους."
-            buttonText="Διαχείριση Πεδίων"
+            buttonText="Διαχείριση πεδίων"
             to="/scientific-fields"
             // showInfoMark={true}
             // infoPopup={scientificFieldsPopup}
           />
           <HomePagePanel
-            title="Γενική Κατάταξη"
+            title="Γενική κατάταξη"
             description="Δείτε τη γενική κατάταξη όλων των αιτούντων σε όλα τα επιστημονικά πεδία."
-            buttonText="Δείτε Κατάταξη"
+            buttonText="Δείτε κατάταξη"
             to="/ranking"
             // showInfoMark={true}
             // infoPopup={rankingInfoPopup}
           />
           <HomePagePanel
-            title="Διαχείριση Διαχειριστών"
+            title="Διαχείριση διαχειριστών"
             description="Δημιουργήστε νέο λογαριασμό διαχειριστή με ειδικά δικαιώματα."
-            buttonText="Δημιουργία Διαχειριστή"
+            buttonText="Δημιουργία διαχειριστή"
             to="/register-admin"
             // showInfoMark={true}
             // infoPopup={registerAdminPopup}

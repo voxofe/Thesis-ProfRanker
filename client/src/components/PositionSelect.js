@@ -34,7 +34,6 @@ export default function PositionSelect({
   const errorStyle = "outline-red-500 focus:outline-red-500";
   const getInputStyle = () => {
     if (disabled) return disabledStyle + " pr-12";
-    if (error) return `${enabledStyle} ${errorStyle} pr-12`;
     return enabledStyle + " pr-12";
   };
 
@@ -154,6 +153,10 @@ export default function PositionSelect({
           id="position-combobox"
           ref={inputRef}
           type="text"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
           disabled={disabled}
           required={required}
           aria-required={required}

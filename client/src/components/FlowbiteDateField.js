@@ -21,6 +21,7 @@ export default function FlowbiteDateField({
   label,
   value,
   onChange,
+  onClear,
   required = false,
   minDate,
   maxDate,
@@ -211,7 +212,10 @@ export default function FlowbiteDateField({
           {value && (
             <button
               type="button"
-              onClick={() => onChange("")}
+              onClick={() => {
+                onChange("");
+                onClear?.();
+              }}
               title="Καθαρισμός"
               aria-label="Καθαρισμός"
               className="absolute right-2 top-1/2 -translate-y-1/2 text-patras-sanguineBrown hover:text-red-700 w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50"
@@ -229,6 +233,7 @@ FlowbiteDateField.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  onClear: PropTypes.func,
   required: PropTypes.bool,
   minDate: PropTypes.string,
   maxDate: PropTypes.string,

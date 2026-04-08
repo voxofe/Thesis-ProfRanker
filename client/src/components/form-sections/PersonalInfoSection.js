@@ -56,7 +56,7 @@ export default function PersonalInfoSection() {
         {/* CV Upload*/}
         <Upload
           icon="document-text"
-          label="Βιογραφικό Σημείωμα"
+          label="Βιογραφικό σημείωμα"
           content="τo βιογραφικό σας"
           id="cv-upload"
           name="cv-upload"

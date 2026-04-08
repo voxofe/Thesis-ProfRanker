@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAuth, useCreatePositionValidation } from "../contexts";
 import InputField from "../components/InputField";
 import CustomSelect from "../components/CustomSelect";
 import CoursePanel from "../components/CoursePanel";
-import Tooltip from "../components/Tooltip";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -64,8 +63,14 @@ export default function ScientificFieldsCreate() {
   const [notification, setNotification] = useState({ message: "", type: "" });
   const [submitting, setSubmitting] = useState(false);
   const [redirectLoading, setRedirectLoading] = useState(false);
-  const submitButtonRef = useRef(null);
-  const [openSubmitTip, setOpenSubmitTip] = useState(false);
+  const [touched, setTouched] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const markTouched = (field) =>
+    setTouched((prev) => ({ ...prev, [field]: true }));
+
+  const showError = (field) => submitted || touched[field];
+  const showCourseError = submitted || touched.courses;
 
   // access control
   useEffect(() => {
@@ -88,13 +93,15 @@ export default function ScientificFieldsCreate() {
 
   // course handlers
   const handleCourseChange = (idx, field, value) => {
+    markTouched("courses");
     setFormData((prev) => ({
       ...prev,
       courses: prev.courses.map((c, i) => (i === idx ? { ...c, [field]: value } : c)),
     }));
   };
 
-  const addCourse = () =>
+  const addCourse = () => {
+    markTouched("courses");
     setFormData((prev) => ({
       ...prev,
       courses: [
@@ -112,16 +119,20 @@ export default function ScientificFieldsCreate() {
         },
       ],
     }));
+  };
 
-  const removeCourse = (idx) =>
+  const removeCourse = (idx) => {
+    markTouched("courses");
     setFormData((prev) => ({
       ...prev,
       courses: prev.courses.filter((_, i) => i !== idx),
     }));
+  };
 
   // submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitted(true);
     const errors = updateValidity(formData, "scientificField");
     if (Object.keys(errors).length > 0) return;
 
@@ -204,13 +215,9 @@ export default function ScientificFieldsCreate() {
         </div>
       )}
       <header className="text-center">
-        <h1 className="text-3xl font-semibold text-gray-800">Δημιουργία Πεδίου</h1>
+        <h1 className="text-3xl font-semibold text-gray-800">Δημιουργία πεδίου</h1>
         <p className="text-gray-500 mt-1 text-sm">Ορίστε τα στοιχεία του νέου επιστημονικού πεδίου και τα μαθήματά του</p>
       </header>
-
-      <p className="text-sm text-gray-600 -mt-2 mb-2">
-        <span className="text-red-600">*</span> Τα πεδία με αστερίσκο είναι υποχρεωτικά
-      </p>
 
       <form
         onSubmit={handleSubmit}
@@ -218,40 +225,55 @@ export default function ScientificFieldsCreate() {
       >
         {/* BASIC INFO */}
         <section>
-          <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Βασικές Πληροφορίες</h2>
+          <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Βασικές πληροφορίες</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InputField
-              label="Επιστημονικό Πεδίο"
+              label="Επιστημονικό πεδίο"
               value={formData.scientificField}
-              onChange={(val) => setFormData((prev) => ({ ...prev, scientificField: val }))}
+              onChange={(val) => {
+                markTouched("scientificField");
+                setFormData((prev) => ({ ...prev, scientificField: val }));
+              }}
               required
-              error={validationErrors.scientificField}
+              error={showError("scientificField") ? validationErrors.scientificField : ""}
             />
 
+            <div className="hidden md:block" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             <CustomSelect
               label="Σχολή"
               value={formData.school}
-              onChange={(val) => setFormData((prev) => ({ ...prev, school: val, department: "select" }))}
+              onChange={(val) => {
+                markTouched("school");
+                setFormData((prev) => ({ ...prev, school: val, department: "select" }));
+              }}
               options={SCHOOLS.map((s) => ({ value: s, label: s }))}
               required
+              error={showError("school") ? validationErrors.school : ""}
             />
 
             <CustomSelect
               label="Τμήμα"
               value={formData.department}
               onChange={(val) =>
-                setFormData((prev) => {
-                  const updated = { ...prev, department: val };
-                  if (val !== "select") {
-                    const found = Object.entries(DEPARTMENTS).find(([school, deps]) => deps.includes(val));
-                    if (found) updated.school = found[0];
-                  }
-                  return updated;
-                })
+                {
+                  markTouched("department");
+                  setFormData((prev) => {
+                    const updated = { ...prev, department: val };
+                    if (val !== "select") {
+                      const found = Object.entries(DEPARTMENTS).find(([school, deps]) => deps.includes(val));
+                      if (found) updated.school = found[0];
+                    }
+                    return updated;
+                  });
+                }
               }
               options={departmentOptions.map((d) => ({ value: d, label: d }))}
               required
+              error={showError("department") ? validationErrors.department : ""}
             />
           </div>
         </section>
@@ -267,34 +289,20 @@ export default function ScientificFieldsCreate() {
           scientificFieldValue={formData.scientificField}
           errors={validationErrors}
         />
+        {showCourseError && validationErrors.courses && (
+          <p className="-mt-6 text-sm text-red-600">{validationErrors.courses}</p>
+        )}
 
         {/* SUBMIT */}
         <div className="pt-6 border-t text-right">
-          <span
-            className="inline-block"
-            ref={submitButtonRef}
-            onMouseEnter={() => submitDisabled && setOpenSubmitTip(true)}
-            onMouseLeave={() => setOpenSubmitTip(false)}
-            onFocus={() => submitDisabled && setOpenSubmitTip(true)}
-            onBlur={() => setOpenSubmitTip(false)}
+          <button
+            type="submit"
+            disabled={submitDisabled}
+            aria-disabled={submitDisabled}
+            className="px-6 py-2 bg-patras-buccaneer text-white font-medium rounded-lg hover:bg-patras-sanguineBrown transition disabled:opacity-60"
           >
-            <button
-              type="submit"
-              disabled={submitDisabled}
-              aria-disabled={submitDisabled}
-              className="px-6 py-2 bg-patras-buccaneer text-white font-medium rounded-lg hover:bg-patras-sanguineBrown transition disabled:opacity-60"
-            >
-              {submitting ? "Δημιουργία..." : "Δημιουργία Πεδίου"}
-            </button>
-            <Tooltip
-              anchorRef={submitButtonRef}
-              open={openSubmitTip && submitDisabled}
-              placement="top-left"
-              className="bg-white border border-patras-buccaneer text-patras-buccaneer text-xs px-2 py-1 rounded-lg shadow-lg whitespace-nowrap min-w-max"
-            >
-              Συμπληρώστε όλα τα υποχρεωτικά πεδία για να συνεχίσετε
-            </Tooltip>
-          </span>
+            {submitting ? "Δημιουργία..." : "Δημιουργία πεδίου"}
+          </button>
 
           {notification.message && (
             <p

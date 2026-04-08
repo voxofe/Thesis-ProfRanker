@@ -20,7 +20,7 @@ export default function PaperSection() {
   return (
     <div className="overflow-hidden"> 
       <legend className="text-sm/6 font-semibold text-gray-900">
-        Ακαδημαϊκές Εργασίες (Δημοσιεύσεις / Ανακοινώσεις σε συνέδρια)
+        Ακαδημαϊκές εργασίες (δημοσιεύσεις/ανακοινώσεις σε συνέδρια)
       </legend>
       <div className="">
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-8 pt-1 pb-0 sm:pb-2"></div>

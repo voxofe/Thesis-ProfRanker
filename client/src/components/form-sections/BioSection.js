@@ -1,41 +1,40 @@
 import React from "react";
 import { useFormData } from "../../contexts/FormDataContext";
-import InputField from "../InputField";
+import { useAuth } from "../../contexts/AuthContext";
+import CustomSelect from "../CustomSelect";
 import Upload from "../Upload";
 import Checkbox from "../Checkbox";
 
 export default function BioSection({ academicYear }) {
   const { formData, handleChange, handleFileChange, handleFileDelete } =
     useFormData();
+  const { currentUser } = useAuth();
+  const requiresMilitaryDoc = currentUser?.gender === "male";
 
-  const handleWorkExperienceChange = (value) => {
-    const numValue = parseInt(value) || 0;
-    if (numValue < 0 || numValue > 10) {
-      return; // Don't update if out of range
-    }
-    handleChange("workExperience", numValue);
-  };
-
-  const workExperienceError =
-    formData.workExperience < 0 || formData.workExperience > 10
-      ? "Τα χρόνια εργασιακής εμπειρίας πρέπει να είναι μεταξύ 0 και 10"
-      : null;
+  const workExperienceOptions = Array.from({ length: 11 }, (_, index) => ({
+    value: String(index),
+    label: String(index),
+  }));
 
   return (
     <div className="space-y-6">
       {/* Work Experience Section */}
 
-      <InputField
+      <CustomSelect
         label="Χρόνια μεταδιδακτορικής εργασιακής εμπειρίας (εξαιρείται η διδακτική εμπειρία)"
-        id="experience-years"
-        name="experience-years"
-        type="number"
-        min="0"
-        max="10"
-        defaultValue={0}
-        value={formData.workExperience}
-        onChange={handleWorkExperienceChange}
-        error={workExperienceError}
+        value={
+          formData.workExperience === ""
+            ? ""
+            : String(formData.workExperience)
+        }
+        onChange={(value) => {
+          if (value === "select") {
+            handleChange("workExperience", "");
+            return;
+          }
+          handleChange("workExperience", Number(value));
+        }}
+        options={workExperienceOptions}
         required={true}
       />
 
@@ -43,7 +42,7 @@ export default function BioSection({ academicYear }) {
 
       <Upload
         icon="document-text"
-        label={`Υπεύθυνη Δήλωση εκπλήρωσης Στρατιωτικών Υποχρεώσεων ή νόμιμης απαλλαγής από αυτών ή αναβολής για το ακαδημαϊκό έτος ${academicYear}`}
+        label={`Υπεύθυνη δήλωση εκπλήρωσης στρατιωτικών υποχρεώσεων ή νόμιμης απαλλαγής από αυτές ή αναβολής για το ακαδημαϊκό έτος ${academicYear}`}
         content="την υπεύθυνη δήλωση"
         id="military-obligations-upload"
         name="military-obligations-upload"
@@ -51,7 +50,7 @@ export default function BioSection({ academicYear }) {
         uploadedFile={formData.militaryObligationsDocument}
         onChange={(e) => handleFileChange("militaryObligationsDocument", e)}
         onDelete={() => handleFileDelete("militaryObligationsDocument")}
-        required={true}
+        required={requiresMilitaryDoc}
         compact
       />
 

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useFormData } from "./FormDataContext";
+import { useAuth } from "./AuthContext";
 
 const ValidationContext = createContext();
 
@@ -7,6 +8,7 @@ export const useValidation = () => useContext(ValidationContext);
 
 export const ValidationProvider = ({ children }) => {
   const { formData } = useFormData();
+  const { currentUser } = useAuth();
   const [stepValidation, setStepValidation] = useState({
     1: false, // Personal Info
     2: false, // Scientific Field
@@ -84,11 +86,21 @@ export const ValidationProvider = ({ children }) => {
     };
 
     const validateFinalInfo = () => {
+      const requiresMilitaryDoc = currentUser?.gender === "male";
+      const workExperienceValue = formData.workExperience;
+      const hasWorkExperience =
+        workExperienceValue !== "" &&
+        workExperienceValue !== null &&
+        workExperienceValue !== undefined;
+      const workExperienceNumber = Number(workExperienceValue);
+      const workExperienceValid =
+        Number.isFinite(workExperienceNumber) &&
+        workExperienceNumber >= 0 &&
+        workExperienceNumber <= 14;
       return !!(
-        formData.workExperience !== null &&
-        formData.workExperience >= 0 &&
-        formData.workExperience <= 14 &&
-        formData.militaryObligationsDocument
+        hasWorkExperience &&
+        workExperienceValid &&
+        (!requiresMilitaryDoc || formData.militaryObligationsDocument)
       );
     };
 
@@ -100,7 +112,7 @@ export const ValidationProvider = ({ children }) => {
       5: validatePapers(),
       6: validateFinalInfo(),
     });
-  }, [formData]);
+  }, [formData, currentUser?.gender]);
 
   // Check if a step can be accessed
   const canAccessStep = (stepNumber) => {

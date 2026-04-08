@@ -107,7 +107,7 @@ export default function Paper({ index }) {
           />
         </div>
         <InputField
-          label="Τίτλος Εργασίας"
+          label="Τίτλος εργασίας"
           id={`paper-title-${index}`}
           name={`paper-title-${index}`}
           type="text"

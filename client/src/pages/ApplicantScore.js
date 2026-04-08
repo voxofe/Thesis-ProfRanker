@@ -79,8 +79,11 @@ export default function ApplicantScore() {
   const toDDMMYYYYHHMM = (dateStr, timeStr) => {
     if (!dateStr) return "";
     const base = toDDMMYYYY(dateStr);
-    if (!timeStr) return base;
-    return `${base} ${timeStr}`;
+    const embeddedTime = typeof dateStr === "string" ? dateStr.match(/\b(\d{2}:\d{2})\b/)?.[1] : "";
+    const rawTime = timeStr || embeddedTime || "00:00";
+    const [hh, mm] = String(rawTime).split(":");
+    const padded = `${String(hh || "0").padStart(2, "0")}:${String(mm || "0").padStart(2, "0")}`;
+    return `${base} ${padded}`;
   };
 
   const schoolName = applicantData?.school || matchedPosition?.school || "—";
@@ -132,10 +135,10 @@ export default function ApplicantScore() {
                   Επώνυμο
                 </th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Διδακτορικός Τίτλος
+                  Διδακτορικός τίτλος
                 </th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Ημερομηνία λήψης Διδακτορικού Τίτλου
+                  Ημερομηνία λήψης διδακτορικού τίτλου
                 </th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider">
                   Mεταδιδακτορική εργασιακή εμπειρία
@@ -183,16 +186,16 @@ export default function ApplicantScore() {
                   Τμήμα
                 </th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Επιστημονικό Πεδίο
+                  Επιστημονικό πεδίο
                 </th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Έναρξη Αιτήσεων
+                  Έναρξη αιτήσεων
                 </th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Λήξη Αιτήσεων
+                  Λήξη αιτήσεων
                 </th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                  Υποβολή Αίτησης
+                  Υποβολή αίτησης
                 </th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider">
                   Μαθήματα
@@ -217,7 +220,7 @@ export default function ApplicantScore() {
                   {toDDMMYYYYHHMM(endDate, endTime)}
                 </td>
                 <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
-                  {toDDMMYYYY(submitDate)}
+                  {toDDMMYYYYHHMM(submitDate)}
                 </td>
                 <td className="px-6 py-4 text-center align-middle">
                   <CoursesDrawer
@@ -301,7 +304,7 @@ export default function ApplicantScore() {
                 </td>
               </tr>
               <tr className="bg-patras-buccaneer font-semibold bg-wh">
-                <td className="px-6 py-4 text-white">Σύνολικά Μόρια</td>
+                <td className="px-6 py-4 text-white">Συνολικά μόρια</td>
                 <td className="px-6 py-4 text-center text-white">
                   {applicantData?.totalPoints}
                 </td>

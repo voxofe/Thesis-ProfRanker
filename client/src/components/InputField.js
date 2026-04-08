@@ -34,7 +34,6 @@ export default function InputField(props) {
 
   const getInputStyle = () => {
     if (props.disabled) return disabledStyle;
-    if (props.error) return `${enabledStyle} ${errorStyle}`;
     return enabledStyle;
   };
 

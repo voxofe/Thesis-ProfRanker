@@ -33,7 +33,6 @@ export default function CustomSelect({
 
   const getTriggerStyle = () => {
     if (disabled) return disabledStyle;
-    if (error) return `${enabledStyle} ${errorStyle}`;
     return enabledStyle;
   };
 
@@ -60,12 +59,19 @@ export default function CustomSelect({
         disabled={disabled}
       >
         <Select.Trigger
-          className={`mt-2 ${getTriggerStyle()} flex justify-between items-center w-full text-left ring-0 focus:ring-0`}
+          className={`mt-2 ${getTriggerStyle()} flex justify-between items-center w-full text-left ring-0 focus:ring-0 whitespace-nowrap overflow-hidden`}
+          title={
+            safeValue === "select"
+              ? placeholder
+              : options.find((optn) => optn.value === safeValue)?.label || placeholder
+          }
         >
-          <Select.Value>
-            {safeValue === "select"
-              ? placeholder // 👈 Always show placeholder text visually
-              : options.find((optn) => optn.value === safeValue)?.label || placeholder}
+          <Select.Value asChild>
+            <span className="flex-1 min-w-0 overflow-hidden whitespace-nowrap truncate pr-2">
+              {safeValue === "select"
+                ? placeholder // 👈 Always show placeholder text visually
+                : options.find((optn) => optn.value === safeValue)?.label || placeholder}
+            </span>
           </Select.Value>
           <Select.Icon>
             <ChevronDown className="w-4 h-4 opacity-70" />
@@ -96,7 +102,7 @@ export default function CustomSelect({
                       optn.value === "__new__" ? newFieldStyle : ""
                     }`}
                   >
-                    <Select.ItemText>{optn.label}</Select.ItemText>
+                    <Select.ItemText className="whitespace-nowrap">{optn.label}</Select.ItemText>
                   </Select.Item>
                 ))
               ) : (

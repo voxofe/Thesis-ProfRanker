@@ -62,7 +62,7 @@ export default function CoursePanel({
         {courses.length === 0 ? ( // Check if there are no courses
           scientificFieldValue === "select" ? ( // Check if scientific field is "select"
             <div className="text-center text-gray-500 py-8">
-              <p>Επιλέξτε Επιστημονικό Πεδίο για να δείτε τα διαθέσιμα μαθήματα.</p>
+              <p>Επιλέξτε επιστημονικό πεδίο για να δείτε τα διαθέσιμα μαθήματα.</p>
             </div>
           ) : (
             <div className="text-center text-gray-500 py-8">
@@ -116,7 +116,7 @@ export default function CoursePanel({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div className="md:col-span-2">
                   <InputField
-                    label="Όνομα Μαθήματος"
+                    label="Όνομα μαθήματος"
                     value={c.name}
                     onChange={(val) => onCourseChange(idx, "name", val)}
                     required
@@ -125,7 +125,7 @@ export default function CoursePanel({
                 </div>
                 <div className="md:col-span-1">
                   <InputField
-                    label="Κωδικός Μαθήματος"
+                    label="Κωδικός μαθήματος"
                     value={c.code}
                     onChange={(val) => onCourseChange(idx, "code", val)}
                     required
@@ -173,7 +173,7 @@ export default function CoursePanel({
               {/* Row 3: Teaching Units, Theory Hours, Lab Hours */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <InputField
-                  label="Διδακτικές Μονάδες"
+                  label="Διδακτικές μονάδες"
                   type="number"
                   min="1"
                   value={c.teaching_units}
@@ -183,7 +183,7 @@ export default function CoursePanel({
                   error={teachingUnitsError}
                 />
                 <InputField
-                  label="Ώρες Θεωρίας"
+                  label="Ώρες θεωρίας"
                   type="number"
                   min="0"
                   value={c.theory_hours}
@@ -193,7 +193,7 @@ export default function CoursePanel({
                   error={theoryHoursError}
                 />
                 <InputField
-                  label="Ώρες Εργαστηρίου"
+                  label="Ώρες εργαστηρίου"
                   type="number"
                   min="0"
                   value={c.lab_hours}

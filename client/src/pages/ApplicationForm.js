@@ -38,18 +38,18 @@ export default function Form({ academicYear }) {
   const steps = [
     {
       id: 1,
-      title: "Γενικά Στοιχεία",
+      title: "Γενικά στοιχεία",
       description: "Βασικές πληροφορίες",
       component: PersonalInfoSection,
     },
     {
       id: 2,
-      title: "Επιστημονικό Πεδίο",
+      title: "Επιστημονικό πεδίο",
       component: ScientificFieldSection,
     },
     {
       id: 3,
-      title: "Σχεδιάγραμμα Διδασκαλίας",
+      title: "Σχεδιάγραμμα διδασκαλίας",
       component: (props) => (
         <CoursePlanSection
           formData={formData}
@@ -65,12 +65,12 @@ export default function Form({ academicYear }) {
     },
     {
       id: 5,
-      title: "Ακαδημαϊκές Εργασίες",
+      title: "Ακαδημαϊκές εργασίες",
       component: PapersSection,
     },
     {
       id: 6,
-      title: "Τελικές Πληροφορίες",
+      title: "Τελικές πληροφορίες",
       component: BioSection,
     },
   ];
@@ -248,9 +248,6 @@ export default function Form({ academicYear }) {
         canAccessStep={canAccessStep}
       />
 
-      <p className="mb-2 text-sm text-gray-600">
-        <span className="text-red-600">*</span> Τα πεδία με αστερίσκο είναι υποχρεωτικά
-      </p>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 min-h-[450px] flex flex-col">
         <div className={`flex-1 ${contentOverflow} p-6`}>

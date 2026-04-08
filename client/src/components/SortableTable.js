@@ -1,5 +1,56 @@
 import React, { useMemo, useState } from "react";
 
+export const formatDateTimeCell = (dateValue, timeValue, fallbackTime = "00:00") => {
+  if (!dateValue) return "—";
+
+  const pad2 = (v) => String(v).padStart(2, "0");
+
+  const renderDateTime = (datePart, timePart) => (
+    <span className="inline-flex flex-col leading-tight">
+      <span>{datePart}</span>
+      <span className="text-xs text-gray-600">{timePart}</span>
+    </span>
+  );
+
+  if (dateValue instanceof Date && !Number.isNaN(dateValue.getTime())) {
+    const dd = pad2(dateValue.getDate());
+    const mm = pad2(dateValue.getMonth() + 1);
+    const yyyy = dateValue.getFullYear();
+    const embedded = `${pad2(dateValue.getHours())}:${pad2(dateValue.getMinutes())}`;
+    const time = timeValue || embedded || fallbackTime;
+    const [hh, min] = String(time).split(":");
+    return renderDateTime(`${dd}-${mm}-${yyyy}`, `${pad2(hh || 0)}:${pad2(min || 0)}`);
+  }
+
+  const raw = String(dateValue);
+  const embeddedTime = raw.match(/\b(\d{2}:\d{2})\b/)?.[1];
+  const time = timeValue || embeddedTime || fallbackTime;
+  const [hh, min] = String(time).split(":");
+  const paddedTime = `${pad2(hh || 0)}:${pad2(min || 0)}`;
+
+  const datePart = raw.includes("T")
+    ? raw.split("T")[0]
+    : raw.includes(" ")
+      ? raw.split(" ")[0]
+      : raw;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+    const [y, m, d] = datePart.split("-");
+    return renderDateTime(`${d}-${m}-${y}`, paddedTime);
+  }
+
+  if (/^\d{2}-\d{2}-\d{4}$/.test(datePart)) {
+    return renderDateTime(datePart, paddedTime);
+  }
+
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(datePart)) {
+    const [d, m, y] = datePart.split("/");
+    return renderDateTime(`${d}-${m}-${y}`, paddedTime);
+  }
+
+  return renderDateTime(datePart, paddedTime);
+};
+
 export default function SortableTable({
   columns,
   rows,
@@ -12,9 +63,9 @@ export default function SortableTable({
   loadingMessage = "Φόρτωση...",
   emptyMessage = "Δεν υπάρχουν διαθέσιμες εγγραφές.",
   wrapperClassName = "w-full overflow-x-auto overflow-y-visible shadow-md rounded-lg border border-patras-capePalliser/50",
-  tableClassName = "min-w-full table-fixed font-semibold bg-white/25 t-5",
+  tableClassName = "min-w-full table-fixed text-[13px] font-medium bg-white/25 t-5",
   theadClassName = "bg-patras-buccaneer",
-  tbodyClassName = "divide-y divide-patras-cameo",
+  tbodyClassName = "divide-y divide-patras-cameo text-[13px]",
   headerCellClassName = "",
 }) {
   const [sortBy, setSortBy] = useState(initialSortBy || columns[0]?.key);

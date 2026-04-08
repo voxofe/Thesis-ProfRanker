@@ -52,7 +52,7 @@ export default function PapersDrawer({ papers }) {
         onClick={toggleDrawer}
       >
         <span className="flex items-center text-patras-buccaneer">
-          Δημοσιεύσεις/Ανακοινώσεις σε συνέδρια
+          Δημοσιεύσεις/ανακοινώσεις σε συνέδρια
           <span className="text-patras-buccaneer text-lg ml-2">
             {isOpen ? "▼" : "\u25B6\uFE0E"}
           </span>

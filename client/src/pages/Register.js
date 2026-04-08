@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import InputField from "../components/InputField";
+import CustomSelect from "../components/CustomSelect";
 
 export default function Register({ isAdmin = false }) {
   const [firstName, setFirstName] = useState("");
@@ -11,6 +12,7 @@ export default function Register({ isAdmin = false }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [gender, setGender] = useState("select");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -29,7 +31,8 @@ export default function Register({ isAdmin = false }) {
     !!password &&
     !!confirmPassword &&
     isEmailValid &&
-    isPasswordMatch;
+    isPasswordMatch &&
+    (isAdmin || (gender && gender !== "select"));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,7 +41,11 @@ export default function Register({ isAdmin = false }) {
 
     const registrationMethod = isAdmin ? registerAdmin : register;
 
-    registrationMethod(firstName, lastName, email, password)
+    const registerArgs = isAdmin
+      ? [firstName, lastName, email, password]
+      : [firstName, lastName, email, password, gender];
+
+    registrationMethod(...registerArgs)
       .then(() => navigate("/login"))
       .catch(() =>
         setError(
@@ -72,7 +79,7 @@ export default function Register({ isAdmin = false }) {
     <div className="flex flex-col justify-start pt-4 sm:px-6 lg:px-8 -mt-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
         <h2 className="text-center text-3xl font-semibold tracking-tight text-gray-600">
-          {isAdmin ? "Εγγραφή Διαχειριστή" : "Εγγραφή στο σύστημα"}
+          {isAdmin ? "Εγγραφή διαχειριστή" : "Εγγραφή στο σύστημα"}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           {isAdmin
@@ -132,6 +139,20 @@ export default function Register({ isAdmin = false }) {
               onBlur={checkEmailValidity}
             />
 
+            {!isAdmin && (
+              <CustomSelect
+                label="Φύλο"
+                value={gender}
+                onChange={setGender}
+                options={[
+                  { value: "male", label: "Άνδρας" },
+                  { value: "female", label: "Γυναίκα" },
+                ]}
+                required
+                placeholder="Επιλέξτε φύλο"
+              />
+            )}
+
             {/* Password and Confirm Password Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 -mb-4 gap-x-4">
               <InputField
@@ -172,10 +193,10 @@ export default function Register({ isAdmin = false }) {
               >
                 {isLoading
                   ? isAdmin
-                    ? "Εγγραφή Διαχειριστή..."
+                    ? "Εγγραφή διαχειριστή..."
                     : "Εγγραφή..."
                   : isAdmin
-                  ? "Εγγραφή Διαχειριστή"
+                  ? "Εγγραφή διαχειριστή"
                   : "Εγγραφή"}
               </button>
             </div>

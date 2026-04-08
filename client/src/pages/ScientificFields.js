@@ -34,13 +34,18 @@ export default function ScientificFields() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-0">
+        <h1 className="text-2xl font-bold text-gray-700 mb-2">
+        Επιστημονικά πεδία
+        </h1>
         <p className="text-gray-600 text-[17px]">
-          Διαχειριστείτε τα επιστημονικά πεδία και τα μαθήματά τους. Επιλέξτε μία από τις παρακάτω ενέργειες για να συνεχίσετε.
+          Διαχειριστείτε τα επιστημονικά πεδία και τα μαθήματά τους. 
+          <br />
+          <span>Επιλέξτε μία από τις παρακάτω ενέργειες για να ξεκινήσετε.</span>
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <HomePagePanel
-          title="Προβολή Πεδίων"
+          title="Προβολή πεδίων"
           description="Δείτε όλα τα επιστημονικά πεδία σε έναν αναλυτικό πίνακα."
           buttonText="Όλα τα Πεδία"
           to="/scientific-fields/all"
@@ -48,15 +53,15 @@ export default function ScientificFields() {
           // infoPopup={scientificFieldsListPopup}
         />
         <HomePagePanel
-          title="Δημιουργία Πεδίου"
+          title="Δημιουργία πεδίου"
           description="Δημιουργήστε νέο επιστημονικό πεδίο με τα αντίστοιχα μαθήματα."
-          buttonText="+ Νέο Πεδίο"
+          buttonText="+ Νέο πεδίο"
           to="/scientific-fields/create"
           // showInfoMark={true}
           // infoPopup={scientificFieldsCreatePopup}
         />
         <HomePagePanel
-          title="Επεξεργασία Πεδίου"
+          title="Επεξεργασία πεδίου"
           description="Επεξεργαστείτε υπάρχοντα επιστημονικά πεδία και μαθήματα."
           buttonText="Επεξεργασία"
           to="/scientific-fields/edit"
