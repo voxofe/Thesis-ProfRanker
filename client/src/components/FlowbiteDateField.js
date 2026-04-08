@@ -55,6 +55,96 @@ const displayToIso = (display) => {
   return dateToIso(date);
 };
 
+const formatDisplayInput = (raw, options = {}) => {
+  const digits = raw.replace(/\D/g, "").slice(0, 8);
+  if (!digits) return "";
+
+  let idx = 0;
+  let day = "";
+  let month = "";
+  let dayAuto = false;
+  let monthAuto = false;
+  let dayComplete = false;
+  let monthComplete = false;
+
+  // Smart-advance: if first day digit is 4-9, treat as 0d and move on.
+  const d1 = digits[idx];
+  if (d1 >= "4") {
+    day = `0${d1}`;
+    dayAuto = true;
+    dayComplete = true;
+    idx += 1;
+  } else if (d1 === "3") {
+    if (digits.length - idx >= 2) {
+      const d2 = digits[idx + 1];
+      if (d2 === "0" || d2 === "1") {
+        day = `3${d2}`;
+        dayComplete = true;
+        idx += 2;
+      } else {
+        day = "03";
+        dayAuto = true;
+        dayComplete = true;
+        idx += 1;
+      }
+    } else {
+      day = digits.slice(idx);
+      idx = digits.length;
+    }
+  } else if (digits.length - idx >= 2) {
+    day = digits.slice(idx, idx + 2);
+    dayComplete = true;
+    idx += 2;
+  } else {
+    day = digits.slice(idx);
+    idx = digits.length;
+  }
+
+  if (idx < digits.length) {
+    // Smart-advance: if first month digit is 2-9, treat as 0m and move on.
+    const m1 = digits[idx];
+    if (m1 >= "2") {
+      month = `0${m1}`;
+      monthAuto = true;
+      monthComplete = true;
+      idx += 1;
+    } else if (m1 === "1" && digits.length - idx >= 2) {
+      const m2 = digits[idx + 1];
+      if (m2 >= "3") {
+        month = "01";
+        monthAuto = true;
+        monthComplete = true;
+        idx += 1;
+      } else {
+        month = `1${m2}`;
+        monthComplete = true;
+        idx += 2;
+      }
+    } else if (digits.length - idx >= 2) {
+      month = digits.slice(idx, idx + 2);
+      monthComplete = true;
+      idx += 2;
+    } else {
+      month = digits.slice(idx);
+      idx = digits.length;
+    }
+  }
+
+  const year = digits.slice(idx, idx + 4);
+  const parts = [];
+  if (day) parts.push(day);
+  if (month) parts.push(month);
+  if (year) parts.push(year);
+
+  let output = parts.join("-");
+  if (dayComplete && !month) output += "-";
+  if (monthComplete && !year && month) output += "-";
+  if (options.suppressTrailingDash && output.endsWith("-")) {
+    output = output.slice(0, -1);
+  }
+  return output;
+};
+
 const isoToLongDisplay = (iso) => {
   if (!iso) return "";
   const date = isoToDate(iso);
@@ -97,6 +187,7 @@ export default function FlowbiteDateField({
   const wrapperRef = useRef(null);
   const inputRef = useRef(null);
   const isClearingRef = useRef(false);
+  const suppressTrailingDashRef = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -291,6 +382,7 @@ export default function FlowbiteDateField({
     ? `${theme.root.input.field.input.base} ${inputClassNameProp}`
     : theme.root.input.field.input.base;
 
+
   const inlineTheme = useMemo(
     () => ({
       ...theme,
@@ -348,8 +440,26 @@ export default function FlowbiteDateField({
               }
               setIsOpen(false);
             }}
-            onChange={(event) => setInputValue(event.target.value)}
+            onChange={(event) => {
+              setInputValue(
+                formatDisplayInput(event.target.value, {
+                  suppressTrailingDash: suppressTrailingDashRef.current,
+                })
+              );
+              suppressTrailingDashRef.current = false;
+            }}
             onKeyDown={(event) => {
+              if (event.key === "Backspace") {
+                const el = inputRef.current;
+                if (
+                  el &&
+                  inputValue.endsWith("-") &&
+                  el.selectionStart === inputValue.length &&
+                  el.selectionEnd === inputValue.length
+                ) {
+                  suppressTrailingDashRef.current = true;
+                }
+              }
               if (event.key === "Enter") {
                 event.preventDefault();
                 const committed = commitTextValue(inputValue) ?? value;

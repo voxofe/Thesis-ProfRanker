@@ -9,6 +9,7 @@ export default function PhdSection() {
   const { formData, handleChange, handleFileChange, handleFileDelete } =
     useFormData();
   const today = new Date().toISOString().split("T")[0];
+  const todayDisplay = today.split("-").reverse().join("-");
 
   return (
     <div className="space-y-3 overflow-visible">
@@ -44,14 +45,19 @@ export default function PhdSection() {
 
           <div></div>
 
-          <FlowbiteDateField
-            label="Ημερομηνία λήψης διδακτορικού τίτλου"
-            value={formData.phdAcquisitionDate}
-            onChange={(value) => handleChange("phdAcquisitionDate", value)}
-            minDate="2011-01-01"
-            maxDate={today}
-            required={true}
-          />
+          <div>
+            <FlowbiteDateField
+              label="Ημερομηνία λήψης διδακτορικού τίτλου"
+              value={formData.phdAcquisitionDate}
+              onChange={(value) => handleChange("phdAcquisitionDate", value)}
+              minDate="2011-01-01"
+              maxDate={today}
+              required={true}
+            />
+            <p className="-mt-3 text-xs text-gray-500 italic">
+              Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}
+            </p>
+          </div>
           {/* <InputField
             label="Ημερομηνία λήψης διδακτορικού τίτλου"
             id="date-field"
