@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Datepicker } from "flowbite-react";
 import PropTypes from "prop-types";
 
@@ -17,6 +17,70 @@ const dateToIso = (date) => {
   return `${y}-${m}-${d}`;
 };
 
+const isoToDisplay = (iso) => {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-");
+  if (!y || !m || !d) return "";
+  return `${d}-${m}-${y}`;
+};
+
+const displayToIso = (display) => {
+  if (!display) return "";
+  const parts = display
+    .trim()
+    .split(/[-./\s]/)
+    .filter(Boolean);
+  if (parts.length !== 3) return "";
+
+  const [dStr, mStr, yStr] = parts;
+  const day = Number(dStr);
+  const month = Number(mStr);
+  const year = Number(yStr);
+  if (!Number.isFinite(day) || !Number.isFinite(month) || !Number.isFinite(year)) {
+    return "";
+  }
+  if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) {
+    return "";
+  }
+
+  const date = new Date(year, month - 1, day);
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return "";
+  }
+
+  return dateToIso(date);
+};
+
+const isoToLongDisplay = (iso) => {
+  if (!iso) return "";
+  const date = isoToDate(iso);
+  if (!date) return "";
+  return new Intl.DateTimeFormat("el-GR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+};
+
+const isWithinRange = (iso, minDate, maxDate) => {
+  if (!iso) return false;
+  const current = isoToDate(iso);
+  if (!current) return false;
+  if (minDate) {
+    const min = isoToDate(minDate);
+    if (min && current < min) return false;
+  }
+  if (maxDate) {
+    const max = isoToDate(maxDate);
+    if (max && current > max) return false;
+  }
+  return true;
+};
+
 export default function FlowbiteDateField({
   label,
   value,
@@ -26,21 +90,62 @@ export default function FlowbiteDateField({
   minDate,
   maxDate,
   popupAlign = "left",
+  placeholder = "DD-MM-YYYY",
   ...props
 }) {
-  const wrapperRef = useRef(null); // ✅ FIXED: declare ref
+  const { className: inputClassNameProp, ...inputProps } = props;
+  const wrapperRef = useRef(null);
+  const inputRef = useRef(null);
+  const isClearingRef = useRef(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [inputValue, setInputValue] = useState("");
 
   const dateValue = isoToDate(value);
   const min = minDate ? isoToDate(minDate) : undefined;
   const max = maxDate ? isoToDate(maxDate) : undefined;
 
-  // Clear field (scoped to this component)
+  const commitTextValue = useCallback(
+    (rawValue) => {
+      const raw = rawValue.trim();
+      if (!raw) {
+        onChange("");
+        onClear?.();
+        return "";
+      }
+
+      const nextIso = displayToIso(raw);
+      if (nextIso && isWithinRange(nextIso, minDate, maxDate)) {
+        onChange(nextIso);
+        return nextIso;
+      }
+
+      return null;
+    },
+    [onChange, onClear, minDate, maxDate]
+  );
+
   useEffect(() => {
-    if (value === "") {
-      const input = wrapperRef.current?.querySelector("input[type='text']");
-      if (input) input.value = "";
-    }
-  }, [value]);
+    if (isFocused) return;
+    setInputValue(value ? isoToLongDisplay(value) : "");
+  }, [value, isFocused]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!wrapperRef.current) return;
+      if (wrapperRef.current.contains(event.target)) return;
+
+      if (isFocused) {
+        const committed = commitTextValue(inputValue) ?? value;
+        setInputValue(committed ? isoToLongDisplay(committed) : "");
+        setIsFocused(false);
+      }
+      setIsOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [commitTextValue, inputValue, isFocused, value]);
 
   // Popup alignment
   const popupPos = useMemo(() => {
@@ -182,6 +287,25 @@ export default function FlowbiteDateField({
     },
   };
 
+  const inputClassName = inputClassNameProp
+    ? `${theme.root.input.field.input.base} ${inputClassNameProp}`
+    : theme.root.input.field.input.base;
+
+  const inlineTheme = useMemo(
+    () => ({
+      ...theme,
+      popup: {
+        ...theme.popup,
+        root: {
+          ...theme.popup.root,
+          base: "relative top-0 z-auto",
+          inline: "",
+        },
+      },
+    }),
+    [theme]
+  );
+
   return (
     <div className="flex flex-col mb-5">
       <label className="block text-sm font-medium pb-2 text-gray-900 mb-1">
@@ -193,28 +317,91 @@ export default function FlowbiteDateField({
         className="flex items-center gap-3 w-full relative overflow-visible pr-datepicker"
       >
         <div className="relative flex-1">
-          <Datepicker
-            className="w-full"
-            value={dateValue}
-            onChange={(dt) => onChange(dt ? dateToIso(dt) : "")}
-            minDate={min}
-            maxDate={max}
-            weekStart={1}
-            language="el"
-            showTodayButton = {false}
-            showClearButton={false}
-            labelTodayButton="Σήμερα"
-            theme={theme}
-            {...props}
+          <input
+            type="text"
+            value={inputValue}
+            placeholder={placeholder}
+            inputMode="numeric"
+            pattern="\d{2}-\d{2}-\d{4}"
+            {...inputProps}
+            ref={inputRef}
+            onFocus={() => {
+              setIsFocused(true);
+              if (isClearingRef.current) {
+                isClearingRef.current = false;
+                setInputValue("");
+              } else {
+                setInputValue(value ? isoToDisplay(value) : "");
+              }
+              setIsOpen(true);
+            }}
+            onBlur={(event) => {
+              const nextTarget = event.relatedTarget;
+              if (nextTarget && wrapperRef.current?.contains(nextTarget)) {
+                return;
+              }
+
+              if (isFocused) {
+                const committed = commitTextValue(inputValue) ?? value;
+                setInputValue(committed ? isoToLongDisplay(committed) : "");
+                setIsFocused(false);
+              }
+              setIsOpen(false);
+            }}
+            onChange={(event) => setInputValue(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                const committed = commitTextValue(inputValue) ?? value;
+                setInputValue(committed ? isoToLongDisplay(committed) : "");
+                setIsFocused(false);
+                setIsOpen(false);
+                inputRef.current?.blur();
+              }
+            }}
+            className={inputClassName}
           />
         </div>
+
+        {isOpen && (
+          <div className={popupPos}>
+            <Datepicker
+              inline
+              value={dateValue}
+              onChange={(dt) => {
+                const nextIso = dt ? dateToIso(dt) : "";
+                if (nextIso && !isWithinRange(nextIso, minDate, maxDate)) {
+                  return;
+                }
+                onChange(nextIso);
+                setInputValue(nextIso ? isoToLongDisplay(nextIso) : "");
+                setIsFocused(false);
+                setIsOpen(false);
+              }}
+              minDate={min}
+              maxDate={max}
+              weekStart={1}
+              language="el"
+              showTodayButton={false}
+              showClearButton={false}
+              labelTodayButton="Σήμερα"
+              theme={inlineTheme}
+            />
+          </div>
+        )}
 
           {value && (
             <button
               type="button"
+              onMouseDown={(event) => event.preventDefault()}
               onClick={() => {
+                isClearingRef.current = true;
                 onChange("");
                 onClear?.();
+                setInputValue("");
+                setIsFocused(true);
+                setIsOpen(true);
+                inputRef.current?.focus();
               }}
               title="Καθαρισμός"
               aria-label="Καθαρισμός"
@@ -238,4 +425,5 @@ FlowbiteDateField.propTypes = {
   minDate: PropTypes.string,
   maxDate: PropTypes.string,
   popupAlign: PropTypes.oneOf(["left", "center", "right"]),
+  placeholder: PropTypes.string,
 };

@@ -113,7 +113,7 @@ function AppContent() {
 
   return (
     <div className="flex justify-center min-h-screen min-w-screen">
-      <div className="w-[1310px] px-7 py-4 flex flex-col min-h-screen">
+      <div className="w-[1330px] px-7 py-4 flex flex-col min-h-screen">
         <Header academicYear={academicYear} />
         {/* Back link shown below header on non-home routes */}
         {shouldShowBackLink && (

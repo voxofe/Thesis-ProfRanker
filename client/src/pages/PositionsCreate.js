@@ -334,18 +334,22 @@ export default function CreatePosition() {
                 label="Ημερομηνία έναρξης"
                 value={formData.startDate}
                 onChange={(val) => {
+                  markTouched("startDate");
                   setFormData({ ...formData, startDate: val });
                   if (val) {
                     setDateCleared((prev) => ({ ...prev, startDate: false }));
                   }
                 }}
-                onClear={() => setDateCleared((prev) => ({ ...prev, startDate: true }))}
+                onClear={() => {
+                  markTouched("startDate");
+                  setDateCleared((prev) => ({ ...prev, startDate: true }));
+                }}
                 minDate={todayISO()}
                 maxDate={formData.endDate || undefined}
                 popupAlign="right"
                 required
               />
-              {dateCleared.startDate && validationErrors.startDate && (
+              {showError("startDate") && validationErrors.startDate && (
                 <p className="-mt-3 text-sm text-red-600">{validationErrors.startDate}</p>
               )}
             </div>
@@ -354,17 +358,21 @@ export default function CreatePosition() {
                 label="Ημερομηνία λήξης"
                 value={formData.endDate}
                 onChange={(val) => {
+                  markTouched("endDate");
                   setFormData({ ...formData, endDate: val });
                   if (val) {
                     setDateCleared((prev) => ({ ...prev, endDate: false }));
                   }
                 }}
-                onClear={() => setDateCleared((prev) => ({ ...prev, endDate: true }))}
+                onClear={() => {
+                  markTouched("endDate");
+                  setDateCleared((prev) => ({ ...prev, endDate: true }));
+                }}
                 minDate={formData.startDate || todayISO()}
                 popupAlign="right"
                 required
               />
-              {dateCleared.endDate && validationErrors.endDate && (
+              {showError("endDate") && validationErrors.endDate && (
                 <p className="-mt-3 text-sm text-red-600">{validationErrors.endDate}</p>
               )}
             </div>

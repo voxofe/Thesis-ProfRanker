@@ -20,11 +20,20 @@ export const CreatePositionValidationProvider = ({ children }) => {
       if (!formData.startTime) errors.startTime = "Η ώρα έναρξης είναι υποχρεωτική.";
       if (!formData.endTime) errors.endTime = "Η ώρα λήξης είναι υποχρεωτική.";
 
+      if (formData.startDate && formData.startTime) {
+        const start = new Date(`${formData.startDate}T${formData.startTime}`);
+        const now = new Date();
+        if (!isNaN(start) && start < now) {
+          errors.startDate = "Η ημερομηνία/ώρα έναρξης πρέπει να είναι σήμερα ή στο μέλλον (όχι πριν από τώρα).";
+        }
+      }
+
       if (formData.startDate && formData.endDate && formData.startTime && formData.endTime) {
         const start = new Date(`${formData.startDate}T${formData.startTime}`);
         const end = new Date(`${formData.endDate}T${formData.endTime}`);
-        if (!isNaN(start) && !isNaN(end) && end < start) {
-          errors.dateTimeRange = "Η ημερομηνία/ώρα λήξης δεν μπορεί να είναι πριν την ημερομηνία/ώρα έναρξης.";
+        if (!isNaN(start) && !isNaN(end) && end <= start) {
+          errors.endDate = "Η ημερομηνία/ώρα λήξης πρέπει να είναι μετά την ημερομηνία/ώρα έναρξης.";
+          errors.dateTimeRange = "Η λήξη πρέπει να είναι αυστηρά μετά την έναρξη (ημερομηνία και ώρα).";
         }
       }
     }
