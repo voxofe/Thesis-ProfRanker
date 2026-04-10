@@ -11,7 +11,7 @@ export function getParentPath(pathname) {
   if (path.startsWith("/scientific-fields/")) return "/scientific-fields";
   if (path === "/register-admin") return "/home";
   if (path === "/ranking") return "/home";
-  if (path.startsWith("/applicant-score/")) return "/home";
+  if (path.startsWith("/application-score/")) return "/home";
   if (path === "/form") return "/home";
   return "/home";
 }

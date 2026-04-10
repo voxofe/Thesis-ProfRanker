@@ -215,7 +215,7 @@ export default function Home() {
             title="Η αίτησή μου & η βαθμολογία μου"
             description="Δείτε την υποβληθείσα αίτησή σας, τα δικαιολογητικά και τη βαθμολογία σας."
             buttonText="Προβολή αίτησης"
-            to={userRole === "applicant" ? `/applicant-score/${currentUser.id}` : undefined}
+            to={userRole === "applicant" ? `/application-score/${currentUser.id}` : undefined}
             buttonDisabled={userRole === "guest"}
             colorClass={
               userRole === "guest"

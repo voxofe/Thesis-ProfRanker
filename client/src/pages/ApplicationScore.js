@@ -14,7 +14,7 @@ const API_BASE_URL = (
   ""
 );
 
-export default function ApplicantScore() {
+export default function ApplicationScore() {
   const { currentUser } = useAuth();
   const { id } = useParams();
   const { positions = [] } = usePositions();
@@ -124,19 +124,31 @@ export default function ApplicantScore() {
     { key: "military", label: "Στρατιωτικές υποχρεώσεις", value: applicantData?.documents?.military },
   ];
 
+  const handleDownload = async (url, name) => {
+    if (!url) return;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(url, {
+        responseType: "blob",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      const blobUrl = window.URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = name || "document";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Error downloading document:", error);
+    }
+  };
+
   return (
-    <div className="grid grid-cols-1 gap-y-5 pt-5">
-      {/* <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b pb-2">
-        <h1 className="text-2xl text-gray-700">Η αίτηση μου</h1>
-        <Link
-          to="/form"
-          className="inline-flex items-center justify-center bg-patras-buccaneer text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors"
-        >
-          Επεξεργασία αίτησης
-        </Link>
-      </div> */}
-      <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-700">
-        Η αίτησή μου & η βαθμολογία μου
+    <div className="grid grid-cols-1 gap-y-5 pt-0">
+      <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
+        Αίτηση & Βαθμολογία υποψηφίου
       </h1>
       <div className="flex items-center justify-center">
         <div className="inline-flex rounded-full border border-patras-buccaneer/40 bg-white">
@@ -247,25 +259,25 @@ export default function ApplicantScore() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                    <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite">
                       {schoolName}
                     </td>
-                    <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                    <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite">
                       {departmentName}
                     </td>
-                    <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                    <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite">
                       {applicantData?.scientificField || "—"}
                     </td>
-                    <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                    <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
                       {toDDMMYYYYHHMM(startDate, startTime)}
                     </td>
-                    <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                    <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
                       {toDDMMYYYYHHMM(endDate, endTime)}
                     </td>
-                    <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                    <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
                       {toDDMMYYYYHHMM(submitDate)}
                     </td>
-                    <td className="px-6 py-4 text-center align-middle">
+                    <td className="px-6 py-4 text-sm text-center align-middle">
                       <CoursesDrawer
                         courses={courses}
                         scientificField={applicantData?.scientificField || matchedPosition?.scientificField}
@@ -296,15 +308,19 @@ export default function ApplicantScore() {
                         {doc.label}
                       </td>
                       <td className="px-6 py-4 text-patras-buccaneer">
-                        {doc.value?.url ? (
-                          <a
-                            href={doc.value.url}
+                        {doc.value?.downloadPath || doc.value?.downloadUrl || doc.value?.url ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const downloadUrl = doc.value?.downloadPath
+                                ? `${API_BASE_URL}${doc.value.downloadPath}`
+                                : doc.value?.downloadUrl || doc.value?.url;
+                              handleDownload(downloadUrl, doc.value?.name);
+                            }}
                             className="underline text-patras-buccaneer hover:text-patras-sanguineBrown"
-                            target="_blank"
-                            rel="noreferrer"
                           >
                             {doc.value?.name || "Λήψη αρχείου"}
-                          </a>
+                          </button>
                         ) : (
                           "Δεν έχει υποβληθεί"
                         )}

@@ -236,7 +236,7 @@ export default function CreatePosition() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
+    <div className="max-w-5xl mx-auto px-6 py-0 space-y-8">
       {submitting && (
         <div className="flex justify-center items-center">
           <svg
@@ -262,14 +262,14 @@ export default function CreatePosition() {
           <span className="ml-2 text-patras-buccaneer">Υποβολή αίτησης...</span>
         </div>
       )}
-      <header className="text-center">
-        <h1 className="text-3xl font-semibold text-gray-800">
-          {isEditMode ? "Ενημέρωση Θέσης" : "Δημιουργία θέσης"}
+      <header className="text-center pb-2">
+        <h1 className="text-2xl text-center border-b pb-2 text-gray-800">
+          {isEditMode ? "Ενημέρωση θέσης" : "Δημιουργία θέσης"}
         </h1>
-        <p className="text-gray-500 mt-1 text-sm">
+        <p className="text-gray-500 mt-10 text-sm text-center">
           {isEditMode
-            ? "Ενημερώστε τα στοιχεία της θέσης και την χρονική περίδο των αιτήσεων της."
-            : "Ορίστε τα στοιχεία της νέας θέσης και την χρονική περίδο των αιτήσεων της."}
+            ? "Ενημερώστε το επιστημονικό πεδίο και την χρονική περίοδο των αιτήσεων της."
+            : "Ορίστε το επιστημονικό πεδίο και την χρονική περίοδο των αιτήσεων της."}
         </p>
       </header>
 
@@ -312,18 +312,6 @@ export default function CreatePosition() {
             />
           </div>
         </section>
-
-        {/* COURSES */}
-        <CoursePanel
-          courses={selectedScientificField?.courses || []}
-          onCourseChange={handleCourseChange}
-          onAddCourse={addCourse}
-          onRemoveCourse={removeCourse}
-          showAddButton={false}
-          disabled
-          scientificFieldValue={selectedScientificField?.scientificField || "select"}
-          errors={validationErrors}
-        />
 
         {/* DATES */}
         <section>
@@ -416,7 +404,7 @@ export default function CreatePosition() {
             aria-disabled={submitDisabled}
             className="px-6 py-2 bg-patras-buccaneer text-white font-medium rounded-lg hover:bg-patras-sanguineBrown transition disabled:opacity-60"
           >
-            {submitting ? (isEditMode ? "Ενημέρωση..." : "Δημιουργία...") : (isEditMode ? "Ενημέρωση Θέσης" : "Δημιουργία θέσης")}
+            {submitting ? (isEditMode ? "Ενημέρωση..." : "Δημιουργία...") : (isEditMode ? "Ενημέρωση θέσης" : "Δημιουργία θέσης")}
           </button>
 
           {notification.message && (

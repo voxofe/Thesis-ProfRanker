@@ -12,7 +12,7 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import BackLinkController from "./components/BackLinkController";
 import ApplicationForm from "./pages/ApplicationForm";
-import ApplicantScore from "./pages/ApplicantScore";
+import ApplicationScore from "./pages/ApplicationScore";
 import Ranking from "./pages/Ranking";
 import Positions from "./pages/Positions";
 import PositionsAll from "./pages/PositionsAll";
@@ -155,8 +155,8 @@ function AppContent() {
                 {(currentUser?.role === "applicant" ||
                   currentUser?.role === "admin") && (
                   <>
-                    <Route path="/applicant-score/:id" element={<ApplicantScore />} />
-                    <Route path="/score/applicant/:id" element={<Navigate to="/applicant-score/:id" replace />} />
+                    <Route path="/application-score/:id" element={<ApplicationScore />} />
+                    <Route path="/score/applicant/:id" element={<Navigate to="/application-score/:id" replace />} />
                   </>
                 )}
 

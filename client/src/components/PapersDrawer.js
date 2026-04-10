@@ -40,6 +40,13 @@ function IssnCell({ issn }) {
 export default function PapersDrawer({ papers }) {
   const [isOpen, setIsOpen] = useState(false);
 
+  const getPaperPoints = (quartile) => {
+    const q = String(quartile || "").trim().toUpperCase();
+    if (q === "Q1") return 2;
+    if (q === "Q2") return 1.6;
+    return 0.4;
+  };
+
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
   };
@@ -65,33 +72,36 @@ export default function PapersDrawer({ papers }) {
           <table className="min-w-full bg-[#fffbf6] border border-patras-cameo rounded-lg shadow-md">
             <thead className="bg-patras-buccaneer">
               <tr>
-                <th className="px-4 py-2 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
                   Είδος
                 </th>
-                <th className="px-4 py-2 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
                   Τίτλος
                 </th>
-                <th className="px-4 py-2 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
                   Περιοδικό/Συνέδριο
                 </th>
-                <th className="px-4 py-2 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
                   Έτος
                 </th>
-                <th className="px-4 py-2 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
                   ISSN
                 </th>
-                <th className="px-4 py-2 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
+                <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
                   Χώρα
                 </th>
-                <th className="px-4 py-2 text-center text-sm font-semibold text-white uppercase tracking-wider">
+                <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
                   Quartile
+                </th>
+                <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider">
+                  Μόρια
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-patras-cameo">
               {papers.map((paper, index) => (
                 <tr key={index} className="">
-                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite text-[15px]">
                     {paper.type === "journal"
                       ? "Περιοδικό"
                       : paper.type === "conference"
@@ -100,23 +110,26 @@ export default function PapersDrawer({ papers }) {
                       ? "Άλλο"
                       : "N/A"}
                   </td>
-                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite text-[15px]">
                     {paper.paperTitle || "N/A"}
                   </td>
-                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite text-[15px]">
                     {paper.journalConfTitle || "-"}
                   </td>
-                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite text-[15px]">
                     {paper.year || "N/A"}
                   </td>
-                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite text-[15px]">
                     <IssnCell issn={paper.issn} />
                   </td>
-                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite text-[15px]">
                     {paper.country || ""}
                   </td>
-                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle">
+                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite text-[15px]">
                     {paper.quartile || ""}
+                  </td>
+                  <td className="px-4 py-2 text-patras-buccaneer text-center align-middle text-[15px]">
+                    {getPaperPoints(paper.quartile)}
                   </td>
                 </tr>
               ))}

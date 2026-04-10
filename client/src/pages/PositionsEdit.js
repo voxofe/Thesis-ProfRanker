@@ -218,8 +218,8 @@ export default function PositionsEdit() {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-y-5 pt-5">
-      <h1 className="text-2xl text-center border-b  pb-2 mb-6 text-gray-700">
+    <div className="grid grid-cols-1 gap-y-5 pt-0">
+      <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
         Επεξεργασία θέσεων
       </h1>
       <div className="flex items-center justify-between ml-1 m-0 p-0">

@@ -188,7 +188,7 @@ export default function ScientificFieldsCreate() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
+    <div className="max-w-5xl mx-auto px-6 py-0 space-y-8">
       {submitting && (
         <div className="flex justify-center items-center">
           <svg
@@ -214,9 +214,13 @@ export default function ScientificFieldsCreate() {
           <span className="ml-2 text-patras-buccaneer">Υποβολή αίτησης...</span>
         </div>
       )}
-      <header className="text-center">
-        <h1 className="text-3xl font-semibold text-gray-800">Δημιουργία πεδίου</h1>
-        <p className="text-gray-500 mt-1 text-sm">Ορίστε τα στοιχεία του νέου επιστημονικού πεδίου και τα μαθήματά του</p>
+      <header className="text-center pb-2">
+        <h1 className="text-2xl text-center border-b pb-2 text-gray-800">
+          Δημιουργία πεδίου
+        </h1>
+        <p className="text-gray-500 mt-10 text-sm text-center">
+          Ορίστε τα στοιχεία του νέου επιστημονικού πεδίου και τα μαθήματά του
+        </p>
       </header>
 
       <form
