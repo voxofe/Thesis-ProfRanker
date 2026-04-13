@@ -1,7 +1,6 @@
 import React from "react";
 import { useFormData } from "../../contexts/FormDataContext";
 import InputField from "../InputField";
-import Checkbox from "../Checkbox";
 
 export default function PersonalInfoSection() {
   const { formData, handleChange } = useFormData();
@@ -107,16 +106,6 @@ export default function PersonalInfoSection() {
           value={formData.postalCode}
           onChange={(value) => handleChange("postalCode", value)}
           required={true}
-        />
-      </div>
-
-      <div className="sm:col-span-3 pt-2">
-        <Checkbox
-          label="Είμαι δημόσιος υπάλληλος"
-          id="is-public-employee"
-          name="is-public-employee"
-          checked={formData.isPublicEmployee}
-          onChange={(value) => handleChange("isPublicEmployee", value)}
         />
       </div>
     </div>

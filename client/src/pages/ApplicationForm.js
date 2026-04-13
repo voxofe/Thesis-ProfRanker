@@ -145,7 +145,7 @@ export default function Form({ academicYear }) {
       "militaryObligationsDocument",
       "employmentCertificateDocument",
       "publicEmployeePermissionDocument",
-      
+      "notParticipatedDeclarationDocument",
     ].forEach((field) => {
       if (formData[field]) {
         formDataToSend.append(field, formData[field]);

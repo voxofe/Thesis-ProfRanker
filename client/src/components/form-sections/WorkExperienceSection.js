@@ -34,7 +34,7 @@ export default function WorkExperienceSection() {
 
       <Upload
         icon="document-text"
-        label="Βεβαίωση προϋπηρεσίας από τον Φορέα"
+        label="Βεβαιώσεις προϋπηρεσίας από τον Φορέα / Συμβάσεις ως τεκμήρια μεταδιδακτορικής εργασιακής εμπειρίας (εξαιρείται η διδακτική εμπειρία)"
         content="τη βεβαίωση προϋπηρεσίας"
         id="employment-certificate-upload"
         name="employment-certificate-upload"

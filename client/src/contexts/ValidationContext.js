@@ -118,10 +118,12 @@ export const ValidationProvider = ({ children }) => {
     const validateDocuments = () => {
       const requiresMilitaryDoc = currentUser?.gender === "male";
       const requiresPublicEmployeeDoc = formData.isPublicEmployee;
+      const requiresNotParticipatedDoc = formData.hasNotParticipatedInPastProgram;
 
       return !!(
         (!requiresMilitaryDoc || formData.militaryObligationsDocument) &&
-        (!requiresPublicEmployeeDoc || formData.publicEmployeePermissionDocument)
+        (!requiresPublicEmployeeDoc || formData.publicEmployeePermissionDocument) &&
+        (!requiresNotParticipatedDoc || formData.notParticipatedDeclarationDocument)
       );
     };
 
