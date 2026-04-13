@@ -14,6 +14,12 @@ export const FormDataProvider = ({ children }) => {
       firstName: currentUser?.firstName ?? "",
       lastName: currentUser?.lastName ?? "",
       email: currentUser?.email ?? "",
+      phoneNumber: "",
+      landlineNumber: "",
+      streetAddress: "",
+      city: "",
+      postalCode: "",
+      isPublicEmployee: false,
       phdTitle: "",
       phdAcquisitionDate: "",
       phdIsFromForeignInstitute: false,
@@ -24,6 +30,7 @@ export const FormDataProvider = ({ children }) => {
       doatapDocument: null,
       coursePlanDocument: null,
       militaryObligationsDocument: null,
+      employmentCertificateDocument: null,
       papers: [],
       positionId: "",
     };
@@ -33,6 +40,12 @@ export const FormDataProvider = ({ children }) => {
       const form = currentUser.form;
       return {
         ...baseData,
+        phoneNumber: form.phoneNumber ?? "",
+        landlineNumber: form.landlineNumber ?? "",
+        streetAddress: form.streetAddress ?? "",
+        city: form.city ?? "",
+        postalCode: form.postalCode ?? "",
+        isPublicEmployee: form.isPublicEmployee ?? false,
         phdTitle: form.phdTitle ?? "",
         phdAcquisitionDate: form.phdAcquisitionDate ?? "",
         phdIsFromForeignInstitute: form.phdIsFromForeignInstitute ?? false,
@@ -44,6 +57,7 @@ export const FormDataProvider = ({ children }) => {
         doatapDocument: form.doatapDocument ?? null,
         coursePlanDocument: form.coursePlanDocument ?? null,
         militaryObligationsDocument: form.militaryObligationsDocument ?? null,
+        employmentCertificateDocument: form.employmentCertificateDocument ?? null,
         papers: form.papers ?? [],
       };
     }

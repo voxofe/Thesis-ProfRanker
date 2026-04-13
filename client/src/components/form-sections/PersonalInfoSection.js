@@ -1,16 +1,14 @@
 import React from "react";
 import { useFormData } from "../../contexts/FormDataContext";
 import InputField from "../InputField";
-import Upload from "../Upload";
+import Checkbox from "../Checkbox";
 
 export default function PersonalInfoSection() {
-  const { formData, handleChange, handleFileChange, handleFileDelete } =
-    useFormData();
+  const { formData, handleChange } = useFormData();
 
   return (
     <div className="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-3">
       <div className="sm:col-span-1">
-        {/* First Name */}
         <InputField
           disabled
           label="Όνομα"
@@ -23,8 +21,8 @@ export default function PersonalInfoSection() {
           required={true}
         />
       </div>
+
       <div className="sm:col-span-1">
-        {/* Last Name */}
         <InputField
           disabled
           label="Επώνυμο"
@@ -37,8 +35,8 @@ export default function PersonalInfoSection() {
           required={true}
         />
       </div>
+
       <div className="sm:col-span-1">
-        {/* Email */}
         <InputField
           disabled
           label="Email"
@@ -52,19 +50,49 @@ export default function PersonalInfoSection() {
         />
       </div>
 
-      <div className="sm:col-span-3">
-        {/* CV Upload*/}
-        <Upload
-          icon="document-text"
-          label="Βιογραφικό σημείωμα"
-          content="τo βιογραφικό σας"
-          id="cv-upload"
-          name="cv-upload"
-          accept=".pdf,.doc,.docx, .odt"
-          uploadedFile={formData.cvDocument}
-          onChange={(e) => handleFileChange("cvDocument", e)}
-          onDelete={() => handleFileDelete("cvDocument")}
+      <div className="sm:col-span-1">
+        <InputField
+          label="Κινητό τηλέφωνο"
+          id="phone-number"
+          name="phone-number"
+          type="text"
+          value={formData.phoneNumber}
+          onChange={(value) => handleChange("phoneNumber", value)}
           required={true}
+        />
+      </div>
+
+      <div className="sm:col-span-1">
+        <InputField
+          label="Σταθερό τηλέφωνο"
+          id="landline-number"
+          name="landline-number"
+          type="text"
+          value={formData.landlineNumber}
+          onChange={(value) => handleChange("landlineNumber", value)}
+          required={false}
+        />
+      </div>
+
+      <div className="sm:col-span-1">
+        <InputField
+          label="Διεύθυνση"
+          id="address"
+          name="address"
+          type="text"
+          value={formData.address}
+          onChange={(value) => handleChange("address", value)}
+          required={true}
+        />
+      </div>
+
+      <div className="sm:col-span-3 pt-2">
+        <Checkbox
+          label="Είμαι δημόσιος υπάλληλος"
+          id="is-public-employee"
+          name="is-public-employee"
+          checked={formData.isPublicEmployee}
+          onChange={(value) => handleChange("isPublicEmployee", value)}
         />
       </div>
     </div>
