@@ -127,6 +127,8 @@ export const FormDataProvider = ({ children }) => {
         handleChange,
         handleFileChange,
         handleFileDelete,
+        addEmploymentCertificate,
+        removeEmploymentCertificate,
       }}
     >
       {children}

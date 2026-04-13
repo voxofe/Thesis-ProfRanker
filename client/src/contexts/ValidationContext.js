@@ -108,12 +108,20 @@ export const ValidationProvider = ({ children }) => {
         workExperienceNumber >= 0 &&
         workExperienceNumber <= 10;
 
-      return !!(
-        hasWorkExperience &&
-        workExperienceValid &&
-        (formData.employmentCertificates || []).length > 0
-      );
-    };
+        const hasEmploymentCertificates =
+          (formData.employmentCertificates || []).length > 0;
+
+        // If applicant declares 0 years, no certificates are required.
+        if (hasWorkExperience && workExperienceValid && workExperienceNumber === 0) {
+          return true;
+        }
+
+        return !!(
+          hasWorkExperience &&
+          workExperienceValid &&
+          hasEmploymentCertificates
+        );
+      };
 
     const validateDocuments = () => {
       const requiresMilitaryDoc = currentUser?.gender === "male";

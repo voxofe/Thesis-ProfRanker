@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   PlusIcon,
   TrashIcon,
@@ -23,9 +23,14 @@ export default function EmploymentCertificatesUploadStrip({
   label,
 }) {
   const inputRef = useRef(null);
+  const [localFiles, setLocalFiles] = useState([]);
   const maxFileBytes = 5 * 1024 * 1024;
-  const addFileHandler = onAddFile || onChange || (() => {});
-  const deleteFileHandler = onDeleteFile || onDelete || (() => {});
+  const addFileHandler = onAddFile || onChange;
+  const deleteFileHandler = onDeleteFile || onDelete;
+  const effectiveFiles = useMemo(() => {
+    if (Array.isArray(files) && files.length > 0) return files;
+    return localFiles;
+  }, [files, localFiles]);
 
   const parseAcceptList = () =>
     (accept || "")
@@ -57,7 +62,10 @@ export default function EmploymentCertificatesUploadStrip({
     incoming.forEach((file) => {
       if (!isFileAllowed(file)) return;
       if (file.size > maxFileBytes) return;
-      addFileHandler(file);
+      setLocalFiles((prev) => [...prev, file]);
+      if (typeof addFileHandler === "function") {
+        addFileHandler(file);
+      }
     });
     event.target.value = "";
   };
@@ -70,14 +78,21 @@ export default function EmploymentCertificatesUploadStrip({
       </label>
 
       <div className="flex items-stretch gap-3 overflow-x-auto pb-2">
-        {files.map((file, index) => (
+        {effectiveFiles.map((file, index) => (
           <div
             key={`${getDisplayName(file)}-${index}`}
             className="relative h-40 w-40 shrink-0 rounded-lg border-2 border-patras-buccaneer bg-white p-3"
           >
             <TrashIcon
               className="absolute right-2 top-2 h-5 w-5 cursor-pointer text-gray-400 hover:text-red-700"
-              onClick={() => deleteFileHandler(index)}
+              onClick={() => {
+                setLocalFiles((prev) =>
+                  prev.filter((_, currentIndex) => currentIndex !== index)
+                );
+                if (typeof deleteFileHandler === "function") {
+                  deleteFileHandler(index);
+                }
+              }}
             />
             <div className="flex h-full flex-col items-center justify-center text-center">
               <DocumentTextIcon className="h-10 w-10 text-patras-buccaneer" />
