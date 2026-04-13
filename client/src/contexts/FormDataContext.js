@@ -31,6 +31,7 @@ export const FormDataProvider = ({ children }) => {
       coursePlanDocument: null,
       militaryObligationsDocument: null,
       employmentCertificateDocument: null,
+      publicEmployeePermissionDocument: null,
       papers: [],
       positionId: "",
     };
@@ -58,6 +59,7 @@ export const FormDataProvider = ({ children }) => {
         coursePlanDocument: form.coursePlanDocument ?? null,
         militaryObligationsDocument: form.militaryObligationsDocument ?? null,
         employmentCertificateDocument: form.employmentCertificateDocument ?? null,
+        publicEmployeePermissionDocument: form.publicEmployeePermissionDocument ?? null,
         papers: form.papers ?? [],
       };
     }

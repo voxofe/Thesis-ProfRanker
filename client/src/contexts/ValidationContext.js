@@ -11,11 +11,13 @@ export const ValidationProvider = ({ children }) => {
   const { currentUser } = useAuth();
   const [stepValidation, setStepValidation] = useState({
     1: false, // Personal Info
-    2: false, // Scientific Field
-    3: false, // Course Plan (empty step)
-    4: false, // PhD
-    5: true, // Papers
-    6: false, // Final Info
+    2: false, // Bio
+    3: false, // Scientific Field
+    4: true,  // Course Plan
+    5: false, // PhD
+    6: true,  // Papers
+    7: false, // Work Experience
+    8: false, // Documents / Declarations
   });
 
   // Update validation whenever formData changes
@@ -25,8 +27,23 @@ export const ValidationProvider = ({ children }) => {
         formData.firstName?.trim() &&
         formData.lastName?.trim() &&
         formData.email?.trim() &&
-        formData.cvDocument
+        formData.phoneNumber?.trim() &&
+        formData.streetAddress?.trim() &&
+        formData.city?.trim() &&
+        formData.postalCode?.trim()
       );
+    };
+
+    const validateBio = () => {
+      return !!formData.cvDocument;
+    };
+
+    const validateScientificField = () => {
+      return !!formData.positionId;
+    };
+
+    const validateCoursePlan = () => {
+      return true; // Not yet implemented
     };
 
     const validatePhd = () => {
@@ -77,40 +94,46 @@ export const ValidationProvider = ({ children }) => {
       return allPapersComplete;
     };
 
-    const validateScientificField = () => {
-      return !!formData.positionId;
-    };
 
-    const validateCoursePlan = () => {
-      return true; // Not yet implemented
-    };
-
-    const validateFinalInfo = () => {
-      const requiresMilitaryDoc = currentUser?.gender === "male";
+    const validateWorkExperience = () => {
       const workExperienceValue = formData.workExperience;
       const hasWorkExperience =
         workExperienceValue !== "" &&
         workExperienceValue !== null &&
         workExperienceValue !== undefined;
+
       const workExperienceNumber = Number(workExperienceValue);
       const workExperienceValid =
         Number.isFinite(workExperienceNumber) &&
         workExperienceNumber >= 0 &&
-        workExperienceNumber <= 14;
+        workExperienceNumber <= 10;
+
       return !!(
         hasWorkExperience &&
         workExperienceValid &&
-        (!requiresMilitaryDoc || formData.militaryObligationsDocument)
+        formData.employmentCertificateDocument
+      );
+    };
+
+    const validateDocuments = () => {
+      const requiresMilitaryDoc = currentUser?.gender === "male";
+      const requiresPublicEmployeeDoc = formData.isPublicEmployee;
+
+      return !!(
+        (!requiresMilitaryDoc || formData.militaryObligationsDocument) &&
+        (!requiresPublicEmployeeDoc || formData.publicEmployeePermissionDocument)
       );
     };
 
     setStepValidation({
       1: validatePersonalInfo(),
-      2: validateScientificField(),
-      3: validateCoursePlan(),
-      4: validatePhd(),
-      5: validatePapers(),
-      6: validateFinalInfo(),
+      2: validateBio(),
+      3: validateScientificField(),
+      4: validateCoursePlan(),
+      5: validatePhd(),
+      6: validatePapers(),
+      7: validateWorkExperience(),
+      8: validateDocuments(),
     });
   }, [formData, currentUser?.gender]);
 

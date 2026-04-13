@@ -76,12 +76,36 @@ export default function PersonalInfoSection() {
 
       <div className="sm:col-span-1">
         <InputField
-          label="Διεύθυνση"
-          id="address"
-          name="address"
+          label="Οδός / Διεύθυνση"
+          id="street-address"
+          name="street-address"
           type="text"
-          value={formData.address}
-          onChange={(value) => handleChange("address", value)}
+          value={formData.streetAddress}
+          onChange={(value) => handleChange("streetAddress", value)}
+          required={true}
+        />
+      </div>
+
+      <div className="sm:col-span-1">
+        <InputField
+          label="Πόλη"
+          id="city"
+          name="city"
+          type="text"
+          value={formData.city}
+          onChange={(value) => handleChange("city", value)}
+          required={true}
+        />
+      </div>
+
+      <div className="sm:col-span-1">
+        <InputField
+          label="Ταχυδρομικός κώδικας"
+          id="postal-code"
+          name="postal-code"
+          type="text"
+          value={formData.postalCode}
+          onChange={(value) => handleChange("postalCode", value)}
           required={true}
         />
       </div>

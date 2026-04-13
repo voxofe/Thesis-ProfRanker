@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useFormData } from "../contexts/FormDataContext";
 import { useValidation } from "../contexts/ValidationContext";
 import PersonalInfoSection from "../components/form-sections/PersonalInfoSection";
-import PhdSection from "../components/form-sections/PhdSection";
-import ScientificFieldSection from "../components/form-sections/ScientificFieldSection";
 import BioSection from "../components/form-sections/BioSection";
-import PapersSection from "../components/form-sections/PapersSection";
+import ScientificFieldSection from "../components/form-sections/ScientificFieldSection";
 import CoursePlanSection from "../components/form-sections/CoursePlanSection";
+import PhdSection from "../components/form-sections/PhdSection";
+import PapersSection from "../components/form-sections/PapersSection";
+import WorkExperienceSection from "../components/form-sections/WorkExperienceSection";
+import DocumentsSection from "../components/form-sections/DocumentsSection";
 import Stepper from "../components/Stepper";
 import Tooltip from "../components/Tooltip";
 import axios from "axios";
@@ -44,11 +46,16 @@ export default function Form({ academicYear }) {
     },
     {
       id: 2,
+      title: "Βιογραφικό",
+      component: BioSection,
+    },
+    {
+      id: 3,
       title: "Επιστημονικό πεδίο",
       component: ScientificFieldSection,
     },
     {
-      id: 3,
+      id: 4,
       title: "Σχεδιάγραμμα διδασκαλίας",
       component: (props) => (
         <CoursePlanSection
@@ -59,19 +66,24 @@ export default function Form({ academicYear }) {
       ),
     },
     {
-      id: 4,
+      id: 5,
       title: "Διδακτορικό",
       component: PhdSection,
     },
     {
-      id: 5,
+      id: 6,
       title: "Ακαδημαϊκές εργασίες",
       component: PapersSection,
     },
     {
-      id: 6,
-      title: "Τελικές πληροφορίες",
-      component: BioSection,
+      id: 7,
+      title: "Εργασιακή εμπειρία",
+      component: WorkExperienceSection,
+    },
+    {
+      id: 8,
+      title: "Υπεύθυνες δηλώσεις",
+      component: DocumentsSection,
     },
   ];
 
@@ -81,7 +93,7 @@ export default function Form({ academicYear }) {
   const nextDisabled = !canProceedFromStep(currentStep);
 
   // Only these steps need overflow-visible (add more IDs if needed)
-  const stepsNeedingOverflow = new Set([4]);
+  const stepsNeedingOverflow = new Set([5]);
   const contentOverflow =  stepsNeedingOverflow.has(currentStep) ? "overflow-visible" : "overflow-y-auto";
   // const contentOverflow = "overflow-y-auto";
   const handleStepClick = (step) => {
