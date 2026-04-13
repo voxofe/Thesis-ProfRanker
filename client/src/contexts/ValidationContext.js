@@ -121,6 +121,7 @@ export const ValidationProvider = ({ children }) => {
       const requiresNotParticipatedDoc = formData.hasNotParticipatedInPastProgram;
 
       return !!(
+        formData.responsibleDeclarationDocument &&
         (!requiresMilitaryDoc || formData.militaryObligationsDocument) &&
         (!requiresPublicEmployeeDoc || formData.publicEmployeePermissionDocument) &&
         (!requiresNotParticipatedDoc || formData.notParticipatedDeclarationDocument)

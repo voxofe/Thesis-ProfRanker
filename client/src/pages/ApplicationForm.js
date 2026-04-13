@@ -146,6 +146,7 @@ export default function Form({ academicYear }) {
       "employmentCertificateDocument",
       "publicEmployeePermissionDocument",
       "notParticipatedDeclarationDocument",
+      "responsibleDeclarationDocument"
     ].forEach((field) => {
       if (formData[field]) {
         formDataToSend.append(field, formData[field]);

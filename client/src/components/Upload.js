@@ -9,6 +9,8 @@ export default function Upload(props) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState("");
   const maxFileBytes = 10 * 1024 * 1024;
+  const contentLabel = props.contentLabel || props.content || "";
+  const contentStatus = props.contentStatus || props.content || "";
 
   // Check if we have an existing file (filename string) or uploaded file (File object)
   const hasExistingFile =
@@ -179,7 +181,7 @@ export default function Upload(props) {
                                         : ""
                                     }`}
               >
-                <span className="m-2 block">Αναρτήστε {props.content} εδώ </span>
+                <span className="m-2 block">Αναρτήστε {contentLabel} εδώ </span>
                 <input
                   id={props.id}
                   name={props.name}
@@ -216,8 +218,8 @@ export default function Upload(props) {
                 ? `Το αρχείο "${getDisplayName()}" είναι ήδη αναρτημένο`
                 : props.id === "milatary-obligations-upload"
                 ? "Η υπεύθυνη δήλωση"
-                : props.content.charAt(0).toUpperCase() +
-                  props.content.slice(1)}{" "}
+                : contentStatus.charAt(0).toUpperCase() +
+                  contentStatus.slice(1)}{" "}
               {hasUploadedFile && "επιλέχθηκε επιτυχώς"}
             </p>
           )}
