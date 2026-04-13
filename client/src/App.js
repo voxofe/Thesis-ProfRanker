@@ -13,6 +13,7 @@ import Home from "./pages/Home";
 import BackLinkController from "./components/BackLinkController";
 import ApplicationForm from "./pages/ApplicationForm";
 import ApplicationScore from "./pages/ApplicationScore";
+import Profile from "./pages/Profile";
 import Ranking from "./pages/Ranking";
 import Positions from "./pages/Positions";
 import PositionsAll from "./pages/PositionsAll";
@@ -131,6 +132,8 @@ function AppContent() {
 
                 <Route path="/ranking" element={<Ranking />} />
                 <Route path="/score/total" element={<Navigate to="/ranking" replace />} />
+
+                <Route path="/profile" element={<Profile />} />
 
 
                 {(currentUser?.role === "guest" ||
