@@ -74,11 +74,7 @@ export default function PhdSection() {
       </div>
 
       {/* Foreign Institute Recognition */}
-      <div className="bg-patras-goldSand/20 p-6 rounded-lg">
-        {/* <h3 className="text-sm font-medium text-gray-900 mb-4">
-          Αναγνώριση από εξωτερικό ίδρυμα
-        </h3> */}
-
+      <div className="bg-patras-goldSand/20 p-3 rounded-lg">
         <div className="space-y-4">
           <Checkbox
             label="Κατοχή τίτλου από ίδρυμα του εξωτερικού (αναγνωρισμένο από τον ΔΟΑΤΑΠ)"

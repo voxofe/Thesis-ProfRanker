@@ -8,7 +8,7 @@ import {
 export default function Upload(props) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState("");
-  const maxFileBytes = 10 * 1024 * 1024;
+  const maxFileBytes = 5 * 1024 * 1024;
   const contentLabel = props.contentLabel || props.content || "";
   const contentStatus = props.contentStatus || props.content || "";
 
@@ -87,7 +87,7 @@ export default function Upload(props) {
     return `Επιτρέπονται μόνο: ${props.accept.replace(/\s+/g, "")}`;
   };
 
-  const getSizeErrorMessage = () => "Μέγιστο μέγεθος αρχείου: 10MB.";
+  const getSizeErrorMessage = () => "Μέγιστο μέγεθος αρχείου: 5MB.";
 
   const validateFile = (file) => {
     if (!isFileAllowed(file)) {
@@ -209,7 +209,7 @@ export default function Upload(props) {
             <div>
               <span className="text-sm pl-1 mb-10">ή σύρετε και αφήστε</span>
               <p className="pt-2 text-xs/5 text-gray-600">
-                PDF, DOC, DOCX, ODT · Μέγιστο μέγεθος: 10MB
+                PDF, DOC, DOCX, ODT · Μέγιστο μέγεθος: 5MB
               </p>
             </div>
           ) : (

@@ -129,12 +129,32 @@ export default function Form({ academicYear }) {
 
     const formDataToSend = new FormData();
 
-    // Append text fields
-    Object.keys(formData).forEach((key) => {
-      if (formData[key] && typeof formData[key] !== "object") {
-        formDataToSend.append(key, formData[key]);
-      }
-    });
+    // Append other fields
+    formDataToSend.append("email", formData.email || "");
+    formDataToSend.append("phoneNumber", formData.phoneNumber || "");
+    formDataToSend.append("landlineNumber", formData.landlineNumber || "");
+    formDataToSend.append("streetAddress", formData.streetAddress || "");
+    formDataToSend.append("city", formData.city || "");
+    formDataToSend.append("postalCode", formData.postalCode || "");
+
+    formDataToSend.append("isPublicEmployee", String(formData.isPublicEmployee));
+    formDataToSend.append(
+      "phdIsFromForeignInstitute",
+      String(formData.phdIsFromForeignInstitute)
+    );
+    formDataToSend.append(
+      "hasNotParticipatedInPastProgram",
+      String(formData.hasNotParticipatedInPastProgram)
+    );
+    formDataToSend.append(
+      "isEuCitizenNonGreek",
+      String(formData.isEuCitizenNonGreek)
+    );
+
+    formDataToSend.append("phdTitle", formData.phdTitle || "");
+    formDataToSend.append("phdAcquisitionDate", formData.phdAcquisitionDate || "");
+    formDataToSend.append("workExperience", String(formData.workExperience ?? ""));
+    formDataToSend.append("positionId", formData.positionId || "");
 
     // Append files
     [
@@ -146,6 +166,7 @@ export default function Form({ academicYear }) {
       "employmentCertificateDocument",
       "publicEmployeePermissionDocument",
       "notParticipatedDeclarationDocument",
+      "euCitizenGreekLanguageCertificateDocument",
       "responsibleDeclarationDocument"
     ].forEach((field) => {
       if (formData[field]) {

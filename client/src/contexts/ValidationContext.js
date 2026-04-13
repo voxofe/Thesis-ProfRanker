@@ -119,12 +119,16 @@ export const ValidationProvider = ({ children }) => {
       const requiresMilitaryDoc = currentUser?.gender === "male";
       const requiresPublicEmployeeDoc = formData.isPublicEmployee;
       const requiresNotParticipatedDoc = formData.hasNotParticipatedInPastProgram;
+      const requiresEuCitizenDoc = formData.isEuCitizenNonGreek;
 
       return !!(
         formData.responsibleDeclarationDocument &&
         (!requiresMilitaryDoc || formData.militaryObligationsDocument) &&
         (!requiresPublicEmployeeDoc || formData.publicEmployeePermissionDocument) &&
-        (!requiresNotParticipatedDoc || formData.notParticipatedDeclarationDocument)
+        (!requiresNotParticipatedDoc ||
+          formData.notParticipatedDeclarationDocument) &&
+        (!requiresEuCitizenDoc ||
+          formData.euCitizenGreekLanguageCertificateDocument)
       );
     };
 

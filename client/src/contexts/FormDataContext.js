@@ -20,6 +20,7 @@ export const FormDataProvider = ({ children }) => {
       city: "",
       postalCode: "",
       isPublicEmployee: false,
+      isEuCitizenNonGreek: false,
       phdTitle: "",
       phdAcquisitionDate: "",
       phdIsFromForeignInstitute: false,
@@ -33,6 +34,7 @@ export const FormDataProvider = ({ children }) => {
       employmentCertificateDocument: null,
       publicEmployeePermissionDocument: null,
       notParticipatedDeclarationDocument: null,
+      euCitizenGreekLanguageCertificateDocument: null,
       responsibleDeclarationDocument: null,
       papers: [],
       positionId: "",
@@ -49,6 +51,7 @@ export const FormDataProvider = ({ children }) => {
         city: form.city ?? "",
         postalCode: form.postalCode ?? "",
         isPublicEmployee: form.isPublicEmployee ?? false,
+        isEuCitizenNonGreek: form.isEuCitizenNonGreek ?? false,
         phdTitle: form.phdTitle ?? "",
         phdAcquisitionDate: form.phdAcquisitionDate ?? "",
         phdIsFromForeignInstitute: form.phdIsFromForeignInstitute ?? false,
@@ -63,6 +66,8 @@ export const FormDataProvider = ({ children }) => {
         employmentCertificateDocument: form.employmentCertificateDocument ?? null,
         publicEmployeePermissionDocument: form.publicEmployeePermissionDocument ?? null,
         notParticipatedDeclarationDocument: form.notParticipatedDeclarationDocument ?? null,
+        euCitizenGreekLanguageCertificateDocument:
+          form.euCitizenGreekLanguageCertificateDocument ?? null,
         responsibleDeclarationDocument: form.responsibleDeclarationDocument ?? null,
         papers: form.papers ?? [],
       };

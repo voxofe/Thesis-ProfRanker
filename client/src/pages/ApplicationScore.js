@@ -122,6 +122,11 @@ export default function ApplicationScore() {
     { key: "doatap", label: "ΔΟΑΤΑΠ", value: applicantData?.documents?.doatap },
     { key: "coursePlan", label: "Σχεδιάγραμμα διδασκαλίας", value: applicantData?.documents?.coursePlan },
     { key: "military", label: "Στρατιωτικές υποχρεώσεις", value: applicantData?.documents?.military },
+    {
+      key: "euCitizenGreekLanguageCertificate",
+      label: "Πιστοποιητικό ελληνομάθειας Δ΄ επιπέδου",
+      value: applicantData?.documents?.euCitizenGreekLanguageCertificate,
+    },
   ];
 
   const handleDownload = async (url, name) => {
