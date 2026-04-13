@@ -144,6 +144,7 @@ export default function Form({ academicYear }) {
       "coursePlanDocument",
       "militaryObligationsDocument",
       "employmentCertificateDocument",
+      "publicEmployeePermissionDocument",
       
     ].forEach((field) => {
       if (formData[field]) {
