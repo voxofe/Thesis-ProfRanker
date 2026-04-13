@@ -1,11 +1,10 @@
 import React from "react";
 import { useFormData } from "../../contexts/FormDataContext";
 import CustomSelect from "../CustomSelect";
-import Upload from "../Upload";
+import EmploymentCertificatesUploadStrip from "../EmploymentCertificatesUploadStrip";
 
 export default function WorkExperienceSection() {
-  const { formData, handleChange, handleFileChange, handleFileDelete } =
-    useFormData();
+  const { formData, handleChange, addEmploymentCertificate, removeEmploymentCertificate } = useFormData();
 
   const workExperienceOptions = Array.from({ length: 11 }, (_, index) => ({
     value: String(index),
@@ -32,19 +31,13 @@ export default function WorkExperienceSection() {
         required={true}
       />
 
-      <Upload
-        icon="document-text"
+      <EmploymentCertificatesUploadStrip
         label="Βεβαιώσεις προϋπηρεσίας από τον Φορέα / Συμβάσεις ως τεκμήρια μεταδιδακτορικής εργασιακής εμπειρίας (εξαιρείται η διδακτική εμπειρία)"
-        contentLabel="την βεβαίωση προϋπηρεσίας"
-        contentStatus="η βεβαίωση προϋπηρεσίας"
-        id="employment-certificate-upload"
-        name="employment-certificate-upload"
+        files={formData.employmentCertificates}
         accept=".pdf,.doc,.docx,.odt"
-        uploadedFile={formData.employmentCertificateDocument}
-        onChange={(e) => handleFileChange("employmentCertificateDocument", e)}
-        onDelete={() => handleFileDelete("employmentCertificateDocument")}
+        onAddFile={addEmploymentCertificate}
+        onDeleteFile={removeEmploymentCertificate}
         required={true}
-        compact
       />
     </div>
   );

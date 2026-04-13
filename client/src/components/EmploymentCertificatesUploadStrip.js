@@ -1,0 +1,113 @@
+import React, { useRef } from "react";
+import {
+  PlusIcon,
+  TrashIcon,
+  DocumentTextIcon,
+} from "@heroicons/react/24/solid";
+
+const getDisplayName = (fileItem) => {
+  if (fileItem instanceof File) return fileItem.name;
+  if (typeof fileItem === "string") return fileItem;
+  if (fileItem?.name) return fileItem.name;
+  return "";
+};
+
+export default function EmploymentCertificatesUploadStrip({
+  files = [],
+  onAddFile,
+  onDeleteFile,
+  onChange,
+  onDelete,
+  accept = ".pdf,.doc,.docx,.odt",
+  required = false,
+  label,
+}) {
+  const inputRef = useRef(null);
+  const maxFileBytes = 5 * 1024 * 1024;
+  const addFileHandler = onAddFile || onChange || (() => {});
+  const deleteFileHandler = onDeleteFile || onDelete || (() => {});
+
+  const parseAcceptList = () =>
+    (accept || "")
+      .split(",")
+      .map((item) => item.trim().toLowerCase())
+      .filter(Boolean);
+
+  const isFileAllowed = (file) => {
+    const acceptList = parseAcceptList();
+    if (acceptList.length === 0) return true;
+
+    const name = file?.name?.toLowerCase() || "";
+    const type = file?.type?.toLowerCase() || "";
+
+    return acceptList.some((allowed) => {
+      if (allowed.startsWith(".")) {
+        return name.endsWith(allowed);
+      }
+      if (allowed.endsWith("/*")) {
+        const prefix = allowed.replace("/*", "");
+        return type.startsWith(prefix);
+      }
+      return type === allowed;
+    });
+  };
+
+  const handleFilePick = (event) => {
+    const incoming = Array.from(event.target.files || []);
+    incoming.forEach((file) => {
+      if (!isFileAllowed(file)) return;
+      if (file.size > maxFileBytes) return;
+      addFileHandler(file);
+    });
+    event.target.value = "";
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="block text-sm/6 font-medium text-gray-900">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
+
+      <div className="flex items-stretch gap-3 overflow-x-auto pb-2">
+        {files.map((file, index) => (
+          <div
+            key={`${getDisplayName(file)}-${index}`}
+            className="relative h-40 w-40 shrink-0 rounded-lg border-2 border-patras-buccaneer bg-white p-3"
+          >
+            <TrashIcon
+              className="absolute right-2 top-2 h-5 w-5 cursor-pointer text-gray-400 hover:text-red-700"
+              onClick={() => deleteFileHandler(index)}
+            />
+            <div className="flex h-full flex-col items-center justify-center text-center">
+              <DocumentTextIcon className="h-10 w-10 text-patras-buccaneer" />
+              <p className="mt-2 line-clamp-3 break-all text-xs text-gray-700">
+                {getDisplayName(file)}
+              </p>
+            </div>
+          </div>
+        ))}
+
+        <button
+          type="button"
+          className="flex h-40 w-40 shrink-0 items-center justify-center rounded-lg border border-dashed border-patras-buccaneer/40 bg-white text-patras-buccaneer hover:bg-patras-albescentWhite"
+          onClick={() => inputRef.current?.click()}
+        >
+          <PlusIcon className="h-12 w-12" />
+        </button>
+      </div>
+
+      <input
+        ref={inputRef}
+        type="file"
+        className="sr-only"
+        accept={accept}
+        multiple
+        onChange={handleFilePick}
+      />
+      <p className="text-xs/5 text-gray-600">
+        PDF, DOC, DOCX, ODT · Μέγιστο μέγεθος: 5MB
+      </p>
+    </div>
+  );
+}

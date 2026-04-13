@@ -111,7 +111,7 @@ export const ValidationProvider = ({ children }) => {
       return !!(
         hasWorkExperience &&
         workExperienceValid &&
-        formData.employmentCertificateDocument
+        (formData.employmentCertificates || []).length > 0
       );
     };
 

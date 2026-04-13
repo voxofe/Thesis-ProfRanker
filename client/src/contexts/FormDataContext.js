@@ -31,7 +31,7 @@ export const FormDataProvider = ({ children }) => {
       doatapDocument: null,
       coursePlanDocument: null,
       militaryObligationsDocument: null,
-      employmentCertificateDocument: null,
+      employmentCertificates: [],
       publicEmployeePermissionDocument: null,
       notParticipatedDeclarationDocument: null,
       euCitizenGreekLanguageCertificateDocument: null,
@@ -63,7 +63,7 @@ export const FormDataProvider = ({ children }) => {
         doatapDocument: form.doatapDocument ?? null,
         coursePlanDocument: form.coursePlanDocument ?? null,
         militaryObligationsDocument: form.militaryObligationsDocument ?? null,
-        employmentCertificateDocument: form.employmentCertificateDocument ?? null,
+        employmentCertificates: form.employmentCertificates?.map((item) => item.name ?? item) ?? [],
         publicEmployeePermissionDocument: form.publicEmployeePermissionDocument ?? null,
         notParticipatedDeclarationDocument: form.notParticipatedDeclarationDocument ?? null,
         euCitizenGreekLanguageCertificateDocument:
@@ -101,6 +101,22 @@ export const FormDataProvider = ({ children }) => {
     setFormData((prevData) => ({
       ...prevData,
       [field]: null,
+    }));
+  };
+
+  const addEmploymentCertificate = (file) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      employmentCertificates: [...(prevData.employmentCertificates || []), file],
+    }));
+  };
+
+  const removeEmploymentCertificate = (index) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      employmentCertificates: (prevData.employmentCertificates || []).filter(
+        (_, currentIndex) => currentIndex !== index
+      ),
     }));
   };
 

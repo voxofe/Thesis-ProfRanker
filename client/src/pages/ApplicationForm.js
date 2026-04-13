@@ -163,7 +163,6 @@ export default function Form({ academicYear }) {
       "doatapDocument",
       "coursePlanDocument",
       "militaryObligationsDocument",
-      "employmentCertificateDocument",
       "publicEmployeePermissionDocument",
       "notParticipatedDeclarationDocument",
       "euCitizenGreekLanguageCertificateDocument",
@@ -171,6 +170,12 @@ export default function Form({ academicYear }) {
     ].forEach((field) => {
       if (formData[field]) {
         formDataToSend.append(field, formData[field]);
+      }
+    });
+
+    (formData.employmentCertificates || []).forEach((certificate) => {
+      if (certificate instanceof File) {
+        formDataToSend.append("employmentCertificateDocuments", certificate);
       }
     });
 
