@@ -19,7 +19,7 @@ export default function PhdSection() {
           <Upload
             compact
             icon="document-text"
-            label="Διδακτορικό δίπλωμα"
+            label="Διδακτορικό δίπλωμα (Φωτοαντίγραφο ή σκαναρισμένο αντίγραφο)"
             content="το διδακτορικό σας"
             id="phd-upload"
             name="phd-upload"
