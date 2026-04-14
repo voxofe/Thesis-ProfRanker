@@ -52,42 +52,6 @@ export default function DocumentsSection({ academicYear }) {
       <div className="bg-patras-goldSand/20 p-3 rounded-lg">
         <div className="space-y-4">
           <Checkbox
-            label="Δεν έχω επιλεγεί σε άλλο πρόγραμμα Απόκτησης Ακαδημαϊκής Διδακτικής Εμπειρίας, στο πλαίσιο των προηγούμενων προσκλήσεων ΕΔΒΜ 20 (ακαδ. έτος 2016‐2017), ΕΔΒΜ 45 (ακαδ. έτος 2017‐2018), ΕΔΒΜ 82 (ακαδ. έτος 2018‐2019), καθώς και της ΕΔΒΜ 96 (ακαδ. έτη 2019‐2020 και 2020‐2021) του ΕΠ ΑΝΑΔ ΕΔΒΜ 2014‐2020."
-            id="not-participated"
-            name="not-participated"
-            checked={formData.hasNotParticipatedInPastProgram}
-            onChange={(value) =>
-              handleChange("hasNotParticipatedInPastProgram", value)
-            }
-          />
-
-          {formData.hasNotParticipatedInPastProgram && (
-            <div className="mt-4 p-4 bg-white rounded-md border border-blue-200 overflow-y-auto">
-              <Upload
-                icon="document-text"
-                label="Υπεύθυνη δήλωση μη προηγούμενης συμμετοχής"
-                contentLabel="την υπεύθυνη δήλωση"
-                contentStatus="η υπεύθυνη δήλωση"
-                id="not-participated-declaration-upload"
-                name="not-participated-declaration-upload"
-                accept=".pdf,.doc,.docx,.odt"
-                uploadedFile={formData.notParticipatedDeclarationDocument}
-                onChange={(e) =>
-                  handleFileChange("notParticipatedDeclarationDocument", e)
-                }
-                onDelete={() =>
-                  handleFileDelete("notParticipatedDeclarationDocument")
-                }
-                required={formData.hasNotParticipatedInPastProgram}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="bg-patras-goldSand/20 p-3 rounded-lg">
-        <div className="space-y-4">
-          <Checkbox
             label="Είμαι πολίτης κράτους – μέλους της Ευρωπαϊκής Ένωσης (εκτός Ελλάδας)"
             id="eu-citizen-non-greek"
             name="eu-citizen-non-greek"
@@ -118,6 +82,42 @@ export default function DocumentsSection({ academicYear }) {
                   handleFileDelete("euCitizenGreekLanguageCertificateDocument")
                 }
                 required={formData.isEuCitizenNonGreek}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+      
+      <div className="bg-patras-goldSand/20 p-3 rounded-lg">
+        <div className="space-y-4">
+          <Checkbox
+            label="Δεν έχω επιλεγεί σε άλλο πρόγραμμα Απόκτησης Ακαδημαϊκής Διδακτικής Εμπειρίας, στο πλαίσιο των προηγούμενων προσκλήσεων ΕΔΒΜ 20 (ακαδ. έτος 2016‐2017), ΕΔΒΜ 45 (ακαδ. έτος 2017‐2018), ΕΔΒΜ 82 (ακαδ. έτος 2018‐2019), καθώς και της ΕΔΒΜ 96 (ακαδ. έτη 2019‐2020 και 2020‐2021) του ΕΠ ΑΝΑΔ ΕΔΒΜ 2014‐2020."
+            id="not-participated"
+            name="not-participated"
+            checked={formData.hasNotParticipatedInPastProgram}
+            onChange={(value) =>
+              handleChange("hasNotParticipatedInPastProgram", value)
+            }
+          />
+
+          {formData.hasNotParticipatedInPastProgram && (
+            <div className="mt-4 p-4 bg-white rounded-md border border-blue-200 overflow-y-auto">
+              <Upload
+                icon="document-text"
+                label="Υπεύθυνη δήλωση μη προηγούμενης συμμετοχής"
+                contentLabel="την υπεύθυνη δήλωση"
+                contentStatus="η υπεύθυνη δήλωση"
+                id="not-participated-declaration-upload"
+                name="not-participated-declaration-upload"
+                accept=".pdf,.doc,.docx,.odt"
+                uploadedFile={formData.notParticipatedDeclarationDocument}
+                onChange={(e) =>
+                  handleFileChange("notParticipatedDeclarationDocument", e)
+                }
+                onDelete={() =>
+                  handleFileDelete("notParticipatedDeclarationDocument")
+                }
+                required={formData.hasNotParticipatedInPastProgram}
               />
             </div>
           )}

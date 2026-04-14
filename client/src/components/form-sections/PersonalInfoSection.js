@@ -48,34 +48,9 @@ export default function PersonalInfoSection() {
           required={true}
         />
       </div>
-
       <div className="sm:col-span-1">
         <InputField
-          label="Κινητό τηλέφωνο"
-          id="phone-number"
-          name="phone-number"
-          type="text"
-          value={formData.phoneNumber}
-          onChange={(value) => handleChange("phoneNumber", value)}
-          required={true}
-        />
-      </div>
-
-      <div className="sm:col-span-1">
-        <InputField
-          label="Σταθερό τηλέφωνο"
-          id="landline-number"
-          name="landline-number"
-          type="text"
-          value={formData.landlineNumber}
-          onChange={(value) => handleChange("landlineNumber", value)}
-          required={false}
-        />
-      </div>
-
-      <div className="sm:col-span-1">
-        <InputField
-          label="Οδός / Διεύθυνση"
+          label="Οδός και αριθμός"
           id="street-address"
           name="street-address"
           type="text"
@@ -106,6 +81,30 @@ export default function PersonalInfoSection() {
           value={formData.postalCode}
           onChange={(value) => handleChange("postalCode", value)}
           required={true}
+        />
+      </div>
+
+      <div className="sm:col-span-1">
+        <InputField
+          label="Κινητό τηλέφωνο"
+          id="phone-number"
+          name="phone-number"
+          type="text"
+          value={formData.phoneNumber}
+          onChange={(value) => handleChange("phoneNumber", value)}
+          required={true}
+        />
+      </div>
+
+      <div className="sm:col-span-1">
+        <InputField
+          label="Σταθερό τηλέφωνο"
+          id="landline-number"
+          name="landline-number"
+          type="text"
+          value={formData.landlineNumber}
+          onChange={(value) => handleChange("landlineNumber", value)}
+          required={false}
         />
       </div>
     </div>

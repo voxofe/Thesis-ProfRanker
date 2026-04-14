@@ -35,7 +35,12 @@ export const ValidationProvider = ({ children }) => {
     };
 
     const validateBio = () => {
-      return !!formData.cvDocument;
+      const hasCv = !!formData.cvDocument;
+      const hasBioSupportingDocs =
+        Array.isArray(formData.bioSupportingDocuments) &&
+        formData.bioSupportingDocuments.length > 0;
+
+      return hasCv && hasBioSupportingDocs;
     };
 
     const validateScientificField = () => {

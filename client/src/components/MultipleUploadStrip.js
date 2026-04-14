@@ -12,7 +12,7 @@ const getDisplayName = (fileItem) => {
   return "";
 };
 
-export default function EmploymentCertificatesUploadStrip({
+export default function MultipleUploadStrip({
   files = [],
   onAddFile,
   onDeleteFile,

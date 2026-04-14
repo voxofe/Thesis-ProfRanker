@@ -1,7 +1,7 @@
 import React from "react";
 import { useFormData } from "../../contexts/FormDataContext";
 import Upload from "../Upload";
-import EmploymentCertificatesUploadStrip from "../EmploymentCertificatesUploadStrip";
+import MultipleUploadStrip from "../MultipleUploadStrip";
 
 export default function BioSection() {
   const {
@@ -27,13 +27,12 @@ export default function BioSection() {
         required={true}
       />
 
-      <EmploymentCertificatesUploadStrip
+      <MultipleUploadStrip
         label="Εγγράφα που τεκμηριώνουν τα διαλαμβανόμενα στο βιογραφικό"
         files={formData.bioSupportingDocuments}
         accept=".pdf,.doc,.docx,.odt"
         onAddFile={addBioSupportingDocument}
         onDeleteFile={removeBioSupportingDocument}
-        required={true}
       />
     </div>
   );
