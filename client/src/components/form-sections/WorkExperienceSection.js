@@ -4,7 +4,8 @@ import CustomSelect from "../CustomSelect";
 import EmploymentCertificatesUploadStrip from "../EmploymentCertificatesUploadStrip";
 
 export default function WorkExperienceSection() {
-  const { formData, handleChange, addEmploymentCertificate, removeEmploymentCertificate } = useFormData();
+  const { formData, handleChange, addEmploymentCertificate, removeEmploymentCertificate } =
+    useFormData();
 
   const workExperienceOptions = Array.from({ length: 11 }, (_, index) => ({
     value: String(index),

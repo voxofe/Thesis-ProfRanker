@@ -173,6 +173,12 @@ export default function Form({ academicYear }) {
       }
     });
 
+    (formData.bioSupportingDocuments || []).forEach((bioDocument) => {
+      if (bioDocument instanceof File) {
+        formDataToSend.append("bioSupportingDocuments", bioDocument);
+      }
+    });
+
     (formData.employmentCertificates || []).forEach((certificate) => {
       if (certificate instanceof File) {
         formDataToSend.append("employmentCertificateDocuments", certificate);

@@ -31,6 +31,7 @@ export const FormDataProvider = ({ children }) => {
       doatapDocument: null,
       coursePlanDocument: null,
       militaryObligationsDocument: null,
+      bioSupportingDocuments: [],
       employmentCertificates: [],
       publicEmployeePermissionDocument: null,
       notParticipatedDeclarationDocument: null,
@@ -63,6 +64,7 @@ export const FormDataProvider = ({ children }) => {
         doatapDocument: form.doatapDocument ?? null,
         coursePlanDocument: form.coursePlanDocument ?? null,
         militaryObligationsDocument: form.militaryObligationsDocument ?? null,
+        bioSupportingDocuments: form.bioSupportingDocuments?.map((item) => item.name ?? item) ?? [],
         employmentCertificates: form.employmentCertificates?.map((item) => item.name ?? item) ?? [],
         publicEmployeePermissionDocument: form.publicEmployeePermissionDocument ?? null,
         notParticipatedDeclarationDocument: form.notParticipatedDeclarationDocument ?? null,
@@ -104,6 +106,22 @@ export const FormDataProvider = ({ children }) => {
     }));
   };
 
+  const addBioSupportingDocument = (file) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      bioSupportingDocuments: [...(prevData.bioSupportingDocuments || []), file],
+    }));
+  };
+
+  const removeBioSupportingDocument = (index) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      bioSupportingDocuments: (prevData.bioSupportingDocuments || []).filter(
+        (_, currentIndex) => currentIndex !== index
+      ),
+    }));
+  };
+
   const addEmploymentCertificate = (file) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -129,6 +147,8 @@ export const FormDataProvider = ({ children }) => {
         handleFileDelete,
         addEmploymentCertificate,
         removeEmploymentCertificate,
+        addBioSupportingDocument,
+        removeBioSupportingDocument,
       }}
     >
       {children}
