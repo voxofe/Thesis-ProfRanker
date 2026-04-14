@@ -20,101 +20,32 @@ export default function Home() {
 
   const userRole = currentUser?.role;
 
-  const parseDateTime = (isoDate, timeStr) => {
-    if (!isoDate) return null;
-    const [y, m, d] = isoDate.split("-").map(Number);
-    if (!y || !m || !d) return null;
-    const [hh, mm] = (timeStr || "23:59").split(":").map(Number);
-    return new Date(y, m - 1, d, hh || 0, mm || 0, 0, 0);
-  };
-
-  // Applicant-specific: find their selected position by id (optional fallback)
-  const applicantPosition = useMemo(() => {
-    const pid = currentUser?.form?.positionId;
-    if (!pid || loading) return null;
-    return activePositions.find(p => String(p.id) === String(pid)) || null;
-  }, [currentUser, loading, activePositions]);
-
-  // Deadline taken from the applicant's own position, prefer backend value
-  const applicantDeadline = useMemo(() => {
-    const endFromUser = currentUser?.form?.positionEndDate;
-    const endTimeFromUser = currentUser?.form?.positionEndTime;
-    if (endFromUser) return parseDateTime(endFromUser, endTimeFromUser);
-    if (applicantPosition?.endDate) return parseDateTime(applicantPosition.endDate, applicantPosition.endTime);
-    return null;
-  }, [currentUser, applicantPosition]);
-
-  const isApplicantDeadlinePassed = useMemo(() => {
-    if (!applicantDeadline) return false;
-    return applicantDeadline.getTime() < Date.now();
-  }, [applicantDeadline]);
-
   // Derive disabled state for the Application panel
-  const isGuestDisabled = userRole === "guest" && activePositions.length === 0;
-  const isApplicantDisabled = userRole === "applicant" && isApplicantDeadlinePassed;
-  const applicationDisabled = isGuestDisabled || isApplicantDisabled;
+  const applicationDisabled =
+    (userRole === "guest" || userRole === "applicant") &&
+    !loading &&
+    activePositions.length === 0;
 
   // Description text when the panel is disabled (and defaults otherwise)
   const applicationDescription = useMemo(() => {
     if (userRole === "guest") {
-      return isGuestDisabled
+      return applicationDisabled
         ? "Δεν υπάρχουν διαθέσιμες ανοιχτές θέσεις για αίτηση αυτή τη στιγμή."
         : "Συμπληρώστε και υποβάλετε την αίτησή σας για το πρόγραμμα.";
     }
     if (userRole === "applicant") {
-      if (isApplicantDisabled && applicantDeadline) {
-        return (
-          <>
-            <p>Η προθεσμία υποβολής για αυτή την θέση έληξε στις <b>{formatDate(applicantDeadline)}.</b></p>
-
-          </>
-        );
-      }
-      return (
-        <>
-          <p>Μπορείτε να επεξεργαστείτε και να αλλάξετε την αίτησή σας μέχρι τις <b>{formatDate(applicantDeadline)}.</b></p>
-        </>
-      );
+      return applicationDisabled
+        ? "Δεν υπάρχουν διαθέσιμες ανοιχτές θέσεις για αίτηση αυτή τη στιγμή."
+        : "Μπορείτε να υποβάλετε νέα αίτηση για οποιαδήποτε ενεργή θέση.";
     }
     return "";
-  }, [userRole, isGuestDisabled, isApplicantDisabled, applicantDeadline, formatDate]);
+  }, [userRole, applicationDisabled]);
 
   // Info popups
   const applicationInfoPopup =
-    userRole === "applicant"
-      ? (
-          applicantDeadline
-            ? (
-                isApplicantDeadlinePassed
-                  ? (
-                    <>
-                      <span className="block mb-1 text-patras-buccaneer font-semibold text-[15px] md:text-base">
-                        Η προθεσμία υποβολής για αυτή την θέση έληξε στις:{" "}
-                        <strong className="font-bold">{formatDate(applicantDeadline)}</strong>
-                      </span>
-                      <span className="block text-sm italic text-gray-700 mt-1">
-                        Μπορείτε να δείτε την θέση σας στην γενική κατάταξη.
-                      </span>
-                    </>
-                  )
-                  : (
-                    <>
-                      <span>Έχετε χρόνο μέχρι τη λήξη της προθεσμίας για να επανυποβάλετε την αίτησή σας.</span>
-                      <span className="block mt-2 text-patras-buccaneer font-semibold">
-                        Προθεσμία επανυποβολής αίτησης: <strong>{formatDate(applicantDeadline)}</strong>
-                      </span>
-                    </>
-                  )
-              )
-            : (
-                !loading && activePositions.length === 0
-                  ? <span>Δεν υπάρχουν διαθέσιμες θέσεις αυτή τη στιγμή</span>
-                  : <span>Επιλέξτε θέση για να δείτε την προθεσμία υποβολής.</span>
-              )
-        )
-      : (!loading && activePositions.length === 0)
-        ? <span className="z-10">Δεν υπάρχουν διαθέσιμες θέσεις αυτή τη στιγμή</span>
-        : <span>Κάντε αίτηση για το επιστημονικό πεδίο που σας αφορά</span>;
+    !loading && activePositions.length === 0
+      ? <span className="z-10">Δεν υπάρχουν διαθέσιμες θέσεις αυτή τη στιγμή</span>
+      : <span>Κάντε αίτηση για το επιστημονικό πεδίο που σας αφορά</span>;
 
   const scoreInfoPopup = (
     <>
@@ -188,18 +119,18 @@ export default function Home() {
           <HomePagePanel
             title={
               userRole === "applicant"
-                ? "Επεξεργασία αίτησης"
+                ? "Υποβολή νέας αίτησης"
                 : "Υποβολή αίτησης"
             }
             description={applicationDescription}
             buttonText={
               userRole === "applicant"
-                ? "Επεξεργασία αίτησης"
+                ? "Δημιουργία αίτησης"
                 : "Δημιουργία αίτησης"
             }
             // Disable for guests when no active positions, or for applicants when deadline passed
             buttonAction={applicationDisabled ? undefined : undefined}
-            to={applicationDisabled ? undefined : "/form"}
+            to={applicationDisabled ? undefined : "/form?mode=new"}
             buttonDisabled={applicationDisabled}
             colorClass={
               applicationDisabled
@@ -212,9 +143,9 @@ export default function Home() {
           />
 
           <HomePagePanel
-            title="Η αίτησή μου & η βαθμολογία μου"
-            description="Δείτε την υποβληθείσα αίτησή σας, τα δικαιολογητικά και τη βαθμολογία σας."
-            buttonText="Προβολή αίτησης"
+            title="Οι αιτήσεις μου & οι βαθμολογίες μου"
+            description="Δείτε τις υποβληθείσες αιτήσεις σας, τα δικαιολογητικά και τις βαθμολογίες σας."
+            buttonText="Προβολή αιτήσεων"
             to={userRole === "applicant" ? `/application-score/${currentUser.id}` : undefined}
             buttonDisabled={userRole === "guest"}
             colorClass={

@@ -5,7 +5,7 @@ import Tooltip from "../Tooltip.jsx";
 import PositionSelect from "../PositionSelect";
 
 export default function ScientificFieldSection() {
-  const { formData, handleChange } = useFormData();
+  const { formData, handleChange, formMode, appliedPositionIds } = useFormData();
   const { positions, loading } = usePositions();
 
   const formatDateTime = (dateStr, timeStr) => {
@@ -45,8 +45,13 @@ export default function ScientificFieldSection() {
 
   // Keep only active positions for the selector
   const activePositions = useMemo(() => {
-    return (positions || []).filter((p) => p?.state === "active");
-  }, [positions]);
+    const active = (positions || []).filter((p) => p?.state === "active");
+    const appliedSet = new Set(appliedPositionIds || []);
+    if (formMode !== "new") return active;
+    return active.filter(
+      (p) => !appliedSet.has(p.id) || String(p.id) === String(formData.positionId)
+    );
+  }, [positions, appliedPositionIds, formMode, formData.positionId]);
 
   return (
     <div className="space-y-6">

@@ -63,37 +63,11 @@ function AppContent() {
     [positions]
   );
 
-  const parseDateTime = (isoDate, timeStr) => {
-    if (!isoDate) return null;
-    const [y, m, d] = isoDate.split("-").map(Number);
-    if (!y || !m || !d) return null;
-    const [hh, mm] = (timeStr || "23:59").split(":").map(Number);
-    return new Date(y, m - 1, d, hh || 0, mm || 0, 0, 0);
-  };
-
-  const applicantPosition = React.useMemo(() => {
-    const pid = currentUser?.form?.positionId;
-    if (!pid || positionsLoading) return null;
-    return activePositions.find((p) => String(p.id) === String(pid)) || null;
-  }, [currentUser, positionsLoading, activePositions]);
-
-  const applicantDeadline = React.useMemo(() => {
-    const endFromUser = currentUser?.form?.positionEndDate;
-    const endTimeFromUser = currentUser?.form?.positionEndTime;
-    if (endFromUser) return parseDateTime(endFromUser, endTimeFromUser);
-    if (applicantPosition?.endDate) return parseDateTime(applicantPosition.endDate, applicantPosition.endTime);
-    return null;
-  }, [currentUser, applicantPosition]);
-
-  const isApplicantDeadlinePassed = React.useMemo(() => {
-    if (!applicantDeadline) return false;
-    return applicantDeadline.getTime() < Date.now();
-  }, [applicantDeadline]);
-
   const userRole = currentUser?.role;
-  const isGuestDisabled = userRole === "guest" && !positionsLoading && activePositions.length === 0;
-  const isApplicantDisabled = userRole === "applicant" && isApplicantDeadlinePassed;
-  const applicationDisabled = isGuestDisabled || isApplicantDisabled;
+  const applicationDisabled =
+    (userRole === "guest" || userRole === "applicant") &&
+    !positionsLoading &&
+    activePositions.length === 0;
 
   // Show loading screen while authentication is being determined
   if (isLoading) {

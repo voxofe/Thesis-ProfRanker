@@ -46,6 +46,12 @@ function resolveApplicationId(applicant) {
   return applicant?.applicationId || applicant?.application_id || applicant?.id || "—";
 }
 
+function getApplicationScoreLink(applicant) {
+  const appId = resolveApplicationId(applicant);
+  if (!appId || appId === "—") return `/application-score/${applicant.id}`;
+  return `/application-score/${applicant.id}?applicationId=${appId}`;
+}
+
 function resolveSubmitDateRaw(applicant) {
   return (
     applicant?.submitDate ||
@@ -371,7 +377,7 @@ export default function Ranking() {
           title={String(resolveApplicationId(applicant))}
         >
           {clickable ? (
-            <Link to={`/application-score${applicant.id}`} className="block w-full h-full px-6 py-4">
+            <Link to={getApplicationScoreLink(applicant)} className="block w-full h-full px-6 py-4">
               {resolveApplicationId(applicant)}
             </Link>
           ) : (
@@ -383,7 +389,7 @@ export default function Ranking() {
           title={applicant.firstName}
         >
           {clickable ? (
-            <Link to={`/application-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+            <Link to={getApplicationScoreLink(applicant)} className="block w-full h-full px-6 py-4">
               {applicant.firstName}
             </Link>
           ) : (
@@ -395,7 +401,7 @@ export default function Ranking() {
           title={applicant.lastName}
         >
           {clickable ? (
-            <Link to={`/application-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+            <Link to={getApplicationScoreLink(applicant)} className="block w-full h-full px-6 py-4">
               {applicant.lastName}
             </Link>
           ) : (
@@ -404,7 +410,7 @@ export default function Ranking() {
         </td>
         <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words">
           {clickable ? (
-            <Link to={`/application-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+            <Link to={getApplicationScoreLink(applicant)} className="block w-full h-full px-6 py-4">
               {applicant.school}
             </Link>
           ) : (
@@ -413,7 +419,7 @@ export default function Ranking() {
         </td>
         <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words">
           {clickable ? (
-            <Link to={`/application-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+            <Link to={getApplicationScoreLink(applicant)} className="block w-full h-full px-6 py-4">
               {applicant.department}</Link>
           ) : (
             <div className="px-6 py-4">{applicant.department}</div>
@@ -421,7 +427,7 @@ export default function Ranking() {
         </td>
         <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words">
           {clickable ? (
-            <Link to={`/application-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+            <Link to={getApplicationScoreLink(applicant)} className="block w-full h-full px-6 py-4">
               {applicant.scientificField}
             </Link>
           ) : (
@@ -430,7 +436,7 @@ export default function Ranking() {
         </td>
         <td className="text-center text-patras-buccaneer text-[13px] whitespace-nowrap">
           {clickable ? (
-            <Link to={`/application-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+            <Link to={getApplicationScoreLink(applicant)} className="block w-full h-full px-6 py-4">
               {formatDateTimeCell(resolveSubmitDateRaw(applicant), null, "00:00")}
             </Link>
           ) : (
@@ -442,7 +448,7 @@ export default function Ranking() {
             const status = getApplicationStatus(applicant.positionEndDate, applicant.positionEndTime);
             const content = <span className={getStatusBadgeClasses(status)}>{status}</span>;
             return clickable ? (
-              <Link to={`/application-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+              <Link to={getApplicationScoreLink(applicant)} className="block w-full h-full px-6 py-4">
                 {content}
               </Link>
             ) : (
@@ -452,7 +458,7 @@ export default function Ranking() {
         </td>
         <td className="text-center">
           {clickable ? (
-            <Link to={`/application-score/${applicant.id}`} className="block w-full h-full px-6 py-4">
+            <Link to={getApplicationScoreLink(applicant)} className="block w-full h-full px-6 py-4">
               <div className="flex justify-center">
                 <span className="inline-block min-w-[30px] px-3 py-1 rounded-md text-black font-semibold text-sm shadow-md ">
                   {applicant.totalPoints}

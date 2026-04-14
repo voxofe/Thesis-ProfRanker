@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { useAuth } from "./AuthContext";
+import { useSearchParams } from "react-router-dom";
 
 const FormDataContext = createContext();
 
@@ -7,8 +8,22 @@ export const useFormData = () => useContext(FormDataContext);
 
 export const FormDataProvider = ({ children }) => {
   const { currentUser } = useAuth();
+  const [searchParams] = useSearchParams();
+  const formMode = (searchParams.get("mode") || "new").toLowerCase();
+  const selectedApplicationId = searchParams.get("applicationId");
 
   // Initial form data structure
+  const getSelectedApplication = () => {
+    if (formMode !== "edit") return null;
+    const applications = currentUser?.applications || [];
+    if (selectedApplicationId) {
+      return applications.find(
+        (app) => String(app.id) === String(selectedApplicationId)
+      );
+    }
+    return currentUser?.form || null;
+  };
+
   const getInitialFormData = () => {
     const baseData = {
       firstName: currentUser?.firstName ?? "",
@@ -43,35 +58,39 @@ export const FormDataProvider = ({ children }) => {
 
     // Auto-fill with existing form data if user is applicant and has submitted before
     if (currentUser?.role === "applicant" && currentUser?.form) {
-      const form = currentUser.form;
+      const selectedForm = getSelectedApplication() || currentUser.form;
       return {
         ...baseData,
-        phoneNumber: form.phoneNumber ?? "",
-        landlineNumber: form.landlineNumber ?? "",
-        streetAddress: form.streetAddress ?? "",
-        city: form.city ?? "",
-        postalCode: form.postalCode ?? "",
-        isPublicEmployee: form.isPublicEmployee ?? false,
-        isEuCitizenNonGreek: form.isEuCitizenNonGreek ?? false,
-        phdTitle: form.phdTitle ?? "",
-        phdAcquisitionDate: form.phdAcquisitionDate ?? "",
-        phdIsFromForeignInstitute: form.phdIsFromForeignInstitute ?? false,
-        workExperience: form.workExperience ?? "",
-        hasNotParticipatedInPastProgram: form.hasNotParticipatedInPastProgram ?? false,
-        positionId: form.positionId ?? "", // positionId from backend
-        cvDocument: form.cvDocument ?? null,
-        phdDocument: form.phdDocument ?? null,
-        doatapDocument: form.doatapDocument ?? null,
-        coursePlanDocument: form.coursePlanDocument ?? null,
-        militaryObligationsDocument: form.militaryObligationsDocument ?? null,
-        bioSupportingDocuments: form.bioSupportingDocuments?.map((item) => item.name ?? item) ?? [],
-        employmentCertificates: form.employmentCertificates?.map((item) => item.name ?? item) ?? [],
-        publicEmployeePermissionDocument: form.publicEmployeePermissionDocument ?? null,
-        notParticipatedDeclarationDocument: form.notParticipatedDeclarationDocument ?? null,
+        phoneNumber: selectedForm.phoneNumber ?? "",
+        landlineNumber: selectedForm.landlineNumber ?? "",
+        streetAddress: selectedForm.streetAddress ?? "",
+        city: selectedForm.city ?? "",
+        postalCode: selectedForm.postalCode ?? "",
+        isPublicEmployee: selectedForm.isPublicEmployee ?? false,
+        isEuCitizenNonGreek: selectedForm.isEuCitizenNonGreek ?? false,
+        phdTitle: selectedForm.phdTitle ?? "",
+        phdAcquisitionDate: selectedForm.phdAcquisitionDate ?? "",
+        phdIsFromForeignInstitute: selectedForm.phdIsFromForeignInstitute ?? false,
+        workExperience: selectedForm.workExperience ?? "",
+        hasNotParticipatedInPastProgram: selectedForm.hasNotParticipatedInPastProgram ?? false,
+        positionId: formMode === "edit" ? selectedForm.positionId ?? "" : "",
+        cvDocument: selectedForm.cvDocument ?? null,
+        phdDocument: selectedForm.phdDocument ?? null,
+        doatapDocument: selectedForm.doatapDocument ?? null,
+        coursePlanDocument: selectedForm.coursePlanDocument ?? null,
+        militaryObligationsDocument: selectedForm.militaryObligationsDocument ?? null,
+        bioSupportingDocuments:
+          selectedForm.bioSupportingDocuments?.map((item) => item.name ?? item) ?? [],
+        employmentCertificates:
+          selectedForm.employmentCertificates?.map((item) => item.name ?? item) ?? [],
+        publicEmployeePermissionDocument:
+          selectedForm.publicEmployeePermissionDocument ?? null,
+        notParticipatedDeclarationDocument:
+          selectedForm.notParticipatedDeclarationDocument ?? null,
         euCitizenGreekLanguageCertificateDocument:
-          form.euCitizenGreekLanguageCertificateDocument ?? null,
-        responsibleDeclarationDocument: form.responsibleDeclarationDocument ?? null,
-        papers: form.papers ?? [],
+          selectedForm.euCitizenGreekLanguageCertificateDocument ?? null,
+        responsibleDeclarationDocument: selectedForm.responsibleDeclarationDocument ?? null,
+        papers: selectedForm.papers ?? [],
       };
     }
 
@@ -80,10 +99,17 @@ export const FormDataProvider = ({ children }) => {
 
   const [formData, setFormData] = useState(getInitialFormData());
 
+  const appliedPositionIds = useMemo(() => {
+    const applications = currentUser?.applications || [];
+    return applications
+      .map((app) => app.positionId)
+      .filter((posId) => posId !== null && posId !== undefined && posId !== "");
+  }, [currentUser]);
+
   // Re-initialize form data when user changes (for auto-fill)
   useEffect(() => {
     setFormData(getInitialFormData());
-  }, [currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentUser, formMode, selectedApplicationId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (field, value) => {
     setFormData((prevData) => ({
@@ -142,6 +168,8 @@ export const FormDataProvider = ({ children }) => {
     <FormDataContext.Provider
       value={{
         formData,
+        formMode,
+        appliedPositionIds,
         handleChange,
         handleFileChange,
         handleFileDelete,
