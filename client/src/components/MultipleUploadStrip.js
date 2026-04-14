@@ -24,6 +24,7 @@ export default function MultipleUploadStrip({
 }) {
   const inputRef = useRef(null);
   const [localFiles, setLocalFiles] = useState([]);
+  const [error, setError] = useState("");
   const maxFileBytes = 5 * 1024 * 1024;
   const addFileHandler = onAddFile || onChange;
   const deleteFileHandler = onDeleteFile || onDelete;
@@ -57,16 +58,39 @@ export default function MultipleUploadStrip({
     });
   };
 
+  const getAcceptErrorMessage = () => {
+    if (!accept) return "Μη αποδεκτός τύπος αρχείου.";
+    return `Επιτρέπονται μόνο: ${accept.replace(/\s+/g, "")}`;
+  };
+
+  const getSizeErrorMessage = () => "Μέγιστο μέγεθος αρχείου: 5MB.";
+
   const handleFilePick = (event) => {
     const incoming = Array.from(event.target.files || []);
+    let hasValidationError = false;
+
     incoming.forEach((file) => {
-      if (!isFileAllowed(file)) return;
-      if (file.size > maxFileBytes) return;
+      if (!isFileAllowed(file)) {
+        hasValidationError = true;
+        setError(getAcceptErrorMessage());
+        return;
+      }
+      if (file.size > maxFileBytes) {
+        hasValidationError = true;
+        setError(getSizeErrorMessage());
+        return;
+      }
+
       setLocalFiles((prev) => [...prev, file]);
       if (typeof addFileHandler === "function") {
         addFileHandler(file);
       }
     });
+
+    if (!hasValidationError) {
+      setError("");
+    }
+
     event.target.value = "";
   };
 
@@ -89,6 +113,7 @@ export default function MultipleUploadStrip({
                 setLocalFiles((prev) =>
                   prev.filter((_, currentIndex) => currentIndex !== index)
                 );
+                setError("");
                 if (typeof deleteFileHandler === "function") {
                   deleteFileHandler(index);
                 }
@@ -123,6 +148,7 @@ export default function MultipleUploadStrip({
       <p className="text-xs/5 text-gray-600">
         PDF, DOC, DOCX, ODT · Μέγιστο μέγεθος: 5MB
       </p>
+      {error && <p className="text-sm text-red-600">{error}</p>}
     </div>
   );
 }
