@@ -3,7 +3,7 @@ import axios from "axios";
 import PapersDrawer from "../components/PapersDrawer";
 import CoursesDrawer from "../components/CoursesDrawer";
 import { useAuth } from "../contexts/AuthContext";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { usePositions } from "../contexts/PositionsContext";
 
 const API_BASE_URL = (
@@ -17,16 +17,14 @@ const API_BASE_URL = (
 export default function ApplicationScore() {
   const { currentUser } = useAuth();
   const { id } = useParams();
-  const [searchParams] = useSearchParams();
-  const applicationId = searchParams.get("applicationId");
   const { positions = [] } = usePositions();
   const [applicantData, setApplicantData] = useState();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("application");
-  const isSelfApplicant =
+  const canEditApplication =
     currentUser?.role === "applicant" &&
-    String(currentUser?.id) === String(id);
-  const editApplicationId = applicationId || currentUser?.form?.id;
+    String(currentUser?.id) === String(applicantData?.id);
+  const editApplicationId = id;
 
   // const fmtDate = (d) => {
   //   if (!d) return "";
@@ -42,14 +40,8 @@ export default function ApplicationScore() {
     if (id && currentUser) {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const query = new URLSearchParams();
-      if (applicationId) {
-        query.set("applicationId", applicationId);
-      }
-      query.set("times", "10");
-
       axios
-        .get(`${API_BASE_URL}/api/applicant/${id}?${query.toString()}`, {
+        .get(`${API_BASE_URL}/api/applicant/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => setApplicantData(res.data))
@@ -167,14 +159,10 @@ export default function ApplicationScore() {
       <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
         Αίτηση & Βαθμολογία
       </h1>
-      {isSelfApplicant && (
+      {canEditApplication && (
         <div className="flex justify-center">
           <Link
-            to={
-              editApplicationId
-                ? `/form?mode=edit&applicationId=${editApplicationId}`
-                : "/form?mode=edit"
-            }
+            to={`/form?mode=edit&applicationId=${editApplicationId}`}
             className="inline-flex items-center justify-center bg-patras-buccaneer text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors"
           >
             Επεξεργασία αίτησης

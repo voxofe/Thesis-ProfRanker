@@ -146,7 +146,7 @@ export default function Home() {
             title="Οι αιτήσεις μου & οι βαθμολογίες μου"
             description="Δείτε τις υποβληθείσες αιτήσεις σας, τα δικαιολογητικά και τις βαθμολογίες σας."
             buttonText="Προβολή αιτήσεων"
-            to={userRole === "applicant" ? `/application-score/${currentUser.id}` : undefined}
+            to={userRole === "applicant" ? "/my-applications" : undefined}
             buttonDisabled={userRole === "guest"}
             colorClass={
               userRole === "guest"

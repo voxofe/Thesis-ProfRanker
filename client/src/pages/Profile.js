@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
-import { usePositions } from "../contexts/PositionsContext";
 import InputField from "../components/InputField";
-import PositionSelect from "../components/PositionSelect";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -20,20 +18,20 @@ const genderOptions = [
 
 export default function Profile() {
   const { currentUser, refreshUser } = useAuth();
-  const { positions = [], loading: positionsLoading } = usePositions();
   const [profile, setProfile] = useState(null);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     email: "",
     gender: "",
+    mobileNumber: "",
+    landlineNumber: "",
+    streetAddress: "",
+    city: "",
+    postalCode: "",
   });
-  const [preferredPositionId, setPreferredPositionId] = useState("");
-  const [documents, setDocuments] = useState({});
-  const [docFiles, setDocFiles] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [savingDocs, setSavingDocs] = useState(false);
   const [message, setMessage] = useState(null);
 
   useEffect(() => {
@@ -53,38 +51,18 @@ export default function Profile() {
           lastName: data?.user?.lastName || "",
           email: data?.user?.email || "",
           gender: data?.user?.gender || "",
+          mobileNumber: data?.user?.mobileNumber || "",
+          landlineNumber: data?.user?.landlineNumber || "",
+          streetAddress: data?.user?.streetAddress || "",
+          city: data?.user?.city || "",
+          postalCode: data?.user?.postalCode || "",
         });
-        setDocuments(data?.documents || {});
       })
       .catch((error) => {
         console.error("Error loading profile:", error);
       })
       .finally(() => setLoading(false));
   }, []);
-
-  useEffect(() => {
-    if (!profile || positionsLoading || positions.length === 0) return;
-
-    const preferredFieldId = profile?.preferredScientificFieldId;
-    const fallbackPositionId = currentUser?.form?.positionId;
-
-    const preferredPos = positions.find(
-      (pos) => String(pos.scientificFieldId) === String(preferredFieldId)
-    );
-    const fallbackPos = positions.find(
-      (pos) => String(pos.id) === String(fallbackPositionId)
-    );
-
-    const selected = preferredPos || fallbackPos;
-    if (selected) {
-      setPreferredPositionId(String(selected.id));
-    }
-  }, [profile, positionsLoading, positions, currentUser?.form?.positionId]);
-
-  const applications = useMemo(
-    () => (profile?.applications && Array.isArray(profile.applications) ? profile.applications : []),
-    [profile]
-  );
 
   const isApplicant = currentUser?.role === "applicant";
 
@@ -96,16 +74,17 @@ export default function Profile() {
     setSaving(true);
     setMessage(null);
     const token = localStorage.getItem("token");
-    const selectedPosition = positions.find(
-      (pos) => String(pos.id) === String(preferredPositionId)
-    );
 
     const payload = {
       firstName: form.firstName,
       lastName: form.lastName,
       email: form.email,
       gender: form.gender || null,
-      preferredScientificFieldId: selectedPosition?.scientificFieldId || null,
+      mobileNumber: form.mobileNumber || "",
+      landlineNumber: form.landlineNumber || "",
+      streetAddress: form.streetAddress || "",
+      city: form.city || "",
+      postalCode: form.postalCode || "",
     };
 
     try {
@@ -113,7 +92,6 @@ export default function Profile() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProfile(response.data);
-      setDocuments(response.data?.documents || {});
       setMessage({ type: "success", text: "Οι αλλαγές αποθηκεύτηκαν." });
       refreshUser();
     } catch (error) {
@@ -127,80 +105,65 @@ export default function Profile() {
     }
   };
 
-  const handleDocChange = (key, file) => {
-    setDocFiles((prev) => ({ ...prev, [key]: file }));
-  };
+  const latestForm = currentUser?.form || {};
+  const workExperienceYears = latestForm.workExperience ?? null;
 
-  const handleSaveDocuments = async () => {
-    setSavingDocs(true);
-    setMessage(null);
-    const token = localStorage.getItem("token");
-    const formData = new FormData();
+  const renderFilePills = (files) => (
+    <div className="flex flex-wrap gap-2">
+      {files.map((file, index) => (
+        <span
+          key={`${file}-${index}`}
+          className="inline-flex items-center bg-patras-buccaneer/10 text-patras-buccaneer px-3 py-1 rounded-full text-xs font-medium border border-patras-buccaneer"
+        >
+          {file}
+        </span>
+      ))}
+    </div>
+  );
 
-    const fieldMap = {
-      cv: "cvDocument",
-      phd: "phdDocument",
-      doatap: "doatapDocument",
-      coursePlan: "coursePlanDocument",
-      military: "militaryObligationsDocument",
+  const vaultItems = useMemo(() => {
+    const items = [];
+    const single = (label, name) => {
+      if (name) items.push({ label, files: [name] });
+    };
+    const multi = (label, list) => {
+      const files = Array.isArray(list)
+        ? list.filter((item) => !!item)
+        : [];
+      if (files.length) items.push({ label, files });
     };
 
-    Object.entries(fieldMap).forEach(([key, fieldName]) => {
-      if (docFiles[key]) {
-        formData.append(fieldName, docFiles[key]);
-      }
-    });
+    single("Βιογραφικό σημείωμα", latestForm.cvDocument);
+    multi(
+      "Έγγραφα που τεκμηριώνουν τα διαλαμβανόμενα στο βιογραφικό",
+      latestForm.bioSupportingDocuments
+    );
+    single("Διδακτορικό δίπλωμα", latestForm.phdDocument);
+    single("ΔΟΑΤΑΠ", latestForm.doatapDocument);
+    multi(
+      "Βεβαιώσεις προϋπηρεσίας από τον Φορέα / Συμβάσεις",
+      latestForm.employmentCertificates
+    );
+    single("Υπεύθυνη δήλωση", latestForm.responsibleDeclarationDocument);
+    single(
+      "Βεβαίωση άδειας από Δημόσια Υπηρεσία",
+      latestForm.publicEmployeePermissionDocument
+    );
+    single(
+      "Υπεύθυνη δήλωση μη συμμετοχής",
+      latestForm.notParticipatedDeclarationDocument
+    );
+    single(
+      "Πιστοποιητικό ελληνομάθειας",
+      latestForm.euCitizenGreekLanguageCertificateDocument
+    );
+    single(
+      "Βεβαίωση στρατιωτικών υποχρεώσεων",
+      latestForm.militaryObligationsDocument
+    );
 
-    try {
-      const response = await axios.post(`${API_BASE_URL}/api/profile/documents`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      setProfile(response.data);
-      setDocuments(response.data?.documents || {});
-      setDocFiles({});
-      setMessage({ type: "success", text: "Τα αρχεία αποθηκεύτηκαν." });
-    } catch (error) {
-      console.error("Error saving documents:", error);
-      setMessage({
-        type: "error",
-        text: "Αποτυχία αποθήκευσης αρχείων.",
-      });
-    } finally {
-      setSavingDocs(false);
-    }
-  };
-
-  const handleDownload = async (downloadPath, name) => {
-    if (!downloadPath) return;
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`${API_BASE_URL}${downloadPath}`, {
-        responseType: "blob",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const blobUrl = window.URL.createObjectURL(response.data);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = name || "document";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error("Error downloading document:", error);
-    }
-  };
-
-  const documentItems = [
-    { key: "cv", label: "Βιογραφικό" },
-    { key: "phd", label: "Διδακτορικός τίτλος" },
-    { key: "doatap", label: "ΔΟΑΤΑΠ" },
-    { key: "coursePlan", label: "Σχεδιάγραμμα διδασκαλίας" },
-    { key: "military", label: "Στρατιωτικές υποχρεώσεις" },
-  ];
+    return items;
+  }, [latestForm]);
 
   if (loading) {
     return (
@@ -232,7 +195,7 @@ export default function Profile() {
       )}
 
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-patras-buccaneer mb-4">Στοιχεία λογαριασμού</h2>
+        <h2 className="text-lg font-semibold text-patras-buccaneer mb-4">Στοιχεία χρήστη</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <InputField
             id="firstName"
@@ -259,19 +222,47 @@ export default function Profile() {
             onChange={(value) => handleFieldChange("email", value)}
           />
           <InputField
-            id="gender"
-            name="gender"
-            label="Φύλο"
-            isDropdown={true}
-            optns={genderOptions}
-            value={form.gender || ""}
-            onChange={(value) => handleFieldChange("gender", value)}
+            id="mobileNumber"
+            name="mobileNumber"
+            label="Κινητό τηλέφωνο"
+            type="text"
+            value={form.mobileNumber}
+            onChange={(value) => handleFieldChange("mobileNumber", value)}
+          />
+          <InputField
+            id="landlineNumber"
+            name="landlineNumber"
+            label="Σταθερό τηλέφωνο"
+            type="text"
+            value={form.landlineNumber}
+            onChange={(value) => handleFieldChange("landlineNumber", value)}
+          />
+          <InputField
+            id="streetAddress"
+            name="streetAddress"
+            label="Οδός και αριθμός"
+            type="text"
+            value={form.streetAddress}
+            onChange={(value) => handleFieldChange("streetAddress", value)}
+          />
+          <InputField
+            id="city"
+            name="city"
+            label="Πόλη"
+            type="text"
+            value={form.city}
+            onChange={(value) => handleFieldChange("city", value)}
+          />
+          <InputField
+            id="postalCode"
+            name="postalCode"
+            label="Τ.Κ."
+            type="text"
+            value={form.postalCode}
+            onChange={(value) => handleFieldChange("postalCode", value)}
           />
         </div>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-4">
-          <div className="text-sm text-gray-500">
-            Ρόλος: <span className="font-semibold text-gray-700">{profile?.user?.role}</span>
-          </div>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 mt-4">
           <button
             type="button"
             onClick={handleSaveProfile}
@@ -283,113 +274,42 @@ export default function Profile() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-patras-buccaneer mb-4">Προτιμώμενο επιστημονικό πεδίο</h2>
-        <PositionSelect
-          positions={positions}
-          value={preferredPositionId}
-          onChange={(value) => setPreferredPositionId(value)}
-          label="Προτιμώμενο επιστημονικό πεδίο"
-          disabled={positionsLoading}
-          maxResults={50}
-        />
-        <p className="text-sm text-gray-500">
-          Θα χρησιμοποιηθεί ως προεπιλογή σε μελλοντικές αιτήσεις.
-        </p>
-      </div>
-
       {isApplicant && (
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-patras-buccaneer mb-4">Θησαυροφυλάκιο δικαιολογητικών</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-              <thead className="bg-patras-buccaneer">
-                <tr>
-                  <th className="px-4 py-2 text-left text-sm font-semibold text-white uppercase tracking-wider">Έγγραφο</th>
-                  <th className="px-4 py-2 text-left text-sm font-semibold text-white uppercase tracking-wider">Αρχείο</th>
-                  <th className="px-4 py-2 text-left text-sm font-semibold text-white uppercase tracking-wider">Ενημέρωση</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {documentItems.map((doc) => (
-                  <tr key={doc.key}>
-                    <td className="px-4 py-3 text-sm text-patras-buccaneer">{doc.label}</td>
-                    <td className="px-4 py-3 text-sm text-patras-buccaneer">
-                      {documents?.[doc.key]?.name ? (
-                        <button
-                          type="button"
-                          onClick={() => handleDownload(documents[doc.key].downloadPath, documents[doc.key].name)}
-                          className="underline text-patras-buccaneer hover:text-patras-sanguineBrown"
-                        >
-                          {documents[doc.key].name}
-                        </button>
-                      ) : (
-                        "Δεν έχει υποβληθεί"
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <input
-                        type="file"
-                        onChange={(e) => handleDocChange(doc.key, e.target.files?.[0])}
-                        className="text-sm text-gray-600"
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="flex justify-end mt-4">
-            <button
-              type="button"
-              onClick={handleSaveDocuments}
-              disabled={savingDocs}
-              className="inline-flex items-center justify-center bg-patras-buccaneer text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors disabled:opacity-60"
-            >
-              {savingDocs ? "Αποθήκευση..." : "Αποθήκευση αρχείων"}
-            </button>
+          <h2 className="text-lg font-semibold text-patras-buccaneer mb-4">
+            Μεταδιδακτορική εργασιακή εμπειρία
+          </h2>
+          <div className="text-sm text-gray-700">
+            Χρόνια μεταδιδακτορικής εργασιακής εμπειρίας (εξαιρείται η διδακτική εμπειρία):
+            <span className="font-semibold text-patras-buccaneer ml-2">
+              {workExperienceYears ?? "—"}
+            </span>
           </div>
         </div>
       )}
 
       {isApplicant && (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6" id="profile-applications">
-          <h2 className="text-lg font-semibold text-patras-buccaneer mb-4">Ιστορικό αιτήσεων</h2>
-          {applications.length === 0 ? (
-            <p className="text-gray-500">Δεν υπάρχουν καταχωρημένες αιτήσεις.</p>
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-patras-buccaneer mb-4">
+            Θησαυροφυλάκιο δικαιολογητικών
+          </h2>
+          {vaultItems.length === 0 ? (
+            <p className="text-gray-500">Δεν υπάρχουν καταχωρημένα δικαιολογητικά.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-                <thead className="bg-patras-buccaneer">
-                  <tr>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-white uppercase tracking-wider">Επιστημονικό πεδίο</th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-white uppercase tracking-wider">Σχολή</th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-white uppercase tracking-wider">Τμήμα</th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-white uppercase tracking-wider">Ημερομηνία</th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-white uppercase tracking-wider">Μόρια</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {applications.map((app) => (
-                    <tr key={app.id}>
-                      <td className="px-4 py-3 text-sm text-patras-buccaneer">{app.scientificField || "—"}</td>
-                      <td className="px-4 py-3 text-sm text-patras-buccaneer">{app.school || "—"}</td>
-                      <td className="px-4 py-3 text-sm text-patras-buccaneer">{app.department || "—"}</td>
-                      <td className="px-4 py-3 text-sm text-patras-buccaneer">{app.submitDate || "—"}</td>
-                      <td className="px-4 py-3 text-sm text-patras-buccaneer">{app.totalPoints ?? "—"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="space-y-4">
+              {vaultItems.map((item) => (
+                <div key={item.label} className="border border-gray-200 rounded-lg p-4">
+                  <div className="text-sm font-semibold text-gray-700 mb-2">
+                    {item.label}
+                  </div>
+                  {renderFilePills(item.files)}
+                </div>
+              ))}
             </div>
           )}
         </div>
       )}
 
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6" id="profile-settings">
-        <h2 className="text-lg font-semibold text-patras-buccaneer mb-2">Ρυθμίσεις</h2>
-        <p className="text-gray-500">Θα προστεθούν σύντομα επιπλέον ρυθμίσεις.</p>
-      </div>
     </div>
   );
 }

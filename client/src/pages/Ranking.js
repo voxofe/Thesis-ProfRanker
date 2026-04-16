@@ -48,8 +48,8 @@ function resolveApplicationId(applicant) {
 
 function getApplicationScoreLink(applicant) {
   const appId = resolveApplicationId(applicant);
-  if (!appId || appId === "—") return `/application-score/${applicant.id}`;
-  return `/application-score/${applicant.id}?applicationId=${appId}`;
+  if (!appId || appId === "—") return `/application-score/unknown`;
+  return `/application-score/${appId}`;
 }
 
 function resolveSubmitDateRaw(applicant) {
