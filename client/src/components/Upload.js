@@ -14,7 +14,11 @@ export default function Upload(props) {
 
   // Check if we have an existing file (filename string) or uploaded file (File object)
   const hasExistingFile =
-    typeof props.uploadedFile === "string" && props.uploadedFile;
+    (typeof props.uploadedFile === "string" && props.uploadedFile) ||
+    (props.uploadedFile &&
+      !(props.uploadedFile instanceof File) &&
+      typeof props.uploadedFile.name === "string" &&
+      props.uploadedFile.name);
   const hasUploadedFile = props.uploadedFile instanceof File;
   const hasAnyFile = hasExistingFile || hasUploadedFile;
 
@@ -23,7 +27,9 @@ export default function Upload(props) {
       return props.uploadedFile.name;
     }
     if (hasExistingFile) {
-      return props.uploadedFile; // This is the filename string from backend
+      return typeof props.uploadedFile === "string"
+        ? props.uploadedFile
+        : props.uploadedFile?.name || "";
     }
     return "";
   };

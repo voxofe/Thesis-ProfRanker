@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 import InputField from "../components/InputField";
+import Checkbox from "../components/Checkbox";
+import FlowbiteDateField from "../components/FlowbiteDateField";
+import CustomSelect from "../components/CustomSelect";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -18,7 +22,9 @@ const genderOptions = [
 
 export default function Profile() {
   const { currentUser, refreshUser } = useAuth();
+  const { showToast } = useToast();
   const [profile, setProfile] = useState(null);
+  const [activeSection, setActiveSection] = useState("general");
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -30,9 +36,19 @@ export default function Profile() {
     city: "",
     postalCode: "",
   });
+  const [additionalForm, setAdditionalForm] = useState({
+    isPublicEmployee: false,
+    isEuCitizenNonGreek: false,
+    hasNotParticipatedInPastProgram: false,
+    phdTitle: "",
+    phdAcquisitionDate: "",
+    phdIsFromForeignInstitute: false,
+    workExperience: "",
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState(null);
+  const [savingAdditional, setSavingAdditional] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -57,6 +73,19 @@ export default function Profile() {
           city: data?.user?.city || "",
           postalCode: data?.user?.postalCode || "",
         });
+        const defaults = data?.applicationDefaults || {};
+        setAdditionalForm({
+          isPublicEmployee: !!defaults.isPublicEmployee,
+          isEuCitizenNonGreek: !!defaults.isEuCitizenNonGreek,
+          hasNotParticipatedInPastProgram: !!defaults.hasNotParticipatedInPastProgram,
+          phdTitle: defaults.phdTitle || "",
+          phdAcquisitionDate: defaults.phdAcquisitionDate || "",
+          phdIsFromForeignInstitute: !!defaults.phdIsFromForeignInstitute,
+          workExperience:
+            defaults.workExperience === null || defaults.workExperience === undefined
+              ? ""
+              : String(defaults.workExperience),
+        });
       })
       .catch((error) => {
         console.error("Error loading profile:", error);
@@ -65,14 +94,118 @@ export default function Profile() {
   }, []);
 
   const isApplicant = currentUser?.role === "applicant";
+  const today = new Date().toISOString().split("T")[0];
+  const todayDisplay = today.split("-").reverse().join("-");
+  const workExperienceOptions = Array.from({ length: 11 }, (_, index) => ({
+    value: String(index),
+    label: String(index),
+  }));
+  const emailRegex =
+    /^(?=[a-zA-Z0-9@._%+-]{6,254}$)(?=[a-zA-Z0-9._%+-]{1,64}@)([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
+
+  const validateField = (key, value, nextForm) => {
+    if (key === "firstName") {
+      if (!value.trim()) return "Το όνομα είναι υποχρεωτικό.";
+      return "";
+    }
+    if (key === "lastName") {
+      if (!value.trim()) return "Το επώνυμο είναι υποχρεωτικό.";
+      return "";
+    }
+    if (key === "email") {
+      if (!value.trim()) return "Το email είναι υποχρεωτικό.";
+      if (!emailRegex.test(value.trim())) return "Παρακαλώ εισάγετε έγκυρο email.";
+      return "";
+    }
+    if (key === "mobileNumber") {
+      if (!value.trim()) return "";
+      const mobile = normalizePhone(value);
+      if (!/^69\d{8}$/.test(mobile)) {
+        return "Ο αριθμός κινητού πρέπει να έχει 10 ψηφία και να ξεκινά από 69.";
+      }
+      return "";
+    }
+    if (key === "landlineNumber") {
+      if (!value.trim()) return "";
+      const landline = normalizePhone(value);
+      if (!/^2\d{9}$/.test(landline)) {
+        return "Ο αριθμός σταθερού πρέπει να έχει 10 ψηφία και να ξεκινά από 2.";
+      }
+      return "";
+    }
+    if (key === "postalCode") {
+      if (!value.trim()) return "";
+      if (!/^\d{5}$/.test(value.trim())) return "Ο Τ.Κ. πρέπει να έχει 5 ψηφία.";
+      return "";
+    }
+    return "";
+  };
 
   const handleFieldChange = (key, value) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+    const nextForm = { ...form, [key]: value };
+    setForm(nextForm);
+    const error = validateField(key, value, nextForm);
+    setFormErrors((prev) => ({ ...prev, [key]: error }));
+  };
+
+  const handleAdditionalFieldChange = (key, value) => {
+    setAdditionalForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const normalizePhone = (value) => (value || "").replace(/[\s()-]/g, "");
+
+  const validateProfileForm = () => {
+    const errors = {};
+
+    if (!form.firstName.trim()) {
+      errors.firstName = "Το όνομα είναι υποχρεωτικό.";
+    }
+    if (!form.lastName.trim()) {
+      errors.lastName = "Το επώνυμο είναι υποχρεωτικό.";
+    }
+    if (!form.email.trim()) {
+      errors.email = "Το email είναι υποχρεωτικό.";
+    } else if (!emailRegex.test(form.email.trim())) {
+      errors.email = "Παρακαλώ εισάγετε έγκυρο email.";
+    }
+
+    if (form.mobileNumber?.trim()) {
+      const mobile = normalizePhone(form.mobileNumber);
+      if (!/^69\d{8}$/.test(mobile)) {
+        errors.mobileNumber =
+          "Ο αριθμός κινητού πρέπει να έχει 10 ψηφία και να ξεκινά από 69.";
+      }
+    }
+
+    if (form.landlineNumber?.trim()) {
+      const landline = normalizePhone(form.landlineNumber);
+      if (!/^2\d{9}$/.test(landline)) {
+        errors.landlineNumber =
+          "Ο αριθμός σταθερού πρέπει να έχει 10 ψηφία και να ξεκινά από 2.";
+      }
+    }
+
+    if (form.postalCode?.trim()) {
+      if (!/^\d{5}$/.test(form.postalCode.trim())) {
+        errors.postalCode = "Ο Τ.Κ. πρέπει να έχει 5 ψηφία.";
+      }
+    }
+
+    return errors;
   };
 
   const handleSaveProfile = async () => {
+    const errors = validateProfileForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      showToast({
+        type: "error",
+        message: "Ελέγξτε τα πεδία στα Γενικά στοιχεία.",
+      });
+      return;
+    }
+
     setSaving(true);
-    setMessage(null);
     const token = localStorage.getItem("token");
 
     const payload = {
@@ -92,21 +225,92 @@ export default function Profile() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProfile(response.data);
-      setMessage({ type: "success", text: "Οι αλλαγές αποθηκεύτηκαν." });
+      const defaults = response.data?.applicationDefaults || {};
+      setAdditionalForm({
+        isPublicEmployee: !!defaults.isPublicEmployee,
+        isEuCitizenNonGreek: !!defaults.isEuCitizenNonGreek,
+        hasNotParticipatedInPastProgram: !!defaults.hasNotParticipatedInPastProgram,
+        phdTitle: defaults.phdTitle || "",
+        phdAcquisitionDate: defaults.phdAcquisitionDate || "",
+        phdIsFromForeignInstitute: !!defaults.phdIsFromForeignInstitute,
+        workExperience:
+          defaults.workExperience === null || defaults.workExperience === undefined
+            ? ""
+            : String(defaults.workExperience),
+      });
+      showToast({ type: "success", message: "Οι αλλαγές αποθηκεύτηκαν." });
       refreshUser();
     } catch (error) {
       console.error("Error saving profile:", error);
-      setMessage({
+      showToast({
         type: "error",
-        text: error?.response?.data?.error || "Αποτυχία αποθήκευσης.",
+        message: error?.response?.data?.error || "Αποτυχία αποθήκευσης.",
       });
     } finally {
       setSaving(false);
     }
   };
 
-  const latestForm = currentUser?.form || {};
-  const workExperienceYears = latestForm.workExperience ?? null;
+  const handleSaveAdditional = async () => {
+    setSavingAdditional(true);
+    const token = localStorage.getItem("token");
+
+    const workExperienceValue =
+      additionalForm.workExperience === ""
+        ? null
+        : Number(additionalForm.workExperience);
+
+    const payload = {
+      applicationDefaults: {
+        isPublicEmployee: !!additionalForm.isPublicEmployee,
+        isEuCitizenNonGreek: !!additionalForm.isEuCitizenNonGreek,
+        hasNotParticipatedInPastProgram:
+          !!additionalForm.hasNotParticipatedInPastProgram,
+        phdTitle: additionalForm.phdTitle || null,
+        phdAcquisitionDate: additionalForm.phdAcquisitionDate || null,
+        phdIsFromForeignInstitute: !!additionalForm.phdIsFromForeignInstitute,
+        workExperience: Number.isNaN(workExperienceValue)
+          ? null
+          : workExperienceValue,
+      },
+    };
+
+    try {
+      const response = await axios.put(`${API_BASE_URL}/api/profile`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProfile(response.data);
+      const defaults = response.data?.applicationDefaults || {};
+      setAdditionalForm({
+        isPublicEmployee: !!defaults.isPublicEmployee,
+        isEuCitizenNonGreek: !!defaults.isEuCitizenNonGreek,
+        hasNotParticipatedInPastProgram: !!defaults.hasNotParticipatedInPastProgram,
+        phdTitle: defaults.phdTitle || "",
+        phdAcquisitionDate: defaults.phdAcquisitionDate || "",
+        phdIsFromForeignInstitute: !!defaults.phdIsFromForeignInstitute,
+        workExperience:
+          defaults.workExperience === null || defaults.workExperience === undefined
+            ? ""
+            : String(defaults.workExperience),
+      });
+      showToast({ type: "success", message: "Οι αλλαγές αποθηκεύτηκαν." });
+    } catch (error) {
+      console.error("Error saving additional profile data:", error);
+      showToast({
+        type: "error",
+        message: error?.response?.data?.error || "Αποτυχία αποθήκευσης.",
+      });
+    } finally {
+      setSavingAdditional(false);
+    }
+  };
+
+  const formatDate = (value) => {
+    if (!value || typeof value !== "string") return "—";
+    const parts = value.split("-");
+    if (parts.length !== 3) return value;
+    return [parts[2], parts[1], parts[0]].join("-");
+  };
 
   const renderFilePills = (files) => (
     <div className="flex flex-wrap gap-2">
@@ -123,47 +327,52 @@ export default function Profile() {
 
   const vaultItems = useMemo(() => {
     const items = [];
-    const single = (label, name) => {
-      if (name) items.push({ label, files: [name] });
+    const single = (label, doc) => {
+      if (doc?.name) items.push({ label, files: [doc.name] });
     };
     const multi = (label, list) => {
       const files = Array.isArray(list)
-        ? list.filter((item) => !!item)
+        ? list
+            .map((item) => (item?.name ? item.name : item))
+            .filter((item) => !!item)
         : [];
       if (files.length) items.push({ label, files });
     };
 
-    single("Βιογραφικό σημείωμα", latestForm.cvDocument);
+    const vault = profile?.documentVault || {};
+    const defaults = profile?.documents || {};
+
+    single("Βιογραφικό σημείωμα", defaults.cv);
     multi(
       "Έγγραφα που τεκμηριώνουν τα διαλαμβανόμενα στο βιογραφικό",
-      latestForm.bioSupportingDocuments
+      vault.bio_supporting
     );
-    single("Διδακτορικό δίπλωμα", latestForm.phdDocument);
-    single("ΔΟΑΤΑΠ", latestForm.doatapDocument);
+    single("Διδακτορικό δίπλωμα", defaults.phd);
+    single("ΔΟΑΤΑΠ", defaults.doatap);
     multi(
       "Βεβαιώσεις προϋπηρεσίας από τον Φορέα / Συμβάσεις",
-      latestForm.employmentCertificates
+      vault.employment_certificate
     );
-    single("Υπεύθυνη δήλωση", latestForm.responsibleDeclarationDocument);
+    single("Υπεύθυνη δήλωση", defaults.responsibleDeclaration);
     single(
       "Βεβαίωση άδειας από Δημόσια Υπηρεσία",
-      latestForm.publicEmployeePermissionDocument
+      defaults.publicEmployeePermission
     );
     single(
       "Υπεύθυνη δήλωση μη συμμετοχής",
-      latestForm.notParticipatedDeclarationDocument
+      defaults.notParticipatedDeclaration
     );
     single(
       "Πιστοποιητικό ελληνομάθειας",
-      latestForm.euCitizenGreekLanguageCertificateDocument
+      defaults.euCitizenGreekLanguageCertificate
     );
     single(
       "Βεβαίωση στρατιωτικών υποχρεώσεων",
-      latestForm.militaryObligationsDocument
+      defaults.military
     );
 
     return items;
-  }, [latestForm]);
+  }, [profile]);
 
   if (loading) {
     return (
@@ -173,143 +382,326 @@ export default function Profile() {
     );
   }
 
+
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-8">
+    <div className="max-w-6xl mx-auto px-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-700">Το προφίλ μου</h1>
-        <p className="text-gray-500 mt-1">
-          Οι αλλαγές εδώ δεν τροποποιούν τις ήδη υποβληθείσες αιτήσεις.
-        </p>
+        <h1 className="text-2xl text-center border-b pb-2 mb-8 text-gray-800">
+          To προφίλ μου 
+        </h1>
       </div>
 
-      {message && (
-        <div
-          className={`px-4 py-3 rounded-md text-sm font-medium ${
-            message.type === "success"
-              ? "bg-green-100 text-green-800 border border-green-300"
-              : "bg-red-100 text-red-800 border border-red-300"
-          }`}
-        >
-          {message.text}
-        </div>
-      )}
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
+        <aside className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 h-fit lg:sticky lg:top-6">
+          <nav className="space-y-2 text-sm">
+            <button
+              type="button"
+              onClick={() => setActiveSection("general")}
+              className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+                activeSection === "general"
+                  ? "bg-patras-albescentWhite text-patras-buccaneer"
+                  : "text-gray-700 hover:bg-patras-albescentWhite"
+              }`}
+            >
+              Γενικά στοιχεία
+            </button>
+            {isApplicant && (
+              <button
+                type="button"
+                onClick={() => setActiveSection("additional")}
+                className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+                  activeSection === "additional"
+                    ? "bg-patras-albescentWhite text-patras-buccaneer"
+                    : "text-gray-700 hover:bg-patras-albescentWhite"
+                }`}
+              >
+                Πρόσθετα στοιχεία
+              </button>
+            )}
+            {isApplicant && (
+              <button
+                type="button"
+                onClick={() => setActiveSection("vault")}
+                className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+                  activeSection === "vault"
+                    ? "bg-patras-albescentWhite text-patras-buccaneer"
+                    : "text-gray-700 hover:bg-patras-albescentWhite"
+                }`}
+              >
+                Θησαυροφυλάκιο αρχείων
+              </button>
+            )}
+          </nav>
+        </aside>
 
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-patras-buccaneer mb-4">Στοιχεία χρήστη</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <InputField
-            id="firstName"
-            name="firstName"
-            label="Όνομα"
-            type="text"
-            value={form.firstName}
-            onChange={(value) => handleFieldChange("firstName", value)}
-          />
-          <InputField
-            id="lastName"
-            name="lastName"
-            label="Επώνυμο"
-            type="text"
-            value={form.lastName}
-            onChange={(value) => handleFieldChange("lastName", value)}
-          />
-          <InputField
-            id="email"
-            name="email"
-            label="Email"
-            type="email"
-            value={form.email}
-            onChange={(value) => handleFieldChange("email", value)}
-          />
-          <InputField
-            id="mobileNumber"
-            name="mobileNumber"
-            label="Κινητό τηλέφωνο"
-            type="text"
-            value={form.mobileNumber}
-            onChange={(value) => handleFieldChange("mobileNumber", value)}
-          />
-          <InputField
-            id="landlineNumber"
-            name="landlineNumber"
-            label="Σταθερό τηλέφωνο"
-            type="text"
-            value={form.landlineNumber}
-            onChange={(value) => handleFieldChange("landlineNumber", value)}
-          />
-          <InputField
-            id="streetAddress"
-            name="streetAddress"
-            label="Οδός και αριθμός"
-            type="text"
-            value={form.streetAddress}
-            onChange={(value) => handleFieldChange("streetAddress", value)}
-          />
-          <InputField
-            id="city"
-            name="city"
-            label="Πόλη"
-            type="text"
-            value={form.city}
-            onChange={(value) => handleFieldChange("city", value)}
-          />
-          <InputField
-            id="postalCode"
-            name="postalCode"
-            label="Τ.Κ."
-            type="text"
-            value={form.postalCode}
-            onChange={(value) => handleFieldChange("postalCode", value)}
-          />
-        </div>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 mt-4">
-          <button
-            type="button"
-            onClick={handleSaveProfile}
-            disabled={saving}
-            className="inline-flex items-center justify-center bg-patras-buccaneer text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors disabled:opacity-60"
-          >
-            {saving ? "Αποθήκευση..." : "Αποθήκευση αλλαγών"}
-          </button>
-        </div>
-      </div>
-
-      {isApplicant && (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-patras-buccaneer mb-4">
-            Μεταδιδακτορική εργασιακή εμπειρία
-          </h2>
-          <div className="text-sm text-gray-700">
-            Χρόνια μεταδιδακτορικής εργασιακής εμπειρίας (εξαιρείται η διδακτική εμπειρία):
-            <span className="font-semibold text-patras-buccaneer ml-2">
-              {workExperienceYears ?? "—"}
-            </span>
+        <section>
+          <div className="mb-4 rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-600">
+            Οι αλλαγές στο προφίλ δεν επηρεάζουν ήδη υποβληθείσες αιτήσεις. 
+            Για αλλαγές σε ενεργές αιτήσεις, επεξεργαστείτε τις από την αρχική σελίδα.
           </div>
-        </div>
-      )}
-
-      {isApplicant && (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-patras-buccaneer mb-4">
-            Θησαυροφυλάκιο δικαιολογητικών
-          </h2>
-          {vaultItems.length === 0 ? (
-            <p className="text-gray-500">Δεν υπάρχουν καταχωρημένα δικαιολογητικά.</p>
-          ) : (
-            <div className="space-y-4">
-              {vaultItems.map((item) => (
-                <div key={item.label} className="border border-gray-200 rounded-lg p-4">
-                  <div className="text-sm font-semibold text-gray-700 mb-2">
-                    {item.label}
+          {activeSection === "general" && (
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Βασικά στοιχεία</h3>
+                  <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <InputField
+                      id="firstName"
+                      name="firstName"
+                      label="Όνομα"
+                      type="text"
+                      value={form.firstName}
+                      onChange={(value) => handleFieldChange("firstName", value)}
+                      required
+                      error={formErrors.firstName}
+                    />
+                    <InputField
+                      id="lastName"
+                      name="lastName"
+                      label="Επώνυμο"
+                      type="text"
+                      value={form.lastName}
+                      onChange={(value) => handleFieldChange("lastName", value)}
+                      required
+                      error={formErrors.lastName}
+                    />
+                    <InputField
+                      id="email"
+                      name="email"
+                      label="Email"
+                      type="email"
+                      value={form.email}
+                      onChange={(value) => handleFieldChange("email", value)}
+                      required
+                      error={formErrors.email}
+                    />
                   </div>
-                  {renderFilePills(item.files)}
+                  </div>
                 </div>
-              ))}
+
+                <div>
+                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Τηλέφωνα</h3>
+                  <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <InputField
+                      id="mobileNumber"
+                      name="mobileNumber"
+                      label="Κινητό τηλέφωνο"
+                      type="text"
+                      value={form.mobileNumber}
+                      onChange={(value) => handleFieldChange("mobileNumber", value)}
+                      error={formErrors.mobileNumber}
+                    />
+                    <InputField
+                      id="landlineNumber"
+                      name="landlineNumber"
+                      label="Σταθερό τηλέφωνο"
+                      type="text"
+                      value={form.landlineNumber}
+                      onChange={(value) => handleFieldChange("landlineNumber", value)}
+                      error={formErrors.landlineNumber}
+                    />
+                  </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Διεύθυνση</h3>
+                  <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <InputField
+                      id="streetAddress"
+                      name="streetAddress"
+                      label="Οδός και αριθμός"
+                      type="text"
+                      value={form.streetAddress}
+                      onChange={(value) => handleFieldChange("streetAddress", value)}
+                    />
+                    <InputField
+                      id="city"
+                      name="city"
+                      label="Πόλη"
+                      type="text"
+                      value={form.city}
+                      onChange={(value) => handleFieldChange("city", value)}
+                    />
+                    <InputField
+                      id="postalCode"
+                      name="postalCode"
+                      label="Τ.Κ."
+                      type="text"
+                      value={form.postalCode}
+                      onChange={(value) => handleFieldChange("postalCode", value)}
+                      error={formErrors.postalCode}
+                    />
+                  </div>
+                  </div>
+                </div>
+              </div>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 mt-8">
+              <button
+                type="button"
+                onClick={handleSaveProfile}
+                disabled={saving}
+                className="inline-flex items-center justify-center bg-patras-buccaneer text-sm text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors disabled:opacity-60"
+              >
+                {saving ? "Αποθήκευση..." : "Αποθήκευση αλλαγών"}
+              </button>
+            </div>
             </div>
           )}
-        </div>
-      )}
 
+          {isApplicant && activeSection === "additional" && (
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Κατάσταση υποψηφίου</h3>
+                  <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
+                    <div className="flex flex-col gap-3">
+                      <Checkbox
+                        id="hasNotParticipatedInPastProgram"
+                        name="hasNotParticipatedInPastProgram"
+                        label="Μη συμμετοχή σε προηγούμενο Πρόγραμμα Απόκτησης Ακαδημαϊκής Διδακτικής Εμπειρίας"
+                        description=""
+                        checked={additionalForm.hasNotParticipatedInPastProgram}
+                        onChange={(value) =>
+                          handleAdditionalFieldChange(
+                            "hasNotParticipatedInPastProgram",
+                            value
+                          )
+                        }
+                      />
+                      <Checkbox
+                        id="isPublicEmployee"
+                        name="isPublicEmployee"
+                        label="Δημόσιος υπάλληλος"
+                        description=""
+                        checked={additionalForm.isPublicEmployee}
+                        onChange={(value) =>
+                          handleAdditionalFieldChange("isPublicEmployee", value)
+                        }
+                      />
+                      <Checkbox
+                        id="isEuCitizenNonGreek"
+                        name="isEuCitizenNonGreek"
+                        label="Πολίτης Ε.Ε. (εκτός Ελλάδας)"
+                        description=""
+                        checked={additionalForm.isEuCitizenNonGreek}
+                        onChange={(value) =>
+                          handleAdditionalFieldChange("isEuCitizenNonGreek", value)
+                        }
+                      />
+
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Στοιχεία διδακτορικού</h3>
+                  <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <InputField
+                        id="phdTitle"
+                        name="phdTitle"
+                        label="Τίτλος διατριβής"
+                        type="text"
+                        value={additionalForm.phdTitle}
+                        onChange={(value) =>
+                          handleAdditionalFieldChange("phdTitle", value)
+                        }
+                      />
+                      <div>
+                        <FlowbiteDateField
+                          label="Ημερομηνία λήψης"
+                          value={additionalForm.phdAcquisitionDate}
+                          onChange={(value) =>
+                            handleAdditionalFieldChange("phdAcquisitionDate", value)
+                          }
+                          minDate="2011-01-01"
+                          maxDate={today}
+                        />
+                        <p className="-mt-3 text-xs text-gray-500 italic">
+                          Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}
+                        </p>
+                      </div>
+                      <div className="md:col-span-2">
+                        <Checkbox
+                          id="phdIsFromForeignInstitute"
+                          name="phdIsFromForeignInstitute"
+                          label="Τίτλος από ίδρυμα εξωτερικού"
+                          description=""
+                          checked={additionalForm.phdIsFromForeignInstitute}
+                          onChange={(value) =>
+                            handleAdditionalFieldChange(
+                              "phdIsFromForeignInstitute",
+                              value
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Εργασιακή εμπειρία</h3>
+                  <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
+                    <CustomSelect
+                      label="Χρόνια μεταδιδακτορικής εργασιακής εμπειρίας (εξαιρείται η διδακτική εμπειρία)"
+                      value={
+                        additionalForm.workExperience === ""
+                          ? ""
+                          : String(additionalForm.workExperience)
+                      }
+                      onChange={(value) => {
+                        if (value === "select") {
+                          handleAdditionalFieldChange("workExperience", "");
+                          return;
+                        }
+                        handleAdditionalFieldChange(
+                          "workExperience",
+                          Number(value)
+                        );
+                      }}
+                      options={workExperienceOptions}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 mt-8">
+                <button
+                  type="button"
+                  onClick={handleSaveAdditional}
+                  disabled={savingAdditional}
+                  className="inline-flex items-center justify-center bg-patras-buccaneer text-sm text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors disabled:opacity-60"
+                >
+                  {savingAdditional ? "Αποθήκευση..." : "Αποθήκευση αλλαγών"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {isApplicant && activeSection === "vault" && (
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+              {vaultItems.length === 0 ? (
+                <p className="text-gray-500">Δεν υπάρχουν καταχωρημένα δικαιολογητικά.</p>
+              ) : (
+                <div className="space-y-4">
+                  {vaultItems.map((item) => (
+                    <div key={item.label} className="border border-gray-200 rounded-lg p-4">
+                      <div className="text-sm font-semibold text-gray-700 mb-2">
+                        {item.label}
+                      </div>
+                      {renderFilePills(item.files)}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

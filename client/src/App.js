@@ -34,19 +34,22 @@ import {
   CreatePositionValidationProvider,
   usePositions
 } from "./contexts";
+import { ToastProvider } from "./contexts/ToastContext";
 
 
 export default function App() {
   return (
     <CreatePositionValidationProvider>
       <AuthProvider>
-        <PositionsProvider>
-          <Router>
-            <PreviousLocationProvider>
-              <AppContent />
-            </PreviousLocationProvider>
-          </Router>
-        </PositionsProvider>
+        <ToastProvider>
+          <PositionsProvider>
+            <Router>
+              <PreviousLocationProvider>
+                <AppContent />
+              </PreviousLocationProvider>
+            </Router>
+          </PositionsProvider>
+        </ToastProvider>
       </AuthProvider>
     </CreatePositionValidationProvider>
   );

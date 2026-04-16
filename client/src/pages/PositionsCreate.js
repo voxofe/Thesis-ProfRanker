@@ -6,6 +6,7 @@ import FlowbiteDateField from "../components/FlowbiteDateField";
 import PositionSelect from "../components/PositionSelect";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useToast } from "../contexts/ToastContext";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -72,7 +73,7 @@ export default function CreatePosition() {
 
   const [scientificFields, setScientificFields] = useState([]);
   const [selectedScientificField, setSelectedScientificField] = useState(null);
-  const [notification, setNotification] = useState({ message: "", type: "" });
+  const { showToast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [redirectLoading, setRedirectLoading] = useState(false);
   const [touched, setTouched] = useState({});
@@ -180,7 +181,6 @@ export default function CreatePosition() {
     if (Object.keys(errors).length > 0) return;
 
     setSubmitting(true);
-    setNotification({ message: "", type: "" });
 
     const payload = {
       positionId: formData.positionId || undefined,
@@ -200,7 +200,12 @@ export default function CreatePosition() {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
-      setNotification({ message: isEditMode ? "Η θέση ενημερώθηκε με επιτυχία!" : "Η θέση δημιουργήθηκε με επιτυχία!", type: "success" });
+      showToast({
+        type: "success",
+        message: isEditMode
+          ? "Η θέση ενημερώθηκε με επιτυχία!"
+          : "Η θέση δημιουργήθηκε με επιτυχία!",
+      });
       setSubmitting(false);
       if (refreshPositions) {
         await refreshPositions();
@@ -213,7 +218,7 @@ export default function CreatePosition() {
       }, 500);
     } catch (error) {
       const message = error?.response?.data?.error || "Αποτυχία δημιουργίας θέσης. Παρακαλώ δοκιμάστε ξανά.";
-      setNotification({ message, type: "error" });
+      showToast({ type: "error", message });
       setSubmitting(false);
     }
   };
@@ -407,14 +412,6 @@ export default function CreatePosition() {
             {submitting ? (isEditMode ? "Ενημέρωση..." : "Δημιουργία...") : (isEditMode ? "Ενημέρωση θέσης" : "Δημιουργία θέσης")}
           </button>
 
-          {notification.message && (
-            <p
-              className={`mt-3 text-sm font-medium ${notification.type === "success" ? "text-green-600" : "text-red-600"
-                }`}
-            >
-              {notification.message}
-            </p>
-          )}
         </div>
       </form>
     </div>

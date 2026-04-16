@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useAuth, useCreatePositionValidation } from "../contexts";
+import { useToast } from "../contexts/ToastContext";
 import InputField from "../components/InputField";
 import CustomSelect from "../components/CustomSelect";
 import CoursePanel from "../components/CoursePanel";
@@ -60,7 +61,7 @@ export default function ScientificFieldsCreate() {
     courses: [],
   });
 
-  const [notification, setNotification] = useState({ message: "", type: "" });
+  const { showToast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [redirectLoading, setRedirectLoading] = useState(false);
   const [touched, setTouched] = useState({});
@@ -137,7 +138,6 @@ export default function ScientificFieldsCreate() {
     if (Object.keys(errors).length > 0) return;
 
     setSubmitting(true);
-    setNotification({ message: "", type: "" });
 
     const payload = {
       name: formData.scientificField,
@@ -155,7 +155,10 @@ export default function ScientificFieldsCreate() {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
-      setNotification({ message: "Το επιστημονικό πεδίο δημιουργήθηκε με επιτυχία!", type: "success" });
+      showToast({
+        type: "success",
+        message: "Το επιστημονικό πεδίο δημιουργήθηκε με επιτυχία!",
+      });
       setSubmitting(false);
       setTimeout(() => {
         setRedirectLoading(true);
@@ -165,7 +168,7 @@ export default function ScientificFieldsCreate() {
       }, 500);
     } catch (error) {
       const message = error?.response?.data?.error || "Αποτυχία δημιουργίας πεδίου. Παρακαλώ δοκιμάστε ξανά.";
-      setNotification({ message, type: "error" });
+      showToast({ type: "error", message });
       setSubmitting(false);
     }
   };
@@ -307,14 +310,6 @@ export default function ScientificFieldsCreate() {
           >
             {submitting ? "Δημιουργία..." : "Δημιουργία πεδίου"}
           </button>
-
-          {notification.message && (
-            <p
-              className={`mt-3 text-sm font-medium ${notification.type === "success" ? "text-green-600" : "text-red-600"}`}
-            >
-              {notification.message}
-            </p>
-          )}
         </div>
       </form>
     </div>

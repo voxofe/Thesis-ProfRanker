@@ -14,6 +14,7 @@ import Stepper from "../components/Stepper";
 import Tooltip from "../components/Tooltip";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -30,7 +31,7 @@ export default function Form({ academicYear }) {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [maxStepReached, setMaxStepReached] = useState(1);
-  const [notification, setNotification] = useState({ message: "", type: "" });
+  const { showToast } = useToast();
   const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [redirectLoading, setRedirectLoading] = useState(false);
@@ -156,8 +157,7 @@ export default function Form({ academicYear }) {
     formDataToSend.append("workExperience", String(formData.workExperience ?? ""));
     formDataToSend.append("positionId", formData.positionId || "");
 
-    // Append files
-    [
+    const singleDocFields = [
       "cvDocument",
       "phdDocument",
       "doatapDocument",
@@ -166,24 +166,50 @@ export default function Form({ academicYear }) {
       "publicEmployeePermissionDocument",
       "notParticipatedDeclarationDocument",
       "euCitizenGreekLanguageCertificateDocument",
-      "responsibleDeclarationDocument"
-    ].forEach((field) => {
-      if (formData[field]) {
-        formDataToSend.append(field, formData[field]);
+      "responsibleDeclarationDocument",
+    ];
+
+    const toIdField = (field) => `${field}Id`;
+
+    singleDocFields.forEach((field) => {
+      const value = formData[field];
+      if (value instanceof File) {
+        formDataToSend.append(field, value);
+        return;
       }
+      if (value && typeof value === "object" && value.id) {
+        formDataToSend.append(toIdField(field), String(value.id));
+        return;
+      }
+      formDataToSend.append(toIdField(field), "");
     });
 
+    const bioKeepIds = [];
     (formData.bioSupportingDocuments || []).forEach((bioDocument) => {
       if (bioDocument instanceof File) {
         formDataToSend.append("bioSupportingDocuments", bioDocument);
+        return;
+      }
+      if (bioDocument?.id) {
+        bioKeepIds.push(bioDocument.id);
       }
     });
+    formDataToSend.append("bioSupportingDocumentIds", JSON.stringify(bioKeepIds));
 
+    const employmentKeepIds = [];
     (formData.employmentCertificates || []).forEach((certificate) => {
       if (certificate instanceof File) {
         formDataToSend.append("employmentCertificateDocuments", certificate);
+        return;
+      }
+      if (certificate?.id) {
+        employmentKeepIds.push(certificate.id);
       }
     });
+    formDataToSend.append(
+      "employmentCertificateDocumentIds",
+      JSON.stringify(employmentKeepIds)
+    );
 
     // Convert papers to a JSON string and append it to the FormData
     formDataToSend.append("papers", JSON.stringify(cleanedPapers));
@@ -208,9 +234,9 @@ export default function Form({ academicYear }) {
       );
 
       console.log("Form submitted successfully:", response.data);
-      setNotification({
-        message: "Η αίτηση υποβλήθηκε επιτυχώς!",
+      showToast({
         type: "success",
+        message: "Η αίτηση υποβλήθηκε επιτυχώς!",
       });
 
       refreshUser();
@@ -219,12 +245,12 @@ export default function Form({ academicYear }) {
         setTimeout(() => {
           navigate("/");
         }, 1500); // Show loading for 1.5 seconds before redirect
-      }, 500); // Wait for notification to show first
+      }, 500); // Allow toast to show before redirect
     } catch (error) {
       console.error("Error submitting form:", error);
-      setNotification({
-        message: "Αποτυχία υποβολής αίτησης. Παρακαλώ δοκιμάστε ξανά.",
+      showToast({
         type: "error",
+        message: "Αποτυχία υποβολής αίτησης. Παρακαλώ δοκιμάστε ξανά.",
       });
     } finally {
       setLoading(false);
@@ -274,18 +300,6 @@ export default function Form({ academicYear }) {
         </div>
       )}
 
-      {/* Notification */}
-      {notification.message && (
-        <div
-          className={`mb-4 px-4 py-3 rounded-md text-sm font-medium ${
-            notification.type === "success"
-              ? "bg-green-100 text-green-800 border border-green-300"
-              : "bg-red-100 text-red-800 border border-red-300"
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
       <h1 className="text-2xl text-center border-b pb-2 mb-8 text-gray-800">
         Αίτηση υποψηφιότητας 
       </h1>
@@ -321,7 +335,7 @@ export default function Form({ academicYear }) {
             onClick={handleSubmit}
             className="rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
           >
-            Υποβολή Αίτησης
+            Υποβολή αίτησης
           </button>
         ) : (
           <span

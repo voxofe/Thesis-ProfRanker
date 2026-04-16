@@ -18,7 +18,10 @@ export default function Checkbox(props) {
           checked={props.checked}
           onChange={(e) => props.onChange(e.target.checked)}
         />
-        <label htmlFor={props.id} className={`ml-3 ${labelStyle}`}>
+        <label
+          htmlFor={props.id}
+          className={`ml-3 ${labelStyle} ${props.labelClassName || ""}`}
+        >
           {props.label}
           {props.required && <span className="text-red-500 ml-1">*</span>}
         </label>

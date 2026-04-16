@@ -143,8 +143,8 @@ export default function Home() {
           />
 
           <HomePagePanel
-            title="Οι αιτήσεις μου & οι βαθμολογίες μου"
-            description="Δείτε τις υποβληθείσες αιτήσεις σας, τα δικαιολογητικά και τις βαθμολογίες σας."
+            title="Οι αιτήσεις μου"
+            description="Δείτε τις αιτήσεις σας και τις βαθμολογίες τους ή επεξεργαστείτε τις ενεργές αιτήσεις."
             buttonText="Προβολή αιτήσεων"
             to={userRole === "applicant" ? "/my-applications" : undefined}
             buttonDisabled={userRole === "guest"}
