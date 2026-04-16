@@ -152,18 +152,20 @@ export const FormDataProvider = ({ children }) => {
         papers: latestPapers ?? [],
         cvDocument: buildDocItem(profileSnapshot.documents?.cv),
         phdDocument: buildDocItem(profileSnapshot.documents?.phd),
-        doatapDocument: buildDocItem(profileSnapshot.documents?.doatap),
+        doatapDocument: defaults.phdIsFromForeignInstitute
+          ? buildDocItem(profileSnapshot.documents?.doatap)
+          : null,
         coursePlanDocument: buildDocItem(profileSnapshot.documents?.coursePlan),
         militaryObligationsDocument: buildDocItem(profileSnapshot.documents?.military),
-        publicEmployeePermissionDocument: buildDocItem(
-          profileSnapshot.documents?.publicEmployeePermission
-        ),
-        notParticipatedDeclarationDocument: buildDocItem(
-          profileSnapshot.documents?.notParticipatedDeclaration
-        ),
-        euCitizenGreekLanguageCertificateDocument: buildDocItem(
-          profileSnapshot.documents?.euCitizenGreekLanguageCertificate
-        ),
+        publicEmployeePermissionDocument: defaults.isPublicEmployee
+          ? buildDocItem(profileSnapshot.documents?.publicEmployeePermission)
+          : null,
+        notParticipatedDeclarationDocument: defaults.hasNotParticipatedInPastProgram
+          ? buildDocItem(profileSnapshot.documents?.notParticipatedDeclaration)
+          : null,
+        euCitizenGreekLanguageCertificateDocument: defaults.isEuCitizenNonGreek
+          ? buildDocItem(profileSnapshot.documents?.euCitizenGreekLanguageCertificate)
+          : null,
         responsibleDeclarationDocument: buildDocItem(
           profileSnapshot.documents?.responsibleDeclaration
         ),

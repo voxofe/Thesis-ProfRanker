@@ -100,10 +100,14 @@ export default function Profile() {
     value: String(index),
     label: String(index),
   }));
+  const canEditIdentity = profile?.canEditIdentity !== false;
   const emailRegex =
     /^(?=[a-zA-Z0-9@._%+-]{6,254}$)(?=[a-zA-Z0-9._%+-]{1,64}@)([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
 
   const validateField = (key, value, nextForm) => {
+    if (!canEditIdentity && ["firstName", "lastName"].includes(key)) {
+      return "";
+    }
     if (key === "firstName") {
       if (!value.trim()) return "Το όνομα είναι υποχρεωτικό.";
       return "";
@@ -113,8 +117,6 @@ export default function Profile() {
       return "";
     }
     if (key === "email") {
-      if (!value.trim()) return "Το email είναι υποχρεωτικό.";
-      if (!emailRegex.test(value.trim())) return "Παρακαλώ εισάγετε έγκυρο email.";
       return "";
     }
     if (key === "mobileNumber") {
@@ -157,16 +159,13 @@ export default function Profile() {
   const validateProfileForm = () => {
     const errors = {};
 
-    if (!form.firstName.trim()) {
-      errors.firstName = "Το όνομα είναι υποχρεωτικό.";
-    }
-    if (!form.lastName.trim()) {
-      errors.lastName = "Το επώνυμο είναι υποχρεωτικό.";
-    }
-    if (!form.email.trim()) {
-      errors.email = "Το email είναι υποχρεωτικό.";
-    } else if (!emailRegex.test(form.email.trim())) {
-      errors.email = "Παρακαλώ εισάγετε έγκυρο email.";
+    if (canEditIdentity) {
+      if (!form.firstName.trim()) {
+        errors.firstName = "Το όνομα είναι υποχρεωτικό.";
+      }
+      if (!form.lastName.trim()) {
+        errors.lastName = "Το επώνυμο είναι υποχρεωτικό.";
+      }
     }
 
     if (form.mobileNumber?.trim()) {
@@ -428,7 +427,7 @@ export default function Profile() {
                     : "text-gray-700 hover:bg-patras-albescentWhite"
                 }`}
               >
-                Θησαυροφυλάκιο αρχείων
+                Αρχεία
               </button>
             )}
           </nav>
@@ -445,38 +444,44 @@ export default function Profile() {
                 <div>
                   <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Βασικά στοιχεία</h3>
                   <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <InputField
-                      id="firstName"
-                      name="firstName"
-                      label="Όνομα"
-                      type="text"
-                      value={form.firstName}
-                      onChange={(value) => handleFieldChange("firstName", value)}
-                      required
-                      error={formErrors.firstName}
-                    />
-                    <InputField
-                      id="lastName"
-                      name="lastName"
-                      label="Επώνυμο"
-                      type="text"
-                      value={form.lastName}
-                      onChange={(value) => handleFieldChange("lastName", value)}
-                      required
-                      error={formErrors.lastName}
-                    />
-                    <InputField
-                      id="email"
-                      name="email"
-                      label="Email"
-                      type="email"
-                      value={form.email}
-                      onChange={(value) => handleFieldChange("email", value)}
-                      required
-                      error={formErrors.email}
-                    />
-                  </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <InputField
+                        id="email"
+                        name="email"
+                        label="Email"
+                        type="email"
+                        value={form.email}
+                        onChange={(value) => handleFieldChange("email", value)}
+                        disabled
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <InputField
+                        id="firstName"
+                        name="firstName"
+                        label="Όνομα"
+                        type="text"
+                        value={form.firstName}
+                        onChange={(value) => handleFieldChange("firstName", value)}
+                        disabled={!canEditIdentity}
+                        required
+                        error={formErrors.firstName}
+                      />
+                      <InputField
+                        id="lastName"
+                        name="lastName"
+                        label="Επώνυμο"
+                        type="text"
+                        value={form.lastName}
+                        onChange={(value) => handleFieldChange("lastName", value)}
+                        disabled={!canEditIdentity}
+                        required
+                        error={formErrors.lastName}
+                      />
+                    </div>
+                  <p className="mt-2 text-xs text-gray-500">
+                    Το ονοματεπώνυμο κλειδώνει μετά την πρώτη υποβολή αίτησης.
+                  </p>
                   </div>
                 </div>
 
@@ -556,7 +561,7 @@ export default function Profile() {
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Κατάσταση υποψηφίου</h3>
+                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Ιδιότητες υποψηφίου</h3>
                   <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
                     <div className="flex flex-col gap-3">
                       <Checkbox
@@ -604,7 +609,7 @@ export default function Profile() {
                       <InputField
                         id="phdTitle"
                         name="phdTitle"
-                        label="Τίτλος διατριβής"
+                        label="Τίτλος διδακτορικής διατριβής"
                         type="text"
                         value={additionalForm.phdTitle}
                         onChange={(value) =>
