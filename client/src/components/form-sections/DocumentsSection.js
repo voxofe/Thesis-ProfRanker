@@ -3,6 +3,7 @@ import { useFormData } from "../../contexts/FormDataContext";
 import { useAuth } from "../../contexts/AuthContext";
 import Upload from "../Upload";
 import Checkbox from "../Checkbox";
+import TermsModal from "../TermsModal";
 
 export default function DocumentsSection({ academicYear }) {
   const { formData, handleChange, handleFileChange, handleFileDelete } =
@@ -170,83 +171,10 @@ export default function DocumentsSection({ academicYear }) {
             required={true}
             compact
         />
-      {isRestrictionsModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          <div className="bg-white rounded-lg shadow-lg border w-full max-w-lg p-6 relative max-h-[80vh] overflow-hidden">
-            <button
-              type="button"
-              className="absolute top-3 right-3 text-gray-600 hover:text-red-700 text-2xl"
-              onClick={() => setIsRestrictionsModalOpen(false)}
-              title="Κλείσιμο"
-            >
-              &times;
-            </button>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">
-              Όροι Πράξης
-            </h2>
-            <div className="text-sm text-gray-700 space-y-4 overflow-y-auto max-h-[65vh] pr-2">
-              <p>
-                Υπεύθυνη Δήλωση αρ. 8, παρ. 4, του Ν.1599/1986 στην οποία
-                δηλώνεται ότι ο/η υποψήφιος/α:
-              </p>
-              <ul className="list-disc pl-5 space-y-2">
-                <li>
-                  έλαβε γνώση των όρων της παρούσας πρόσκλησης εκδήλωσης
-                  ενδιαφέροντος και τους αποδέχεται όλους ανεπιφύλακτα.
-                </li>
-                <li>
-                  τα στοιχεία του βιογραφικού σημειώματος είναι αληθή.
-                </li>
-                <li>
-                  έχει λάβει το διδακτορικό του τίτλο (ημερομηνία επιτυχούς
-                  υποστήριξης) μετά την 1.1.2011.
-                </li>
-                <li>
-                  δεν κατέχει θέση μέλους ΔΕΠ/ΕΠ, ΕΕΠ, ΕΔΙΠ, ΕΤΕΠ των ΑΕΙ, ή
-                  συμβασιούχου Επιστημονικού Συνεργάτη ΤΕΙ, ή συμβασιούχου
-                  Εργαστηριακού Συνεργάτη ΤΕΙ στην Ελλάδα ή στην αλλοδαπή.
-                </li>
-                <li>
-                  δεν κατέχει θέση διοικητικού προσωπικού στο Ίδρυμα.
-                </li>
-                <li>
-                  δεν κατέχει θέση Ερευνητή / Ειδικού Λειτουργικού
-                  Επιστήμονα σε ερευνητικά κέντρα της Ελλάδας ή της αλλοδαπής.
-                </li>
-                <li>
-                  κατά τη διάρκεια του ακαδημαϊκού έτους 2021-2022 δεν θα
-                  κατέχει θέση συμβασιούχου διδάσκοντα του Π.Δ. 407/80 στην
-                  Ελλάδα, ή θέση συμβασιούχου πανεπιστημιακού υποτρόφου του
-                  έκτου εδαφίου της παρ. 6 του άρθρου 29 του ν. 4009/2011, όπως
-                  έχει τροποποιηθεί και ισχύει, του οικείου τμήματος πέραν της
-                  σύμβασης που θα συνάψει στο πλαίσιο της παρούσας Δράσης.
-                </li>
-                <li>
-                  κατά τη διάρκεια του ακαδημαϊκού έτους 2021-2022 μπορεί να
-                  διδάξει μαθήματα σε μόνο ένα (1) Τμήμα, ενός (1) Ανώτατου
-                  Εκπαιδευτικού Ιδρύματος.
-                </li>
-                <li>
-                  δίνει τη συγκατάθεσή του, σε περίπτωση επιλογής του, για
-                  την αποστολή των στοιχείων του (ονοματεπώνυμο και τα στοιχεία
-                  επικοινωνίας) στο Εθνικό Κέντρο Τεκμηρίωσης (επίσημος φορέας
-                  Ελληνικού Στατιστικού Συστήματος), προκειμένου να
-                  επικοινωνήσουν για τη διεξαγωγή διαδικασίας αξιολόγησης του
-                  έργου της εν λόγω Πράξης.
-                </li>
-                <li>
-                    γνωρίζει και αποδέχεται εγγράφως, ότι με την υποβολή
-                    υποψηφιότητας παραχωρεί το δικαίωμα χρήσης των προσωπικών
-                    δεδομένων για τους σκοπούς της αξιολόγησης όπως και την κατά
-                    Νόμο αναγκαία χρήση τους για λόγους διαφάνειας στην ανάρτηση των
-                    σχετικών αποφάσεων στην ιστοσελίδα της Αναθέτουσας Αρχής και
-                    σύμφωνα με τις κείμενες διατάξεις, στο σύστημα ΔΙΑΥΓΕΙΑ.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
+      <TermsModal
+        open={isRestrictionsModalOpen}
+        onClose={() => setIsRestrictionsModalOpen(false)}
+      />
     </div>
   );
 }

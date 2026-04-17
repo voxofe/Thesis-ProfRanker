@@ -6,6 +6,8 @@ import InputField from "../components/InputField";
 import Checkbox from "../components/Checkbox";
 import FlowbiteDateField from "../components/FlowbiteDateField";
 import CustomSelect from "../components/CustomSelect";
+import VaultFileActions from "../components/VaultFileActions";
+import TermsModal from "../components/TermsModal";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -14,11 +16,6 @@ const API_BASE_URL = (
   /\/+$/,
   ""
 );
-
-const genderOptions = [
-  { value: "male", label: "Άνδρας" },
-  { value: "female", label: "Γυναίκα" },
-];
 
 export default function Profile() {
   const { currentUser, refreshUser } = useAuth();
@@ -49,6 +46,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [savingAdditional, setSavingAdditional] = useState(false);
   const [formErrors, setFormErrors] = useState({});
+  const [isRestrictionsModalOpen, setIsRestrictionsModalOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -101,10 +99,8 @@ export default function Profile() {
     label: String(index),
   }));
   const canEditIdentity = profile?.canEditIdentity !== false;
-  const emailRegex =
-    /^(?=[a-zA-Z0-9@._%+-]{6,254}$)(?=[a-zA-Z0-9._%+-]{1,64}@)([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
 
-  const validateField = (key, value, nextForm) => {
+  const validateField = (key, value) => {
     if (!canEditIdentity && ["firstName", "lastName"].includes(key)) {
       return "";
     }
@@ -114,9 +110,6 @@ export default function Profile() {
     }
     if (key === "lastName") {
       if (!value.trim()) return "Το επώνυμο είναι υποχρεωτικό.";
-      return "";
-    }
-    if (key === "email") {
       return "";
     }
     if (key === "mobileNumber") {
@@ -146,7 +139,7 @@ export default function Profile() {
   const handleFieldChange = (key, value) => {
     const nextForm = { ...form, [key]: value };
     setForm(nextForm);
-    const error = validateField(key, value, nextForm);
+    const error = validateField(key, value);
     setFormErrors((prev) => ({ ...prev, [key]: error }));
   };
 
@@ -304,74 +297,257 @@ export default function Profile() {
     }
   };
 
-  const formatDate = (value) => {
-    if (!value || typeof value !== "string") return "—";
-    const parts = value.split("-");
-    if (parts.length !== 3) return value;
-    return [parts[2], parts[1], parts[0]].join("-");
-  };
-
   const renderFilePills = (files) => (
     <div className="flex flex-wrap gap-2">
-      {files.map((file, index) => (
-        <span
-          key={`${file}-${index}`}
-          className="inline-flex items-center bg-patras-buccaneer/10 text-patras-buccaneer px-3 py-1 rounded-full text-xs font-medium border border-patras-buccaneer"
-        >
-          {file}
-        </span>
+      {files.map((file) => (
+        <VaultFileActions
+          key={file.id || file.name}
+          file={file}
+          onReplace={(selected) => handleVaultReplace(file, selected)}
+          onDelete={() => handleVaultDelete(file)}
+          onView={() => handleVaultView(file)}
+          onDownload={() => handleVaultDownload(file)}
+        />
       ))}
     </div>
   );
 
   const vaultItems = useMemo(() => {
     const items = [];
-    const single = (label, doc) => {
-      if (doc?.name) items.push({ label, files: [doc.name] });
-    };
-    const multi = (label, list) => {
+    const normalizeFiles = (list) => {
       const files = Array.isArray(list)
-        ? list
-            .map((item) => (item?.name ? item.name : item))
-            .filter((item) => !!item)
+        ? list.filter((item) => item?.name)
         : [];
-      if (files.length) items.push({ label, files });
+      return files.sort((a, b) => {
+        if (a.isDefault && !b.isDefault) return -1;
+        if (!a.isDefault && b.isDefault) return 1;
+        return 0;
+      });
+    };
+    const addSection = (key, label, docType, list) => {
+      items.push({
+        key,
+        label,
+        docType,
+        files: normalizeFiles(list),
+      });
     };
 
     const vault = profile?.documentVault || {};
-    const defaults = profile?.documents || {};
 
-    single("Βιογραφικό σημείωμα", defaults.cv);
-    multi(
+    const restrictionsLabel = (
+      <>
+        Υπεύθυνη δήλωση σχετικά με τους{" "}
+        <button
+          type="button"
+          className="text-patras-buccaneer underline hover:text-patras-auChico"
+          onClick={() => setIsRestrictionsModalOpen(true)}
+        >
+          περιορισμούς της Πράξης
+        </button>
+      </>
+    );
+
+    addSection("cv", "Βιογραφικό σημείωμα", "cv", vault.cv);
+    addSection(
+      "bio-supporting",
       "Έγγραφα που τεκμηριώνουν τα διαλαμβανόμενα στο βιογραφικό",
+      "bio_supporting",
       vault.bio_supporting
     );
-    single("Διδακτορικό δίπλωμα", defaults.phd);
-    single("ΔΟΑΤΑΠ", defaults.doatap);
-    multi(
-      "Βεβαιώσεις προϋπηρεσίας από τον Φορέα / Συμβάσεις",
+    addSection("phd", "Διδακτορικό δίπλωμα", "phd", vault.phd);
+    addSection("doatap", "Έγγραφο αναγνώρισης από ΔΟΑΤΑΠ", "doatap", vault.doatap);
+    addSection(
+      "employment-certs",
+      "Βεβαιώσεις προϋπηρεσίας από τον Φορέα",
+      "employment_certificate",
       vault.employment_certificate
     );
-    single("Υπεύθυνη δήλωση", defaults.responsibleDeclaration);
-    single(
-      "Βεβαίωση άδειας από Δημόσια Υπηρεσία",
-      defaults.publicEmployeePermission
+    addSection(
+      "public-employee-permission",
+      "Πρωτοκολλημένη αίτηση για έκδοση σχετικής άδειας από το αρμόδιο όργανο",
+      "public_employee_permission",
+      vault.public_employee_permission
     );
-    single(
-      "Υπεύθυνη δήλωση μη συμμετοχής",
-      defaults.notParticipatedDeclaration
+    addSection(
+      "eu-citizen",
+      "Πιστοποιητικό ελληνομάθειας Δ΄ επιπέδου από το Κέντρο Ελληνικής Γλώσσας",
+      "eu_citizen_greek_language_certificate",
+      vault.eu_citizen_greek_language_certificate
     );
-    single(
-      "Πιστοποιητικό ελληνομάθειας",
-      defaults.euCitizenGreekLanguageCertificate
+    addSection(
+      "not-participated",
+      "Υπεύθυνη δήλωση μη συμμετοχής σε άλλο πρόγραμμα Απόκτησης Ακαδημαϊκής Διδακτικής Εμπειρίας",
+      "not_participated_declaration",
+      vault.not_participated_declaration
     );
-    single(
-      "Βεβαίωση στρατιωτικών υποχρεώσεων",
-      defaults.military
+    addSection(
+      "military",
+      "Υπεύθυνη δήλωση εκπλήρωσης στρατιωτικών υποχρεώσεων / νόμιμης απαλλαγής / αναβολής",
+      "military",
+      vault.military
+    );
+    addSection(
+      "responsible-declaration",
+      restrictionsLabel,
+      "responsible_declaration",
+      vault.responsible_declaration
     );
 
     return items;
   }, [profile]);
+
+  const handleVaultUpload = async (docType, selectedFile) => {
+    if (!selectedFile || !docType) return;
+    const allowed = ["pdf", "doc", "docx", "odt"];
+    const ext = selectedFile.name.split(".").pop()?.toLowerCase();
+    if (!ext || !allowed.includes(ext)) {
+      showToast({
+        type: "error",
+        message: "Επιτρέπονται μόνο αρχεία PDF, DOC, DOCX, ODT.",
+      });
+      return;
+    }
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      showToast({ type: "error", message: "Το αρχείο πρέπει να είναι έως 5MB." });
+      return;
+    }
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("docType", docType);
+
+    try {
+      await axios.post(`${API_BASE_URL}/api/profile/vault`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      showToast({ type: "success", message: "Το αρχείο προστέθηκε." });
+      refreshProfileData();
+    } catch (error) {
+      console.error("Error uploading document:", error);
+      showToast({
+        type: "error",
+        message: error?.response?.data?.error || "Αποτυχία προσθήκης αρχείου.",
+      });
+    }
+  };
+
+  const refreshProfileData = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProfile(res.data);
+    } catch (error) {
+      console.error("Error refreshing profile:", error);
+    }
+  };
+
+  const handleVaultReplace = async (file, selectedFile) => {
+    if (!file?.id || !selectedFile) return;
+    const allowed = ["pdf", "doc", "docx", "odt"];
+    const ext = selectedFile.name.split(".").pop()?.toLowerCase();
+    if (!ext || !allowed.includes(ext)) {
+      showToast({
+        type: "error",
+        message: "Επιτρέπονται μόνο αρχεία PDF, DOC, DOCX, ODT.",
+      });
+      return;
+    }
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      showToast({ type: "error", message: "Το αρχείο πρέπει να είναι έως 5MB." });
+      return;
+    }
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      await axios.put(`${API_BASE_URL}/api/profile/vault/${file.id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      showToast({ type: "success", message: "Το αρχείο αντικαταστάθηκε." });
+      refreshProfileData();
+    } catch (error) {
+      console.error("Error replacing document:", error);
+      showToast({
+        type: "error",
+        message:
+          error?.response?.data?.error || "Αποτυχία αντικατάστασης αρχείου.",
+      });
+    }
+  };
+
+  const handleVaultDelete = async (file) => {
+    if (!file?.id) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      await axios.delete(`${API_BASE_URL}/api/profile/vault/${file.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      showToast({ type: "success", message: "Το αρχείο διαγράφηκε." });
+      refreshProfileData();
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      showToast({
+        type: "error",
+        message:
+          error?.response?.data?.error || "Αποτυχία διαγραφής αρχείου.",
+      });
+    }
+  };
+
+  const handleVaultView = async (file) => {
+    if (!file?.downloadPath) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const response = await axios.get(`${API_BASE_URL}${file.downloadPath}`, {
+        responseType: "blob",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const blobUrl = window.URL.createObjectURL(response.data);
+      window.open(blobUrl, "_blank", "noopener");
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000 * 60);
+    } catch (error) {
+      console.error("Error opening document:", error);
+      showToast({ type: "error", message: "Αποτυχία ανοίγματος αρχείου." });
+    }
+  };
+
+  const handleVaultDownload = async (file) => {
+    if (!file?.downloadPath) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const response = await axios.get(`${API_BASE_URL}${file.downloadPath}`, {
+        responseType: "blob",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const blobUrl = window.URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = file.name || "document";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Error downloading document:", error);
+      showToast({ type: "error", message: "Αποτυχία λήψης αρχείου." });
+    }
+  };
 
   if (loading) {
     return (
@@ -380,7 +556,6 @@ export default function Profile() {
       </div>
     );
   }
-
 
   return (
     <div className="max-w-6xl mx-auto px-6">
@@ -435,7 +610,7 @@ export default function Profile() {
 
         <section>
           <div className="mb-4 rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-600">
-            Οι αλλαγές στο προφίλ δεν επηρεάζουν ήδη υποβληθείσες αιτήσεις. 
+            Οι αλλαγές στο προφίλ δεν επηρεάζουν ήδη υποβληθείσες αιτήσεις.
             Για αλλαγές σε ενεργές αιτήσεις, επεξεργαστείτε τις από την αρχική σελίδα.
           </div>
           {activeSection === "general" && (
@@ -479,9 +654,9 @@ export default function Profile() {
                         error={formErrors.lastName}
                       />
                     </div>
-                  <p className="mt-2 text-xs text-gray-500">
-                    Το ονοματεπώνυμο κλειδώνει μετά την πρώτη υποβολή αίτησης.
-                  </p>
+                    <p className="mt-2 text-xs text-gray-500">
+                      Το ονοματεπώνυμο κλειδώνει μετά την πρώτη υποβολή αίτησης.
+                    </p>
                   </div>
                 </div>
 
@@ -692,19 +867,76 @@ export default function Profile() {
               {vaultItems.length === 0 ? (
                 <p className="text-gray-500">Δεν υπάρχουν καταχωρημένα δικαιολογητικά.</p>
               ) : (
-                <div className="space-y-4">
-                  {vaultItems.map((item) => (
-                    <div key={item.label} className="border border-gray-200 rounded-lg p-4">
-                      <div className="text-sm font-semibold text-gray-700 mb-2">
-                        {item.label}
+                <div>
+                  {(() => {
+                    const groupedDocTypes = new Set([
+                      "responsible_declaration",
+                      "public_employee_permission",
+                      "not_participated_declaration",
+                      "eu_citizen_greek_language_certificate",
+                      "military",
+                    ]);
+                    const primaryItems = vaultItems.filter(
+                      (item) => !groupedDocTypes.has(item.docType)
+                    );
+                    const groupedItems = vaultItems.filter((item) =>
+                      groupedDocTypes.has(item.docType)
+                    );
+
+                    const renderItem = (item) => (
+                      <div key={item.key} className="mt-6 first:mt-0">
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                          <div className="text-sm font-semibold text-patras-buccaneer">
+                            {item.label}
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] items-end gap-3">
+                            {renderFilePills(item.files)}
+                            <div className="flex md:justify-end">
+                              <label
+                                className="group inline-flex items-center gap-2 text-xs font-semibold text-patras-buccaneer cursor-pointer relative"
+                              >
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  accept=".pdf,.doc,.docx,.odt"
+                                  onChange={(event) => {
+                                    const file = event.target.files?.[0];
+                                    event.target.value = "";
+                                    handleVaultUpload(item.docType, file);
+                                  }}
+                                />
+                                <span className="inline-flex items-center gap-1 rounded-full border border-patras-buccaneer/40 bg-patras-albescentWhite/60 px-3 py-1 transition-colors duration-150 hover:bg-patras-buccaneer hover:text-white">
+                                  + Προσθήκη
+                                </span>
+                                <span className="absolute right-0 top-full mt-2 w-max rounded-md border border-gray-200 bg-white px-3 py-2 text-[11px] text-gray-600 shadow-md opacity-0 translate-y-1 pointer-events-none transition duration-150 group-hover:opacity-100 group-hover:translate-y-0">
+                                  PDF, DOC, DOCX, ODT
+                                  <br />
+                                  Μέγιστο μέγεθος: 5MB
+                                </span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      {renderFilePills(item.files)}
-                    </div>
-                  ))}
+                    );
+
+                    return (
+                      <>
+                        {primaryItems.map(renderItem)}
+                        {groupedItems.map(renderItem)}
+                      </>
+                    );
+                  })()}
                 </div>
               )}
             </div>
           )}
+          <TermsModal
+            open={isRestrictionsModalOpen}
+            onClose={() => setIsRestrictionsModalOpen(false)}
+          />
         </section>
       </div>
     </div>
