@@ -11,11 +11,11 @@ export const ValidationProvider = ({ children }) => {
   const { currentUser } = useAuth();
   const [stepValidation, setStepValidation] = useState({
     1: false, // Personal Info
-    2: false, // Bio
-    3: false, // Scientific Field
-    4: true,  // Course Plan
+    2: false, // Scientific Field
+    3: true, // Course Plan
+    4: false, // Bio
     5: false, // PhD
-    6: true,  // Papers
+    6: true, // Papers
     7: false, // Work Experience
     8: false, // Documents / Declarations
   });
@@ -147,9 +147,9 @@ export const ValidationProvider = ({ children }) => {
 
     setStepValidation({
       1: validatePersonalInfo(),
-      2: validateBio(),
-      3: validateScientificField(),
-      4: validateCoursePlan(),
+      2: validateScientificField(),
+      3: validateCoursePlan(),
+      4: validateBio(),
       5: validatePhd(),
       6: validatePapers(),
       7: validateWorkExperience(),

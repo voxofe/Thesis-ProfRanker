@@ -54,7 +54,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
 
       {open && (
         <div
-          className="absolute right-0 mt-3 w-max min-w-[12rem] max-w-xs rounded-xl border border-gray-200 bg-white shadow-xl z-50"
+          className="absolute right-0 mt-3 w-max rounded-xl border border-gray-200 bg-white shadow-xl z-50"
           role="menu"
         >
           <div className="py-2 text-left">

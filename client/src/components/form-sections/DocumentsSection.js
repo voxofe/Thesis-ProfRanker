@@ -6,8 +6,13 @@ import Checkbox from "../Checkbox";
 import TermsModal from "../TermsModal";
 
 export default function DocumentsSection({ academicYear }) {
-  const { formData, handleChange, handleFileChange, handleFileDelete } =
-    useFormData();
+  const {
+    formData,
+    documentVault,
+    handleChange,
+    handleFileChange,
+    handleFileDelete,
+  } = useFormData();
   const { currentUser } = useAuth();
   const [isRestrictionsModalOpen, setIsRestrictionsModalOpen] = useState(false);
 
@@ -42,6 +47,10 @@ export default function DocumentsSection({ academicYear }) {
                 }
                 onDelete={() =>
                   handleFileDelete("publicEmployeePermissionDocument")
+                }
+                existingOptions={documentVault?.public_employee_permission}
+                onSelectExisting={(doc) =>
+                  handleFileChange("publicEmployeePermissionDocument", doc)
                 }
                 required={formData.isPublicEmployee}
               />
@@ -82,6 +91,15 @@ export default function DocumentsSection({ academicYear }) {
                 onDelete={() =>
                   handleFileDelete("euCitizenGreekLanguageCertificateDocument")
                 }
+                existingOptions={
+                  documentVault?.eu_citizen_greek_language_certificate
+                }
+                onSelectExisting={(doc) =>
+                  handleFileChange(
+                    "euCitizenGreekLanguageCertificateDocument",
+                    doc
+                  )
+                }
                 required={formData.isEuCitizenNonGreek}
               />
             </div>
@@ -118,6 +136,10 @@ export default function DocumentsSection({ academicYear }) {
                 onDelete={() =>
                   handleFileDelete("notParticipatedDeclarationDocument")
                 }
+                existingOptions={documentVault?.not_participated_declaration}
+                onSelectExisting={(doc) =>
+                  handleFileChange("notParticipatedDeclarationDocument", doc)
+                }
                 required={formData.hasNotParticipatedInPastProgram}
               />
             </div>
@@ -137,6 +159,10 @@ export default function DocumentsSection({ academicYear }) {
             uploadedFile={formData.militaryObligationsDocument}
             onChange={(e) => handleFileChange("militaryObligationsDocument", e)}
             onDelete={() => handleFileDelete("militaryObligationsDocument")}
+            existingOptions={documentVault?.military}
+            onSelectExisting={(doc) =>
+              handleFileChange("militaryObligationsDocument", doc)
+            }
             required={true}
             compact
         />
@@ -167,6 +193,10 @@ export default function DocumentsSection({ academicYear }) {
             }
             onDelete={() =>
                 handleFileDelete("responsibleDeclarationDocument")
+            }
+            existingOptions={documentVault?.responsible_declaration}
+            onSelectExisting={(doc) =>
+              handleFileChange("responsibleDeclarationDocument", doc)
             }
             required={true}
             compact

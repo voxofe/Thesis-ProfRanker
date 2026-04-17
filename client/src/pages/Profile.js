@@ -99,6 +99,7 @@ export default function Profile() {
     label: String(index),
   }));
   const canEditIdentity = profile?.canEditIdentity !== false;
+  const requiresMilitaryDoc = profile?.user?.gender === "male";
 
   const validateField = (key, value) => {
     if (!canEditIdentity && ["firstName", "lastName"].includes(key)) {
@@ -381,12 +382,14 @@ export default function Profile() {
       "not_participated_declaration",
       vault.not_participated_declaration
     );
-    addSection(
-      "military",
-      "Υπεύθυνη δήλωση εκπλήρωσης στρατιωτικών υποχρεώσεων / νόμιμης απαλλαγής / αναβολής",
-      "military",
-      vault.military
-    );
+    if (requiresMilitaryDoc) {
+      addSection(
+        "military",
+        "Υπεύθυνη δήλωση εκπλήρωσης στρατιωτικών υποχρεώσεων / νόμιμης απαλλαγής / αναβολής",
+        "military",
+        vault.military
+      );
+    }
     addSection(
       "responsible-declaration",
       restrictionsLabel,
@@ -395,7 +398,7 @@ export default function Profile() {
     );
 
     return items;
-  }, [profile]);
+  }, [profile, requiresMilitaryDoc]);
 
   const handleVaultUpload = async (docType, selectedFile) => {
     if (!selectedFile || !docType) return;

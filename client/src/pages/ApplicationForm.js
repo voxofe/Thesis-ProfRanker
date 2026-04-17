@@ -47,16 +47,11 @@ export default function Form({ academicYear }) {
     },
     {
       id: 2,
-      title: "Βιογραφικό",
-      component: BioSection,
-    },
-    {
-      id: 3,
       title: "Επιστημονικό πεδίο",
       component: ScientificFieldSection,
     },
     {
-      id: 4,
+      id: 3,
       title: "Σχεδιάγραμμα διδασκαλίας",
       component: (props) => (
         <CoursePlanSection
@@ -65,6 +60,11 @@ export default function Form({ academicYear }) {
           handleFileDelete={props.handleFileDelete}
         />
       ),
+    },
+    {
+      id: 4,
+      title: "Βιογραφικό",
+      component: BioSection,
     },
     {
       id: 5,
@@ -96,7 +96,7 @@ export default function Form({ academicYear }) {
   // Only these steps need overflow-visible (add more IDs if needed)
   const stepsNeedingOverflow = new Set([5]);
   const contentOverflow =  stepsNeedingOverflow.has(currentStep) ? "overflow-visible" : "overflow-y-auto";
-  // const contentOverflow = "overflow-y-auto";
+
   const handleStepClick = (step) => {
     // Only allow navigation to accessible steps
     if (canAccessStep(step)) {

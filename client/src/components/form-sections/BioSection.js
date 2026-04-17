@@ -6,6 +6,7 @@ import MultipleUploadStrip from "../MultipleUploadStrip";
 export default function BioSection() {
   const {
     formData,
+    documentVault,
     handleFileChange,
     handleFileDelete,
     addBioSupportingDocument,
@@ -24,6 +25,8 @@ export default function BioSection() {
         uploadedFile={formData.cvDocument}
         onChange={(e) => handleFileChange("cvDocument", e)}
         onDelete={() => handleFileDelete("cvDocument")}
+        existingOptions={documentVault?.cv}
+        onSelectExisting={(doc) => handleFileChange("cvDocument", doc)}
         required={true}
       />
 
@@ -33,6 +36,8 @@ export default function BioSection() {
         accept=".pdf,.doc,.docx,.odt"
         onAddFile={addBioSupportingDocument}
         onDeleteFile={removeBioSupportingDocument}
+        existingOptions={documentVault?.bio_supporting}
+        required={true}
       />
     </div>
   );

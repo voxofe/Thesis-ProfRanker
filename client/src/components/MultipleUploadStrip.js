@@ -4,6 +4,7 @@ import {
   TrashIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/solid";
+import CustomSelect from "./CustomSelect";
 
 const getDisplayName = (fileItem) => {
   if (fileItem instanceof File) return fileItem.name;
@@ -18,6 +19,7 @@ export default function MultipleUploadStrip({
   onDeleteFile,
   onChange,
   onDelete,
+  existingOptions = [],
   accept = ".pdf,.doc,.docx,.odt",
   required = false,
   label,
@@ -25,6 +27,7 @@ export default function MultipleUploadStrip({
   const inputRef = useRef(null);
   const [localFiles, setLocalFiles] = useState([]);
   const [error, setError] = useState("");
+  const [showVaultPicker, setShowVaultPicker] = useState(false);
   const maxFileBytes = 5 * 1024 * 1024;
   const addFileHandler = onAddFile || onChange;
   const deleteFileHandler = onDeleteFile || onDelete;
@@ -32,6 +35,28 @@ export default function MultipleUploadStrip({
     if (Array.isArray(files) && files.length > 0) return files;
     return localFiles;
   }, [files, localFiles]);
+  const selectedIds = new Set(
+    effectiveFiles
+      .map((fileItem) =>
+        fileItem && typeof fileItem === "object" && fileItem.id
+          ? String(fileItem.id)
+          : null
+      )
+      .filter(Boolean)
+  );
+  const selectedNames = new Set(
+    effectiveFiles.map((fileItem) => getDisplayName(fileItem)).filter(Boolean)
+  );
+  const selectableOptions = Array.isArray(existingOptions)
+    ? existingOptions.filter(
+        (option) =>
+          option &&
+          option.id &&
+          option.name &&
+          !selectedIds.has(String(option.id)) &&
+          !selectedNames.has(option.name)
+      )
+    : [];
 
   const parseAcceptList = () =>
     (accept || "")
@@ -128,13 +153,61 @@ export default function MultipleUploadStrip({
           </div>
         ))}
 
-        <button
-          type="button"
-          className="flex h-40 w-40 shrink-0 items-center justify-center rounded-lg border border-dashed border-patras-buccaneer/40 bg-white text-patras-buccaneer hover:bg-patras-albescentWhite"
-          onClick={() => inputRef.current?.click()}
-        >
-          <PlusIcon className="h-12 w-12" />
-        </button>
+        <div className="relative h-40 w-40 shrink-0 rounded-lg border border-dashed border-patras-buccaneer/40 bg-white text-patras-buccaneer">
+          {!showVaultPicker && (
+            <button
+              type="button"
+              className="flex h-full w-full items-center justify-center hover:bg-patras-albescentWhite"
+              onClick={() => {
+                if (selectableOptions.length === 0) {
+                  inputRef.current?.click();
+                  return;
+                }
+                setShowVaultPicker(true);
+              }}
+            >
+              <PlusIcon className="h-12 w-12" />
+            </button>
+          )}
+
+          {showVaultPicker && selectableOptions.length > 0 && (
+            <div className="p-3">
+              <CustomSelect
+                label="Επιλέξτε από τα ήδη αναρτημένα αρχεία σας"
+                value="select"
+                placeholder="Επιλέξτε..."
+                options={[
+                  ...selectableOptions.map((option) => ({
+                    value: String(option.id),
+                    label: option.name,
+                  })),
+                  { value: "__upload__", label: "Ανεβάστε νέο αρχείο" },
+                ]}
+                onChange={(value) => {
+                  if (value === "__upload__") {
+                    setShowVaultPicker(false);
+                    inputRef.current?.click();
+                    return;
+                  }
+                  if (value === "select") {
+                    return;
+                  }
+                  const selected = selectableOptions.find(
+                    (option) => String(option.id) === value
+                  );
+                  if (selected) {
+                    const fileEntry = { id: selected.id, name: selected.name };
+                    setLocalFiles((prev) => [...prev, fileEntry]);
+                    if (typeof addFileHandler === "function") {
+                      addFileHandler(fileEntry);
+                    }
+                  }
+                  setShowVaultPicker(false);
+                }}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       <input

@@ -6,8 +6,13 @@ import Checkbox from "../Checkbox";
 import FlowbiteDateField from "../FlowbiteDateField";
 
 export default function PhdSection() {
-  const { formData, handleChange, handleFileChange, handleFileDelete } =
-    useFormData();
+  const {
+    formData,
+    documentVault,
+    handleChange,
+    handleFileChange,
+    handleFileDelete,
+  } = useFormData();
   const today = new Date().toISOString().split("T")[0];
   const todayDisplay = today.split("-").reverse().join("-");
 
@@ -27,6 +32,8 @@ export default function PhdSection() {
             uploadedFile={formData.phdDocument}
             onChange={(e) => handleFileChange("phdDocument", e)}
             onDelete={() => handleFileDelete("phdDocument")}
+            existingOptions={documentVault?.phd}
+            onSelectExisting={(doc) => handleFileChange("phdDocument", doc)}
             required={true}
           />
         </div>
@@ -98,6 +105,8 @@ export default function PhdSection() {
                 uploadedFile={formData.doatapDocument}
                 onChange={(e) => handleFileChange("doatapDocument", e)}
                 onDelete={() => handleFileDelete("doatapDocument")}
+                existingOptions={documentVault?.doatap}
+                onSelectExisting={(doc) => handleFileChange("doatapDocument", doc)}
                 required={formData.phdIsFromForeignInstitute}
               />
             </div>

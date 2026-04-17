@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   DocumentTextIcon,
   TrashIcon,
   CheckIcon,
 } from "@heroicons/react/24/solid";
+import CustomSelect from "./CustomSelect";
 
 export default function Upload(props) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState("");
+  const inputRef = useRef(null);
   const maxFileBytes = 5 * 1024 * 1024;
   const contentLabel = props.contentLabel || props.content || "";
   const contentStatus = props.contentStatus || props.content || "";
@@ -21,6 +23,20 @@ export default function Upload(props) {
       props.uploadedFile.name);
   const hasUploadedFile = props.uploadedFile instanceof File;
   const hasAnyFile = hasExistingFile || hasUploadedFile;
+  const existingOptions = Array.isArray(props.existingOptions)
+    ? props.existingOptions
+    : [];
+  const selectableOptions = existingOptions.filter(
+    (option) => option && option.id && option.name
+  );
+  const canPickFromVault = selectableOptions.length > 0;
+  const selectedExistingId =
+    !hasUploadedFile &&
+    props.uploadedFile &&
+    typeof props.uploadedFile === "object" &&
+    props.uploadedFile?.id
+      ? String(props.uploadedFile.id)
+      : "";
 
   const getDisplayName = () => {
     if (hasUploadedFile) {
@@ -121,17 +137,17 @@ export default function Upload(props) {
         {props.required && <span className="text-red-500 ml-1">*</span>}
       </label>
       <div
-        className={`relative mt-2 flex w-full min-w-0 justify-center rounded-lg 
+        className={`relative mt-2 flex w-full min-w-0 justify-center rounded-lg pr-upload-surface
                     ${
                       hasAnyFile
-                        ? "border-2 border-patras-buccaneer bg-white cursor-not-allowed"
-                        : "border border-dashed border-patras-buccaneer/25"
-                    } 
+                        ? "border-2 border-patras-buccaneer cursor-not-allowed pr-upload-texture-filled"
+                        : "border border-dashed border-patras-buccaneer/25 pr-upload-texture-empty"
+                    }
                     ${
                       isDragging && !hasAnyFile
                         ? "border-patras-buccaneer bg-patras-albescentWhite"
                         : ""
-                    } 
+                    }
                     ${props.compact ? "px-2 py-4" : "px-6 py-10"}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -175,40 +191,75 @@ export default function Upload(props) {
             </p>
           ) : (
             <div className="flex flex-wrap justify-center text-sm/6 text-gray-600 mt-3">
-              <label
-                htmlFor={props.id}
-                className={`relative cursor-pointer rounded-md bg-white font-semibold text-patras-auChico text-center max-w-full break-words 
-                                    focus-within:outline-none focus-within:ring-2 focus-within:ring-patras-buccaneer focus-within:ring-offset-2 
-                                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer focus-visible:ring-offset-2
-                                    hover:text-white hover:bg-patras-buccaneer 
-                                    ${
-                                      props.disabled
-                                        ? "pointer-events-none"
-                                        : ""
-                                    }`}
-              >
-                <span className="m-2 block">Αναρτήστε {contentLabel} εδώ </span>
-                <input
-                  id={props.id}
-                  name={props.name}
-                  type="file"
-                  className="sr-only"
-                  accept={props.accept}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    const validationError = validateFile(file);
-                    if (!validationError) {
-                      setError("");
-                      props.onChange(file);
-                    } else {
-                      setError(validationError);
-                      e.target.value = "";
-                    }
-                  }}
-                  disabled={props.disabled}
-                />
-              </label>
+              {!canPickFromVault && (
+                <>
+                  <label
+                    htmlFor={props.id}
+                    className={`relative cursor-pointer rounded-md bg-white font-semibold text-patras-auChico text-center max-w-full break-words 
+                                        focus-within:outline-none focus-within:ring-2 focus-within:ring-patras-buccaneer focus-within:ring-offset-2 
+                                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer focus-visible:ring-offset-2
+                                        hover:text-white hover:bg-patras-buccaneer 
+                                        ${
+                                          props.disabled
+                                            ? "pointer-events-none"
+                                            : ""
+                                        }`}
+                  >
+                    <span className="m-2 block">
+                      {`Αναρτήστε ${contentLabel} εδώ`}
+                    </span>
+                    <input
+                      ref={inputRef}
+                      id={props.id}
+                      name={props.name}
+                      type="file"
+                      className="sr-only"
+                      accept={props.accept}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const validationError = validateFile(file);
+                        if (!validationError) {
+                          setError("");
+                          props.onChange(file);
+                        } else {
+                          setError(validationError);
+                          e.target.value = "";
+                        }
+                      }}
+                      disabled={props.disabled}
+                    />
+                  </label>
+                </>
+              )}
+              {canPickFromVault && (
+                <div className="mt-2 w-full">
+                  <CustomSelect
+                    label="Επιλέξτε από τα ήδη αναρτημένα αρχεία σας"
+                    value={selectedExistingId || "select"}
+                    placeholder="Επιλέξτε..."
+                    options={selectableOptions.map((option) => ({
+                      value: String(option.id),
+                      label: option.name,
+                    }))}
+                    disabled={props.disabled}
+                    onChange={(value) => {
+                      if (value === "select") {
+                        return;
+                      }
+                      const selected = selectableOptions.find(
+                        (option) => String(option.id) === value
+                      );
+                      if (selected) {
+                        props.onSelectExisting?.({
+                          id: selected.id,
+                          name: selected.name,
+                        });
+                      }
+                    }}
+                  />
+                </div>
+              )}
             </div>
           )}
           {!hasAnyFile ? (

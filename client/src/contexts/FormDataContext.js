@@ -178,6 +178,7 @@ export const FormDataProvider = ({ children }) => {
   };
 
   const [formData, setFormData] = useState(getInitialFormData());
+  const documentVault = profileData?.documentVault || {};
 
   const appliedPositionIds = useMemo(() => {
     const applications = profileData?.applications || [];
@@ -234,6 +235,24 @@ export const FormDataProvider = ({ children }) => {
         setLatestPapers([]);
       });
   }, [profileData]);
+
+  useEffect(() => {
+    if (formMode !== "new") {
+      return;
+    }
+    if (!Array.isArray(latestPapers) || latestPapers.length === 0) {
+      return;
+    }
+    setFormData((prev) => {
+      if (Array.isArray(prev.papers) && prev.papers.length > 0) {
+        return prev;
+      }
+      return {
+        ...prev,
+        papers: latestPapers,
+      };
+    });
+  }, [formMode, latestPapers]);
 
   useEffect(() => {
     if (formMode === "edit" && selectedApplicationId) {
@@ -319,6 +338,7 @@ export const FormDataProvider = ({ children }) => {
         formData,
         formMode,
         appliedPositionIds,
+        documentVault,
         handleChange,
         handleFileChange,
         handleFileDelete,

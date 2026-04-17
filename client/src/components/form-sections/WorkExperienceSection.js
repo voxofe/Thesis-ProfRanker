@@ -4,8 +4,13 @@ import CustomSelect from "../CustomSelect";
 import MultipleUploadStrip from "../MultipleUploadStrip";
 
 export default function WorkExperienceSection() {
-  const { formData, handleChange, addEmploymentCertificate, removeEmploymentCertificate } =
-    useFormData();
+  const {
+    formData,
+    documentVault,
+    handleChange,
+    addEmploymentCertificate,
+    removeEmploymentCertificate,
+  } = useFormData();
 
   const workExperienceOptions = Array.from({ length: 11 }, (_, index) => ({
     value: String(index),
@@ -38,6 +43,7 @@ export default function WorkExperienceSection() {
         accept=".pdf,.doc,.docx,.odt"
         onAddFile={addEmploymentCertificate}
         onDeleteFile={removeEmploymentCertificate}
+        existingOptions={documentVault?.employment_certificate}
         required={true}
       />
     </div>
