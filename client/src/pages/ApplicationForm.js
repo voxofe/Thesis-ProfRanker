@@ -73,7 +73,7 @@ export default function Form({ academicYear }) {
     },
     {
       id: 6,
-      title: "Ακαδημαϊκές εργασίες",
+      title: "Επιστημονικές δημοσιεύσεις",
       component: PapersSection,
     },
     {
@@ -154,6 +154,7 @@ export default function Form({ academicYear }) {
 
     formDataToSend.append("phdTitle", formData.phdTitle || "");
     formDataToSend.append("phdAcquisitionDate", formData.phdAcquisitionDate || "");
+    formDataToSend.append("phdDegreeId", formData.phdDegreeId ?? "");
     formDataToSend.append("workExperience", String(formData.workExperience ?? ""));
     formDataToSend.append("positionId", formData.positionId || "");
 
@@ -169,9 +170,19 @@ export default function Form({ academicYear }) {
       "responsibleDeclarationDocument",
     ];
 
+    const conditionalDocGuards = {
+      publicEmployeePermissionDocument: formData.isPublicEmployee,
+      euCitizenGreekLanguageCertificateDocument: formData.isEuCitizenNonGreek,
+      notParticipatedDeclarationDocument: formData.hasNotParticipatedInPastProgram,
+    };
+
     const toIdField = (field) => `${field}Id`;
 
     singleDocFields.forEach((field) => {
+      if (field in conditionalDocGuards && !conditionalDocGuards[field]) {
+        formDataToSend.append(toIdField(field), "");
+        return;
+      }
       const value = formData[field];
       if (value instanceof File) {
         formDataToSend.append(field, value);

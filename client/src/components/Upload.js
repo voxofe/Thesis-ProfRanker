@@ -129,6 +129,27 @@ export default function Upload(props) {
           : ""
       } `}
     >
+      <input
+        ref={inputRef}
+        id={props.id}
+        name={props.name}
+        type="file"
+        className="sr-only"
+        accept={props.accept}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const validationError = validateFile(file);
+          if (!validationError) {
+            setError("");
+            props.onChange(file);
+          } else {
+            setError(validationError);
+            e.target.value = "";
+          }
+        }}
+        disabled={props.disabled}
+      />
       <label
         htmlFor={props.icon}
         className="block text-sm/6 font-medium text-gray-900"
@@ -208,27 +229,6 @@ export default function Upload(props) {
                     <span className="m-2 block">
                       {`Αναρτήστε ${contentLabel} εδώ`}
                     </span>
-                    <input
-                      ref={inputRef}
-                      id={props.id}
-                      name={props.name}
-                      type="file"
-                      className="sr-only"
-                      accept={props.accept}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        const validationError = validateFile(file);
-                        if (!validationError) {
-                          setError("");
-                          props.onChange(file);
-                        } else {
-                          setError(validationError);
-                          e.target.value = "";
-                        }
-                      }}
-                      disabled={props.disabled}
-                    />
                   </label>
                 </>
               )}
@@ -238,12 +238,19 @@ export default function Upload(props) {
                     label="Επιλέξτε από τα ήδη αναρτημένα αρχεία σας"
                     value={selectedExistingId || "select"}
                     placeholder="Επιλέξτε..."
-                    options={selectableOptions.map((option) => ({
-                      value: String(option.id),
-                      label: option.name,
-                    }))}
+                    options={[
+                      ...selectableOptions.map((option) => ({
+                        value: String(option.id),
+                        label: option.name,
+                      })),
+                      { value: "__new__", label: "Ανέβασμα νέου αρχείου" },
+                    ]}
                     disabled={props.disabled}
                     onChange={(value) => {
+                      if (value === "__new__") {
+                        inputRef.current?.click();
+                        return;
+                      }
                       if (value === "select") {
                         return;
                       }

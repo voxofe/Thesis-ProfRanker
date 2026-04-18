@@ -620,7 +620,7 @@ export default function Profile() {
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Βασικά στοιχεία</h3>
+                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Βασικά</h3>
                   <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <InputField

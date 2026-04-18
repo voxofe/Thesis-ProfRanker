@@ -181,10 +181,10 @@ export default function MultipleUploadStrip({
                     value: String(option.id),
                     label: option.name,
                   })),
-                  { value: "__upload__", label: "Ανεβάστε νέο αρχείο" },
+                  { value: "__new__", label: "Ανεβάστε νέο αρχείο" },
                 ]}
                 onChange={(value) => {
-                  if (value === "__upload__") {
+                  if (value === "__new__") {
                     setShowVaultPicker(false);
                     inputRef.current?.click();
                     return;

@@ -22,6 +22,10 @@ export const FormDataProvider = ({ children }) => {
   const selectedApplicationId = searchParams.get("applicationId");
   const [profileData, setProfileData] = useState(null);
   const [latestPapers, setLatestPapers] = useState([]);
+  const phdDegrees = useMemo(
+    () => (Array.isArray(profileData?.phdDegrees) ? profileData.phdDegrees : []),
+    [profileData]
+  );
 
   // Initial form data structure
   const buildDocItem = (doc) => {
@@ -47,6 +51,7 @@ export const FormDataProvider = ({ children }) => {
       phdTitle: "",
       phdAcquisitionDate: "",
       phdIsFromForeignInstitute: false,
+      phdDegreeId: null,
       workExperience: "",
       hasNotParticipatedInPastProgram: false,
       cvDocument: null,
@@ -78,6 +83,7 @@ export const FormDataProvider = ({ children }) => {
         phdTitle: selectedForm.phdTitle ?? "",
         phdAcquisitionDate: selectedForm.phdAcquisitionDate ?? "",
         phdIsFromForeignInstitute: selectedForm.phdIsFromForeignInstitute ?? false,
+        phdDegreeId: selectedForm.phdDegreeId ?? null,
         workExperience: selectedForm.workExperience ?? "",
         hasNotParticipatedInPastProgram: selectedForm.hasNotParticipatedInPastProgram ?? false,
         positionId: formMode === "edit" ? selectedForm.positionId ?? "" : "",
@@ -135,6 +141,30 @@ export const FormDataProvider = ({ children }) => {
     if (profileSnapshot) {
       const vault = profileSnapshot.documentVault || {};
       const defaults = profileSnapshot.applicationDefaults || {};
+      const degrees = Array.isArray(profileSnapshot.phdDegrees)
+        ? profileSnapshot.phdDegrees
+        : [];
+      const defaultTitle = (defaults.phdTitle || "").trim();
+      const defaultDate = defaults.phdAcquisitionDate || "";
+      const profilePhdDocId = profileSnapshot.documents?.phd?.id;
+
+      const degreeByDoc = degrees.find(
+        (degree) =>
+          profilePhdDocId &&
+          String(degree.document?.id) === String(profilePhdDocId)
+      );
+      const degreeByDefaults = degrees.find(
+        (degree) =>
+          defaultTitle &&
+          defaultDate &&
+          (degree.title || "").trim() === defaultTitle &&
+          String(degree.acquiredAt || "") === String(defaultDate)
+      );
+      const selectedDegree = degreeByDoc || degreeByDefaults || null;
+      const isForeignInstitute = selectedDegree
+        ? !!selectedDegree.isForeignInstitute
+        : defaults.phdIsFromForeignInstitute ?? false;
+
       return {
         ...baseData,
         phoneNumber: profileSnapshot.user?.mobileNumber ?? "",
@@ -145,15 +175,21 @@ export const FormDataProvider = ({ children }) => {
         isPublicEmployee: defaults.isPublicEmployee ?? false,
         isEuCitizenNonGreek: defaults.isEuCitizenNonGreek ?? false,
         hasNotParticipatedInPastProgram: defaults.hasNotParticipatedInPastProgram ?? false,
-        phdTitle: defaults.phdTitle ?? "",
-        phdAcquisitionDate: defaults.phdAcquisitionDate ?? "",
-        phdIsFromForeignInstitute: defaults.phdIsFromForeignInstitute ?? false,
+        phdTitle: selectedDegree?.title ?? defaults.phdTitle ?? "",
+        phdAcquisitionDate:
+          selectedDegree?.acquiredAt ?? defaults.phdAcquisitionDate ?? "",
+        phdIsFromForeignInstitute: isForeignInstitute,
+        phdDegreeId: selectedDegree?.id ?? null,
         workExperience: defaults.workExperience ?? "",
         papers: latestPapers ?? [],
         cvDocument: buildDocItem(profileSnapshot.documents?.cv),
-        phdDocument: buildDocItem(profileSnapshot.documents?.phd),
-        doatapDocument: defaults.phdIsFromForeignInstitute
-          ? buildDocItem(profileSnapshot.documents?.doatap)
+        phdDocument: selectedDegree
+          ? buildDocItem(selectedDegree.document)
+          : buildDocItem(profileSnapshot.documents?.phd),
+        doatapDocument: isForeignInstitute
+          ? buildDocItem(
+              selectedDegree?.doatapDocument || profileSnapshot.documents?.doatap
+            )
           : null,
         coursePlanDocument: buildDocItem(profileSnapshot.documents?.coursePlan),
         militaryObligationsDocument: buildDocItem(profileSnapshot.documents?.military),
@@ -179,6 +215,69 @@ export const FormDataProvider = ({ children }) => {
 
   const [formData, setFormData] = useState(getInitialFormData());
   const documentVault = profileData?.documentVault || {};
+
+  const buildPhdDocItem = (doc) => buildDocItem(doc);
+
+  const findMatchingPhdDegree = (nextState) => {
+    if (!phdDegrees.length) return null;
+
+    const docId = nextState.phdDocument?.id;
+    if (docId) {
+      const byDoc = phdDegrees.find(
+        (degree) => String(degree.document?.id) === String(docId)
+      );
+      if (byDoc) return byDoc;
+    }
+
+    const title = (nextState.phdTitle || "").trim();
+    const date = nextState.phdAcquisitionDate || "";
+
+    if (title && date) {
+      const matches = phdDegrees.filter(
+        (degree) =>
+          (degree.title || "").trim() === title &&
+          String(degree.acquiredAt || "") === String(date)
+      );
+      if (matches.length === 1) return matches[0];
+    }
+
+    if (title) {
+      const matches = phdDegrees.filter(
+        (degree) => (degree.title || "").trim() === title
+      );
+      if (matches.length === 1) return matches[0];
+    }
+
+    if (date) {
+      const matches = phdDegrees.filter(
+        (degree) => String(degree.acquiredAt || "") === String(date)
+      );
+      if (matches.length === 1) return matches[0];
+    }
+
+    return null;
+  };
+
+  const applyPhdDegree = (prevState, degree) => {
+    if (!degree) {
+      return {
+        ...prevState,
+        phdDegreeId: null,
+      };
+    }
+
+    return {
+      ...prevState,
+      phdDegreeId: degree.id ?? null,
+      phdTitle: degree.title ?? "",
+      phdAcquisitionDate: degree.acquiredAt ?? "",
+      phdIsFromForeignInstitute: !!degree.isForeignInstitute,
+      phdDocument: buildPhdDocItem(degree.document),
+      doatapDocument: degree.isForeignInstitute
+        ? buildPhdDocItem(degree.doatapDocument)
+        : null,
+    };
+  };
 
   const appliedPositionIds = useMemo(() => {
     const applications = profileData?.applications || [];
@@ -286,6 +385,69 @@ export const FormDataProvider = ({ children }) => {
     }));
   };
 
+  const handlePhdTitleChange = (value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      phdTitle: value,
+    }));
+  };
+
+  const handlePhdDateChange = (value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      phdAcquisitionDate: value,
+    }));
+  };
+
+  const handlePhdDocumentChange = (value) => {
+    setFormData((prevData) => {
+      const nextState = {
+        ...prevData,
+        phdDocument: value,
+      };
+
+      if (!value) {
+        return {
+          ...nextState,
+          phdDegreeId: null,
+        };
+      }
+
+      if (value instanceof File) {
+        return {
+          ...nextState,
+          phdDegreeId: null,
+        };
+      }
+
+      const match = phdDegrees.find(
+        (degree) => String(degree.document?.id) === String(value?.id)
+      );
+      if (!match) {
+        return {
+          ...nextState,
+          phdDegreeId: null,
+        };
+      }
+      return applyPhdDegree(nextState, match);
+    });
+  };
+
+  const handlePhdForeignInstituteChange = (value) => {
+    setFormData((prevData) => {
+      const nextState = {
+        ...prevData,
+        phdIsFromForeignInstitute: value,
+      };
+
+      if (!value) {
+        nextState.doatapDocument = null;
+      }
+
+      return nextState;
+    });
+  };
+
   const handleFileChange = (field, file) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -294,6 +456,15 @@ export const FormDataProvider = ({ children }) => {
   };
 
   const handleFileDelete = (field) => {
+    if (field === "phdDocument") {
+      setFormData((prevData) => ({
+        ...prevData,
+        phdDocument: null,
+        phdDegreeId: null,
+      }));
+      return;
+    }
+
     setFormData((prevData) => ({
       ...prevData,
       [field]: null,
@@ -339,9 +510,14 @@ export const FormDataProvider = ({ children }) => {
         formMode,
         appliedPositionIds,
         documentVault,
+        phdDegrees,
         handleChange,
         handleFileChange,
         handleFileDelete,
+        handlePhdTitleChange,
+        handlePhdDateChange,
+        handlePhdDocumentChange,
+        handlePhdForeignInstituteChange,
         addEmploymentCertificate,
         removeEmploymentCertificate,
         addBioSupportingDocument,

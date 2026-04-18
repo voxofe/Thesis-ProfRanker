@@ -12,6 +12,10 @@ export default function PhdSection() {
     handleChange,
     handleFileChange,
     handleFileDelete,
+    handlePhdTitleChange,
+    handlePhdDateChange,
+    handlePhdDocumentChange,
+    handlePhdForeignInstituteChange,
   } = useFormData();
   const today = new Date().toISOString().split("T")[0];
   const todayDisplay = today.split("-").reverse().join("-");
@@ -30,10 +34,10 @@ export default function PhdSection() {
             name="phd-upload"
             accept=".pdf,.doc,.docx, .odt"
             uploadedFile={formData.phdDocument}
-            onChange={(e) => handleFileChange("phdDocument", e)}
+            onChange={(e) => handlePhdDocumentChange(e)}
             onDelete={() => handleFileDelete("phdDocument")}
             existingOptions={documentVault?.phd}
-            onSelectExisting={(doc) => handleFileChange("phdDocument", doc)}
+            onSelectExisting={(doc) => handlePhdDocumentChange(doc)}
             required={true}
           />
         </div>
@@ -46,7 +50,7 @@ export default function PhdSection() {
             type="text"
             placeholder="Εισάγετε τον τίτλο της διδακτορικής διατριβής"
             value={formData.phdTitle}
-            onChange={(value) => handleChange("phdTitle", value)}
+            onChange={(value) => handlePhdTitleChange(value)}
             required={true}
           />
 
@@ -56,7 +60,7 @@ export default function PhdSection() {
             <FlowbiteDateField
               label="Ημερομηνία λήψης διδακτορικού τίτλου"
               value={formData.phdAcquisitionDate}
-              onChange={(value) => handleChange("phdAcquisitionDate", value)}
+              onChange={(value) => handlePhdDateChange(value)}
               minDate="2011-01-01"
               maxDate={today}
               required={true}
@@ -88,9 +92,7 @@ export default function PhdSection() {
             id="foreign-institute"
             name="foreign-institute"
             checked={formData.phdIsFromForeignInstitute}
-            onChange={(value) =>
-              handleChange("phdIsFromForeignInstitute", value)
-            }
+            onChange={(value) => handlePhdForeignInstituteChange(value)}
           />
 
           {formData.phdIsFromForeignInstitute && (
