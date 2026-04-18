@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Settings, User } from "lucide-react";
+import { Settings } from "lucide-react";
 
 export default function UserMenu({ currentUser, initials, roleLabel, onLogout }) {
   const [open, setOpen] = useState(false);
@@ -18,7 +18,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
   }, []);
 
   return (
-    <div className="relative inline-block" ref={wrapperRef}>
+    <div className="relative" ref={wrapperRef}>
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
@@ -59,15 +59,6 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
         >
           <div className="py-2 text-left">
             <Link
-              to="/profile"
-              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-patras-albescentWhite/40"
-              onClick={() => setOpen(false)}
-              role="menuitem"
-            >
-              <User className="w-4 h-4 text-patras-buccaneer" aria-hidden="true" />
-              <span className="font-medium">Το προφίλ μου</span>
-            </Link>
-            <Link
               to="/profile#profile-settings"
               className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-patras-albescentWhite/40"
               onClick={() => setOpen(false)}
@@ -94,7 +85,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
               fill="none"
               viewBox="0 0 32 32"
               stroke="currentColor"
-              className="text-patras-buccaneer"
+              className="text-patras-buccaneer ml-2"
             >
               <path d="m25.853 13.146-2-2a.5.5 0 0 0-.708.708L24.293 13H15.5a.5.5 0 0 0 0 1h8.793l-1.147 1.146a.5.5 0 0 0 .708.708l2-2a.5.5 0 0 0-.001-.708z" />
               <path d="M20 15v6h-6v1h6.5a.5.5 0 0 0 .5-.5V15z" />

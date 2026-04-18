@@ -115,57 +115,92 @@ export default function Home() {
             Το πρόγραμμα απευθύνεται σε νέους επιστήμονες, κατόχους διδακτορικού τίτλου, που επιθυμούν να αποκτήσουν διδακτική-ακαδημαϊκή εμπειρία.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <HomePagePanel
-            title={
-              userRole === "applicant"
-                ? "Υποβολή νέας αίτησης"
-                : "Υποβολή αίτησης"
-            }
-            description={applicationDescription}
-            buttonText={
-              userRole === "applicant"
-                ? "Δημιουργία αίτησης"
-                : "Δημιουργία αίτησης"
-            }
-            // Disable for guests when no active positions, or for applicants when deadline passed
-            buttonAction={applicationDisabled ? undefined : undefined}
-            to={applicationDisabled ? undefined : "/form?mode=new"}
-            buttonDisabled={applicationDisabled}
-            colorClass={
-              applicationDisabled
-                ? "bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
-                : "bg-patras-albescentWhite/20 border border-patras-albescentWhite"
-            }
-            // Hide the tooltip icon when disabled
-            // showInfoMark={!applicationDisabled}
-            // infoPopup={applicationInfoPopup}
-          />
+        {userRole === "applicant" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <HomePagePanel
+              title="Υποβολή νέας αίτησης"
+              description={applicationDescription}
+              buttonText="Δημιουργία αίτησης"
+              // Disable for applicants when no active positions
+              buttonAction={applicationDisabled ? undefined : undefined}
+              to={applicationDisabled ? undefined : "/form?mode=new"}
+              buttonDisabled={applicationDisabled}
+              colorClass={
+                applicationDisabled
+                  ? "bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
+                  : "bg-patras-albescentWhite/20 border border-patras-albescentWhite"
+              }
+              // showInfoMark={!applicationDisabled}
+              // infoPopup={applicationInfoPopup}
+            />
 
-          <HomePagePanel
-            title="Οι αιτήσεις μου"
-            description="Δείτε τις αιτήσεις σας και τις βαθμολογίες τους ή επεξεργαστείτε τις ενεργές αιτήσεις."
-            buttonText="Προβολή αιτήσεων"
-            to={userRole === "applicant" ? "/my-applications" : undefined}
-            buttonDisabled={userRole === "guest"}
-            colorClass={
-              userRole === "guest"
-                ? "bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
-                : "bg-patras-albescentWhite/20 border border-patras-albescentWhite"
-            }
-            // showInfoMark={true}
-            // infoPopup={scoreInfoPopup}
-          />
+            <HomePagePanel
+              title="Ο φάκελός μου"
+              description="Δείτε ή ενημερώστε τα στοιχεία σας, τα αρχεία και τις δημοσιεύσεις σας."
+              buttonText="Προβολή φακέλου"
+              to="/profile"
+            />
 
-          <HomePagePanel
-            title="Γενική κατάταξη"
-            description="Δείτε τη γενική κατάταξη όλων των αιτούντων σε όλα τα επιστημονικά πεδία."
-            buttonText="Δείτε Κατάταξη"
-            to="/ranking"
-            // showInfoMark={true}
-            // infoPopup={rankingInfoPopup}
-          />
-        </div>
+            <HomePagePanel
+              title="Οι αιτήσεις μου"
+              description="Δείτε τις αιτήσεις σας και τις βαθμολογίες τους ή επεξεργαστείτε τις ενεργές αιτήσεις."
+              buttonText="Προβολή αιτήσεων"
+              to="/my-applications"
+            />
+
+            <HomePagePanel
+              title="Γενική κατάταξη"
+              description="Δείτε τη γενική κατάταξη όλων των αιτούντων σε όλα τα επιστημονικά πεδία."
+              buttonText="Δείτε Κατάταξη"
+              to="/ranking"
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <HomePagePanel
+              title="Υποβολή αίτησης"
+              description={applicationDescription}
+              buttonText="Δημιουργία αίτησης"
+              // Disable for guests when no active positions
+              buttonAction={applicationDisabled ? undefined : undefined}
+              to={applicationDisabled ? undefined : "/form?mode=new"}
+              buttonDisabled={applicationDisabled}
+              colorClass={
+                applicationDisabled
+                  ? "bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
+                  : "bg-patras-albescentWhite/20 border border-patras-albescentWhite"
+              }
+              // showInfoMark={!applicationDisabled}
+              // infoPopup={applicationInfoPopup}
+            />
+
+            <HomePagePanel
+              title="Ο φάκελός μου"
+              description="Δείτε ή ενημερώστε τα στοιχεία σας, τα αρχεία και τις δημοσιεύσεις σας."
+              buttonText="Προβολή φακέλου"
+              to="/profile"
+            />
+
+            <HomePagePanel
+              title="Οι αιτήσεις μου"
+              description="Δείτε τις αιτήσεις σας και τις βαθμολογίες τους ή επεξεργαστείτε τις ενεργές αιτήσεις."
+              buttonText="Προβολή αιτήσεων"
+              buttonDisabled={true}
+              colorClass="bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
+              // showInfoMark={true}
+              // infoPopup={scoreInfoPopup}
+            />
+
+            <HomePagePanel
+              title="Γενική κατάταξη"
+              description="Δείτε τη γενική κατάταξη όλων των αιτούντων σε όλα τα επιστημονικά πεδία."
+              buttonText="Δείτε Κατάταξη"
+              to="/ranking"
+              // showInfoMark={true}
+              // infoPopup={rankingInfoPopup}
+            />
+          </div>
+        )}
       </div>
     );
   }

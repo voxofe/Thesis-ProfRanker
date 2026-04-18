@@ -396,6 +396,7 @@ export default function Profile() {
       "responsible_declaration",
       vault.responsible_declaration
     );
+    addSection("other", "Άλλα", "other", vault.other);
 
     return items;
   }, [profile, requiresMilitaryDoc]);
@@ -563,12 +564,16 @@ export default function Profile() {
   return (
     <div className="max-w-6xl mx-auto px-6">
       <div>
-        <h1 className="text-2xl text-center border-b pb-2 mb-8 text-gray-800">
-          To προφίλ μου 
+        <h1 className="text-2xl text-center border-b pb-2 mb-2 text-gray-800">
+          O φακελός μου
         </h1>
       </div>
-
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
+        <h2 className="text-lg text-center font-semibold text-patras-buccaneer ">
+            {activeSection === "general" && "Γενικά στοιχεία"}
+            {activeSection === "additional" && "Πρόσθετα στοιχεία"}
+            {activeSection === "vault" && "Αρχεία"}
+        </h2>
+      <div className="mt-2 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
         <aside className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 h-fit lg:sticky lg:top-6">
           <nav className="space-y-2 text-sm">
             <button
@@ -609,11 +614,13 @@ export default function Profile() {
               </button>
             )}
           </nav>
+
         </aside>
 
         <section>
+
           <div className="mb-4 rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-600">
-            Οι αλλαγές στο προφίλ δεν επηρεάζουν ήδη υποβληθείσες αιτήσεις.
+            Οι αλλαγές εδώ δεν επηρεάζουν ήδη υποβληθείσες αιτήσεις.
             Για αλλαγές σε ενεργές αιτήσεις, επεξεργαστείτε τις από την αρχική σελίδα.
           </div>
           {activeSection === "general" && (
@@ -878,6 +885,7 @@ export default function Profile() {
                       "not_participated_declaration",
                       "eu_citizen_greek_language_certificate",
                       "military",
+                      "other",
                     ]);
                     const primaryItems = vaultItems.filter(
                       (item) => !groupedDocTypes.has(item.docType)

@@ -36,35 +36,39 @@ export default function Header({ academicYear }) {
     : rolesInGreek[currentUser?.role] || currentUser?.role;
 
   return (
-    <header className="w-full rounded-xl border border-gray-200 shadow-lg">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
-        {/* Left: Logo (clickable anchor so middle-click opens in new tab) */}
-        <Link to="/" className="flex items-center">
-          <img
-            src={logo}
-            alt="University of Patras logo"
-            className="max-h-24 w-auto object-contain"
-          />
-        </Link>
-        {/* Center: Title and Subtitle */}
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <h1 className="text-xl lg:text-xl font-semibold text-gray-700 text-center">
-            ΑΙΤΗΣΗ ΥΠΟΨΗΦΙΟΤΗΤΑΣ ΔΙΔΑΣΚΟΝΤΩΝ ΠΑΝΕΠΙΣΤΗΜΙΟΥ ΠΑΤΡΩΝ {academicYear}
-          </h1>
-          <p className="mt-1 text-base lg:text-[15px] text-gray-600 text-center">
-            Πρόσκληση απόκτησης διδακτικής-ακαδημαϊκής εμπειρίας για νέους επιστήμονες, κατόχους διδακτορικού
-          </p>
+    <div className="w-full flex items-stretch gap-4">
+      <header className="flex-1 rounded-xl border border-gray-200 shadow-lg">
+        <div className="max-w-7xl mx-auto flex items-center px-6 py-3">
+          {/* Left: Logo (clickable anchor so middle-click opens in new tab) */}
+          <Link to="/" className="flex items-center">
+            <img
+              src={logo}
+              alt="University of Patras logo"
+              className="max-h-24 w-auto object-contain"
+            />
+          </Link>
+          {/* Center: Title and Subtitle */}
+          <div className="flex-1 flex flex-col items-center justify-center">
+            <h1 className="text-xl lg:text-xl font-semibold text-gray-700 text-center">
+              ΑΙΤΗΣΗ ΥΠΟΨΗΦΙΟΤΗΤΑΣ ΔΙΔΑΣΚΟΝΤΩΝ ΠΑΝΕΠΙΣΤΗΜΙΟΥ ΠΑΤΡΩΝ {academicYear}
+            </h1>
+            <p className="mt-1 text-base lg:text-[15px] text-gray-600 text-center">
+              Πρόσκληση απόκτησης διδακτικής-ακαδημαϊκής εμπειρίας για νέους επιστήμονες, κατόχους διδακτορικού
+            </p>
+          </div>
         </div>
-        {/* Right: User Info Panel */}
-        {isLoggedIn && currentUser && (
+      </header>
+      {/* Right: User Info Panel (outside header) */}
+      {isLoggedIn && currentUser && (
+        <div className="shrink-0 rounded-xl border border-gray-200 shadow-lg px-4 py-3 flex items-center justify-center">
           <UserMenu
             currentUser={currentUser}
             initials={initials}
             roleLabel={roleLabel}
             onLogout={logout}
           />
-        )}
-      </div>
-    </header>
+        </div>
+      )}
+    </div>
   );
 }
