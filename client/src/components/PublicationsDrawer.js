@@ -37,10 +37,10 @@ function IssnCell({ issn }) {
   );
 }
 
-export default function PapersDrawer({ papers }) {
+export default function PublicationsDrawer({ publications }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const getPaperPoints = (quartile) => {
+  const getPublicationPoints = (quartile) => {
     const q = String(quartile || "").trim().toUpperCase();
     if (q === "Q1") return 2;
     if (q === "Q2") return 1.6;
@@ -99,37 +99,37 @@ export default function PapersDrawer({ papers }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-patras-cameo">
-              {papers.map((paper, index) => (
+              {publications.map((publication, index) => (
                 <tr key={index} className="">
                   <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite text-[15px]">
-                    {paper.type === "journal"
+                    { publication.type === "journal"
                       ? "Περιοδικό"
-                      : paper.type === "conference"
+                      : publication.type === "conference"
                       ? "Συνέδριο"
-                      : paper.type === "other"
+                      : publication.type === "other"
                       ? "Άλλο"
                       : "N/A"}
                   </td>
                   <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite text-[15px]">
-                    {paper.paperTitle || "N/A"}
+                    {publication.publicationTitle || "N/A"}
                   </td>
                   <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite text-[15px]">
-                    {paper.journalConfTitle || "-"}
+                    {publication.journalConfTitle || "-"}
                   </td>
                   <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite text-[15px]">
-                    {paper.year || "N/A"}
+                    {publication.year || "N/A"}
                   </td>
                   <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite text-[15px]">
-                    <IssnCell issn={paper.issn} />
+                    <IssnCell issn={publication.issn} />
                   </td>
                   <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite text-[15px]">
-                    {paper.country || ""}
+                    {publication.country || ""}
                   </td>
                   <td className="px-4 py-2 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite text-[15px]">
-                    {paper.quartile || ""}
+                    {publication.quartile || ""}
                   </td>
                   <td className="px-4 py-2 text-patras-buccaneer text-center align-middle text-[15px]">
-                    {getPaperPoints(paper.quartile)}
+                    {getPublicationPoints(publication.quartile)}
                   </td>
                 </tr>
               ))}

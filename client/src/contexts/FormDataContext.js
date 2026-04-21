@@ -21,7 +21,7 @@ export const FormDataProvider = ({ children }) => {
   const formMode = (searchParams.get("mode") || "new").toLowerCase();
   const selectedApplicationId = searchParams.get("applicationId");
   const [profileData, setProfileData] = useState(null);
-  const [latestPapers, setLatestPapers] = useState([]);
+  const [latestPublications, setLatestPublications] = useState([]);
   const phdDegrees = useMemo(
     () => (Array.isArray(profileData?.phdDegrees) ? profileData.phdDegrees : []),
     [profileData]
@@ -65,7 +65,7 @@ export const FormDataProvider = ({ children }) => {
       notParticipatedDeclarationDocument: null,
       euCitizenGreekLanguageCertificateDocument: null,
       responsibleDeclarationDocument: null,
-      papers: [],
+      publications: [],
       positionId: "",
     };
 
@@ -134,7 +134,7 @@ export const FormDataProvider = ({ children }) => {
               name: selectedForm.responsibleDeclarationDocument,
             }
           : null,
-        papers: selectedForm.papers ?? [],
+        publications: selectedForm.publications ?? [],
       };
     }
 
@@ -181,7 +181,7 @@ export const FormDataProvider = ({ children }) => {
         phdIsFromForeignInstitute: isForeignInstitute,
         phdDegreeId: selectedDegree?.id ?? null,
         workExperience: defaults.workExperience ?? "",
-        papers: latestPapers ?? [],
+        publications: latestPublications ?? [],
         cvDocument: buildDocItem(profileSnapshot.documents?.cv),
         phdDocument: selectedDegree
           ? buildDocItem(selectedDegree.document)
@@ -291,7 +291,7 @@ export const FormDataProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     if (!token) {
       setProfileData(null);
-      setLatestPapers([]);
+      setLatestPublications([]);
       return;
     }
 
@@ -305,20 +305,20 @@ export const FormDataProvider = ({ children }) => {
       .catch((error) => {
         console.error("Error loading profile:", error);
         setProfileData(null);
-        setLatestPapers([]);
+        setLatestPublications([]);
       });
   }, [currentUser]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      setLatestPapers([]);
+      setLatestPublications([]);
       return;
     }
 
     const latestAppId = profileData?.applications?.[0]?.id;
     if (!latestAppId) {
-      setLatestPapers([]);
+      setLatestPublications([]);
       return;
     }
 
@@ -327,11 +327,11 @@ export const FormDataProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        setLatestPapers(res.data?.papers ?? []);
+        setLatestPublications(res.data?.publications ?? []);
       })
       .catch((error) => {
-        console.error("Error loading latest application papers:", error);
-        setLatestPapers([]);
+        console.error("Error loading latest application publications:", error);
+        setLatestPublications([]);
       });
   }, [profileData]);
 
@@ -339,19 +339,19 @@ export const FormDataProvider = ({ children }) => {
     if (formMode !== "new") {
       return;
     }
-    if (!Array.isArray(latestPapers) || latestPapers.length === 0) {
+    if (!Array.isArray(latestPublications) || latestPublications.length === 0) {
       return;
     }
     setFormData((prev) => {
-      if (Array.isArray(prev.papers) && prev.papers.length > 0) {
+      if (Array.isArray(prev.publications) && prev.publications.length > 0) {
         return prev;
       }
       return {
         ...prev,
-        papers: latestPapers,
+        publications: latestPublications,
       };
     });
-  }, [formMode, latestPapers]);
+  }, [formMode, latestPublications]);
 
   useEffect(() => {
     if (formMode === "edit" && selectedApplicationId) {

@@ -15,23 +15,45 @@ export const ValidationProvider = ({ children }) => {
     3: true, // Course Plan
     4: false, // Bio
     5: false, // PhD
-    6: true, // Papers
+    6: true, // Publications
     7: false, // Work Experience
     8: false, // Documents / Declarations
   });
 
   // Update validation whenever formData changes
   useEffect(() => {
+    const normalizePhone = (value) => (value || "").replace(/[\s()-]/g, "");
+
     const validatePersonalInfo = () => {
-      return !!(
-        formData.firstName?.trim() &&
-        formData.lastName?.trim() &&
-        formData.email?.trim() &&
-        formData.phoneNumber?.trim() &&
-        formData.streetAddress?.trim() &&
-        formData.city?.trim() &&
-        formData.postalCode?.trim()
-      );
+      if (
+        !formData.firstName?.trim() ||
+        !formData.lastName?.trim() ||
+        !formData.email?.trim() ||
+        !formData.phoneNumber?.trim() ||
+        !formData.streetAddress?.trim() ||
+        !formData.city?.trim() ||
+        !formData.postalCode?.trim()
+      ) {
+        return false;
+      }
+
+      const mobile = normalizePhone(formData.phoneNumber);
+      if (!/^69\d{8}$/.test(mobile)) {
+        return false;
+      }
+
+      if (formData.landlineNumber?.trim()) {
+        const landline = normalizePhone(formData.landlineNumber);
+        if (!/^2\d{9}$/.test(landline)) {
+          return false;
+        }
+      }
+
+      if (!/^\d{5}$/.test(formData.postalCode.trim())) {
+        return false;
+      }
+
+      return true;
     };
 
     const validateBio = () => {
@@ -66,37 +88,48 @@ export const ValidationProvider = ({ children }) => {
       return basicValid;
     };
 
-    const validatePapers = () => {
-      // Papers are optional, but if any paper exists, it must be complete
-      if (formData.papers.length === 0) {
-        return true; // No papers is valid
+    const validatePublications = () => {
+      // Publications are optional, but if any publication exists, it must be complete
+      if (formData.publications.length === 0) {
+        return true; // No publications is valid
       }
 
-      // Check if all papers are complete
-      const allPapersComplete = formData.papers.every((paper) => {
-        const hasType = paper.type?.trim();
-        const hasTitle = paper.paperTitle?.trim();
-        const hasYear = paper.year?.trim();
+      // Check if all publications are complete
+      const allPublicationsComplete = formData.publications.every((publication) => {
+        const hasType = publication.type?.trim();
+        const hasTitle = publication.publicationTitle?.trim();
+        const hasYear = publication.year?.trim();
+        const hasAuthors = Array.isArray(publication.authors)
+          ? publication.authors.length > 0
+          : !!publication.authors?.trim();
 
-        if (!hasType || !hasTitle || !hasYear) {
+        if (!hasType || !hasTitle || !hasYear || !hasAuthors) {
           return false;
         }
 
-        // For journal type, ISSN and journal title are required
-        if (paper.type === "journal") {
-          return paper.issn?.trim() && paper.journalConfTitle?.trim();
+        if (publication.type === "journal") {
+          return publication.issn?.trim() && publication.journalConfTitle?.trim();
         }
 
-        // For conference type, conference title is required
-        if (paper.type === "conference") {
-          return paper.journalConfTitle?.trim();
+        if (publication.type === "conference_proceedings") {
+          return (
+            publication.journalConfTitle?.trim() &&
+            publication.publisher?.trim()
+          );
         }
 
-        // For other types, only title and year are required
+        if (publication.type === "conference_presentation") {
+          return publication.journalConfTitle?.trim();
+        }
+
+        if (publication.type === "book" || publication.type === "monograph") {
+          return publication.publisher?.trim();
+        }
+
         return true;
       });
 
-      return allPapersComplete;
+      return allPublicationsComplete;
     };
 
 
@@ -151,7 +184,7 @@ export const ValidationProvider = ({ children }) => {
       3: validateCoursePlan(),
       4: validateBio(),
       5: validatePhd(),
-      6: validatePapers(),
+      6: validatePublications(),
       7: validateWorkExperience(),
       8: validateDocuments(),
     });

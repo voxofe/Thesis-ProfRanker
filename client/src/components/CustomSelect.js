@@ -80,11 +80,11 @@ export default function CustomSelect({
 
         <Select.Portal>
           <Select.Content
-            className="z-50 bg-white border border-patras-buccaneer/20 rounded-md shadow-lg overflow-hidden"
-            position="popper"
-            sideOffset={5}
-            align="end"
-          >
+              className="z-50 w-[--radix-select-trigger-width] min-w-[--radix-select-trigger-width] bg-white border border-patras-buccaneer/20 rounded-md shadow-lg overflow-hidden"
+              position="popper"
+              sideOffset={5}
+              align="end"
+            >
             <Select.Viewport
               style={{
                 maxHeight: 300,
@@ -101,6 +101,7 @@ export default function CustomSelect({
                     className={`cursor-pointer px-3 py-1.5 text-base text-gray-900 hover:bg-patras-buccaneer/90 hover:text-white focus:bg-patras-buccaneer/90 focus:text-white flex items-center justify-between sm:text-sm/6 ${
                       optn.value === "__new__" ? newFieldStyle : ""
                     }`}
+                    title={optn.label}
                   >
                     <Select.ItemText className="whitespace-nowrap">{optn.label}</Select.ItemText>
                   </Select.Item>

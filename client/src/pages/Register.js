@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import InputField from "../components/InputField";
 import CustomSelect from "../components/CustomSelect";
+import Tooltip from "../components/Tooltip.jsx";
 
 export default function Register({ isAdmin = false }) {
   const [firstName, setFirstName] = useState("");
@@ -127,6 +128,20 @@ export default function Register({ isAdmin = false }) {
                 onChange={setLastName}
               />
             </div>
+
+            {!isAdmin && (
+              <div className="-mt-2 flex items-center gap-2 text-sm text-gray-600">
+                <Tooltip content="Το ονοματεπώνυμο σας θα εμφανίζεται στις αιτήσεις. Μπορείτε να το επεξεργαστείτε και μετά την εγγραφή.">
+                  <span
+                    className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer text-xs font-semibold cursor-help"
+                    aria-label="Σημείωση για το ονοματεπώνυμο"
+                  >
+                    i
+                  </span>
+                </Tooltip>
+                <span>Σημείωση για το ονοματεπώνυμο</span>
+              </div>
+            )}
 
             <InputField
               label="Email"

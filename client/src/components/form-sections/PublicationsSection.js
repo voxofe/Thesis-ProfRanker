@@ -1,36 +1,36 @@
 import React from "react";
 import { useFormData } from "../../contexts/FormDataContext.js";
-import Paper from "../Paper.js";
+import Publication from "../Publication.js";
 
-export default function PaperSection() {
+export default function PublicationsSection() {
   const { formData, handleChange } = useFormData();
 
-  const addNewPaper = () => {
-    const newPaper = {
+  const addNewPublication = () => {
+    const newPublication = {
       type: "",
-      paperTitle: "",
+      publicationTitle: "",
       journalConfTitle: "",
       year: "",
       issn: "",
     };
-    const updatedPapers = [...formData.papers, newPaper];
-    handleChange("papers", updatedPapers);
+    const updatedPublications = [...formData.publications, newPublication];
+    handleChange("publications", updatedPublications);
   };
 
   return (
     <div className="overflow-hidden"> 
       <legend className="text-sm/6 font-semibold text-gray-900">
-        Ακαδημαϊκές εργασίες (δημοσιεύσεις/ανακοινώσεις σε συνέδρια)
+        Επιστημονικές δημοσιεύσεις
       </legend>
       <div className="">
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-8 pt-1 pb-0 sm:pb-2"></div>
         <div className="grid grid-cols-1 pt-2 gap-y-3">
-          {formData.papers.map((_, index) => (
-            <Paper key={index} index={index} />
+          {formData.publications.map((_, index) => (
+            <Publication key={index} index={index} />
           ))}
-          {formData.papers.length === 0 && (
+          {formData.publications.length === 0 && (
             <div className="text-center text-gray-500 py-8">
-              <p>Δεν έχετε προσθέσει ακόμη κάποια ακαδημαϊκή εργασία.</p>
+              <p>Δεν έχετε προσθέσει ακόμη κάποια επιστημονική δημοσίευση.</p>
               <p className="text-sm mt-2">
                 Χρησιμοποιήστε το κουμπί παρακάτω για να προσθέσετε μία.
               </p>
@@ -39,7 +39,7 @@ export default function PaperSection() {
         </div>
         <div className="flex items-center justify-center sm:justify-start gap-x-6 pt-5 mt-3 sm:pt-0">
           <button
-            onClick={addNewPaper}
+            onClick={addNewPublication}
             type="button"
             className="rounded-md bg-patras-buccaneer px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
           >

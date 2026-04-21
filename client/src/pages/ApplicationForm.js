@@ -7,7 +7,7 @@ import BioSection from "../components/form-sections/BioSection";
 import ScientificFieldSection from "../components/form-sections/ScientificFieldSection";
 import CoursePlanSection from "../components/form-sections/CoursePlanSection";
 import PhdSection from "../components/form-sections/PhdSection";
-import PapersSection from "../components/form-sections/PapersSection";
+import PublicationsSection from "../components/form-sections/PublicationsSection";
 import WorkExperienceSection from "../components/form-sections/WorkExperienceSection";
 import DocumentsSection from "../components/form-sections/DocumentsSection";
 import Stepper from "../components/Stepper";
@@ -26,7 +26,7 @@ const API_BASE_URL = (
 
 
 export default function Form({ academicYear }) {
-  const { formData } = useFormData();
+  const { formData, formMode } = useFormData();
   const { canAccessStep, canProceedFromStep, stepValidation } = useValidation();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
@@ -74,7 +74,7 @@ export default function Form({ academicYear }) {
     {
       id: 6,
       title: "Επιστημονικές δημοσιεύσεις",
-      component: PapersSection,
+      component: PublicationsSection,
     },
     {
       id: 7,
@@ -92,6 +92,7 @@ export default function Form({ academicYear }) {
   const isLastStep = currentStep === steps.length;
   const isFirstStep = currentStep === 1;
   const nextDisabled = !canProceedFromStep(currentStep);
+  const submitLabel = formMode === "edit" ? "Επανυποβολή αίτησης" : "Υποβολή αίτησης";
 
   // Only these steps need overflow-visible (add more IDs if needed)
   const stepsNeedingOverflow = new Set([5]);
@@ -123,9 +124,9 @@ export default function Form({ academicYear }) {
     setLoading(true);
 
     // Clean ISSN values before sending
-    const cleanedPapers = formData.papers.map(paper => ({
-      ...paper,
-      issn: paper.issn ? paper.issn.replace(/\(wrong\)/gi, "").trim() : paper.issn,
+    const cleanedPublications = formData.publications.map(publication => ({
+      ...publication,
+      issn: publication.issn ? publication.issn.replace(/\(wrong\)/gi, "").trim() : publication.issn,
     }));
 
     const formDataToSend = new FormData();
@@ -222,8 +223,8 @@ export default function Form({ academicYear }) {
       JSON.stringify(employmentKeepIds)
     );
 
-    // Convert papers to a JSON string and append it to the FormData
-    formDataToSend.append("papers", JSON.stringify(cleanedPapers));
+    // Convert publications to a JSON string and append it to the FormData
+    formDataToSend.append("publications", JSON.stringify(cleanedPublications));
 
     // Debugging: Log the FormData contents
     console.log("FormData contents:");
@@ -283,6 +284,11 @@ export default function Form({ academicYear }) {
     );
   }
 
+  const headerTitle =
+    formMode === "edit"
+      ? "Επεξεργασία αίτησης υποψηφιότητας"
+      : "Νέα αίτηση υποψηφιότητας";
+
   return (
     <div className="w-full max-w-6xl mx-auto">
       {loading && (
@@ -307,12 +313,12 @@ export default function Form({ academicYear }) {
               d="M4 12a8 8 0 018-8v8H4z"
             ></path>
           </svg>
-          <span className="ml-2 text-patras-buccaneer">Υποβολή αίτησης...</span>
+          <span className="ml-2 text-patras-buccaneer">{submitLabel}...</span>
         </div>
       )}
 
       <h1 className="text-2xl text-center border-b pb-2 mb-8 text-gray-800">
-        Αίτηση υποψηφιότητας 
+        {headerTitle}
       </h1>
       <Stepper
         steps={steps}
@@ -346,7 +352,7 @@ export default function Form({ academicYear }) {
             onClick={handleSubmit}
             className="rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
           >
-            Υποβολή αίτησης
+            {submitLabel}
           </button>
         ) : (
           <span

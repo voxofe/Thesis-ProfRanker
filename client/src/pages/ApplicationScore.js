@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import PapersDrawer from "../components/PapersDrawer";
+import PublicationsDrawer from "../components/PublicationsDrawer";
 import CoursesDrawer from "../components/CoursesDrawer";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useParams } from "react-router-dom";
@@ -395,10 +395,10 @@ export default function ApplicationScore() {
                           </tr>
                           <tr className="">
                             <td className="px-6 py-4 text-patras-buccaneer">
-                              <PapersDrawer papers={applicantData?.papers || []} />
+                              <PublicationsDrawer publications={applicantData?.publications || []} />
                             </td>
                             <td className="px-6 py-4 text-center text-patras-buccaneer">
-                              {applicantData?.paperPoints}
+                              {applicantData?.publicationPoints}
                             </td>
                           </tr>
                           <tr className="">

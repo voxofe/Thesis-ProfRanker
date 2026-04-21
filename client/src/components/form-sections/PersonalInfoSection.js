@@ -1,9 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import { useFormData } from "../../contexts/FormDataContext";
 import InputField from "../InputField";
 
 export default function PersonalInfoSection() {
   const { formData, handleChange } = useFormData();
+  const [errors, setErrors] = useState({});
+
+  const normalizePhone = (value) => (value || "").replace(/[\s()-]/g, "");
+
+  const validateField = (key, value) => {
+    if (key === "phoneNumber") {
+      if (!value.trim()) return "Το κινητό είναι υποχρεωτικό.";
+      const mobile = normalizePhone(value);
+      if (!/^69\d{8}$/.test(mobile)) {
+        return "Ο αριθμός κινητού πρέπει να έχει 10 ψηφία και να ξεκινά από 69.";
+      }
+      return "";
+    }
+    if (key === "landlineNumber") {
+      if (!value.trim()) return "";
+      const landline = normalizePhone(value);
+      if (!/^2\d{9}$/.test(landline)) {
+        return "Ο αριθμός σταθερού πρέπει να έχει 10 ψηφία και να ξεκινά από 2.";
+      }
+      return "";
+    }
+    if (key === "postalCode") {
+      if (!value.trim()) return "Ο Τ.Κ. είναι υποχρεωτικός.";
+      if (!/^\d{5}$/.test(value.trim())) return "Ο Τ.Κ. πρέπει να έχει 5 ψηφία.";
+      return "";
+    }
+    return "";
+  };
+
+  const handleValidatedChange = (key, value) => {
+    handleChange(key, value);
+    const error = validateField(key, value);
+    setErrors((prev) => ({ ...prev, [key]: error }));
+  };
+
+  const handleValidatedBlur = (key, value) => {
+    const error = validateField(key, value);
+    setErrors((prev) => ({ ...prev, [key]: error }));
+  };
 
   return (
     <div className="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-3">
@@ -79,8 +118,10 @@ export default function PersonalInfoSection() {
           name="postal-code"
           type="text"
           value={formData.postalCode}
-          onChange={(value) => handleChange("postalCode", value)}
+          onChange={(value) => handleValidatedChange("postalCode", value)}
+          onBlur={() => handleValidatedBlur("postalCode", formData.postalCode)}
           required={true}
+          error={errors.postalCode}
         />
       </div>
 
@@ -91,8 +132,10 @@ export default function PersonalInfoSection() {
           name="phone-number"
           type="text"
           value={formData.phoneNumber}
-          onChange={(value) => handleChange("phoneNumber", value)}
+          onChange={(value) => handleValidatedChange("phoneNumber", value)}
+          onBlur={() => handleValidatedBlur("phoneNumber", formData.phoneNumber)}
           required={true}
+          error={errors.phoneNumber}
         />
       </div>
 
@@ -103,8 +146,10 @@ export default function PersonalInfoSection() {
           name="landline-number"
           type="text"
           value={formData.landlineNumber}
-          onChange={(value) => handleChange("landlineNumber", value)}
+          onChange={(value) => handleValidatedChange("landlineNumber", value)}
+          onBlur={() => handleValidatedBlur("landlineNumber", formData.landlineNumber)}
           required={false}
+          error={errors.landlineNumber}
         />
       </div>
     </div>
