@@ -107,7 +107,7 @@ export default function Publication({ index, readOnly = false }) {
   };
 
   return (
-    <div className="grid sm:flex sm:flex-col gap-x-8 rounded-md border border-patras-cameo bg-patras-albescentWhite/30 px-4 pt-2 pb-5 relative">
+    <div className="grid sm:flex sm:flex-col gap-x-8 rounded-md border border-patras-buccaneer/10 bg-patras-albescentWhite/30 px-4 pt-2 pb-5 relative">
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-8 gap-y-4 mt-4">
         <div className="col-span-1">
           <CustomSelect
@@ -172,7 +172,7 @@ export default function Publication({ index, readOnly = false }) {
         </div>
       </div>
 
-      <div className="border-t border-patras-cameo/60 my-4" />
+      <div className="border-t border-patras-buccaneer/20 my-4" />
 
       {isOtherGroup && (
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-8 gap-y-4">
@@ -195,7 +195,7 @@ export default function Publication({ index, readOnly = false }) {
               ]}
             />
           </div>
-          <div className="col-span-2">
+          <div className="col-span-2 sm:col-start-3 sm:col-span-2 sm:pl-10">
             {isConferencePresentationType && (
               <InputField
                 label="Τίτλος συνεδρίου"

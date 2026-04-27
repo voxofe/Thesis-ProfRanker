@@ -24,6 +24,10 @@ export default function Profile() {
   const { showToast } = useToast();
   const [profile, setProfile] = useState(null);
   const [activeSection, setActiveSection] = useState("general");
+  const [activePhdIndex, setActivePhdIndex] = useState(0);
+  const [phdSlideDirection, setPhdSlideDirection] = useState("next");
+  const [phdSliding, setPhdSliding] = useState(false);
+  const [phdNextDraft, setPhdNextDraft] = useState(null);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -44,6 +48,11 @@ export default function Profile() {
     phdIsFromForeignInstitute: false,
     workExperience: "",
   });
+  const [phdDraft, setPhdDraft] = useState({
+    phdTitle: "",
+    phdAcquisitionDate: "",
+    phdIsFromForeignInstitute: false,
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savingAdditional, setSavingAdditional] = useState(false);
@@ -51,6 +60,10 @@ export default function Profile() {
   const [formErrors, setFormErrors] = useState({});
   const [isRestrictionsModalOpen, setIsRestrictionsModalOpen] = useState(false);
   const [profilePublications, setProfilePublications] = useState([]);
+  const phdDegrees = useMemo(
+    () => (Array.isArray(profile?.phdDegrees) ? profile.phdDegrees : []),
+    [profile]
+  );
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -76,6 +89,7 @@ export default function Profile() {
           postalCode: data?.user?.postalCode || "",
         });
         const defaults = data?.applicationDefaults || {};
+        const degrees = Array.isArray(data?.phdDegrees) ? data.phdDegrees : [];
         setAdditionalForm({
           isPublicEmployee: !!defaults.isPublicEmployee,
           isEuCitizenNonGreek: !!defaults.isEuCitizenNonGreek,
@@ -88,6 +102,21 @@ export default function Profile() {
               ? ""
               : String(defaults.workExperience),
         });
+        if (degrees.length > 0) {
+          setActivePhdIndex(0);
+          setPhdDraft({
+            phdTitle: degrees[0]?.title || "",
+            phdAcquisitionDate: degrees[0]?.acquiredAt || "",
+            phdIsFromForeignInstitute: !!degrees[0]?.isForeignInstitute,
+          });
+        } else {
+          setActivePhdIndex(0);
+          setPhdDraft({
+            phdTitle: defaults.phdTitle || "",
+            phdAcquisitionDate: defaults.phdAcquisitionDate || "",
+            phdIsFromForeignInstitute: !!defaults.phdIsFromForeignInstitute,
+          });
+        }
         setProfilePublications(
           Array.isArray(data?.profilePublications) ? data.profilePublications : []
         );
@@ -97,6 +126,27 @@ export default function Profile() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (!phdDegrees.length) {
+      setActivePhdIndex(0);
+      return;
+    }
+    setActivePhdIndex((prev) => {
+      const nextIndex = Math.min(prev, phdDegrees.length - 1);
+      if (nextIndex !== prev) {
+        const nextDegree = phdDegrees[nextIndex];
+        if (nextDegree) {
+          setPhdDraft({
+            phdTitle: nextDegree.title || "",
+            phdAcquisitionDate: nextDegree.acquiredAt || "",
+            phdIsFromForeignInstitute: !!nextDegree.isForeignInstitute,
+          });
+        }
+      }
+      return nextIndex;
+    });
+  }, [phdDegrees]);
 
   const isApplicant = currentUser?.role === "applicant";
   const today = new Date().toISOString().split("T")[0];
@@ -164,6 +214,59 @@ export default function Profile() {
 
   const handleAdditionalFieldChange = (key, value) => {
     setAdditionalForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const updatePhdDraft = (key, value) => {
+    setPhdDraft((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handlePrevPhd = () => {
+    if (!phdDegrees.length) return;
+    if (activePhdIndex <= 0) return;
+    if (phdSliding) return;
+    setPhdSlideDirection("prev");
+    setActivePhdIndex((prev) => {
+      const nextIndex = Math.max(prev - 1, 0);
+      const nextDegree = phdDegrees[nextIndex];
+      if (nextDegree) {
+        setPhdNextDraft({
+          phdTitle: nextDegree.title || "",
+          phdAcquisitionDate: nextDegree.acquiredAt || "",
+          phdIsFromForeignInstitute: !!nextDegree.isForeignInstitute,
+        });
+        setPhdSliding(true);
+      }
+      return nextIndex;
+    });
+  };
+
+  const handleNextPhd = () => {
+    if (!phdDegrees.length) return;
+    if (activePhdIndex >= phdDegrees.length - 1) return;
+    if (phdSliding) return;
+    setPhdSlideDirection("next");
+    setActivePhdIndex((prev) => {
+      const nextIndex = Math.min(prev + 1, phdDegrees.length - 1);
+      const nextDegree = phdDegrees[nextIndex];
+      if (nextDegree) {
+        setPhdNextDraft({
+          phdTitle: nextDegree.title || "",
+          phdAcquisitionDate: nextDegree.acquiredAt || "",
+          phdIsFromForeignInstitute: !!nextDegree.isForeignInstitute,
+        });
+        setPhdSliding(true);
+      }
+      return nextIndex;
+    });
+  };
+
+  const handlePhdSlideEnd = () => {
+    if (!phdSliding) return;
+    if (phdNextDraft) {
+      setPhdDraft(phdNextDraft);
+    }
+    setPhdNextDraft(null);
+    setPhdSliding(false);
   };
 
   const normalizePhone = (value) => (value || "").replace(/[\s()-]/g, "");
@@ -277,9 +380,9 @@ export default function Profile() {
         isEuCitizenNonGreek: !!additionalForm.isEuCitizenNonGreek,
         hasNotParticipatedInPastProgram:
           !!additionalForm.hasNotParticipatedInPastProgram,
-        phdTitle: additionalForm.phdTitle || null,
-        phdAcquisitionDate: additionalForm.phdAcquisitionDate || null,
-        phdIsFromForeignInstitute: !!additionalForm.phdIsFromForeignInstitute,
+        phdTitle: phdDraft.phdTitle || null,
+        phdAcquisitionDate: phdDraft.phdAcquisitionDate || null,
+        phdIsFromForeignInstitute: !!phdDraft.phdIsFromForeignInstitute,
         workExperience: Number.isNaN(workExperienceValue)
           ? null
           : workExperienceValue,
@@ -304,6 +407,16 @@ export default function Profile() {
             ? ""
             : String(defaults.workExperience),
       });
+      const degrees = Array.isArray(response.data?.phdDegrees)
+        ? response.data.phdDegrees
+        : [];
+      if (!degrees.length) {
+        setPhdDraft({
+          phdTitle: defaults.phdTitle || "",
+          phdAcquisitionDate: defaults.phdAcquisitionDate || "",
+          phdIsFromForeignInstitute: !!defaults.phdIsFromForeignInstitute,
+        });
+      }
       showToast({ type: "success", message: "Οι αλλαγές αποθηκεύτηκαν." });
     } catch (error) {
       console.error("Error saving additional profile data:", error);
@@ -626,15 +739,15 @@ export default function Profile() {
             {activeSection === "publications" && "Επιστημονικές δημοσιεύσεις"}
         </h2>
       <div className="mt-2 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
-        <aside className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 h-fit lg:sticky lg:top-6">
+        <aside className="rounded-xl border border-gray-200/70 bg-white/15 p-4 h-fit lg:sticky lg:top-6">
           <nav className="space-y-2 text-sm">
             <button
               type="button"
               onClick={() => setActiveSection("general")}
-              className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+              className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
                 activeSection === "general"
-                  ? "bg-patras-albescentWhite text-patras-buccaneer"
-                  : "text-gray-700 hover:bg-patras-albescentWhite"
+                  ? "bg-patras-albescentWhite/80 text-patras-buccaneer border border-patras-buccaneer/20"
+                  : "text-gray-700 hover:bg-white/60"
               }`}
             >
               Γενικά στοιχεία
@@ -643,10 +756,10 @@ export default function Profile() {
               <button
                 type="button"
                 onClick={() => setActiveSection("additional")}
-                className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
                   activeSection === "additional"
-                    ? "bg-patras-albescentWhite text-patras-buccaneer"
-                    : "text-gray-700 hover:bg-patras-albescentWhite"
+                    ? "bg-patras-albescentWhite/80 text-patras-buccaneer border border-patras-buccaneer/20"
+                    : "text-gray-700 hover:bg-white/60"
                 }`}
               >
                 Πρόσθετα στοιχεία
@@ -655,28 +768,29 @@ export default function Profile() {
             {isApplicant && (
               <button
                 type="button"
-                onClick={() => setActiveSection("vault")}
-                className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-                  activeSection === "vault"
-                    ? "bg-patras-albescentWhite text-patras-buccaneer"
-                    : "text-gray-700 hover:bg-patras-albescentWhite"
+                onClick={() => setActiveSection("publications")}
+                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                  activeSection === "publications"
+                    ? "bg-patras-albescentWhite/80 text-patras-buccaneer border border-patras-buccaneer/20"
+                    : "text-gray-700 hover:bg-white/60"
                 }`}
               >
-                Αρχεία
+                Επιστημονικές δημοσιεύσεις
               </button>
             )}
             {isApplicant && (
               <button
                 type="button"
-                onClick={() => setActiveSection("publications")}
-                className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-                  activeSection === "publications"
-                    ? "bg-patras-albescentWhite text-patras-buccaneer"
-                    : "text-gray-700 hover:bg-patras-albescentWhite"
+                onClick={() => setActiveSection("vault")}
+                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                  activeSection === "vault"
+                    ? "bg-patras-albescentWhite/80 text-patras-buccaneer border border-patras-buccaneer/20"
+                    : "text-gray-700 hover:bg-white/60"
                 }`}
               >
-                Επιστημονικές δημοσιεύσεις
+                Αρχεία
               </button>
+
             )}
           </nav>
 
@@ -853,48 +967,126 @@ export default function Profile() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Στοιχεία διδακτορικού</h3>
-                  <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <InputField
-                        id="phdTitle"
-                        name="phdTitle"
-                        label="Τίτλος διδακτορικής διατριβής"
-                        type="text"
-                        value={additionalForm.phdTitle}
-                        onChange={(value) =>
-                          handleAdditionalFieldChange("phdTitle", value)
-                        }
-                      />
-                      <div>
-                        <FlowbiteDateField
-                          label="Ημερομηνία λήψης"
-                          value={additionalForm.phdAcquisitionDate}
-                          onChange={(value) =>
-                            handleAdditionalFieldChange("phdAcquisitionDate", value)
-                          }
-                          minDate="2011-01-01"
-                          maxDate={today}
-                        />
-                        <p className="-mt-3 text-xs text-gray-500 italic">
-                          Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}
-                        </p>
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                    <h3 className="text-sm font-semibold text-patras-buccaneer">
+                      Στοιχεία διδακτορικού
+                    </h3>
+                    {phdDegrees.length > 1 && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handlePrevPhd}
+                          disabled={activePhdIndex === 0}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-patras-buccaneer/40 text-patras-buccaneer hover:bg-patras-albescentWhite disabled:cursor-not-allowed disabled:opacity-40"
+                          aria-label="Προηγούμενο διδακτορικό"
+                        >
+                          ‹
+                        </button>
+                        <span className="text-xs text-gray-500">
+                          {activePhdIndex + 1} / {phdDegrees.length}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleNextPhd}
+                          disabled={activePhdIndex >= phdDegrees.length - 1}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-patras-buccaneer/40 text-patras-buccaneer hover:bg-patras-albescentWhite disabled:cursor-not-allowed disabled:opacity-40"
+                          aria-label="Επόμενο διδακτορικό"
+                        >
+                          ›
+                        </button>
                       </div>
-                      <div className="md:col-span-2">
-                        <Checkbox
-                          id="phdIsFromForeignInstitute"
-                          name="phdIsFromForeignInstitute"
-                          label="Τίτλος από ίδρυμα εξωτερικού"
-                          description=""
-                          checked={additionalForm.phdIsFromForeignInstitute}
-                          onChange={(value) =>
-                            handleAdditionalFieldChange(
-                              "phdIsFromForeignInstitute",
-                              value
-                            )
-                          }
-                        />
+                    )}
+                  </div>
+                  <div
+                    className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 overflow-hidden"
+                  >
+                    <div
+                      className={`flex ${
+                        phdSlideDirection === "prev" ? "flex-row-reverse" : "flex-row"
+                      } ${phdSliding ? "transition-transform duration-400 ease-out" : ""}`}
+                      style={{
+                        transform: phdSliding
+                          ? phdSlideDirection === "next"
+                            ? "translateX(-100%)"
+                            : "translateX(100%)"
+                          : "translateX(0%)",
+                      }}
+                      onTransitionEnd={handlePhdSlideEnd}
+                    >
+                      <div className="w-full shrink-0 p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <InputField
+                            id="phdTitle"
+                            name="phdTitle"
+                            label="Τίτλος διδακτορικής διατριβής"
+                            type="text"
+                            value={phdDraft.phdTitle}
+                            onChange={(value) => updatePhdDraft("phdTitle", value)}
+                          />
+                          <div>
+                            <FlowbiteDateField
+                              label="Ημερομηνία λήψης"
+                              value={phdDraft.phdAcquisitionDate}
+                              onChange={(value) =>
+                                updatePhdDraft("phdAcquisitionDate", value)
+                              }
+                              minDate="2011-01-01"
+                              maxDate={today}
+                            />
+                            <p className="-mt-3 text-xs text-gray-500 italic">
+                              Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}
+                            </p>
+                          </div>
+                          <div className="md:col-span-2">
+                            <Checkbox
+                              id="phdIsFromForeignInstitute"
+                              name="phdIsFromForeignInstitute"
+                              label="Τίτλος από ίδρυμα εξωτερικού"
+                              description=""
+                              checked={phdDraft.phdIsFromForeignInstitute}
+                              onChange={(value) =>
+                                updatePhdDraft("phdIsFromForeignInstitute", value)
+                              }
+                            />
+                          </div>
+                        </div>
                       </div>
+                      {phdSliding && phdNextDraft && (
+                        <div className="w-full shrink-0 p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <InputField
+                              id="phdTitle-next"
+                              name="phdTitle-next"
+                              label="Τίτλος διδακτορικής διατριβής"
+                              type="text"
+                              value={phdNextDraft.phdTitle}
+                              onChange={() => {}}
+                            />
+                            <div>
+                              <FlowbiteDateField
+                                label="Ημερομηνία λήψης"
+                                value={phdNextDraft.phdAcquisitionDate}
+                                onChange={() => {}}
+                                minDate="2011-01-01"
+                                maxDate={today}
+                              />
+                              <p className="-mt-3 text-xs text-gray-500 italic">
+                                Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}
+                              </p>
+                            </div>
+                            <div className="md:col-span-2">
+                              <Checkbox
+                                id="phdIsFromForeignInstitute-next"
+                                name="phdIsFromForeignInstitute-next"
+                                label="Τίτλος από ίδρυμα εξωτερικού"
+                                description=""
+                                checked={phdNextDraft.phdIsFromForeignInstitute}
+                                onChange={() => {}}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

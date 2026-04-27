@@ -293,36 +293,34 @@ export default function ApplicationScore() {
 
   return (
     <div className="grid grid-cols-1 gap-y-5 pt-0">
-      <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
+      <h1 className="text-2xl text-center border-b pb-2 mb-4 text-gray-800">
         Αίτηση & Βαθμολογία
       </h1>
       {canEditApplication && (
-        <div className="flex justify-end">
-          <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-            <div className="flex flex-wrap items-center justify-end gap-3">
-              <p className="text-sm font-medium text-amber-900 whitespace-nowrap">
-                Μπορείτε να επεξεργαστείτε ή να διαγράψετε την αίτηση έως{" "}
-                <span className="font-semibold">
-                  {toDDMMYYYYHHMM(endDate, endTime) || "—"}
-                </span>
-                .
-              </p>
-              <div className="flex items-center gap-2">
-                <Link
-                  to={`/form?mode=edit&applicationId=${editApplicationId}`}
-                  className="inline-flex shrink-0 items-center justify-center rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-patras-sanguineBrown"
-                >
-                  Επεξεργασία αίτησης
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleDeleteApplication}
-                  disabled={deleting}
-                  className="inline-flex shrink-0 items-center justify-center rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Διαγραφή αίτησης
-                </button>
-              </div>
+        <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3">
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-sm text-center text-amber-900">
+              Μπορείτε να επεξεργαστείτε ή να διαγράψετε την αίτηση έως{" "}
+              <span className="font-semibold">
+                {toDDMMYYYYHHMM(endDate, endTime) || "—"}
+              </span>
+              .
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Link
+                to={`/form?mode=edit&applicationId=${editApplicationId}`}
+                className="inline-flex shrink-0 items-center justify-center rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-patras-sanguineBrown"
+              >
+                Επεξεργασία αίτησης
+              </Link>
+              <button
+                type="button"
+                onClick={handleDeleteApplication}
+                disabled={deleting}
+                className="inline-flex shrink-0 items-center justify-center rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Διαγραφή αίτησης
+              </button>
             </div>
           </div>
         </div>

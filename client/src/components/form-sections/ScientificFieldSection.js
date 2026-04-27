@@ -60,8 +60,16 @@ export default function ScientificFieldSection() {
           positions={activePositions}
           value={formData.positionId}
           onChange={(posId) => handleChange("positionId", posId)}
-          label="Θέση ( Σχολή - Τμήμα - Επιστημονικό πεδίο )"
-          disabled={loading || activePositions.length === 0}
+          label={
+            formMode === "edit" ? (
+              <Tooltip content="Το επιστημονικό πεδίο δεν αλλάζει κατά την επανυποβολή.">
+                <span className="underline cursor-help">Θέση ( Σχολή - Τμήμα - Επιστημονικό πεδίο )</span>
+              </Tooltip>
+            ) : (
+              "Θέση ( Σχολή - Τμήμα - Επιστημονικό πεδίο )"
+            )
+          }
+          disabled={loading || activePositions.length === 0 || formMode === "edit"}
           maxResults={50}
           required={true}
         />

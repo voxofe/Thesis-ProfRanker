@@ -9,8 +9,14 @@ export default function Header({ academicYear }) {
 
   const rolesInGreek = {
     admin: "Διαχειριστής",
-    applicant: "Υποψήφιος",
-    guest: "Επισκέπτης"
+    applicant: {
+      male: "Υποψήφιος",
+      female: "Υποψήφια",
+    },
+    guest: {
+      male: "Επισκέπτης",
+      female: "Επισκέπτρια",
+    },
   };
 
   // Normalize Greek to plain uppercase (remove tonos/dialytika)
@@ -31,9 +37,19 @@ export default function Header({ academicYear }) {
   // Replace your current initials computation with:
   const initials = getInitials(currentUser?.firstName, currentUser?.lastName);
 
+  const resolveRoleLabel = (role, gender) => {
+    const label = rolesInGreek[role];
+    if (!label) return role;
+    if (typeof label === "string") return label;
+    if (gender === "female") return label.female || label.male || role;
+    return label.male || role;
+  };
+
   const roleLabel = Array.isArray(currentUser?.roles)
-    ? currentUser.roles.map((role) => rolesInGreek[role] || role).join(", ")
-    : rolesInGreek[currentUser?.role] || currentUser?.role;
+    ? currentUser.roles
+        .map((role) => resolveRoleLabel(role, currentUser?.gender))
+        .join(", ")
+    : resolveRoleLabel(currentUser?.role, currentUser?.gender);
 
   return (
     <div className="w-full flex items-stretch gap-4">

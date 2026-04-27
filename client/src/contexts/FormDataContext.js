@@ -332,10 +332,15 @@ export const FormDataProvider = ({ children }) => {
   }, [currentUser, formMode, selectedApplicationId, profileData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (field, value) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [field]: value,
-    }));
+    setFormData((prevData) => {
+      if (formMode === "edit" && field === "positionId") {
+        return prevData;
+      }
+      return {
+        ...prevData,
+        [field]: value,
+      };
+    });
   };
 
   const handlePhdTitleChange = (value) => {
