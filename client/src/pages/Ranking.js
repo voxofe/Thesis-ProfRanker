@@ -90,7 +90,7 @@ export default function Ranking() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const { currentUser } = useAuth();
-  const { positions = [], refreshPositions } = usePositions();
+  const { refreshPositions } = usePositions();
   const [refreshing, setRefreshing] = useState(false);
 
   // Roles
@@ -103,12 +103,38 @@ export default function Ranking() {
   const isApplicant = !!currentUser && !isAdmin && currentUser?.role !== "guest";
   const viewerId = currentUser?.id;
 
-  // Get applicant's position info
-  const myPositionId = currentUser?.form?.positionId;
-  const myPosition = positions.find(p => String(p.id) === String(myPositionId));
-  const mySchool = myPosition?.school;
-  const myDepartment = myPosition?.department;
-  const myScientificField = myPosition?.scientificField;
+  const appliedPositionIds = useMemo(() => {
+    const apps = Array.isArray(currentUser?.applications)
+      ? currentUser.applications
+      : [];
+    const ids = apps
+      .map((app) => app?.positionId)
+      .filter((id) => id !== null && id !== undefined && id !== "");
+    if (!ids.length && currentUser?.form?.positionId) {
+      ids.push(currentUser.form.positionId);
+    }
+    return Array.from(new Set(ids.map((id) => String(id))));
+  }, [currentUser]);
+
+  const appliedPositionIdSet = useMemo(
+    () => new Set(appliedPositionIds),
+    [appliedPositionIds]
+  );
+
+  const appliedScientificFields = useMemo(() => {
+    if (!isApplicant || !currentUser?.id) return [];
+    const viewerIdStr = String(currentUser.id);
+    const fields = users
+      .filter((u) => String(u.id) === viewerIdStr)
+      .filter(
+        (u) =>
+          getApplicationStatus(u?.positionEndDate, u?.positionEndTime) ===
+          "Ολοκληρωμένη"
+      )
+      .map((u) => (u?.scientificField || "").trim())
+      .filter(Boolean);
+    return Array.from(new Set(fields));
+  }, [isApplicant, currentUser?.id, users]);
 
   const fetchUsers = useCallback(async () => {
     const token = localStorage.getItem("token");
@@ -184,12 +210,17 @@ export default function Ranking() {
     return users.filter(u => {
       // Role-based filter: only Ολοκληρωμένη for non-admins
       if (!isAdmin && getApplicationStatus(u.positionEndDate, u.positionEndTime) !== "Ολοκληρωμένη") return false;
-      // School
-      if (filters.schools.length && !filters.schools.includes(u.school)) return false;
-      // Department
-      if (filters.departments.length && !filters.departments.includes(u.department)) return false;
-      // Scientific Field
-      if (filters.scientificFields.length && !filters.scientificFields.includes(u.scientificField)) return false;
+      // School/Department/Scientific Field (OR across categories)
+      const hasOrFilters =
+        filters.schools.length ||
+        filters.departments.length ||
+        filters.scientificFields.length;
+      if (hasOrFilters) {
+        const schoolMatch = filters.schools.includes(u.school);
+        const departmentMatch = filters.departments.includes(u.department);
+        const scientificFieldMatch = filters.scientificFields.includes(u.scientificField);
+        if (!(schoolMatch || departmentMatch || scientificFieldMatch)) return false;
+      }
       // Status (admin only)
       if (isAdmin && filters.status.length && !filters.status.includes(getApplicationStatus(u.positionEndDate, u.positionEndTime))) return false;
       // Points range
@@ -283,6 +314,16 @@ export default function Ranking() {
     });
   };
 
+  // Applicant: checkbox to show only applications for positions they've applied to
+  const [showMyPosition, setShowMyPosition] = useState(false);
+  
+  const filteredByMyPosition = useMemo(() => {
+    if (isApplicant && showMyPosition && appliedPositionIdSet.size) {
+      return filteredUsers.filter((u) => appliedPositionIdSet.has(String(u.positionId)));
+    }
+    return filteredUsers;
+  }, [isApplicant, showMyPosition, appliedPositionIdSet, filteredUsers]);
+
   // Filter tags
   const filterTags = useMemo(() => {
     const tags = [];
@@ -298,56 +339,13 @@ export default function Ranking() {
   const removeTag = (tag) => {
     setFilters((prev) => {
       if (["schools", "departments", "scientificFields", "status"].includes(tag.key)) {
+        if (showMyPosition && tag.key === "scientificFields") {
+          setShowMyPosition(false);
+        }
         return { ...prev, [tag.key]: prev[tag.key].filter((v) => v !== tag.value) };
       }
       if (tag.key === "pointsMin") return { ...prev, pointsMin: "" };
       if (tag.key === "pointsMax") return { ...prev, pointsMax: "" };
-      return prev;
-    });
-  };
-
-  // Applicant: checkbox to show only their position's applications
-  const [showMyPosition, setShowMyPosition] = useState(false);
-  
-  const filteredByMyPosition = useMemo(() => {
-    if (isApplicant && showMyPosition && myPositionId) {
-      return filteredUsers.filter(u => String(u.positionId) === String(myPositionId));
-    }
-    return filteredUsers;
-  }, [isApplicant, showMyPosition, myPositionId, filteredUsers]);
-
-  // Checkbox is checked only if all three filters contain ONLY the applicant's values
-  const hasMyExclusiveFilters =
-    myScientificField &&
-    myDepartment &&
-    mySchool &&
-    filters.scientificFields.length === 1 &&
-    filters.scientificFields[0] === myScientificField &&
-    filters.departments.length === 1 &&
-    filters.departments[0] === myDepartment &&
-    filters.schools.length === 1 &&
-    filters.schools[0] === mySchool;
-
-  const handleMyFieldCheckbox = (checked) => {
-    setFilters((prev) => {
-      if (checked && myScientificField && myDepartment && mySchool) {
-        // Set ONLY the applicant's scientific field, department, and school
-        return {
-          ...prev,
-          scientificFields: [myScientificField],
-          departments: [myDepartment],
-          schools: [mySchool],
-        };
-      }
-      if (!checked) {
-        // Remove applicant's values, keep others if present
-        return {
-          ...prev,
-          scientificFields: prev.scientificFields.filter(f => f !== myScientificField),
-          departments: prev.departments.filter(d => d !== myDepartment),
-          schools: prev.schools.filter(s => s !== mySchool),
-        };
-      }
       return prev;
     });
   };
@@ -487,13 +485,28 @@ export default function Ranking() {
       <div className="flex items-center justify-between ml-1 m-0 p-0">
         {/* Left side: Checkbox for applicant only */}
         <div>
-          {isApplicant && myScientificField && myDepartment && mySchool && (
+          {isApplicant && appliedPositionIds.length > 0 && (
             <Checkbox
               id="show-my-field"
               name="show-my-field"
-              checked={hasMyExclusiveFilters}
-              onChange={handleMyFieldCheckbox}
-              label="Εμφάνιση αιτήσεων μόνο για τη θέση που έχω επιλέξει"
+              checked={showMyPosition}
+              onChange={(checked) => {
+                setShowMyPosition(checked);
+                if (checked) {
+                  setFilters((prev) => ({
+                    ...prev,
+                    scientificFields: appliedScientificFields,
+                  }));
+                } else {
+                  setFilters((prev) => ({
+                    ...prev,
+                    scientificFields: prev.scientificFields.filter(
+                      (sf) => !appliedScientificFields.includes(sf)
+                    ),
+                  }));
+                }
+              }}
+              label="Εμφάνιση αιτήσεων για τις θέσεις που έχω επιλέξει"
             />
           )}
           {/* For guest/admin, tags appear here */}
@@ -582,6 +595,7 @@ export default function Ranking() {
           columns={columns}
           rows={filteredByMyPosition}
           getSortedRows={getSortedUsers}
+          getRowKey={(row) => row?.applicationId ?? row?.id}
           initialSortBy="totalPoints"
           initialSortDirection="desc"
           headerCellClassName={headerCellClassName}

@@ -293,13 +293,13 @@ export default function ApplicationScore() {
 
   return (
     <div className="grid grid-cols-1 gap-y-5 pt-0">
-      <h1 className="text-2xl text-center border-b pb-2 mb-4 text-gray-800">
+      <h1 className="text-2xl text-center border-b pb-2 mb-1 text-gray-800">
         Αίτηση & Βαθμολογία
       </h1>
       {canEditApplication && (
         <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3">
           <div className="flex flex-col items-center gap-3">
-            <p className="text-sm text-center text-amber-900">
+            <p className="text-sm text-center">
               Μπορείτε να επεξεργαστείτε ή να διαγράψετε την αίτηση έως{" "}
               <span className="font-semibold">
                 {toDDMMYYYYHHMM(endDate, endTime) || "—"}

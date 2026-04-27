@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Tooltip from "./Tooltip.jsx";
+import TooltipGray from "./TooltipGray";
 
 export default function CoursesDrawer({ courses = [], scientificField }) {
   const [open, setOpen] = useState(false);
@@ -58,9 +58,9 @@ export default function CoursesDrawer({ courses = [], scientificField }) {
                           <td className="px-2 py-2 border">{c.code}</td>
                           <td className="px-2 py-2 border">{c.name}</td>
                           <td className="px-2 py-2 border">
-                            <Tooltip content={c.description}>
+                            <TooltipGray content={c.description}>
                               <span className="underline cursor-pointer text-patras-buccaneer">Περιγραφή</span>
-                            </Tooltip>
+                            </TooltipGray>
                           </td>
                           <td className="px-2 py-2 border">{c.semester}</td>
                           <td className="px-2 py-2 border">{c.teachingUnits}</td>

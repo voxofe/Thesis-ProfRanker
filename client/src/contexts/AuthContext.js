@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
 
     return axios({
       method: "GET",
-      url: `${API_BASE_URL}/api/users/getByToken`,
+      url: `${API_BASE_URL}/api/users/getByToken?include=applications`,
       headers: {
         Authorization: `Bearer ${token}`,
       },

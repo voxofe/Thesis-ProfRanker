@@ -1,7 +1,7 @@
 // Custom Tooltip Component
 import { useState } from "react";
 
-const Tooltip = ({ children, content }) => {
+const TooltipGray = ({ children, content }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -75,4 +75,4 @@ const Tooltip = ({ children, content }) => {
   );
 };
 
-export default Tooltip;
+export default TooltipGray;

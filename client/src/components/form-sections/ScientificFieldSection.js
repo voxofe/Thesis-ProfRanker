@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { useFormData } from "../../contexts/FormDataContext";
 import { usePositions } from "../../contexts/PositionsContext";
-import Tooltip from "../Tooltip.jsx";
+import TooltipGray from "../TooltipGray";
 import PositionSelect from "../PositionSelect";
 
 export default function ScientificFieldSection() {
@@ -62,9 +62,9 @@ export default function ScientificFieldSection() {
           onChange={(posId) => handleChange("positionId", posId)}
           label={
             formMode === "edit" ? (
-              <Tooltip content="Το επιστημονικό πεδίο δεν αλλάζει κατά την επανυποβολή.">
+              <TooltipGray content="Το επιστημονικό πεδίο δεν αλλάζει κατά την επανυποβολή.">
                 <span className="underline cursor-help">Θέση ( Σχολή - Τμήμα - Επιστημονικό πεδίο )</span>
-              </Tooltip>
+              </TooltipGray>
             ) : (
               "Θέση ( Σχολή - Τμήμα - Επιστημονικό πεδίο )"
             )
@@ -121,9 +121,9 @@ export default function ScientificFieldSection() {
                   <td className="px-2 py-2 border">{course.code}</td>
                   <td className="px-2 py-2 border">{course.name}</td>
                   <td className="px-2 py-2 border">
-                    <Tooltip content={course.description}>
+                    <TooltipGray content={course.description}>
                       <span className="underline cursor-pointer text-patras-buccaneer">Περιγραφή</span>
-                    </Tooltip>
+                    </TooltipGray>
                   </td>
                   <td className="px-2 py-2 border">{course.semester}</td>
                   <td className="px-2 py-2 border">{course.teachingUnits}</td>

@@ -59,7 +59,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
         >
           <div className="py-2 text-left">
             <Link
-              to="/profile#profile-settings"
+              to="/settings"
               className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-patras-albescentWhite/40"
               onClick={() => setOpen(false)}
               role="menuitem"

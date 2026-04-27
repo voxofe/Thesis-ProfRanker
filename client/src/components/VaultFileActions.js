@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import Tooltip from "./Tooltip.jsx";
+import TooltipGray from "./TooltipGray";
 
 export default function VaultFileActions({
   file,
@@ -98,7 +98,7 @@ export default function VaultFileActions({
           {showReplace && (
             file.isUsed ? (
               <div className="block w-full">
-                <Tooltip content="Το αρχείο χρησιμοποιείται σε υποβληθείσα αίτηση.">
+                <TooltipGray content="Το αρχείο χρησιμοποιείται σε υποβληθείσα αίτηση.">
                   <button
                     type="button"
                     disabled
@@ -111,7 +111,7 @@ export default function VaultFileActions({
                     </svg>
                     Αντικατάσταση
                   </button>
-                </Tooltip>
+                </TooltipGray>
               </div>
             ) : (
               <button
@@ -131,7 +131,7 @@ export default function VaultFileActions({
           {showDelete && (
             file.isUsed ? (
               <div className="block w-full">
-                <Tooltip content="Το αρχείο χρησιμοποιείται σε υποβληθείσα αίτηση.">
+                <TooltipGray content="Το αρχείο χρησιμοποιείται σε υποβληθείσα αίτηση.">
                   <button
                     type="button"
                     disabled
@@ -144,7 +144,7 @@ export default function VaultFileActions({
                     </svg>
                     Διαγραφή
                   </button>
-                </Tooltip>
+                </TooltipGray>
               </div>
             ) : (
               <button

@@ -15,6 +15,7 @@ import ApplicationForm from "./pages/ApplicationForm";
 import ApplicationScore from "./pages/ApplicationScore";
 import MyApplications from "./pages/MyApplications";
 import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import Ranking from "./pages/Ranking";
 import Positions from "./pages/Positions";
 import PositionsAll from "./pages/PositionsAll";
@@ -114,6 +115,7 @@ function AppContent() {
                 <Route path="/my-applications" element={<MyApplications />} />
 
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
 
 
                 {(currentUser?.role === "guest" ||
