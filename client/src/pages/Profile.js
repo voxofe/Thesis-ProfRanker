@@ -2,12 +2,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
+import { FormDataContext } from "../contexts/FormDataContext";
 import InputField from "../components/InputField";
 import Checkbox from "../components/Checkbox";
 import FlowbiteDateField from "../components/FlowbiteDateField";
 import CustomSelect from "../components/CustomSelect";
 import VaultFileActions from "../components/VaultFileActions";
 import TermsModal from "../components/TermsModal";
+import PublicationsSection from "../components/form-sections/PublicationsSection";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -45,8 +47,10 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savingAdditional, setSavingAdditional] = useState(false);
+  const [savingPublications, setSavingPublications] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [isRestrictionsModalOpen, setIsRestrictionsModalOpen] = useState(false);
+  const [profilePublications, setProfilePublications] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -84,6 +88,9 @@ export default function Profile() {
               ? ""
               : String(defaults.workExperience),
         });
+        setProfilePublications(
+          Array.isArray(data?.profilePublications) ? data.profilePublications : []
+        );
       })
       .catch((error) => {
         console.error("Error loading profile:", error);
@@ -100,6 +107,17 @@ export default function Profile() {
   }));
   const canEditIdentity = profile?.canEditIdentity !== false;
   const requiresMilitaryDoc = profile?.user?.gender === "male";
+  const publicationsContextValue = useMemo(
+    () => ({
+      formData: { publications: profilePublications },
+      handleChange: (field, value) => {
+        if (field === "publications") {
+          setProfilePublications(value);
+        }
+      },
+    }),
+    [profilePublications]
+  );
 
   const validateField = (key, value) => {
     if (!canEditIdentity && ["firstName", "lastName"].includes(key)) {
@@ -297,6 +315,39 @@ export default function Profile() {
       setSavingAdditional(false);
     }
   };
+
+  const handleSavePublications = async () => {
+    setSavingPublications(true);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setSavingPublications(false);
+      return;
+    }
+
+    try {
+      const response = await axios.put(
+        `${API_BASE_URL}/api/profile`,
+        { profilePublications: profilePublications },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setProfile(response.data);
+      setProfilePublications(
+        Array.isArray(response.data?.profilePublications)
+          ? response.data.profilePublications
+          : []
+      );
+      showToast({ type: "success", message: "Οι αλλαγές αποθηκεύτηκαν." });
+    } catch (error) {
+      console.error("Error saving publications:", error);
+      showToast({
+        type: "error",
+        message: error?.response?.data?.error || "Αποτυχία αποθήκευσης.",
+      });
+    } finally {
+      setSavingPublications(false);
+    }
+  };
+
 
   const renderFilePills = (files) => (
     <div className="flex flex-wrap gap-2">
@@ -572,6 +623,7 @@ export default function Profile() {
             {activeSection === "general" && "Γενικά στοιχεία"}
             {activeSection === "additional" && "Πρόσθετα στοιχεία"}
             {activeSection === "vault" && "Αρχεία"}
+            {activeSection === "publications" && "Επιστημονικές δημοσιεύσεις"}
         </h2>
       <div className="mt-2 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
         <aside className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 h-fit lg:sticky lg:top-6">
@@ -611,6 +663,19 @@ export default function Profile() {
                 }`}
               >
                 Αρχεία
+              </button>
+            )}
+            {isApplicant && (
+              <button
+                type="button"
+                onClick={() => setActiveSection("publications")}
+                className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+                  activeSection === "publications"
+                    ? "bg-patras-albescentWhite text-patras-buccaneer"
+                    : "text-gray-700 hover:bg-patras-albescentWhite"
+                }`}
+              >
+                Επιστημονικές δημοσιεύσεις
               </button>
             )}
           </nav>
@@ -942,6 +1007,24 @@ export default function Profile() {
                   })()}
                 </div>
               )}
+            </div>
+          )}
+
+          {isApplicant && activeSection === "publications" && (
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+              <FormDataContext.Provider value={publicationsContextValue}>
+                <PublicationsSection />
+              </FormDataContext.Provider>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 mt-8">
+                <button
+                  type="button"
+                  onClick={handleSavePublications}
+                  disabled={savingPublications}
+                  className="inline-flex items-center justify-center bg-patras-buccaneer text-sm text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors disabled:opacity-60"
+                >
+                  {savingPublications ? "Αποθήκευση..." : "Αποθήκευση αλλαγών"}
+                </button>
+              </div>
             </div>
           )}
           <TermsModal

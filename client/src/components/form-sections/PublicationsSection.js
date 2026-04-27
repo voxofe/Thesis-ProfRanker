@@ -2,10 +2,11 @@ import React from "react";
 import { useFormData } from "../../contexts/FormDataContext.js";
 import Publication from "../Publication.js";
 
-export default function PublicationsSection() {
+export default function PublicationsSection({ readOnly = false }) {
   const { formData, handleChange } = useFormData();
 
   const addNewPublication = () => {
+    if (readOnly) return;
     const newPublication = {
       type: "",
       publicationTitle: "",
@@ -26,7 +27,7 @@ export default function PublicationsSection() {
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-8 pt-1 pb-0 sm:pb-2"></div>
         <div className="grid grid-cols-1 pt-2 gap-y-3">
           {formData.publications.map((_, index) => (
-            <Publication key={index} index={index} />
+            <Publication key={index} index={index} readOnly={readOnly} />
           ))}
           {formData.publications.length === 0 && (
             <div className="text-center text-gray-500 py-8">
@@ -41,7 +42,8 @@ export default function PublicationsSection() {
           <button
             onClick={addNewPublication}
             type="button"
-            className="rounded-md bg-patras-buccaneer px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            disabled={readOnly}
+            className="rounded-md bg-patras-buccaneer px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             + Προσθήκη νέας
           </button>

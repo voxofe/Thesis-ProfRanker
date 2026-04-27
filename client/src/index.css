@@ -73,6 +73,22 @@
         transparent 8px
       );
   }
+
+  .pr-applications-surface {
+    background-color: #fbf8f1;
+    background-image:
+      radial-gradient(220px 160px at 15% 15%, rgba(140, 108, 64, 0.05), transparent 70%),
+      radial-gradient(260px 200px at 85% 20%, rgba(180, 138, 74, 0.045), transparent 75%),
+      radial-gradient(320px 220px at 50% 100%, rgba(110, 84, 50, 0.03), transparent 70%),
+      repeating-linear-gradient(
+        120deg,
+        rgba(132, 102, 60, 0.015),
+        rgba(132, 102, 60, 0.015) 1px,
+        transparent 1px,
+        transparent 10px
+      );
+    min-height: 100vh;
+  }
 }
 
 /* @layer base {

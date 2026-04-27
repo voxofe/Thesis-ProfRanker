@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import Tooltip from "./Tooltip.jsx";
 
 export default function VaultFileActions({
   file,
@@ -6,6 +7,8 @@ export default function VaultFileActions({
   onDelete,
   onView,
   onDownload,
+  showReplace = true,
+  showDelete = true,
 }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
@@ -40,22 +43,26 @@ export default function VaultFileActions({
   return (
     <div
       ref={wrapperRef}
-      className="group relative inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-1 text-xs shadow-sm transition-colors duration-150 hover:bg-patras-buccaneer hover:text-white"
+      className={`group relative inline-flex items-center rounded-full border border-gray-200 px-3 py-1 text-xs shadow-sm transition-colors duration-150 ${
+        open ? "bg-patras-buccaneer text-white" : "bg-white hover:bg-patras-buccaneer hover:text-white"
+      }`}
     >
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="text-patras-buccaneer group-hover:text-white"
+        className={open ? "text-white" : "text-patras-buccaneer group-hover:text-white"}
       >
         {file.name}
       </button>
-      <input
-        ref={inputRef}
-        type="file"
-        className="hidden"
-        accept=".pdf,.doc,.docx,.odt"
-        onChange={handleReplaceChange}
-      />
+      {showReplace && (
+        <input
+          ref={inputRef}
+          type="file"
+          className="hidden"
+          accept=".pdf,.doc,.docx,.odt"
+          onChange={handleReplaceChange}
+        />
+      )}
       {open && (
         <div className="absolute left-0 top-full mt-2 w-max rounded-md border border-gray-200 bg-white shadow-lg z-20">
           <button
@@ -87,45 +94,76 @@ export default function VaultFileActions({
             </svg>
             Κατεβάστε
           </button>
-          <div className="my-1 border-t border-gray-200" />
-          <button
-            type="button"
-            onClick={file.isUsed ? undefined : triggerReplace}
-            disabled={file.isUsed}
-            className={`flex w-full items-center gap-2 px-3 py-2 text-sm ${
-              file.isUsed
-                ? "text-gray-400 cursor-not-allowed"
-                : "text-gray-700 hover:bg-patras-whiskey hover:text-white"
-            }`}
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M16 3h5v5" />
-              <path d="M21 8l-6-6" />
-              <path d="M20 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
-            </svg>
-            Αντικατάσταση
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (file.isUsed) return;
-              onDelete();
-              setOpen(false);
-            }}
-            disabled={file.isUsed}
-            className={`flex w-full items-center gap-2 px-3 py-2 text-sm ${
-              file.isUsed
-                ? "text-gray-400 cursor-not-allowed"
-                : "text-gray-700 hover:bg-red-700 hover:text-white"
-            }`}
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 6h18" />
-              <path d="M8 6V4h8v2" />
-              <path d="M6 6l1 14h10l1-14" />
-            </svg>
-            Διαγραφή
-          </button>
+          {(showReplace || showDelete) && <div className="my-1 border-t border-gray-200" />}
+          {showReplace && (
+            file.isUsed ? (
+              <div className="block w-full">
+                <Tooltip content="Το αρχείο χρησιμοποιείται σε υποβληθείσα αίτηση.">
+                  <button
+                    type="button"
+                    disabled
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
+                  >
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M16 3h5v5" />
+                      <path d="M21 8l-6-6" />
+                      <path d="M20 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
+                    </svg>
+                    Αντικατάσταση
+                  </button>
+                </Tooltip>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={triggerReplace}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-whiskey hover:text-white"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 3h5v5" />
+                  <path d="M21 8l-6-6" />
+                  <path d="M20 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
+                </svg>
+                Αντικατάσταση
+              </button>
+            )
+          )}
+          {showDelete && (
+            file.isUsed ? (
+              <div className="block w-full">
+                <Tooltip content="Το αρχείο χρησιμοποιείται σε υποβληθείσα αίτηση.">
+                  <button
+                    type="button"
+                    disabled
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
+                  >
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 6h18" />
+                      <path d="M8 6V4h8v2" />
+                      <path d="M6 6l1 14h10l1-14" />
+                    </svg>
+                    Διαγραφή
+                  </button>
+                </Tooltip>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  onDelete();
+                  setOpen(false);
+                }}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-red-700 hover:text-white"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 6h18" />
+                  <path d="M8 6V4h8v2" />
+                  <path d="M6 6l1 14h10l1-14" />
+                </svg>
+                Διαγραφή
+              </button>
+            )
+          )}
         </div>
       )}
     </div>

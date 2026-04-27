@@ -11,7 +11,7 @@ const API_BASE_URL = (
   ""
 );
 
-const FormDataContext = createContext();
+export const FormDataContext = createContext();
 
 export const useFormData = () => useContext(FormDataContext);
 
@@ -21,7 +21,6 @@ export const FormDataProvider = ({ children }) => {
   const formMode = (searchParams.get("mode") || "new").toLowerCase();
   const selectedApplicationId = searchParams.get("applicationId");
   const [profileData, setProfileData] = useState(null);
-  const [latestPublications, setLatestPublications] = useState([]);
   const phdDegrees = useMemo(
     () => (Array.isArray(profileData?.phdDegrees) ? profileData.phdDegrees : []),
     [profileData]
@@ -181,7 +180,7 @@ export const FormDataProvider = ({ children }) => {
         phdIsFromForeignInstitute: isForeignInstitute,
         phdDegreeId: selectedDegree?.id ?? null,
         workExperience: defaults.workExperience ?? "",
-        publications: latestPublications ?? [],
+        publications: profileSnapshot.profilePublications ?? [],
         cvDocument: buildDocItem(profileSnapshot.documents?.cv),
         phdDocument: selectedDegree
           ? buildDocItem(selectedDegree.document)
@@ -291,7 +290,6 @@ export const FormDataProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     if (!token) {
       setProfileData(null);
-      setLatestPublications([]);
       return;
     }
 
@@ -305,53 +303,8 @@ export const FormDataProvider = ({ children }) => {
       .catch((error) => {
         console.error("Error loading profile:", error);
         setProfileData(null);
-        setLatestPublications([]);
       });
   }, [currentUser]);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setLatestPublications([]);
-      return;
-    }
-
-    const latestAppId = profileData?.applications?.[0]?.id;
-    if (!latestAppId) {
-      setLatestPublications([]);
-      return;
-    }
-
-    axios
-      .get(`${API_BASE_URL}/api/applications/${latestAppId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        setLatestPublications(res.data?.publications ?? []);
-      })
-      .catch((error) => {
-        console.error("Error loading latest application publications:", error);
-        setLatestPublications([]);
-      });
-  }, [profileData]);
-
-  useEffect(() => {
-    if (formMode !== "new") {
-      return;
-    }
-    if (!Array.isArray(latestPublications) || latestPublications.length === 0) {
-      return;
-    }
-    setFormData((prev) => {
-      if (Array.isArray(prev.publications) && prev.publications.length > 0) {
-        return prev;
-      }
-      return {
-        ...prev,
-        publications: latestPublications,
-      };
-    });
-  }, [formMode, latestPublications]);
 
   useEffect(() => {
     if (formMode === "edit" && selectedApplicationId) {

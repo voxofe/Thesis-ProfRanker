@@ -4,7 +4,7 @@ import InputField from "./InputField";
 import CustomSelect from "./CustomSelect";
 import RadioButtons from "./RadioButtons";
 
-export default function Publication({ index }) {
+export default function Publication({ index, readOnly = false }) {
   const lastYear = 2021;
   const scimagoYears = Array.from({ length: lastYear - 1999 + 1 }, (_, i) => {
     const year = (1999 + i).toString();
@@ -38,6 +38,7 @@ export default function Publication({ index }) {
   const mainTypeValue = isOtherGroup ? "other" : publication.type || "";
 
   const updatePublicationField = (field, value) => {
+    if (readOnly) return;
     const updatedPublications = [...formData.publications];
 
     // Ensure the publication object exists at this index
@@ -78,11 +79,13 @@ export default function Publication({ index }) {
   };
 
   const handleDelete = () => {
+    if (readOnly) return;
     const updatedPublications = formData.publications.filter((_, i) => i !== index);
     handleChange("publications", updatedPublications);
   };
 
   const handleClearFields = () => {
+    if (readOnly) return;
     const updatedPublications = [...formData.publications];
     updatedPublications[index] = {
       type: "",
@@ -117,6 +120,7 @@ export default function Publication({ index }) {
               }
               updatePublicationField("type", value);
             }}
+            disabled={readOnly}
             options={[
               {
                 label: "Δημοσίευση σε επιστημονικό περιοδικό",
@@ -136,6 +140,7 @@ export default function Publication({ index }) {
             label="Έτος"
             value={publication.year || ""}
             onChange={(value) => updatePublicationField("year", value)}
+            disabled={readOnly}
             options={scimagoYears}
             required={true}
           />
@@ -148,6 +153,7 @@ export default function Publication({ index }) {
             type="text"
             value={publication.publicationTitle || ""}
             onChange={(value) => updatePublicationField("publicationTitle", value)}
+            disabled={readOnly}
             required={true}
           />
         </div>
@@ -160,6 +166,7 @@ export default function Publication({ index }) {
             type="text"
             value={authorsValue}
             onChange={(value) => updatePublicationField("authors", value)}
+            disabled={readOnly}
             required={true}
           />
         </div>
@@ -175,6 +182,7 @@ export default function Publication({ index }) {
               name={`publication-category-${index}`}
               value={publication.type || "other"}
               onChange={(value) => updatePublicationField("type", value)}
+              disabled={readOnly}
               radioButtons={[
                 { id: `other-book-${index}`, label: "Βιβλίο", value: "book" },
                 { id: `other-monograph-${index}`, label: "Μονογραφία", value: "monograph" },
@@ -196,6 +204,7 @@ export default function Publication({ index }) {
                 type="text"
                 value={publication.journalConfTitle || ""}
                 onChange={(value) => updatePublicationField("journalConfTitle", value)}
+                disabled={readOnly}
                 required={true}
               />
             )}
@@ -207,6 +216,7 @@ export default function Publication({ index }) {
                 type="text"
                 value={publication.publisher || ""}
                 onChange={(value) => updatePublicationField("publisher", value)}
+                disabled={readOnly}
                 required={true}
               />
             )}
@@ -228,6 +238,7 @@ export default function Publication({ index }) {
               type="text"
               value={publication.journalConfTitle || ""}
               onChange={(value) => updatePublicationField("journalConfTitle", value)}
+              disabled={readOnly}
               required={true}
             />
           )}
@@ -244,6 +255,7 @@ export default function Publication({ index }) {
                 type="text"
                 value={(publication.issn || "").replace(/\(wrong\)/gi, "").trim()}
                 onChange={(value) => updatePublicationField("issn", value)}
+                disabled={readOnly}
                 required={true}
               />
               {getIssnErrorMessage(publication.issn) && (
@@ -262,6 +274,7 @@ export default function Publication({ index }) {
               type="text"
               value={publication.publisher || ""}
               onChange={(value) => updatePublicationField("publisher", value)}
+              disabled={readOnly}
               required={true}
             />
           )}
@@ -272,14 +285,16 @@ export default function Publication({ index }) {
         <button
           onClick={handleClearFields}
           type="button"
-          className="rounded-md bg-patras-cameo px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          disabled={readOnly}
+          className="rounded-md bg-patras-cameo px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           Καθαρισμός
         </button>
         <button
           onClick={handleDelete}
           type="button"
-          className="rounded-md bg-patras-sanguineBrown px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          disabled={readOnly}
+          className="rounded-md bg-patras-sanguineBrown px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           Διαγραφή
         </button>
