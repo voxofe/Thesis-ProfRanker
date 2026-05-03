@@ -79,7 +79,7 @@ export default function Register({ isAdmin = false }) {
   return (
     <div className="flex flex-col justify-start pt-4 sm:px-6 lg:px-8 -mt-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
-        <h2 className="text-center text-3xl font-semibold tracking-tight text-gray-600">
+        <h2 className="text-center text-2xl font-semibold tracking-tight text-gray-600">
           {isAdmin ? "Εγγραφή διαχειριστή" : "Εγγραφή στο σύστημα"}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">

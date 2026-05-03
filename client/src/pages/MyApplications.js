@@ -192,7 +192,7 @@ export default function MyApplications() {
                       return (
                         <div
                           key={app.id}
-                          className="bg-white/95 border border-gray-200 rounded-lg px-4 py-3 shadow-sm transition-transform transition-shadow duration-200 hover:shadow-md hover:scale-[1.005] hover:bg-patras-albescentWhite/20"
+                          className="bg-white/95 border border-gray-200 rounded-lg px-4 py-3 shadow-sm transition-[transform,box-shadow] duration-200 hover:shadow-md hover:scale-[1.005] hover:bg-patras-albescentWhite/20"
                         >
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                             <div className="space-y-1">
@@ -260,7 +260,7 @@ export default function MyApplications() {
                       return (
                         <div
                           key={app.id}
-                          className="bg-white/95 border border-gray-200 rounded-lg px-4 py-3 shadow-sm transition-transform transition-shadow duration-200 hover:shadow-md hover:scale-[1.005] hover:bg-patras-albescentWhite/20"
+                          className="bg-white/95 border border-gray-200 rounded-lg px-4 py-3 shadow-sm transition-[transform,box-shadow] duration-200 hover:shadow-md hover:scale-[1.005] hover:bg-patras-albescentWhite/20"
                         >
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                             <div className="space-y-1">
