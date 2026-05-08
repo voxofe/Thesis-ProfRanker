@@ -998,7 +998,7 @@ export default function Profile() {
                     )}
                   </div>
                   <div
-                    className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 overflow-hidden"
+                    className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 overflow-x-hidden overflow-y-visible"
                   >
                     <div
                       className={`flex ${
@@ -1032,6 +1032,7 @@ export default function Profile() {
                               }
                               minDate="2011-01-01"
                               maxDate={today}
+                              usePortal
                             />
                             <p className="-mt-3 text-xs text-gray-500 italic">
                               Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}
@@ -1069,6 +1070,7 @@ export default function Profile() {
                                 onChange={() => {}}
                                 minDate="2011-01-01"
                                 maxDate={today}
+                                usePortal
                               />
                               <p className="-mt-3 text-xs text-gray-500 italic">
                                 Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}

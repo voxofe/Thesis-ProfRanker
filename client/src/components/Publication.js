@@ -107,7 +107,10 @@ export default function Publication({ index, readOnly = false }) {
   };
 
   return (
-    <div className="grid sm:flex sm:flex-col gap-x-8 rounded-md border border-patras-buccaneer/10 bg-patras-albescentWhite/30 px-4 pt-2 pb-5 relative">
+    <div className="pr-publication-card grid sm:flex sm:flex-col gap-x-8 rounded-md border border-patras-buccaneer/10 bg-patras-albescentWhite/30 px-4 pt-6 pb-5 relative">
+      <div className="pr-publication-number" aria-hidden="true">
+        <span>{index + 1}</span>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-8 gap-y-4 mt-4">
         <div className="col-span-1">
           <CustomSelect

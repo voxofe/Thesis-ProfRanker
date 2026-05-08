@@ -74,6 +74,30 @@
       );
   }
 
+  .pr-publication-card {
+    position: relative;
+  }
+
+  .pr-publication-number {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-top: 38px solid #633439;
+    border-right: 38px solid transparent;
+  }
+
+  .pr-publication-number span {
+    position: absolute;
+    top: -32px;
+    left: 7px;
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
   .pr-applications-surface {
     background-color: #fbf8f1;
     background-image:

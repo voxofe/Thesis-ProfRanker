@@ -18,11 +18,11 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
   }, []);
 
   return (
-    <div className="relative" ref={wrapperRef}>
+    <div className="relative inline-block" ref={wrapperRef}>
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-4 bg-patras-albescentWhite/5 px-4 py-2 rounded-xl border border-gray-200 shadow-lg hover:bg-patras-albescentWhite/20 transition-colors"
+        className="flex items-center gap-4"
         aria-haspopup="menu"
         aria-expanded={open}
       >
@@ -54,7 +54,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
 
       {open && (
         <div
-          className="absolute right-0 mt-3 w-max rounded-xl border border-gray-200 bg-white shadow-xl z-50"
+          className="absolute -right-4 top-full mt-3 w-max rounded-xl border border-gray-200 bg-white shadow-xl z-50"
           role="menu"
         >
           <div className="py-2 text-left">

@@ -1,4 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
 import { Datepicker } from "flowbite-react";
 import PropTypes from "prop-types";
 
@@ -180,17 +188,21 @@ export default function FlowbiteDateField({
   minDate,
   maxDate,
   popupAlign = "left",
+  usePortal = false,
   placeholder = "DD-MM-YYYY",
   ...props
 }) {
   const { className: inputClassNameProp, ...inputProps } = props;
   const wrapperRef = useRef(null);
   const inputRef = useRef(null);
+  const popupRef = useRef(null);
   const isClearingRef = useRef(false);
   const suppressTrailingDashRef = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [popupStyle, setPopupStyle] = useState({});
+  const [popupReady, setPopupReady] = useState(false);
 
   const dateValue = isoToDate(value);
   const min = minDate ? isoToDate(minDate) : undefined;
@@ -249,6 +261,52 @@ export default function FlowbiteDateField({
         return "absolute left-0 top-0 -translate-y-full mb-2 z-50 block";
     }
   }, [popupAlign]);
+
+  const updatePopupPosition = useCallback(() => {
+    if (!popupRef.current || !inputRef.current) return;
+
+    const inputRect = inputRef.current.getBoundingClientRect();
+    const popupRect = popupRef.current.getBoundingClientRect();
+
+    let left = inputRect.left;
+    if (popupAlign === "center") {
+      left = inputRect.left + (inputRect.width - popupRect.width) / 2;
+    }
+    if (popupAlign === "right") {
+      left = inputRect.right - popupRect.width;
+    }
+
+    let top = inputRect.top - popupRect.height - 8;
+    if (top < 8) {
+      top = inputRect.bottom + 8;
+    }
+
+    setPopupStyle({
+      position: "fixed",
+      top: Math.max(8, top),
+      left: Math.max(8, left),
+      zIndex: 60,
+      visibility: "visible",
+    });
+    setPopupReady(true);
+  }, [popupAlign]);
+
+  useLayoutEffect(() => {
+    if (!usePortal || !isOpen) return;
+    setPopupReady(false);
+
+    const rafId = requestAnimationFrame(updatePopupPosition);
+    const handleUpdate = () => updatePopupPosition();
+
+    window.addEventListener("resize", handleUpdate);
+    window.addEventListener("scroll", handleUpdate, true);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", handleUpdate);
+      window.removeEventListener("scroll", handleUpdate, true);
+    };
+  }, [isOpen, updatePopupPosition, usePortal]);
 
   // Custom Flowbite theme
   const theme = {
@@ -473,7 +531,7 @@ export default function FlowbiteDateField({
           />
         </div>
 
-        {isOpen && (
+        {isOpen && !usePortal && (
           <div className={popupPos}>
             <Datepicker
               inline
@@ -499,6 +557,39 @@ export default function FlowbiteDateField({
             />
           </div>
         )}
+
+        {isOpen && usePortal &&
+          createPortal(
+            <div
+              ref={popupRef}
+              style={popupReady ? popupStyle : { position: "fixed", top: 0, left: 0, visibility: "hidden", zIndex: 60 }}
+              className="z-50"
+            >
+              <Datepicker
+                inline
+                value={dateValue}
+                onChange={(dt) => {
+                  const nextIso = dt ? dateToIso(dt) : "";
+                  if (nextIso && !isWithinRange(nextIso, minDate, maxDate)) {
+                    return;
+                  }
+                  onChange(nextIso);
+                  setInputValue(nextIso ? isoToLongDisplay(nextIso) : "");
+                  setIsFocused(false);
+                  setIsOpen(false);
+                }}
+                minDate={min}
+                maxDate={max}
+                weekStart={1}
+                language="el"
+                showTodayButton={false}
+                showClearButton={false}
+                labelTodayButton="Σήμερα"
+                theme={inlineTheme}
+              />
+            </div>,
+            document.body
+          )}
 
           {value && (
             <button
@@ -535,5 +626,6 @@ FlowbiteDateField.propTypes = {
   minDate: PropTypes.string,
   maxDate: PropTypes.string,
   popupAlign: PropTypes.oneOf(["left", "center", "right"]),
+  usePortal: PropTypes.bool,
   placeholder: PropTypes.string,
 };

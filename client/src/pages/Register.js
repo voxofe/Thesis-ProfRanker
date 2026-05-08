@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 import InputField from "../components/InputField";
 import CustomSelect from "../components/CustomSelect";
 import TooltipGray from "../components/TooltipGray";
@@ -15,9 +16,11 @@ export default function Register({ isAdmin = false }) {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [gender, setGender] = useState("select");
   const [isLoading, setIsLoading] = useState(false);
+  const [redirectLoading, setRedirectLoading] = useState(false);
   const [error, setError] = useState("");
 
   const { register, registerAdmin } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const emailRegex =
@@ -47,7 +50,22 @@ export default function Register({ isAdmin = false }) {
       : [firstName, lastName, email, password, gender];
 
     registrationMethod(...registerArgs)
-      .then(() => navigate("/login"))
+      .then(() => {
+        if (isAdmin) {
+          showToast({
+            type: "success",
+            message: "Ο διαχειριστής δημιουργήθηκε με επιτυχία.",
+          });
+          setTimeout(() => {
+            setRedirectLoading(true);
+            setTimeout(() => {
+              navigate("/login");
+            }, 1500);
+          }, 500);
+          return;
+        }
+        navigate("/login");
+      })
       .catch(() =>
         setError(
           `Σφάλμα κατά την εγγραφή ${
@@ -75,6 +93,21 @@ export default function Register({ isAdmin = false }) {
       setEmailError("");
     }
   };
+
+  if (redirectLoading) {
+    return (
+      <div className="flex justify-center min-h-screen min-w-screen">
+        <div className="w-[1270px] px-7 py-4 flex flex-col min-h-screen">
+          <div className="flex flex-1 justify-center items-center py-4">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-patras-buccaneer"></div>
+              <p className="mt-4 text-gray-600">Φόρτωση...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col justify-start pt-4 sm:px-6 lg:px-8 -mt-4">

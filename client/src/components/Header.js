@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuth } from "../contexts/AuthContext";
-import logo from "../assets/images/patras-university-logo.png";
+import logo from "../assets/images/ProfRanker-logo.png";
 import { Link } from "react-router-dom";
 import UserMenu from "./UserMenu";
 
@@ -52,14 +52,14 @@ export default function Header({ academicYear }) {
     : resolveRoleLabel(currentUser?.role, currentUser?.gender);
 
   return (
-    <div className="w-full flex items-stretch gap-4">
+    <div className="w-full flex items-center gap-4">
       <header className="flex-1 rounded-xl border border-gray-200 shadow-lg">
         <div className="max-w-7xl mx-auto flex items-center px-6 py-3">
           {/* Left: Logo (clickable anchor so middle-click opens in new tab) */}
           <Link to="/" className="flex items-center">
             <img
               src={logo}
-              alt="University of Patras logo"
+              alt="ProfRanker logo"
               className="max-h-24 w-auto object-contain"
             />
           </Link>
