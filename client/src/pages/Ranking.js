@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { usePositions } from "../contexts/PositionsContext";
@@ -103,38 +103,25 @@ export default function Ranking() {
   const isApplicant = !!currentUser && !isAdmin && currentUser?.role !== "guest";
   const viewerId = currentUser?.id;
 
-  const appliedPositionIds = useMemo(() => {
+  const appliedScientificFields = useMemo(() => {
     const apps = Array.isArray(currentUser?.applications)
       ? currentUser.applications
       : [];
-    const ids = apps
-      .map((app) => app?.positionId)
-      .filter((id) => id !== null && id !== undefined && id !== "");
-    if (!ids.length && currentUser?.form?.positionId) {
-      ids.push(currentUser.form.positionId);
+    const fields = apps
+      .map((app) => (app?.scientificField || "").trim())
+      .filter(Boolean);
+    if (!fields.length && currentUser?.form?.scientificField) {
+      fields.push(String(currentUser.form.scientificField).trim());
     }
-    return Array.from(new Set(ids.map((id) => String(id))));
+    return Array.from(new Set(fields));
   }, [currentUser]);
 
-  const appliedPositionIdSet = useMemo(
-    () => new Set(appliedPositionIds),
-    [appliedPositionIds]
+  const appliedScientificFieldSet = useMemo(
+    () => new Set(appliedScientificFields),
+    [appliedScientificFields]
   );
 
-  const appliedScientificFields = useMemo(() => {
-    if (!isApplicant || !currentUser?.id) return [];
-    const viewerIdStr = String(currentUser.id);
-    const fields = users
-      .filter((u) => String(u.id) === viewerIdStr)
-      .filter(
-        (u) =>
-          getApplicationStatus(u?.positionEndDate, u?.positionEndTime) ===
-          "Ολοκληρωμένη"
-      )
-      .map((u) => (u?.scientificField || "").trim())
-      .filter(Boolean);
-    return Array.from(new Set(fields));
-  }, [isApplicant, currentUser?.id, users]);
+  const suppressAutoUncheckRef = useRef(false);
 
   const fetchUsers = useCallback(async () => {
     const token = localStorage.getItem("token");
@@ -317,12 +304,29 @@ export default function Ranking() {
   // Applicant: checkbox to show only applications for positions they've applied to
   const [showMyPosition, setShowMyPosition] = useState(false);
   
-  const filteredByMyPosition = useMemo(() => {
-    if (isApplicant && showMyPosition && appliedPositionIdSet.size) {
-      return filteredUsers.filter((u) => appliedPositionIdSet.has(String(u.positionId)));
+  useEffect(() => {
+    if (suppressAutoUncheckRef.current) {
+      suppressAutoUncheckRef.current = false;
+      return;
     }
-    return filteredUsers;
-  }, [isApplicant, showMyPosition, appliedPositionIdSet, filteredUsers]);
+
+    if (!showMyPosition) return;
+
+    const onlyScientificFields =
+      !filters.schools.length &&
+      !filters.departments.length &&
+      !filters.status.length &&
+      !filters.pointsMin &&
+      !filters.pointsMax;
+
+    const sameFields =
+      filters.scientificFields.length === appliedScientificFields.length &&
+      filters.scientificFields.every((sf) => appliedScientificFieldSet.has(sf));
+
+    if (!(onlyScientificFields && sameFields)) {
+      setShowMyPosition(false);
+    }
+  }, [filters, showMyPosition, appliedScientificFields, appliedScientificFieldSet]);
 
   // Filter tags
   const filterTags = useMemo(() => {
@@ -337,11 +341,11 @@ export default function Ranking() {
   }, [filters, isAdmin]);
 
   const removeTag = (tag) => {
+    if (showMyPosition) {
+      setShowMyPosition(false);
+    }
     setFilters((prev) => {
       if (["schools", "departments", "scientificFields", "status"].includes(tag.key)) {
-        if (showMyPosition && tag.key === "scientificFields") {
-          setShowMyPosition(false);
-        }
         return { ...prev, [tag.key]: prev[tag.key].filter((v) => v !== tag.value) };
       }
       if (tag.key === "pointsMin") return { ...prev, pointsMin: "" };
@@ -485,25 +489,32 @@ export default function Ranking() {
       <div className="flex items-center justify-between ml-1 m-0 p-0">
         {/* Left side: Checkbox for applicant only */}
         <div>
-          {isApplicant && appliedPositionIds.length > 0 && (
+          {isApplicant && appliedScientificFields.length > 0 && (
             <Checkbox
               id="show-my-field"
               name="show-my-field"
               checked={showMyPosition}
               onChange={(checked) => {
+                suppressAutoUncheckRef.current = true;
                 setShowMyPosition(checked);
                 if (checked) {
-                  setFilters((prev) => ({
-                    ...prev,
+                  setFilters({
+                    schools: [],
+                    departments: [],
                     scientificFields: appliedScientificFields,
-                  }));
+                    status: [],
+                    pointsMin: "",
+                    pointsMax: "",
+                  });
                 } else {
-                  setFilters((prev) => ({
-                    ...prev,
-                    scientificFields: prev.scientificFields.filter(
-                      (sf) => !appliedScientificFields.includes(sf)
-                    ),
-                  }));
+                  setFilters({
+                    schools: [],
+                    departments: [],
+                    scientificFields: [],
+                    status: [],
+                    pointsMin: "",
+                    pointsMax: "",
+                  });
                 }
               }}
               label="Εμφάνιση αιτήσεων για τις θέσεις που έχω επιλέξει"
@@ -593,7 +604,7 @@ export default function Ranking() {
         />
         <SortableTable
           columns={columns}
-          rows={filteredByMyPosition}
+          rows={filteredUsers}
           getSortedRows={getSortedUsers}
           getRowKey={(row) => row?.applicationId ?? row?.id}
           initialSortBy="totalPoints"
