@@ -90,19 +90,51 @@ export default function ApplicationScore() {
     return `${base} ${padded}`;
   };
 
-  const parseDDMMYYYYToDate = (value, timeValue) => {
-    if (!value) return null;
-    const match = String(value).match(/^(\d{2})-(\d{2})-(\d{4})/);
+  const getTimeZoneOffset = (date, timeZone) => {
+    const dtf = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+    const parts = dtf.formatToParts(date);
+    const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+    const asUTC = Date.UTC(
+      Number(values.year),
+      Number(values.month) - 1,
+      Number(values.day),
+      Number(values.hour),
+      Number(values.minute),
+      Number(values.second)
+    );
+    return asUTC - date.getTime();
+  };
+
+  const buildTimeInZone = (dateStr, timeStr, timeZone) => {
+    if (!dateStr) return null;
+    const match = String(dateStr).match(/^(\d{2})-(\d{2})-(\d{4})/);
     if (!match) return null;
     const [, dd, mm, yyyy] = match;
-    const [hh, min] = String(timeValue || "00:00").split(":");
-    return new Date(
-      Number(yyyy),
-      Number(mm) - 1,
-      Number(dd),
-      Number(hh || 0),
-      Number(min || 0)
+    const [hour, minute] = String(timeStr || "00:00").split(":");
+    const utcGuess = new Date(
+      Date.UTC(
+        Number(yyyy),
+        Number(mm) - 1,
+        Number(dd),
+        Number(hour || 0),
+        Number(minute || 0)
+      )
     );
+    const offset = getTimeZoneOffset(utcGuess, timeZone);
+    return new Date(utcGuess.getTime() - offset);
+  };
+
+  const parseDDMMYYYYToDate = (value, timeValue) => {
+    return buildTimeInZone(value, timeValue, "Europe/Athens");
   };
 
   const schoolName = applicantData?.school || matchedPosition?.school || "—";
@@ -263,8 +295,35 @@ export default function ApplicationScore() {
 
   const navigate = useNavigate();
 
+  const isPositionCurrentlyActive = () => {
+    const now = new Date();
+    const start = parseDDMMYYYYToDate(startDate, startTime);
+    const end = parseDDMMYYYYToDate(endDate, endTime);
+    if (start && end) return now >= start && now <= end;
+    if (end) return now <= end;
+    return false;
+  };
+
+  const handleEditClick = () => {
+    if (!isPositionCurrentlyActive()) {
+      window.alert(
+        "Η περίοδος αιτήσεων για αυτή τη θέση έχει ολοκληρωθεί. Δεν επιτρέπονται πια επεξεργασία ή διαγραφή. Η σελίδα θα ανανεωθεί."
+      );
+      window.location.reload();
+      return;
+    }
+    navigate(`/form?mode=edit&applicationId=${editApplicationId}`);
+  };
+
   const handleDeleteApplication = async () => {
     if (deleting) return;
+    if (!isPositionCurrentlyActive()) {
+      window.alert(
+        "Η περίοδος αιτήσεων για αυτή τη θέση έχει ολοκληρωθεί. Δεν επιτρέπονται πια επεξεργασία ή διαγραφή. Η σελίδα θα ανανεωθεί."
+      );
+      window.location.reload();
+      return;
+    }
     const confirmed = window.confirm("Θέλετε σίγουρα να διαγράψετε αυτή την αίτηση;");
     if (!confirmed) return;
     const token = localStorage.getItem("token");
@@ -308,7 +367,11 @@ export default function ApplicationScore() {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2">
               <Link
-                to={`/form?mode=edit&applicationId=${editApplicationId}`}
+                to="#"
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleEditClick();
+                }}
                 className="inline-flex shrink-0 items-center justify-center rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-patras-sanguineBrown"
               >
                 Επεξεργασία αίτησης

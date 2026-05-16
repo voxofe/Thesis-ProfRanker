@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useFormData } from "../contexts/FormDataContext";
 import { useValidation } from "../contexts/ValidationContext";
 import PersonalInfoSection from "../components/form-sections/PersonalInfoSection";
@@ -15,6 +15,7 @@ import Tooltip from "../components/Tooltip";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
+import { usePositions } from "../contexts/PositionsContext";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -26,17 +27,27 @@ const API_BASE_URL = (
 
 
 export default function Form({ academicYear }) {
-  const { formData, formMode } = useFormData();
+  const { formData, formMode, handleChange } = useFormData();
   const { canAccessStep, canProceedFromStep, stepValidation } = useValidation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const applicationId = searchParams.get("applicationId");
   const [currentStep, setCurrentStep] = useState(1);
   const [maxStepReached, setMaxStepReached] = useState(1);
   const { showToast } = useToast();
   const { refreshUser } = useAuth();
+  const { positions = [], refreshPositions } = usePositions();
   const [loading, setLoading] = useState(false);
   const [redirectLoading, setRedirectLoading] = useState(false);
   const nextButtonRef = useRef(null);
   const [openNextTip, setOpenNextTip] = useState(false);
+  const [countdownText, setCountdownText] = useState("");
+  const [showCountdown, setShowCountdown] = useState(false);
+  const expiryAlertedRef = useRef(false);
+
+  useEffect(() => {
+    expiryAlertedRef.current = false;
+  }, [formData.positionId]);
 
   const steps = [
     {
@@ -94,6 +105,117 @@ export default function Form({ academicYear }) {
   const nextDisabled = !canProceedFromStep(currentStep);
   const submitLabel = formMode === "edit" ? "Επανυποβολή αίτησης" : "Υποβολή αίτησης";
 
+  const selectedPosition = useMemo(
+    () => positions.find((pos) => String(pos.id) === String(formData.positionId)) || null,
+    [positions, formData.positionId]
+  );
+
+  const getTimeZoneOffset = (date, timeZone) => {
+    const dtf = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+    const parts = dtf.formatToParts(date);
+    const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+    const asUTC = Date.UTC(
+      Number(values.year),
+      Number(values.month) - 1,
+      Number(values.day),
+      Number(values.hour),
+      Number(values.minute),
+      Number(values.second)
+    );
+    return asUTC - date.getTime();
+  };
+
+  const buildTimeInZone = (dateStr, timeStr, timeZone) => {
+    if (!dateStr) return null;
+    const [year, month, day] = String(dateStr).split("-").map(Number);
+    if (!year || !month || !day) return null;
+    const [hour, minute] = String(timeStr || "23:59").split(":").map(Number);
+    const utcGuess = new Date(Date.UTC(year, month - 1, day, hour || 0, minute || 0));
+    const offset = getTimeZoneOffset(utcGuess, timeZone);
+    return new Date(utcGuess.getTime() - offset);
+  };
+
+  const getRemainingMs = () => {
+    const endDate = selectedPosition?.endDate;
+    if (!endDate) return null;
+    const endTime = selectedPosition?.endTime || "23:59";
+    const end = buildTimeInZone(endDate, endTime, "Europe/Athens");
+    if (!end) return null;
+    return end.getTime() - Date.now();
+  };
+
+  const formatCountdown = (ms) => {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
+      seconds
+    ).padStart(2, "0")}`;
+  };
+
+  useEffect(() => {
+    if (!selectedPosition) {
+      setShowCountdown(false);
+      setCountdownText("");
+      return;
+    }
+
+    let intervalId = null;
+    const updateCountdown = () => {
+      const remainingMs = getRemainingMs();
+      if (remainingMs === null) {
+        setShowCountdown(false);
+        setCountdownText("");
+        return;
+      }
+
+      const withinHour = remainingMs <= 60 * 60 * 1000 && remainingMs > 0;
+      setShowCountdown(withinHour);
+      if (withinHour) {
+        setCountdownText(formatCountdown(remainingMs));
+      }
+
+      if (remainingMs <= 0 && !expiryAlertedRef.current) {
+        expiryAlertedRef.current = true;
+        const sfName = selectedPosition?.scientificField || "";
+        if (formMode === "edit") {
+          window.alert(
+            "Η περίοδος αιτήσεων για αυτή τη θέση έχει ολοκληρωθεί. Θα επιστρέψετε στη σελίδα της αίτησης."
+          );
+          if (applicationId) {
+            window.location.replace(`/application-score/${applicationId}`);
+            return;
+          }
+          window.location.replace("/my-applications");
+          return;
+        }
+
+        window.alert(
+          `Η περίοδος αίτησεων για το επιστημονικό πεδίο ${sfName} έληξε.`
+        );
+        refreshPositions();
+        handleChange("positionId", "");
+      }
+    };
+
+    updateCountdown();
+    intervalId = window.setInterval(updateCountdown, 1000);
+
+    return () => {
+      if (intervalId) window.clearInterval(intervalId);
+    };
+  }, [selectedPosition, formMode, applicationId, navigate, handleChange, refreshPositions]);
+
   // Only these steps need overflow-visible (add more IDs if needed)
   const stepsNeedingOverflow = new Set([5]);
   const contentOverflow =  stepsNeedingOverflow.has(currentStep) ? "overflow-visible" : "overflow-y-auto";
@@ -121,6 +243,29 @@ export default function Form({ academicYear }) {
   };
 
   const handleSubmit = async () => {
+    const remainingMs = getRemainingMs();
+    if (remainingMs !== null && remainingMs <= 0) {
+      const sfName = selectedPosition?.scientificField || "";
+      if (formMode === "edit") {
+        window.alert(
+          "Η περίοδος αιτήσεων για αυτή τη θέση έχει ολοκληρωθεί. Θα επιστρέψετε στη σελίδα της αίτησης."
+        );
+        if (applicationId) {
+          window.location.replace(`/application-score/${applicationId}`);
+          return;
+        }
+        window.location.replace("/my-applications");
+        return;
+      }
+
+      window.alert(
+        `Η περίοδος αίτησεων για το επιστημονικό πεδίο ${sfName} έληξε.`
+      );
+      refreshPositions();
+      handleChange("positionId", "");
+      return;
+    }
+
     setLoading(true);
 
     // Clean ISSN values before sending
@@ -320,6 +465,20 @@ export default function Form({ academicYear }) {
       <h1 className="text-2xl text-center border-b pb-2 mb-8 text-gray-800">
         {headerTitle}
       </h1>
+      {showCountdown && (
+        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <span>Η θέση </span>
+          <span className="font-semibold">
+            "{selectedPosition?.scientificField || ""}"
+          </span>
+          <span> κλείνει σε </span>
+          <span className="font-semibold">{countdownText}</span>
+          <span>
+            . Ολοκληρώστε την {formMode === "edit" ? "επανυποβολή" : "υποβολή"} της
+            αίτησης εγκαίρως.
+          </span>
+        </div>
+      )}
       <Stepper
         steps={steps}
         currentStep={currentStep}

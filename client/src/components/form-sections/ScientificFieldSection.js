@@ -21,6 +21,7 @@ export default function ScientificFieldSection() {
       year: "numeric",
       hour: timeStr ? "2-digit" : undefined,
       minute: timeStr ? "2-digit" : undefined,
+      hour12: false,
     }).format(dt);
   };
 
