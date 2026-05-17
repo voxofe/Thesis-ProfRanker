@@ -24,6 +24,13 @@ export default function ApplicationScore() {
   const [deleting, setDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState("application");
   const editApplicationId = id;
+  const isAdmin = currentUser?.role === "admin";
+
+  const applicantName = useMemo(() => {
+    const firstName = applicantData?.firstName || applicantData?.user?.firstName || "";
+    const lastName = applicantData?.lastName || applicantData?.user?.lastName || "";
+    return `${firstName} ${lastName}`.trim();
+  }, [applicantData]);
 
   // const fmtDate = (d) => {
   //   if (!d) return "";
@@ -353,7 +360,15 @@ export default function ApplicationScore() {
   return (
     <div className="grid grid-cols-1 gap-y-5 pt-0">
       <h1 className="text-2xl text-center border-b pb-2 mb-1 text-gray-800">
-        Αίτηση & Βαθμολογία
+        {isAdmin && applicantName ? (
+          <>
+            Αίτηση & Βαθμολογία: <span className="text-lg font-semibold">{applicantName}
+            {applicantData?.scientificField ? ` - ${applicantData.scientificField}` : ""}
+            </span>
+          </>
+        ) : (
+          "Αίτηση & Βαθμολογία"
+        )}
       </h1>
       {canEditApplication && (
         <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3">

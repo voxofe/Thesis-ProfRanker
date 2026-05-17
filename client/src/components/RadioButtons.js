@@ -1,7 +1,6 @@
 import React from "react";
 
 export default function RadioButtons(props) {
-
     const radioButtonStyle = "h-4 w-4 rounded-full border-gray-300 text-patras-buccaneer focus:ring-2 focus:ring-patras-buccaneer focus:ring-offset-0";
     const labelStyle = `block text-sm/6 font-medium ${props.disabled ? "text-gray-400" : "text-gray-900"}`;
 
@@ -15,10 +14,14 @@ export default function RadioButtons(props) {
                             id={option.id}
                             label={props.name}
                             type="radio"
-                            className={radioButtonStyle}
+                            className={`${radioButtonStyle} ${props.readOnly ? "cursor-not-allowed" : ""}`}
                             checked={props.value === option.value}
                             disabled={props.disabled}
-                            onChange={() => props.onChange(option.value)}
+                            onChange={() => {
+                                if (props.readOnly) return;
+                                props.onChange(option.value);
+                            }}
+                            aria-disabled={props.readOnly || props.disabled}
                         />
                         <label
                             htmlFor={option.id}

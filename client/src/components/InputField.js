@@ -34,6 +34,7 @@ export default function InputField(props) {
 
   const getInputStyle = () => {
     if (props.disabled) return disabledStyle;
+    if (props.readOnly) return `${enabledStyle} cursor-not-allowed`;
     return enabledStyle;
   };
 
@@ -80,8 +81,12 @@ export default function InputField(props) {
             min={props.min}
             max={props.max}
             value={props.value}
-            onChange={(e) => props.onChange(e.target.value)}
+            onChange={(e) => {
+              if (props.readOnly) return;
+              props.onChange(e.target.value);
+            }}
             disabled={props.disabled}
+            readOnly={props.readOnly}
             className={`${getInputStyle()} ${isPassword ? "pr-10" : ""}`}
           />
         )}

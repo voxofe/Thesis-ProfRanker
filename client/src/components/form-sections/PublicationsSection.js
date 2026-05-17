@@ -32,22 +32,25 @@ export default function PublicationsSection({ readOnly = false }) {
           {formData.publications.length === 0 && (
             <div className="text-center text-gray-500 py-8">
               <p>Δεν έχετε προσθέσει ακόμη κάποια επιστημονική δημοσίευση.</p>
-              <p className="text-sm mt-2">
-                Χρησιμοποιήστε το κουμπί παρακάτω για να προσθέσετε μία.
-              </p>
+              {!readOnly && (
+                <p className="text-sm mt-2">
+                  Χρησιμοποιήστε το κουμπί παρακάτω για να προσθέσετε μία.
+                </p>
+              )}
             </div>
           )}
         </div>
-        <div className="flex items-center justify-center sm:justify-start gap-x-6 pt-5 mt-3 sm:pt-0">
-          <button
-            onClick={addNewPublication}
-            type="button"
-            disabled={readOnly}
-            className="rounded-md bg-patras-buccaneer px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            + Προσθήκη νέας
-          </button>
-        </div>
+        {!readOnly && (
+          <div className="flex items-center justify-center sm:justify-start gap-x-6 pt-5 mt-3 sm:pt-0">
+            <button
+              onClick={addNewPublication}
+              type="button"
+              className="rounded-md bg-patras-buccaneer px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              + Προσθήκη νέας
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

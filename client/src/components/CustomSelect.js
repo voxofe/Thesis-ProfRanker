@@ -8,12 +8,14 @@ export default function CustomSelect({
   onChange,
   options = [],
   disabled = false,
+  readOnly = false,
   required = false,
   placeholder = "Επιλέξτε...",
   error,
 }) {
+  const isDisabled = disabled || readOnly;
   //  Only show placeholder if not disabled
-  const selectOptions = !disabled
+  const selectOptions = !isDisabled
     ? [{ value: "select", label: placeholder }, ...options]
     : [...options];
 
@@ -33,6 +35,7 @@ export default function CustomSelect({
 
   const getTriggerStyle = () => {
     if (disabled) return disabledStyle;
+    if (readOnly) return `${enabledStyle} cursor-not-allowed`;
     return enabledStyle;
   };
 
@@ -45,7 +48,7 @@ export default function CustomSelect({
           }`}
         >
           {label}
-          {required && !disabled && (
+          {required && !isDisabled && (
             <span className="text-red-500 ml-1">*</span>
           )}
         </label>
@@ -54,9 +57,9 @@ export default function CustomSelect({
       <Select.Root
         value={safeValue}
         onValueChange={(v) => {
-          if (!disabled) onChange(v);
+          if (!isDisabled) onChange(v);
         }}
-        disabled={disabled}
+        disabled={isDisabled}
       >
         <Select.Trigger
           className={`mt-2 ${getTriggerStyle()} flex justify-between items-center w-full text-left ring-0 focus:ring-0 whitespace-nowrap overflow-hidden`}

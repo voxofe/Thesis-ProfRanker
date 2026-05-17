@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 import InputField from "../components/InputField";
-import CustomSelect from "../components/CustomSelect";
-import TooltipGray from "../components/TooltipGray";
 
-export default function Register() {
+export default function RegisterAdmin() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -13,12 +12,12 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
-  const [gender, setGender] = useState("select");
   const [isLoading, setIsLoading] = useState(false);
   const [redirectLoading, setRedirectLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const { register } = useAuth();
+  const { registerAdmin } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const emailRegex =
@@ -33,27 +32,33 @@ export default function Register() {
     !!password &&
     !!confirmPassword &&
     isEmailValid &&
-    isPasswordMatch &&
-    (gender && gender !== "select");
+    isPasswordMatch;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    register(firstName, lastName, email, password, gender)
+    registerAdmin(firstName, lastName, email, password)
       .then(() => {
-        navigate("/login");
+        showToast({
+          type: "success",
+          message: "Ο διαχειριστής δημιουργήθηκε με επιτυχία.",
+        });
+        setTimeout(() => {
+          setRedirectLoading(true);
+          setTimeout(() => {
+            navigate("/login");
+          }, 1500);
+        }, 500);
       })
       .catch(() =>
         setError(
-          "Σφάλμα κατά την εγγραφή χρήστη. Παρακαλώ προσπαθήστε ξανά."
+          "Σφάλμα κατά την εγγραφή διαχειριστή. Παρακαλώ προσπαθήστε ξανά."
         )
       )
       .finally(() => setIsLoading(false));
   };
-
-  const handleLoginClick = () => navigate("/login");
 
   const checkPasswordMatch = () => {
     if (password && confirmPassword && password !== confirmPassword) {
@@ -89,18 +94,19 @@ export default function Register() {
   return (
     <div className="flex flex-col justify-start pt-4 sm:px-6 lg:px-8 -mt-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
-        <h2 className="text-center text-2xl font-semibold tracking-tight text-gray-600">
-          Εγγραφή στο σύστημα
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Συμπληρώστε τα στοιχεία σας για δημιουργία λογαριασμού
-        </p>
+        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
+           Εγγραφή διαχειριστή
+        </h1>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
+      <div className="mt-3 sm:mx-auto sm:w-full sm:max-w-2xl">
         <div
-          className={`bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-200`}
+          className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-200"
         >
+          <div className="text-[13px] text-red-900 font-medium pb-4">
+            Εγγραφή Διαχειριστή - Αυτή η φόρμα δημιουργεί λογαριασμό
+            διαχειριστή με ειδικά δικαιώματα
+          </div>
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="rounded-md bg-red-50 p-4 border border-red-200">
@@ -108,7 +114,6 @@ export default function Register() {
               </div>
             )}
 
-            {/* First Name and Last Name Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 -mb-4">
               <InputField
                 label="Όνομα"
@@ -131,18 +136,6 @@ export default function Register() {
               />
             </div>
 
-            <div className="-mt-2 flex items-center gap-2 text-sm text-gray-600">
-              <TooltipGray content="Το ονοματεπώνυμο σας θα εμφανίζεται στις αιτήσεις. Μπορείτε να το επεξεργαστείτε και μετά την εγγραφή.">
-                <span
-                  className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer text-xs font-semibold cursor-help"
-                  aria-label="Σημείωση για το ονοματεπώνυμο"
-                >
-                  i
-                </span>
-              </TooltipGray>
-              <span>Σημείωση για το ονοματεπώνυμο</span>
-            </div>
-
             <InputField
               label="Email"
               id="email"
@@ -154,19 +147,6 @@ export default function Register() {
               onBlur={checkEmailValidity}
             />
 
-            <CustomSelect
-              label="Φύλο"
-              value={gender}
-              onChange={setGender}
-              options={[
-                { value: "male", label: "Άνδρας" },
-                { value: "female", label: "Γυναίκα" },
-              ]}
-              required
-              placeholder="Επιλέξτε φύλο"
-            />
-
-            {/* Password and Confirm Password Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 -mb-4 gap-x-4">
               <InputField
                 label="Κωδικός πρόσβασης"
@@ -190,7 +170,6 @@ export default function Register() {
                 onBlur={checkPasswordMatch}
               />
 
-              {/* Form validation hints */}
               {emailError || confirmPasswordError ? (
                 <p className={"text-xs text-red-600"}>
                   {emailError || confirmPasswordError}
@@ -204,33 +183,10 @@ export default function Register() {
                 disabled={isLoading || !isFormValid}
                 className="flex w-full justify-center rounded-md bg-patras-buccaneer px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? "Εγγραφή..." : "Εγγραφή"}
+                {isLoading ? "Εγγραφή διαχειριστή..." : "Εγγραφή διαχειριστή"}
               </button>
             </div>
           </form>
-
-          <div className="mt-6">
-            <button
-              type="button"
-              onClick={handleLoginClick}
-              className="flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-patras-buccaneer border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer"
-            >
-              Έχετε ήδη λογαριασμό; Σύνδεση
-            </button>
-          </div>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-gray-500">
-                  Πρόγραμμα Απόκτησης Ακαδημαϊκής Διδακτικής Εμπειρίας
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

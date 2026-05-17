@@ -12,6 +12,10 @@ export default function FilterModal({
   pointsLabel = "Εύρος μορίων",
   showStatus = true,
   showPoints = true,
+  showSchools = true,
+  showDepartments = true,
+  showScientificFields = true,
+  showGender = false,
   title = "Φίλτρα",
   titleClassName = "text-gray-900",
 }) {
@@ -80,12 +84,13 @@ export default function FilterModal({
 
   const handleReset = () => {
     const baseReset = {
-      schools: [],
-      departments: [],
-      scientificFields: [],
+      ...(showSchools ? { schools: [] } : {}),
+      ...(showDepartments ? { departments: [] } : {}),
+      ...(showScientificFields ? { scientificFields: [] } : {}),
     };
     const resetFilters = {
       ...baseReset,
+      ...(showGender ? { genders: [] } : {}),
       ...(showStatus ? { status: [] } : {}),
       ...(showPoints ? { pointsMin: "", pointsMax: "" } : {}),
     };
@@ -112,71 +117,106 @@ export default function FilterModal({
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* School */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">
-              Σχολή
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {options.schools.map((school) => (
-                <button
-                  key={school}
-                  type="button"
-                  className={`px-3 py-1 rounded-full border text-xs font-medium ${
-                    localFilters.schools.includes(school)
-                      ? "bg-patras-buccaneer text-white border-patras-buccaneer"
-                      : "bg-white text-patras-buccaneer border-patras-buccaneer"
-                  }`}
-                  onClick={() => handleMultiSelect("schools", school)}
-                >
-                  {school}
-                </button>
-              ))}
+          {showSchools && (
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Σχολή
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {(options?.schools || []).map((school) => (
+                  <button
+                    key={school}
+                    type="button"
+                    className={`px-3 py-1 rounded-full border text-xs font-medium ${
+                      localFilters.schools.includes(school)
+                        ? "bg-patras-buccaneer text-white border-patras-buccaneer"
+                        : "bg-white text-patras-buccaneer border-patras-buccaneer"
+                    }`}
+                    onClick={() => handleMultiSelect("schools", school)}
+                  >
+                    {school}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
           {/* Department */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">
-              Τμήμα
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {options.departments.map((dep) => (
-                <button
-                  key={dep}
-                  type="button"
-                  className={`px-3 py-1 rounded-full border text-xs font-medium ${
-                    localFilters.departments.includes(dep)
-                      ? "bg-patras-buccaneer text-white border-patras-buccaneer"
-                      : "bg-white text-patras-buccaneer border-patras-buccaneer"
-                  }`}
-                  onClick={() => handleMultiSelect("departments", dep)}
-                >
-                  {dep}
-                </button>
-              ))}
+          {showDepartments && (
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Τμήμα
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {(options?.departments || []).map((dep) => (
+                  <button
+                    key={dep}
+                    type="button"
+                    className={`px-3 py-1 rounded-full border text-xs font-medium ${
+                      localFilters.departments.includes(dep)
+                        ? "bg-patras-buccaneer text-white border-patras-buccaneer"
+                        : "bg-white text-patras-buccaneer border-patras-buccaneer"
+                    }`}
+                    onClick={() => handleMultiSelect("departments", dep)}
+                  >
+                    {dep}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
           {/* Scientific Field */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">
-              Επιστημονικό πεδίο
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {options.scientificFields.map((sf) => (
-                <button
-                  key={sf}
-                  type="button"
-                  className={`px-3 py-1 rounded-full border text-xs font-medium ${
-                    localFilters.scientificFields.includes(sf)
-                      ? "bg-patras-buccaneer text-white border-patras-buccaneer"
-                      : "bg-white text-patras-buccaneer border-patras-buccaneer"
-                  }`}
-                  onClick={() => handleMultiSelect("scientificFields", sf)}
-                >
-                  {sf}
-                </button>
-              ))}
+          {showScientificFields && (
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Επιστημονικό πεδίο
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {(options?.scientificFields || []).map((sf) => (
+                  <button
+                    key={sf}
+                    type="button"
+                    className={`px-3 py-1 rounded-full border text-xs font-medium ${
+                      localFilters.scientificFields.includes(sf)
+                        ? "bg-patras-buccaneer text-white border-patras-buccaneer"
+                        : "bg-white text-patras-buccaneer border-patras-buccaneer"
+                    }`}
+                    onClick={() => handleMultiSelect("scientificFields", sf)}
+                  >
+                    {sf}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+          {/* Gender */}
+          {showGender && (
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Φύλο
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {(options?.genders || []).map((genderOption) => {
+                  const value = typeof genderOption === "string" ? genderOption : genderOption?.value;
+                  const label = typeof genderOption === "string" ? genderOption : genderOption?.label;
+                  if (!value) return null;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`px-3 py-1 rounded-full border text-xs font-medium ${
+                        (localFilters.genders || []).includes(value)
+                          ? "bg-patras-buccaneer text-white border-patras-buccaneer"
+                          : "bg-white text-patras-buccaneer border-patras-buccaneer"
+                      }`}
+                      onClick={() => handleMultiSelect("genders", value)}
+                    >
+                      {label || value}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           {/* Status (admin only) */}
           {showStatus && isAdmin && (
             <div>

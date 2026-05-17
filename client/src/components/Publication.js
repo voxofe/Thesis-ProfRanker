@@ -123,7 +123,7 @@ export default function Publication({ index, readOnly = false }) {
               }
               updatePublicationField("type", value);
             }}
-            disabled={readOnly}
+            readOnly={readOnly}
             options={[
               {
                 label: "Δημοσίευση σε επιστημονικό περιοδικό",
@@ -143,7 +143,7 @@ export default function Publication({ index, readOnly = false }) {
             label="Έτος"
             value={publication.year || ""}
             onChange={(value) => updatePublicationField("year", value)}
-            disabled={readOnly}
+            readOnly={readOnly}
             options={scimagoYears}
             required={true}
           />
@@ -156,7 +156,7 @@ export default function Publication({ index, readOnly = false }) {
             type="text"
             value={publication.publicationTitle || ""}
             onChange={(value) => updatePublicationField("publicationTitle", value)}
-            disabled={readOnly}
+            readOnly={readOnly}
             required={true}
           />
         </div>
@@ -169,7 +169,7 @@ export default function Publication({ index, readOnly = false }) {
             type="text"
             value={authorsValue}
             onChange={(value) => updatePublicationField("authors", value)}
-            disabled={readOnly}
+            readOnly={readOnly}
             required={true}
           />
         </div>
@@ -185,7 +185,7 @@ export default function Publication({ index, readOnly = false }) {
               name={`publication-category-${index}`}
               value={publication.type || "other"}
               onChange={(value) => updatePublicationField("type", value)}
-              disabled={readOnly}
+              readOnly={readOnly}
               radioButtons={[
                 { id: `other-book-${index}`, label: "Βιβλίο", value: "book" },
                 { id: `other-monograph-${index}`, label: "Μονογραφία", value: "monograph" },
@@ -207,7 +207,7 @@ export default function Publication({ index, readOnly = false }) {
                 type="text"
                 value={publication.journalConfTitle || ""}
                 onChange={(value) => updatePublicationField("journalConfTitle", value)}
-                disabled={readOnly}
+                readOnly={readOnly}
                 required={true}
               />
             )}
@@ -219,7 +219,7 @@ export default function Publication({ index, readOnly = false }) {
                 type="text"
                 value={publication.publisher || ""}
                 onChange={(value) => updatePublicationField("publisher", value)}
-                disabled={readOnly}
+                readOnly={readOnly}
                 required={true}
               />
             )}
@@ -241,7 +241,7 @@ export default function Publication({ index, readOnly = false }) {
               type="text"
               value={publication.journalConfTitle || ""}
               onChange={(value) => updatePublicationField("journalConfTitle", value)}
-              disabled={readOnly}
+              readOnly={readOnly}
               required={true}
             />
           )}
@@ -258,7 +258,7 @@ export default function Publication({ index, readOnly = false }) {
                 type="text"
                 value={(publication.issn || "").replace(/\(wrong\)/gi, "").trim()}
                 onChange={(value) => updatePublicationField("issn", value)}
-                disabled={readOnly}
+                readOnly={readOnly}
                 required={true}
               />
               {getIssnErrorMessage(publication.issn) && (
@@ -277,31 +277,31 @@ export default function Publication({ index, readOnly = false }) {
               type="text"
               value={publication.publisher || ""}
               onChange={(value) => updatePublicationField("publisher", value)}
-              disabled={readOnly}
+              readOnly={readOnly}
               required={true}
             />
           )}
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-x-2">
-        <button
-          onClick={handleClearFields}
-          type="button"
-          disabled={readOnly}
-          className="rounded-md bg-patras-cameo px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          Καθαρισμός
-        </button>
-        <button
-          onClick={handleDelete}
-          type="button"
-          disabled={readOnly}
-          className="rounded-md bg-patras-sanguineBrown px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          Διαγραφή
-        </button>
-      </div>
+      {!readOnly && (
+        <div className="flex items-center justify-end gap-x-2">
+          <button
+            onClick={handleClearFields}
+            type="button"
+            className="rounded-md bg-patras-cameo px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            Καθαρισμός
+          </button>
+          <button
+            onClick={handleDelete}
+            type="button"
+            className="rounded-md bg-patras-sanguineBrown px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            Διαγραφή
+          </button>
+        </div>
+      )}
     </div>
   );
 }

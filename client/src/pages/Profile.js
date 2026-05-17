@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { FormDataContext } from "../contexts/FormDataContext";
@@ -20,6 +21,7 @@ const API_BASE_URL = (
 );
 
 export default function Profile() {
+  const { userId } = useParams();
   const { currentUser, refreshUser } = useAuth();
   const { showToast } = useToast();
   const [profile, setProfile] = useState(null);
@@ -65,13 +67,21 @@ export default function Profile() {
     [profile]
   );
 
+  const isAdmin = currentUser?.role === "admin";
+  const isAdminViewingOther =
+    isAdmin && userId && String(userId) !== String(currentUser?.id);
+  const isReadOnly = isAdminViewingOther;
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
     setLoading(true);
+    const profileUrl = isAdminViewingOther
+      ? `${API_BASE_URL}/api/admin/profile/${userId}`
+      : `${API_BASE_URL}/api/profile`;
     axios
-      .get(`${API_BASE_URL}/api/profile`, {
+      .get(profileUrl, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -125,7 +135,7 @@ export default function Profile() {
         console.error("Error loading profile:", error);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [userId, currentUser?.id, isAdminViewingOther]);
 
   useEffect(() => {
     if (!phdDegrees.length) {
@@ -148,14 +158,14 @@ export default function Profile() {
     });
   }, [phdDegrees]);
 
-  const isApplicant = currentUser?.role === "applicant";
+  const isProfileApplicant = profile?.user?.role === "applicant";
   const today = new Date().toISOString().split("T")[0];
   const todayDisplay = today.split("-").reverse().join("-");
   const workExperienceOptions = Array.from({ length: 11 }, (_, index) => ({
     value: String(index),
     label: String(index),
   }));
-  const canEditIdentity = profile?.canEditIdentity !== false;
+  const canEditIdentity = !isAdminViewingOther && profile?.canEditIdentity !== false;
   const requiresMilitaryDoc = profile?.user?.gender === "male";
   const publicationsContextValue = useMemo(
     () => ({
@@ -309,6 +319,10 @@ export default function Profile() {
   };
 
   const handleSaveProfile = async () => {
+    if (isAdminViewingOther) {
+      showToast({ type: "error", message: "Μόνο ανάγνωση για προφίλ άλλου χρήστη." });
+      return;
+    }
     const errors = validateProfileForm();
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -366,6 +380,10 @@ export default function Profile() {
   };
 
   const handleSaveAdditional = async () => {
+    if (isAdminViewingOther) {
+      showToast({ type: "error", message: "Μόνο ανάγνωση για προφίλ άλλου χρήστη." });
+      return;
+    }
     setSavingAdditional(true);
     const token = localStorage.getItem("token");
 
@@ -430,6 +448,10 @@ export default function Profile() {
   };
 
   const handleSavePublications = async () => {
+    if (isAdminViewingOther) {
+      showToast({ type: "error", message: "Μόνο ανάγνωση για προφίλ άλλου χρήστη." });
+      return;
+    }
     setSavingPublications(true);
     const token = localStorage.getItem("token");
     if (!token) {
@@ -472,6 +494,8 @@ export default function Profile() {
           onDelete={() => handleVaultDelete(file)}
           onView={() => handleVaultView(file)}
           onDownload={() => handleVaultDownload(file)}
+          showReplace={!isReadOnly}
+          showDelete={!isReadOnly}
         />
       ))}
     </div>
@@ -566,6 +590,7 @@ export default function Profile() {
   }, [profile, requiresMilitaryDoc]);
 
   const handleVaultUpload = async (docType, selectedFile) => {
+    if (isReadOnly) return;
     if (!selectedFile || !docType) return;
     const allowed = ["pdf", "doc", "docx", "odt"];
     const ext = selectedFile.name.split(".").pop()?.toLowerCase();
@@ -618,6 +643,7 @@ export default function Profile() {
   };
 
   const handleVaultReplace = async (file, selectedFile) => {
+    if (isReadOnly) return;
     if (!file?.id || !selectedFile) return;
     const allowed = ["pdf", "doc", "docx", "odt"];
     const ext = selectedFile.name.split(".").pop()?.toLowerCase();
@@ -657,6 +683,7 @@ export default function Profile() {
   };
 
   const handleVaultDelete = async (file) => {
+    if (isReadOnly) return;
     if (!file?.id) return;
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -729,7 +756,13 @@ export default function Profile() {
     <div className="max-w-6xl mx-auto px-6">
       <div>
         <h1 className="text-2xl text-center border-b pb-2 mb-2 text-gray-800">
-          O φακελός μου
+          {isAdminViewingOther ? (
+            <>
+              Φάκελος χρήστη: <span className="text-lg font-semibold">{`${form.firstName} ${form.lastName}`.trim()}</span>
+            </>
+          ) : (
+            "O φακελός μου"
+          )}
         </h1>
       </div>
         <h2 className="text-lg text-center font-semibold text-patras-buccaneer ">
@@ -752,7 +785,7 @@ export default function Profile() {
             >
               Γενικά στοιχεία
             </button>
-            {isApplicant && (
+            {isProfileApplicant && (
               <button
                 type="button"
                 onClick={() => setActiveSection("additional")}
@@ -765,7 +798,7 @@ export default function Profile() {
                 Πρόσθετα στοιχεία
               </button>
             )}
-            {isApplicant && (
+            {isProfileApplicant && (
               <button
                 type="button"
                 onClick={() => setActiveSection("publications")}
@@ -778,7 +811,7 @@ export default function Profile() {
                 Επιστημονικές δημοσιεύσεις
               </button>
             )}
-            {isApplicant && (
+            {isProfileApplicant && (
               <button
                 type="button"
                 onClick={() => setActiveSection("vault")}
@@ -798,10 +831,12 @@ export default function Profile() {
 
         <section>
 
-          <div className="mb-4 rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-600">
-            Οι αλλαγές εδώ δεν επηρεάζουν ήδη υποβληθείσες αιτήσεις.
-            Για αλλαγές σε ενεργές αιτήσεις, επεξεργαστείτε τις από την αρχική σελίδα.
-          </div>
+          {!isReadOnly && (
+            <div className="mb-4 rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-600">
+              Οι αλλαγές εδώ δεν επηρεάζουν ήδη υποβληθείσες αιτήσεις.
+              Για αλλαγές σε ενεργές αιτήσεις, επεξεργαστείτε τις από την αρχική σελίδα.
+            </div>
+          )}
           {activeSection === "general" && (
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
               <div className="space-y-6">
@@ -816,7 +851,8 @@ export default function Profile() {
                         type="email"
                         value={form.email}
                         onChange={(value) => handleFieldChange("email", value)}
-                        disabled
+                        disabled={!isReadOnly}
+                        readOnly={isReadOnly}
                       />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -827,7 +863,8 @@ export default function Profile() {
                         type="text"
                         value={form.firstName}
                         onChange={(value) => handleFieldChange("firstName", value)}
-                        disabled={!canEditIdentity}
+                        disabled={!canEditIdentity && !isReadOnly}
+                        readOnly={isReadOnly}
                         required
                         error={formErrors.firstName}
                       />
@@ -838,14 +875,12 @@ export default function Profile() {
                         type="text"
                         value={form.lastName}
                         onChange={(value) => handleFieldChange("lastName", value)}
-                        disabled={!canEditIdentity}
+                        disabled={!canEditIdentity && !isReadOnly}
+                        readOnly={isReadOnly}
                         required
                         error={formErrors.lastName}
                       />
                     </div>
-                    <p className="mt-2 text-xs text-gray-500">
-                      Το ονοματεπώνυμο κλειδώνει μετά την πρώτη υποβολή αίτησης.
-                    </p>
                   </div>
                 </div>
 
@@ -861,6 +896,7 @@ export default function Profile() {
                       value={form.mobileNumber}
                       onChange={(value) => handleFieldChange("mobileNumber", value)}
                       error={formErrors.mobileNumber}
+                      readOnly={isReadOnly}
                     />
                     <InputField
                       id="landlineNumber"
@@ -870,6 +906,7 @@ export default function Profile() {
                       value={form.landlineNumber}
                       onChange={(value) => handleFieldChange("landlineNumber", value)}
                       error={formErrors.landlineNumber}
+                      readOnly={isReadOnly}
                     />
                   </div>
                   </div>
@@ -886,6 +923,7 @@ export default function Profile() {
                       type="text"
                       value={form.streetAddress}
                       onChange={(value) => handleFieldChange("streetAddress", value)}
+                      readOnly={isReadOnly}
                     />
                     <InputField
                       id="city"
@@ -894,6 +932,7 @@ export default function Profile() {
                       type="text"
                       value={form.city}
                       onChange={(value) => handleFieldChange("city", value)}
+                      readOnly={isReadOnly}
                     />
                     <InputField
                       id="postalCode"
@@ -903,25 +942,28 @@ export default function Profile() {
                       value={form.postalCode}
                       onChange={(value) => handleFieldChange("postalCode", value)}
                       error={formErrors.postalCode}
+                      readOnly={isReadOnly}
                     />
                   </div>
                   </div>
                 </div>
               </div>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 mt-8">
-              <button
-                type="button"
-                onClick={handleSaveProfile}
-                disabled={saving}
-                className="inline-flex items-center justify-center bg-patras-buccaneer text-sm text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors disabled:opacity-60"
-              >
-                {saving ? "Αποθήκευση..." : "Αποθήκευση αλλαγών"}
-              </button>
-            </div>
+            {!isReadOnly && (
+              <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 mt-8">
+                <button
+                  type="button"
+                  onClick={handleSaveProfile}
+                  disabled={saving}
+                  className="inline-flex items-center justify-center bg-patras-buccaneer text-sm text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors disabled:opacity-60"
+                >
+                  {saving ? "Αποθήκευση..." : "Αποθήκευση αλλαγών"}
+                </button>
+              </div>
+            )}
             </div>
           )}
 
-          {isApplicant && activeSection === "additional" && (
+          {isProfileApplicant && activeSection === "additional" && (
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
               <div className="space-y-6">
                 <div>
@@ -940,6 +982,7 @@ export default function Profile() {
                             value
                           )
                         }
+                        readOnly={isReadOnly}
                       />
                       <Checkbox
                         id="isPublicEmployee"
@@ -950,6 +993,7 @@ export default function Profile() {
                         onChange={(value) =>
                           handleAdditionalFieldChange("isPublicEmployee", value)
                         }
+                        readOnly={isReadOnly}
                       />
                       <Checkbox
                         id="isEuCitizenNonGreek"
@@ -960,6 +1004,7 @@ export default function Profile() {
                         onChange={(value) =>
                           handleAdditionalFieldChange("isEuCitizenNonGreek", value)
                         }
+                        readOnly={isReadOnly}
                       />
 
                     </div>
@@ -1022,6 +1067,7 @@ export default function Profile() {
                             type="text"
                             value={phdDraft.phdTitle}
                             onChange={(value) => updatePhdDraft("phdTitle", value)}
+                            readOnly={isReadOnly}
                           />
                           <div>
                             <FlowbiteDateField
@@ -1033,6 +1079,7 @@ export default function Profile() {
                               minDate="2011-01-01"
                               maxDate={today}
                               usePortal
+                              readOnly={isReadOnly}
                             />
                             <p className="-mt-3 text-xs text-gray-500 italic">
                               Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}
@@ -1048,6 +1095,7 @@ export default function Profile() {
                               onChange={(value) =>
                                 updatePhdDraft("phdIsFromForeignInstitute", value)
                               }
+                              readOnly={isReadOnly}
                             />
                           </div>
                         </div>
@@ -1062,6 +1110,7 @@ export default function Profile() {
                               type="text"
                               value={phdNextDraft.phdTitle}
                               onChange={() => {}}
+                              readOnly={isReadOnly}
                             />
                             <div>
                               <FlowbiteDateField
@@ -1071,6 +1120,7 @@ export default function Profile() {
                                 minDate="2011-01-01"
                                 maxDate={today}
                                 usePortal
+                                readOnly={isReadOnly}
                               />
                               <p className="-mt-3 text-xs text-gray-500 italic">
                                 Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}
@@ -1084,6 +1134,7 @@ export default function Profile() {
                                 description=""
                                 checked={phdNextDraft.phdIsFromForeignInstitute}
                                 onChange={() => {}}
+                                readOnly={isReadOnly}
                               />
                             </div>
                           </div>
@@ -1114,24 +1165,27 @@ export default function Profile() {
                         );
                       }}
                       options={workExperienceOptions}
+                      readOnly={isReadOnly}
                     />
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 mt-8">
-                <button
-                  type="button"
-                  onClick={handleSaveAdditional}
-                  disabled={savingAdditional}
-                  className="inline-flex items-center justify-center bg-patras-buccaneer text-sm text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors disabled:opacity-60"
-                >
-                  {savingAdditional ? "Αποθήκευση..." : "Αποθήκευση αλλαγών"}
-                </button>
-              </div>
+              {!isReadOnly && (
+                <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 mt-8">
+                  <button
+                    type="button"
+                    onClick={handleSaveAdditional}
+                    disabled={savingAdditional}
+                    className="inline-flex items-center justify-center bg-patras-buccaneer text-sm text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors disabled:opacity-60"
+                  >
+                    {savingAdditional ? "Αποθήκευση..." : "Αποθήκευση αλλαγών"}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
-          {isApplicant && activeSection === "vault" && (
+          {isProfileApplicant && activeSection === "vault" && (
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
               {vaultItems.length === 0 ? (
                 <p className="text-gray-500">Δεν υπάρχουν καταχωρημένα δικαιολογητικά.</p>
@@ -1164,28 +1218,30 @@ export default function Profile() {
                           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] items-end gap-3">
                             {renderFilePills(item.files)}
                             <div className="flex md:justify-end">
-                              <label
-                                className="group inline-flex items-center gap-2 text-xs font-semibold text-patras-buccaneer cursor-pointer relative"
-                              >
-                                <input
-                                  type="file"
-                                  className="hidden"
-                                  accept=".pdf,.doc,.docx,.odt"
-                                  onChange={(event) => {
-                                    const file = event.target.files?.[0];
-                                    event.target.value = "";
-                                    handleVaultUpload(item.docType, file);
-                                  }}
-                                />
-                                <span className="inline-flex items-center gap-1 rounded-full border border-patras-buccaneer/40 bg-patras-albescentWhite/60 px-3 py-1 transition-colors duration-150 hover:bg-patras-buccaneer hover:text-white">
-                                  + Προσθήκη
-                                </span>
-                                <span className="absolute right-0 top-full mt-2 w-max rounded-md border border-gray-200 bg-white px-3 py-2 text-[11px] text-gray-600 shadow-md opacity-0 translate-y-1 pointer-events-none transition duration-150 group-hover:opacity-100 group-hover:translate-y-0">
-                                  PDF, DOC, DOCX, ODT
-                                  <br />
-                                  Μέγιστο μέγεθος: 5MB
-                                </span>
-                              </label>
+                              {!isReadOnly && (
+                                <label
+                                  className="group inline-flex items-center gap-2 text-xs font-semibold text-patras-buccaneer cursor-pointer relative"
+                                >
+                                  <input
+                                    type="file"
+                                    className="hidden"
+                                    accept=".pdf,.doc,.docx,.odt"
+                                    onChange={(event) => {
+                                      const file = event.target.files?.[0];
+                                      event.target.value = "";
+                                      handleVaultUpload(item.docType, file);
+                                    }}
+                                  />
+                                  <span className="inline-flex items-center gap-1 rounded-full border border-patras-buccaneer/40 bg-patras-albescentWhite/60 px-3 py-1 transition-colors duration-150 hover:bg-patras-buccaneer hover:text-white">
+                                    + Προσθήκη
+                                  </span>
+                                  <span className="absolute right-0 top-full mt-2 w-max rounded-md border border-gray-200 bg-white px-3 py-2 text-[11px] text-gray-600 shadow-md opacity-0 translate-y-1 pointer-events-none transition duration-150 group-hover:opacity-100 group-hover:translate-y-0">
+                                    PDF, DOC, DOCX, ODT
+                                    <br />
+                                    Μέγιστο μέγεθος: 5MB
+                                  </span>
+                                </label>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -1204,21 +1260,23 @@ export default function Profile() {
             </div>
           )}
 
-          {isApplicant && activeSection === "publications" && (
+          {isProfileApplicant && activeSection === "publications" && (
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
               <FormDataContext.Provider value={publicationsContextValue}>
-                <PublicationsSection />
+                <PublicationsSection readOnly={isReadOnly} />
               </FormDataContext.Provider>
-              <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 mt-8">
-                <button
-                  type="button"
-                  onClick={handleSavePublications}
-                  disabled={savingPublications}
-                  className="inline-flex items-center justify-center bg-patras-buccaneer text-sm text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors disabled:opacity-60"
-                >
-                  {savingPublications ? "Αποθήκευση..." : "Αποθήκευση αλλαγών"}
-                </button>
-              </div>
+              {!isReadOnly && (
+                <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 mt-8">
+                  <button
+                    type="button"
+                    onClick={handleSavePublications}
+                    disabled={savingPublications}
+                    className="inline-flex items-center justify-center bg-patras-buccaneer text-sm text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors disabled:opacity-60"
+                  >
+                    {savingPublications ? "Αποθήκευση..." : "Αποθήκευση αλλαγών"}
+                  </button>
+                </div>
+              )}
             </div>
           )}
           <TermsModal

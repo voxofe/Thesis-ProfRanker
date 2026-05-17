@@ -94,7 +94,7 @@ export default function Login() {
               onClick={handleRegisterClick}
               className="flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-patras-buccaneer border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer"
             >
-              Δεν έχεις λογαριασμό; Εγγράψου
+              Δεν έχετε λογαριασμό; Εγγραφείτε
             </button>
           </div>
 

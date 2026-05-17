@@ -12,12 +12,8 @@
            focus:ring-0 /* prevent extra blue ring from forms plugin */
            placeholder-gray-400
            border-0 /* we’re using outline like your InputField */
+           cursor-not-allowed
            dark:bg-white dark:text-black;
-  }
-
-  /* keep space for the left calendar icon (Flowbite adds it) */
-  .pr-datepicker input[type="text"][readonly] {
-    @apply pl-10;
   }
 
   /* disabled look (matches your InputField) */

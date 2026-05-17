@@ -190,6 +190,7 @@ export default function FlowbiteDateField({
   popupAlign = "left",
   usePortal = false,
   placeholder = "DD-MM-YYYY",
+  readOnly = false,
   ...props
 }) {
   const { className: inputClassNameProp, ...inputProps } = props;
@@ -476,6 +477,7 @@ export default function FlowbiteDateField({
             {...inputProps}
             ref={inputRef}
             onFocus={() => {
+              if (readOnly) return;
               setIsFocused(true);
               if (isClearingRef.current) {
                 isClearingRef.current = false;
@@ -486,6 +488,7 @@ export default function FlowbiteDateField({
               setIsOpen(true);
             }}
             onBlur={(event) => {
+              if (readOnly) return;
               const nextTarget = event.relatedTarget;
               if (nextTarget && wrapperRef.current?.contains(nextTarget)) {
                 return;
@@ -499,6 +502,7 @@ export default function FlowbiteDateField({
               setIsOpen(false);
             }}
             onChange={(event) => {
+              if (readOnly) return;
               setInputValue(
                 formatDisplayInput(event.target.value, {
                   suppressTrailingDash: suppressTrailingDashRef.current,
@@ -507,6 +511,7 @@ export default function FlowbiteDateField({
               suppressTrailingDashRef.current = false;
             }}
             onKeyDown={(event) => {
+              if (readOnly) return;
               if (event.key === "Backspace") {
                 const el = inputRef.current;
                 if (
@@ -527,11 +532,12 @@ export default function FlowbiteDateField({
                 inputRef.current?.blur();
               }
             }}
+            readOnly={readOnly}
             className={inputClassName}
           />
         </div>
 
-        {isOpen && !usePortal && (
+        {isOpen && !usePortal && !readOnly && (
           <div className={popupPos}>
             <Datepicker
               inline
@@ -558,7 +564,7 @@ export default function FlowbiteDateField({
           </div>
         )}
 
-        {isOpen && usePortal &&
+        {isOpen && usePortal && !readOnly &&
           createPortal(
             <div
               ref={popupRef}
@@ -591,7 +597,7 @@ export default function FlowbiteDateField({
             document.body
           )}
 
-          {value && (
+          {value && !readOnly && (
             <button
               type="button"
               onMouseDown={(event) => event.preventDefault()}
@@ -628,4 +634,5 @@ FlowbiteDateField.propTypes = {
   popupAlign: PropTypes.oneOf(["left", "center", "right"]),
   usePortal: PropTypes.bool,
   placeholder: PropTypes.string,
+  readOnly: PropTypes.bool,
 };

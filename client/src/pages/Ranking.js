@@ -78,6 +78,7 @@ function getStatusBadgeClasses(status) {
 
 export default function Ranking() {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
     schools: [],
@@ -101,6 +102,7 @@ export default function Ranking() {
     currentUser?.is_superuser
   );
   const isApplicant = !!currentUser && !isAdmin && currentUser?.role !== "guest";
+  const isGuest = currentUser?.role === "guest";
   const viewerId = currentUser?.id;
 
   const appliedScientificFields = useMemo(() => {
@@ -122,9 +124,11 @@ export default function Ranking() {
   );
 
   const suppressAutoUncheckRef = useRef(false);
+  const guestVisitRecordedRef = useRef(false);
 
   const fetchUsers = useCallback(async () => {
     const token = localStorage.getItem("token");
+    setLoading(true);
     try {
       const response = await axios({
         method: "GET",
@@ -134,6 +138,8 @@ export default function Ranking() {
       setUsers(response.data);
     } catch (error) {
       console.error("Error fetching ranking data:", error);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -141,9 +147,34 @@ export default function Ranking() {
     fetchUsers();
   }, [fetchUsers]);
 
+  const recordGuestRankingVisit = useCallback(async () => {
+    if (!isGuest) return;
+    if (guestVisitRecordedRef.current) return;
+    guestVisitRecordedRef.current = true;
+    const token = localStorage.getItem("token");
+    try {
+      await axios({
+        method: "POST",
+        url: `${API_BASE_URL}/api/guests/ranking-visit`,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+    } catch (error) {
+      console.error("Error recording guest ranking visit:", error);
+    }
+  }, [isGuest]);
+
+  useEffect(() => {
+    guestVisitRecordedRef.current = false;
+  }, [currentUser?.id]);
+
+  useEffect(() => {
+    recordGuestRankingVisit();
+  }, [recordGuestRankingVisit]);
+
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
+      await recordGuestRankingVisit();
       await Promise.all([
         fetchUsers(),
         refreshPositions ? refreshPositions() : Promise.resolve(),
@@ -605,6 +636,7 @@ export default function Ranking() {
         <SortableTable
           columns={columns}
           rows={filteredUsers}
+          loading={loading}
           getSortedRows={getSortedUsers}
           getRowKey={(row) => row?.applicationId ?? row?.id}
           initialSortBy="totalPoints"

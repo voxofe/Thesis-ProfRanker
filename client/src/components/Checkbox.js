@@ -14,9 +14,14 @@ export default function Checkbox(props) {
           id={props.id}
           name={props.name}
           type="checkbox"
-          className={checkboxStyle}
+          className={`${checkboxStyle} ${props.readOnly ? "cursor-not-allowed" : ""}`}
           checked={props.checked}
-          onChange={(e) => props.onChange(e.target.checked)}
+          onChange={(e) => {
+            if (props.readOnly) return;
+            props.onChange(e.target.checked);
+          }}
+          disabled={props.disabled}
+          aria-disabled={props.readOnly || props.disabled}
         />
         <label
           htmlFor={props.id}

@@ -9,6 +9,7 @@ import {
 import Header from "./components/Header";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import RegisterAdmin from "./pages/RegisterAdmin";
 import Home from "./pages/Home";
 import BackLinkController from "./components/BackLinkController";
 import ApplicationForm from "./pages/ApplicationForm";
@@ -21,10 +22,14 @@ import Positions from "./pages/Positions";
 import PositionsAll from "./pages/PositionsAll";
 import PositionsCreate from "./pages/PositionsCreate";
 import PositionsEdit from "./pages/PositionsEdit";
+import PositionsAndFields from "./pages/PositionsAndFields";
 import ScientificFields from "./pages/ScientificFields";
 import ScientificFieldsAll from "./pages/ScientificFieldsAll";
 import ScientificFieldsCreate from "./pages/ScientificFieldsCreate";
 import ScientificFieldsEdit from "./pages/ScientificFieldsEdit";
+import Users from "./pages/Users";
+import UsersView from "./pages/UsersView";
+import Analytics from "./pages/Analytics";
 import {
   FormDataProvider,
   AuthProvider,
@@ -148,7 +153,14 @@ function AppContent() {
                 {/* Admin-only routes */}
                 {currentUser?.role === "admin" && (
                   <>
-                    <Route path="/register-admin" element={<Register isAdmin={true} />} />
+                    <Route path="/profile/:userId" element={<Profile />} />
+                    <Route path="/my-applications/:userId" element={<MyApplications />} />
+                    <Route path="/positions-and-fields" element={<PositionsAndFields />} />
+                    <Route path="/users" element={<Users />} />
+                    <Route path="/users/view" element={<UsersView />} />
+                    <Route path="/users/register-admin" element={<RegisterAdmin />} />
+                    <Route path="/analytics" element={<Analytics />} />
+                    <Route path="/register-admin" element={<RegisterAdmin />} />
                     <Route path="/positions" element={<Positions />} />
                     <Route path="/positions/all" element={<PositionsAll />} />
                     <Route path="/positions/edit" element={<PositionsEdit />} />

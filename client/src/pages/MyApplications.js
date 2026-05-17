@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -11,11 +12,16 @@ const API_BASE_URL = (
 );
 
 export default function MyApplications() {
+  const { userId } = useParams();
+  const { currentUser } = useAuth();
   const [applications, setApplications] = useState([]);
+  const [headerName, setHeaderName] = useState("");
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
   const [activeOpen, setActiveOpen] = useState(true);
   const [completedOpen, setCompletedOpen] = useState(false);
+
+  const isAdminViewing = currentUser?.role === "admin" && userId;
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -25,11 +31,21 @@ export default function MyApplications() {
     }
 
     setLoading(true);
+    const url = isAdminViewing
+      ? `${API_BASE_URL}/api/admin/profile/${userId}`
+      : `${API_BASE_URL}/api/profile`;
     axios
-      .get(`${API_BASE_URL}/api/profile`, {
+      .get(url, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
+        if (isAdminViewing) {
+          const firstName = res.data?.user?.firstName || "";
+          const lastName = res.data?.user?.lastName || "";
+          setHeaderName(`${firstName} ${lastName}`.trim());
+        } else {
+          setHeaderName("");
+        }
         const apps = Array.isArray(res.data?.applications)
           ? res.data.applications
           : [];
@@ -39,7 +55,7 @@ export default function MyApplications() {
         console.error("Error loading applications:", error);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [userId, isAdminViewing]);
 
   const parseDDMMYYYYToDate = (value, timeValue) => {
     if (!value) return null;
@@ -158,14 +174,20 @@ export default function MyApplications() {
     <div>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-6 sm:pt-0 sm:pb-8">
         <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
-          Οι αιτήσεις μου
+          {isAdminViewing ? (
+            <>
+              Αιτήσεις χρήστη: <span className="text-lg font-semibold">{headerName}</span>
+            </>
+          ) : (
+            "Οι αιτήσεις μου"
+          )}
         </h1>
 
         {sortedApplications.length === 0 ? (
           <div className="bg-white/85 rounded-lg border border-gray-200 shadow-sm p-6 text-center">
             <p className="text-gray-700 font-semibold">Δεν υπάρχουν καταχωρημένες αιτήσεις.</p>
             <p className="text-sm text-gray-500 mt-2">
-              Μόλις υποβάλεις, θα εμφανίζονται εδώ με αναλυτικές πληροφορίες.
+              Μόλις υποβάλετε, θα εμφανίζονται εδώ με αναλυτικές πληροφορίες.
             </p>
           </div>
         ) : (
