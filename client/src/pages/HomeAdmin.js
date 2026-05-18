@@ -14,9 +14,9 @@ export default function HomeAdmin() {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <HomePagePanel
-          title="Θέσεις και επιστημονικά πεδία"
-          description="Διαχειριστείτε θέσεις, επιστημονικά πεδία και μαθήματα."
-          buttonText="Διαχείριση θέσεων και πεδίων"
+          title="Επιστημονικά πεδία και μαθήματα"
+          description="Δείτε, επεξεργαστείτε ή δημιουργήστε νέα επιστημονικά πεδία και μαθήματα."
+          buttonText="Διαχείριση πεδίων και μαθημάτων"
           to="/positions-and-fields"
         />
         <HomePagePanel

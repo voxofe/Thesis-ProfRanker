@@ -99,7 +99,7 @@ export default function RegisterAdmin() {
         </h1>
       </div>
 
-      <div className="mt-3 sm:mx-auto sm:w-full sm:max-w-2xl">
+      <div className="mt-0 sm:mx-auto sm:w-full sm:max-w-2xl">
         <div
           className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-200"
         >

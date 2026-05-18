@@ -18,7 +18,7 @@ export default function MyApplications() {
   const [headerName, setHeaderName] = useState("");
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
-  const [activeOpen, setActiveOpen] = useState(true);
+  const [activeOpen, setActiveOpen] = useState(false);
   const [completedOpen, setCompletedOpen] = useState(false);
 
   const isAdminViewing = currentUser?.role === "admin" && userId;
@@ -107,6 +107,11 @@ export default function MyApplications() {
     });
     return { activeApplications: active, completedApplications: completed };
   }, [sortedApplications]);
+
+  useEffect(() => {
+    setActiveOpen(activeApplications.length > 0);
+    setCompletedOpen(completedApplications.length > 0);
+  }, [activeApplications.length, completedApplications.length]);
 
   const toDDMMYYYY = (v) => {
     if (!v) return "";

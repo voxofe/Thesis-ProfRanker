@@ -103,7 +103,7 @@ export default function FilterModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="bg-white rounded-lg shadow-lg border w-full max-w-2xl p-6 relative">
         <button
           className="absolute top-3 right-3 text-gray-600 hover:text-red-700 text-2xl"

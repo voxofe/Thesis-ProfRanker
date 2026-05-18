@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 export const formatDateTimeCell = (dateValue, timeValue, fallbackTime = "00:00") => {
   if (!dateValue) return "—";
@@ -59,6 +59,13 @@ export default function SortableTable({
   getSortedRows,
   initialSortBy,
   initialSortDirection = "asc",
+  enableSearch = true,
+  searchableColumns,
+  searchPlaceholder = "Αναζήτηση...",
+  searchDebounceMs = 300,
+  searchText: controlledSearchText,
+  onSearchTextChange,
+  showSearchBar = true,
   loading = false,
   loadingMessage = "Φόρτωση...",
   emptyMessage = "Δεν υπάρχουν διαθέσιμες εγγραφές.",
@@ -70,6 +77,19 @@ export default function SortableTable({
 }) {
   const [sortBy, setSortBy] = useState(initialSortBy || columns[0]?.key);
   const [sortDirection, setSortDirection] = useState(initialSortDirection);
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState("");
+  const isSearchControlled = typeof controlledSearchText === "string";
+  const resolvedSearchText = isSearchControlled ? controlledSearchText : searchText;
+  const handleSearchTextChange = onSearchTextChange || setSearchText;
+
+  useEffect(() => {
+    if (!enableSearch) return undefined;
+    const handle = setTimeout(() => {
+      setDebouncedSearchText(resolvedSearchText.trim());
+    }, searchDebounceMs);
+    return () => clearTimeout(handle);
+  }, [resolvedSearchText, searchDebounceMs, enableSearch]);
 
   const handleSort = (key) => {
     if (sortBy === key) {
@@ -89,19 +109,70 @@ export default function SortableTable({
     );
   };
 
+  const searchableKeys = useMemo(() => {
+    if (Array.isArray(searchableColumns) && searchableColumns.length > 0) {
+      return searchableColumns;
+    }
+    return (columns || []).map((col) => col?.key).filter(Boolean);
+  }, [columns, searchableColumns]);
+
+  const normalizeSearchValue = (value) => {
+    if (value === null || value === undefined) return "";
+    if (typeof value === "string") return value;
+    if (typeof value === "number") return String(value);
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString();
+    }
+    return String(value);
+  };
+
+  const normalizeForSearch = (value) => {
+    return normalizeSearchValue(value)
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  };
+
+  const buildSearchValues = (row) => {
+    const values = searchableKeys
+      .map((key) => normalizeForSearch(row?.[key]))
+      .filter(Boolean);
+
+    const firstName = row?.firstName ?? "";
+    const lastName = row?.lastName ?? "";
+    const fullName = `${firstName} ${lastName}`.trim();
+    if (fullName) {
+      values.push(normalizeForSearch(fullName));
+    }
+
+    return values;
+  };
+
+  const filteredRows = useMemo(() => {
+    const safeRows = Array.isArray(rows) ? rows : [];
+    if (!enableSearch) return safeRows;
+    const normalizedQuery = normalizeForSearch(debouncedSearchText);
+    if (!normalizedQuery) return safeRows;
+    const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean);
+    return safeRows.filter((row) => {
+      const values = buildSearchValues(row);
+      if (!values.length) return false;
+      return queryTokens.every((token) => values.some((value) => value.includes(token)));
+    });
+  }, [rows, debouncedSearchText, searchableKeys, enableSearch]);
+
   const sortedRows = useMemo(() => {
     if (typeof getSortedRows === "function") {
-      return getSortedRows(rows, sortBy, sortDirection);
+      return getSortedRows(filteredRows, sortBy, sortDirection);
     }
-    const safeRows = Array.isArray(rows) ? rows : [];
-    return [...safeRows].sort((a, b) => {
+    return [...filteredRows].sort((a, b) => {
       const valA = a?.[sortBy]?.toString().toLowerCase() || "";
       const valB = b?.[sortBy]?.toString().toLowerCase() || "";
       if (valA < valB) return sortDirection === "asc" ? -1 : 1;
       if (valA > valB) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
-  }, [rows, sortBy, sortDirection, getSortedRows]);
+  }, [filteredRows, sortBy, sortDirection, getSortedRows]);
 
   const resolveHeaderClass = (col) => {
     if (typeof headerCellClassName === "function") {
@@ -111,8 +182,39 @@ export default function SortableTable({
   };
 
   return (
-    <div className={wrapperClassName}>
-      <table className={tableClassName}>
+    <div className="w-full">
+      {enableSearch && showSearchBar && (
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="relative w-full max-w-xs">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fillRule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clipRule="evenodd" />
+              </svg>
+            </span>
+            <input
+              type="text"
+              value={resolvedSearchText}
+              onChange={(event) => handleSearchTextChange(event.target.value)}
+              placeholder={searchPlaceholder}
+              className="w-full rounded-md border border-patras-capePalliser/50 bg-white/90 py-1.5 pl-9 pr-3 text-sm text-gray-800 shadow-sm focus:border-patras-buccaneer focus:outline-none"
+            />
+            {resolvedSearchText && (
+              <button
+                type="button"
+                onClick={() => handleSearchTextChange("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500/5 text-red-700 hover:bg-red-500/10 hover:text-red-800"
+                aria-label="Καθαρισμός αναζήτησης"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+      <div className={wrapperClassName}>
+        <table className={tableClassName}>
         <thead className={theadClassName}>
           <tr>
             {columns.map((col) => (
@@ -147,7 +249,8 @@ export default function SortableTable({
             })
           )}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   );
 }

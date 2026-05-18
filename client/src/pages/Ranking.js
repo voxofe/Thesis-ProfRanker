@@ -364,13 +364,14 @@ export default function Ranking() {
     const tags = [];
     filters.schools.forEach(s => tags.push({ key: "schools", value: s, label: `Σχολή: ${s}` }));
     filters.departments.forEach(d => tags.push({ key: "departments", value: d, label: `Τμήμα: ${d}` }));
-    filters.scientificFields.forEach(sf => tags.push({ key: "scientificFields", value: sf, label: `Επιστημονικό Πεδίο: ${sf}` }));
+    filters.scientificFields.forEach(sf => tags.push({ key: "scientificFields", value: sf, label: `Επιστημονικό πεδίο: ${sf}` }));
     if (isAdmin) filters.status.forEach(st => tags.push({ key: "status", value: st, label: `Κατάσταση: ${st}` }));
     if (filters.pointsMin) tags.push({ key: "pointsMin", value: filters.pointsMin, label: `Μόρια ≥ ${filters.pointsMin}` });
     if (filters.pointsMax) tags.push({ key: "pointsMax", value: filters.pointsMax, label: `Μόρια ≤ ${filters.pointsMax}` });
     return tags;
   }, [filters, isAdmin]);
 
+  const [searchText, setSearchText] = useState("");
   const removeTag = (tag) => {
     if (showMyPosition) {
       setShowMyPosition(false);
@@ -511,7 +512,7 @@ export default function Ranking() {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-y-5 pt-0"> 
+    <div className="pt-0">
       <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
         Λίστα κατάταξης υποψηφίων
       </h1>
@@ -551,50 +552,9 @@ export default function Ranking() {
               label="Εμφάνιση αιτήσεων για τις θέσεις που έχω επιλέξει"
             />
           )}
-          {/* For guest/admin, tags appear here */}
-          {(isAdmin || currentUser?.role === "guest") && filterTags.length > 0 && (
-            <div className="flex flex-wrap gap-2 pr-24">
-              {filterTags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="inline-flex items-center bg-patras-buccaneer/10 text-patras-buccaneer px-3 py-1 rounded-full text-xs font-medium border border-patras-buccaneer"
-                >
-                  {tag.label}
-                  <button
-                    className="ml-2 text-patras-sanguineBrown hover:text-red-700 text-xs font-bold"
-                    onClick={() => removeTag(tag)}
-                    title="Αφαίρεση φίλτρου"
-                  >
-                    &times;
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
         </div>
         {/* Right side: (button moved to be positioned relative to the table) */}
       </div>
-
-      {/* For applicant, tags appear below the row */}
-      {isApplicant && filterTags.length > 0 && (
-        <div className=" flex flex-wrap gap-2 pr-24">
-          {filterTags.map((tag, idx) => (
-            <span
-              key={idx}
-              className="inline-flex items-center bg-patras-buccaneer/10 text-patras-buccaneer px-3 py-1 rounded-full text-xs font-medium border border-patras-buccaneer"
-            >
-              {tag.label}
-              <button
-                className="ml-2 text-patras-sanguineBrown hover:text-red-700 text-xs font-bold"
-                onClick={() => removeTag(tag)}
-                title="Αφαίρεση φίλτρου"
-              >
-                &times;
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
 
       {/* Filter Modal */}
       <FilterModal
@@ -616,26 +576,77 @@ export default function Ranking() {
         })}
       />
 
-  <div className="relative overflow-visible">
-        {/* Positioned Filters button: placed outside the scrollable area so it won't be clipped */}
-        <button
-          aria-label="Άνοιγμα φίλτρων"
-          className="absolute -top-12 right-0 z-50 flex items-center gap-2 px-3 py-1 rounded-full bg-patras-buccaneer text-white font-medium text-sm shadow-sm hover:bg-patras-sanguineBrown transition border border-patras-buccaneer"
-          onClick={() => setFilterOpen(true)}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414A2 2 0 0013 14.414V19a1 1 0 01-1.447.894l-4-2A1 1 0 017 17v-2.586a2 2 0 00-.586-1.414L3 6.707A1 1 0 013 6V4z"/>
-          </svg>
-          Φίλτρα
-        </button>
-        <RefreshButton
-          onClick={handleRefresh}
-          loading={refreshing}
-          className="absolute -top-12 right-28 z-50"
-        />
+      <div className="mb-2 grid grid-cols-[1fr_auto] items-end gap-3 min-h-[36px]">
+        <div className="flex flex-wrap-reverse content-end gap-2 min-h-[28px] min-w-[12rem] self-end">
+          {filterTags.map((tag, idx) => (
+            <span
+              key={idx}
+              className="inline-flex items-center bg-patras-buccaneer/10 text-patras-buccaneer px-3 py-1 rounded-full text-xs font-medium border border-patras-buccaneer"
+            >
+              {tag.label}
+              <button
+                className="ml-2 text-patras-sanguineBrown hover:text-red-700 text-xs font-bold"
+                onClick={() => removeTag(tag)}
+                title="Αφαίρεση φίλτρου"
+              >
+                &times;
+              </button>
+            </span>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <RefreshButton
+            onClick={handleRefresh}
+            loading={refreshing}
+            className="shrink-0"
+          />
+          <div className="relative w-64">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fillRule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clipRule="evenodd" />
+              </svg>
+            </span>
+            <input
+              type="text"
+              value={searchText}
+              onChange={(event) => setSearchText(event.target.value)}
+              placeholder="Αναζήτηση αιτήσεων..."
+              className="w-full rounded-md border border-patras-capePalliser/50 bg-white/90 py-1.5 pl-9 pr-3 text-sm text-gray-800 shadow-sm focus:border-patras-buccaneer focus:outline-none"
+            />
+            {searchText && (
+              <button
+                type="button"
+                onClick={() => setSearchText("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500/5 text-red-700 hover:bg-red-500/10 hover:text-red-800"
+                aria-label="Καθαρισμός αναζήτησης"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            )}
+          </div>
+          <button
+            aria-label="Άνοιγμα φίλτρων"
+            className="flex items-center gap-2 px-3 py-1 rounded-full bg-patras-buccaneer text-white font-medium text-sm shadow-sm hover:bg-patras-sanguineBrown transition border border-patras-buccaneer"
+            onClick={() => setFilterOpen(true)}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414A2 2 0 0013 14.414V19a1 1 0 01-1.447.894l-4-2A1 1 0 017 17v-2.586a2 2 0 00-.586-1.414L3 6.707A1 1 0 013 6V4z"/>
+            </svg>
+            Φίλτρα
+          </button>
+        </div>
+      </div>
+
+      <div className="relative overflow-visible">
         <SortableTable
           columns={columns}
           rows={filteredUsers}
+          searchableColumns={["applicationId", "firstName", "lastName", "school", "department", "scientificField"]}
+          searchText={searchText}
+          onSearchTextChange={setSearchText}
+          showSearchBar={false}
           loading={loading}
           getSortedRows={getSortedUsers}
           getRowKey={(row) => row?.applicationId ?? row?.id}
