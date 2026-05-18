@@ -18,15 +18,11 @@ import MyApplications from "./pages/MyApplications";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Ranking from "./pages/Ranking";
-import Positions from "./pages/Positions";
-import PositionsAll from "./pages/PositionsAll";
 import PositionsCreate from "./pages/PositionsCreate";
-import PositionsEdit from "./pages/PositionsEdit";
-import PositionsAndFields from "./pages/PositionsAndFields";
 import ScientificFields from "./pages/ScientificFields";
-import ScientificFieldsAll from "./pages/ScientificFieldsAll";
+import ScientificFieldsView from "./pages/ScientificFieldsView";
 import ScientificFieldsCreate from "./pages/ScientificFieldsCreate";
-import ScientificFieldsEdit from "./pages/ScientificFieldsEdit";
+import ScientificFieldSingle from "./pages/ScientificFieldSingle";
 import Users from "./pages/Users";
 import UsersView from "./pages/UsersView";
 import Analytics from "./pages/Analytics";
@@ -155,23 +151,19 @@ function AppContent() {
                   <>
                     <Route path="/profile/:userId" element={<Profile />} />
                     <Route path="/my-applications/:userId" element={<MyApplications />} />
-                    <Route path="/positions-and-fields" element={<PositionsAndFields />} />
                     <Route path="/users" element={<Users />} />
                     <Route path="/users/view" element={<UsersView />} />
                     <Route path="/users/register-admin" element={<RegisterAdmin />} />
                     <Route path="/analytics" element={<Analytics />} />
                     <Route path="/register-admin" element={<RegisterAdmin />} />
-                    <Route path="/positions" element={<Positions />} />
-                    <Route path="/positions/all" element={<PositionsAll />} />
-                    <Route path="/positions/edit" element={<PositionsEdit />} />
                     <Route path="/positions/create" element={
                       <React.Suspense fallback={<div>Φόρτωση...</div>}>
                         {React.createElement(require("./pages/PositionsCreate").default)}
                       </React.Suspense>
                     } />
                     <Route path="/scientific-fields" element={<ScientificFields />} />
-                    <Route path="/scientific-fields/all" element={<ScientificFieldsAll />} />
-                    <Route path="/scientific-fields/edit" element={<ScientificFieldsEdit />} />
+                    <Route path="/scientific-fields/view" element={<ScientificFieldsView />} />
+                    <Route path="/scientific-fields/:id" element={<ScientificFieldSingle />} />
                     <Route path="/scientific-fields/create" element={
                       <React.Suspense fallback={<div>Φόρτωση...</div>}>
                         {React.createElement(require("./pages/ScientificFieldsCreate").default)}

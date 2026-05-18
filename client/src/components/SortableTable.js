@@ -116,6 +116,7 @@ export default function SortableTable({
     return (columns || []).map((col) => col?.key).filter(Boolean);
   }, [columns, searchableColumns]);
 
+
   const normalizeSearchValue = (value) => {
     if (value === null || value === undefined) return "";
     if (typeof value === "string") return value;
@@ -147,6 +148,7 @@ export default function SortableTable({
 
     return values;
   };
+
 
   const filteredRows = useMemo(() => {
     const safeRows = Array.isArray(rows) ? rows : [];
@@ -183,7 +185,7 @@ export default function SortableTable({
 
   return (
     <div className="w-full">
-      {enableSearch && showSearchBar && (
+      {(enableSearch && showSearchBar) && (
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="relative w-full max-w-xs">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -206,7 +208,7 @@ export default function SortableTable({
                 aria-label="Καθαρισμός αναζήτησης"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </button>
             )}

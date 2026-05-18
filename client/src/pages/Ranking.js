@@ -42,6 +42,41 @@ function parseDDMMYYYY(dateStr, timeStr, fallbackTime = "00:00") {
   return new Date(y, m - 1, d, hours, minutes, 0, 0);
 }
 
+function parseDateOnly(value) {
+  if (!value) return null;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+  }
+
+  const raw = String(value).trim();
+  if (!raw) return null;
+
+  const isoMatch = raw.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    const [_, y, m, d] = isoMatch;
+    return new Date(Number(y), Number(m) - 1, Number(d));
+  }
+
+  const dmyMatch = raw.match(/(\d{2})[./-](\d{2})[./-](\d{4})/);
+  if (dmyMatch) {
+    const [_, d, m, y] = dmyMatch;
+    return new Date(Number(y), Number(m) - 1, Number(d));
+  }
+
+  const fallback = new Date(raw);
+  if (!Number.isNaN(fallback.getTime())) {
+    return new Date(fallback.getFullYear(), fallback.getMonth(), fallback.getDate());
+  }
+  return null;
+}
+
+function formatIsoDateLabel(iso) {
+  if (!iso) return "";
+  const [y, m, d] = String(iso).split("-");
+  if (!y || !m || !d) return String(iso);
+  return `${d}-${m}-${y}`;
+}
+
 function resolveApplicationId(applicant) {
   return applicant?.applicationId || applicant?.application_id || applicant?.id || "—";
 }
@@ -87,6 +122,9 @@ export default function Ranking() {
     status: [],
     pointsMin: "",
     pointsMax: "",
+    dateRanges: {
+      submitDate: { from: "", to: "" },
+    },
   });
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -206,6 +244,8 @@ export default function Ranking() {
     if (filters.status.length) params.status = filters.status.join(",");
     if (filters.pointsMin) params.pointsMin = filters.pointsMin;
     if (filters.pointsMax) params.pointsMax = filters.pointsMax;
+    if (filters.dateRanges?.submitDate?.from) params.submitDateFrom = filters.dateRanges.submitDate.from;
+    if (filters.dateRanges?.submitDate?.to) params.submitDateTo = filters.dateRanges.submitDate.to;
     setSearchParams(params);
   }, [filters, setSearchParams]);
 
@@ -219,6 +259,12 @@ export default function Ranking() {
       status: params.status ? params.status.split(",") : [],
       pointsMin: params.pointsMin || "",
       pointsMax: params.pointsMax || "",
+      dateRanges: {
+        submitDate: {
+          from: params.submitDateFrom || "",
+          to: params.submitDateTo || "",
+        },
+      },
     }));
     // eslint-disable-next-line
   }, []);
@@ -244,6 +290,20 @@ export default function Ranking() {
       // Points range
       if (filters.pointsMin && Number(u.totalPoints) < Number(filters.pointsMin)) return false;
       if (filters.pointsMax && Number(u.totalPoints) > Number(filters.pointsMax)) return false;
+      const submitRange = filters.dateRanges?.submitDate;
+      if (submitRange?.from || submitRange?.to) {
+        const submitRaw = resolveSubmitDateRaw(u);
+        const submitDate = parseDateOnly(submitRaw);
+        if (!submitDate) return false;
+        if (submitRange.from) {
+          const fromDate = parseDateOnly(submitRange.from);
+          if (fromDate && submitDate < fromDate) return false;
+        }
+        if (submitRange.to) {
+          const toDate = parseDateOnly(submitRange.to);
+          if (toDate && submitDate > toDate) return false;
+        }
+      }
       return true;
     });
   }, [users, filters, isAdmin]);
@@ -368,6 +428,23 @@ export default function Ranking() {
     if (isAdmin) filters.status.forEach(st => tags.push({ key: "status", value: st, label: `Κατάσταση: ${st}` }));
     if (filters.pointsMin) tags.push({ key: "pointsMin", value: filters.pointsMin, label: `Μόρια ≥ ${filters.pointsMin}` });
     if (filters.pointsMax) tags.push({ key: "pointsMax", value: filters.pointsMax, label: `Μόρια ≤ ${filters.pointsMax}` });
+    const submitRange = filters.dateRanges?.submitDate;
+    if (submitRange?.from) {
+      tags.push({
+        key: "dateRange",
+        rangeKey: "submitDate",
+        bound: "from",
+        label: `Ημερομηνία υποβολής από ${formatIsoDateLabel(submitRange.from)}`,
+      });
+    }
+    if (submitRange?.to) {
+      tags.push({
+        key: "dateRange",
+        rangeKey: "submitDate",
+        bound: "to",
+        label: `Ημερομηνία υποβολής έως ${formatIsoDateLabel(submitRange.to)}`,
+      });
+    }
     return tags;
   }, [filters, isAdmin]);
 
@@ -382,7 +459,36 @@ export default function Ranking() {
       }
       if (tag.key === "pointsMin") return { ...prev, pointsMin: "" };
       if (tag.key === "pointsMax") return { ...prev, pointsMax: "" };
+      if (tag.key === "dateRange") {
+        return {
+          ...prev,
+          dateRanges: {
+            ...prev.dateRanges,
+            [tag.rangeKey]: {
+              ...prev.dateRanges?.[tag.rangeKey],
+              [tag.bound]: "",
+            },
+          },
+        };
+      }
       return prev;
+    });
+  };
+
+  const clearAllFilters = () => {
+    if (showMyPosition) {
+      setShowMyPosition(false);
+    }
+    setFilters({
+      schools: [],
+      departments: [],
+      scientificFields: [],
+      status: [],
+      pointsMin: "",
+      pointsMax: "",
+      dateRanges: {
+        submitDate: { from: "", to: "" },
+      },
     });
   };
 
@@ -537,6 +643,9 @@ export default function Ranking() {
                     status: [],
                     pointsMin: "",
                     pointsMax: "",
+                    dateRanges: {
+                      submitDate: { from: "", to: "" },
+                    },
                   });
                 } else {
                   setFilters({
@@ -546,6 +655,9 @@ export default function Ranking() {
                     status: [],
                     pointsMin: "",
                     pointsMax: "",
+                    dateRanges: {
+                      submitDate: { from: "", to: "" },
+                    },
                   });
                 }
               }}
@@ -566,6 +678,8 @@ export default function Ranking() {
         isAdmin={isAdmin}
         title="Φίλτρα Λίστας Κατάταξης"
         titleClassName="text-gray-900"
+        showDateRanges
+        dateRangeFields={[{ key: "submitDate", label: "Ημερομηνία υποβολής" }]}
         onReset={() => setFilters({
           schools: [],
           departments: [],
@@ -573,11 +687,14 @@ export default function Ranking() {
           status: [],
           pointsMin: "",
           pointsMax: "",
+          dateRanges: {
+            submitDate: { from: "", to: "" },
+          },
         })}
       />
 
       <div className="mb-2 grid grid-cols-[1fr_auto] items-end gap-3 min-h-[36px]">
-        <div className="flex flex-wrap-reverse content-end gap-2 min-h-[28px] min-w-[12rem] self-end">
+        <div className="flex flex-wrap items-center gap-2 min-h-[28px] min-w-[12rem] self-end">
           {filterTags.map((tag, idx) => (
             <span
               key={idx}
@@ -593,6 +710,22 @@ export default function Ranking() {
               </button>
             </span>
           ))}
+          {filterTags.length > 0 && (
+            <button
+              type="button"
+              onClick={clearAllFilters}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border border-patras-buccaneer text-patras-buccaneer hover:bg-patras-buccaneer hover:text-white transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M8 6V4h8v2" />
+                <path d="M19 6l-1 14H6L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+              </svg>
+              Καθαρισμός όλων
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <RefreshButton

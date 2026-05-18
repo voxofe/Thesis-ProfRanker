@@ -2,71 +2,25 @@ import React from "react";
 import HomePagePanel from "../components/HomePagePanel";
 
 export default function ScientificFields() {
-  const scientificFieldsListPopup = (
-    <>
-      <span className="pb-2">Πίνακας Επιστημονικών Πεδίων</span>
-      <ul className="space-y-1">
-        <li>• Όλα τα επιστημονικά πεδία σε έναν αναλυτικό πίνακα</li>
-      </ul>
-    </>
-  );
-
-  const scientificFieldsCreatePopup = (
-    <>
-      <span className="pb-2">Δημιουργία Επιστημονικού Πεδίου</span>
-      <ul className="space-y-1">
-        <li>• Καταχωρήστε νέο πεδίο</li>
-        <li>• Ορίστε τμήμα, σχολή και μαθήματα</li>
-      </ul>
-    </>
-  );
-
-  const scientificFieldsEditPopup = (
-    <>
-      <span className="pb-2">Επεξεργασία Επιστημονικών Πεδίων</span>
-      <ul className="space-y-1">
-        <li>• Ενημερώστε τα στοιχεία των πεδίων</li>
-        <li>• Προσθέστε ή αφαιρέστε μαθήματα</li>
-      </ul>
-    </>
-  );
-
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-0">
       <div className="mb-0">
-        <h1 className="text-2xl font-bold text-gray-700 mb-2">
-        Επιστημονικά πεδία
+        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
+            Διαχείριση επιστημονικών πεδίων
         </h1>
-        <p className="text-gray-600 text-[17px]">
-          Διαχειριστείτε τα επιστημονικά πεδία και τα μαθήματά τους. 
-          <br />
-          <span>Επιλέξτε μία από τις παρακάτω ενέργειες για να ξεκινήσετε.</span>
-        </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <HomePagePanel
-          title="Προβολή πεδίων"
-          description="Δείτε όλα τα επιστημονικά πεδία σε έναν αναλυτικό πίνακα."
-          buttonText="Όλα τα Πεδία"
-          to="/scientific-fields/all"
-          // showInfoMark={true}
-          // infoPopup={scientificFieldsListPopup}
+          title="Προβολή επιστημονικών πεδίων"
+          description="Δείτε ή επεξεργαστείτε όλα τα επιστημονικά πεδία και τα μαθήματα τους."
+          buttonText="Δείτε όλα τα πεδία"
+          to="/scientific-fields/view"
         />
         <HomePagePanel
-          title="Δημιουργία πεδίου"
+          title="Δημιουργία επιστημονικού πεδίου"
           description="Δημιουργήστε νέο επιστημονικό πεδίο με τα αντίστοιχα μαθήματα."
           buttonText="+ Νέο πεδίο"
           to="/scientific-fields/create"
-          // showInfoMark={true}
-          // infoPopup={scientificFieldsCreatePopup}
-        />
-        <HomePagePanel
-          title="Επεξεργασία πεδίου"
-          description="Επεξεργαστείτε υπάρχοντα επιστημονικά πεδία και μαθήματα."
-          buttonText="Επεξεργασία"
-          to="/scientific-fields/edit"
-          // showInfoMark={true}
-          // infoPopup={scientificFieldsEditPopup}
         />
       </div>
     </div>

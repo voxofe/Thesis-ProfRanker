@@ -5,10 +5,8 @@ export function normalizePath(pathname) {
 export function getParentPath(pathname) {
   const path = normalizePath(pathname);
   if (path === "/home") return null;
-  if (path === "/positions-and-fields") return "/home";
-  if (path === "/positions") return "/positions-and-fields";
-  if (path.startsWith("/positions/")) return "/positions";
-  if (path === "/scientific-fields") return "/positions-and-fields";
+  if (path.startsWith("/positions/")) return "/home";
+  if (path === "/scientific-fields") return "/home";
   if (path.startsWith("/scientific-fields/")) return "/scientific-fields";
   if (path === "/users") return "/home";
   if (path === "/users/view") return "/users";

@@ -2,7 +2,6 @@ import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { usePositions } from "../contexts/PositionsContext";
 import FilterModal from "../components/FilterModal";
 import SortableTable, { formatDateTimeCell } from "../components/SortableTable";
 
@@ -18,6 +17,7 @@ const stateLabels = {
   pending: "Προσεχής",
   active: "Ενεργή",
   completed: "Ολοκληρωμένη",
+  unpublished: "Ανενεργή",
 };
 
 const columns = [
@@ -35,7 +35,8 @@ function getStateBadgeClasses(state) {
     "inline-flex items-center justify-center rounded-full px-2 py-1 text-xs font-semibold";
   if (state === "Ενεργή") return `${base} bg-yellow-100 text-yellow-800 border border-yellow-200`;
   if (state === "Ολοκληρωμένη") return `${base} bg-green-100 text-green-800 border border-green-200`;
-  if (state === "Προσεχής") return `${base} bg-gray-100 text-gray-700 border border-gray-200`;
+  if (state === "Προσεχής") return `${base} bg-blue-100 text-blue-800 border border-blue-200`;
+  if (state === "Ανενεργή") return `${base} bg-gray-100 text-gray-700 border border-gray-200`;
   return `${base} bg-gray-100 text-gray-700 border border-gray-200`;
 }
 
@@ -49,18 +50,56 @@ function parseIsoDateTime(dateValue, timeValue) {
   return new Date(y, m - 1, d, hours, minutes, 0, 0);
 }
 
-export default function PositionsTable() {
+function parseDateOnly(value) {
+  if (!value) return null;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+  }
+
+  const raw = String(value).trim();
+  if (!raw) return null;
+
+  const isoMatch = raw.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    const [_, y, m, d] = isoMatch;
+    return new Date(Number(y), Number(m) - 1, Number(d));
+  }
+
+  const dmyMatch = raw.match(/(\d{2})[./-](\d{2})[./-](\d{4})/);
+  if (dmyMatch) {
+    const [_, d, m, y] = dmyMatch;
+    return new Date(Number(y), Number(m) - 1, Number(d));
+  }
+
+  const fallback = new Date(raw);
+  if (!Number.isNaN(fallback.getTime())) {
+    return new Date(fallback.getFullYear(), fallback.getMonth(), fallback.getDate());
+  }
+  return null;
+}
+
+function formatIsoDateLabel(iso) {
+  if (!iso) return "";
+  const [y, m, d] = String(iso).split("-");
+  if (!y || !m || !d) return String(iso);
+  return `${d}-${m}-${y}`;
+}
+
+export default function ScientificFieldsView() {
   const { currentUser } = useAuth();
-  const { positions = [], loading } = usePositions();
-  const [applicants, setApplicants] = useState([]);
+  const [scientificFields, setScientificFields] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
     schools: [],
     departments: [],
-    scientificFields: [],
     status: [],
     pointsMin: "",
     pointsMax: "",
+    dateRanges: {
+      startDate: { from: "", to: "" },
+      endDate: { from: "", to: "" },
+    },
   });
   const [searchText, setSearchText] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
@@ -74,57 +113,49 @@ export default function PositionsTable() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    if (!token || !currentUser) return;
+    setLoading(true);
     axios({
       method: "GET",
-      url: `${API_BASE_URL}/api/applicant/all`,
+      url: `${API_BASE_URL}/api/scientific-fields`,
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
-      .then((response) => setApplicants(response.data || []))
+      .then((response) => setScientificFields(response.data || []))
       .catch((error) => {
-        console.error("Error fetching applicants list:", error);
-        setApplicants([]);
-      });
-  }, []);
-
-  const applicantCounts = useMemo(() => {
-    return (applicants || []).reduce((acc, applicant) => {
-      const key = applicant?.scientificField || "";
-      if (!key) return acc;
-      acc[key] = (acc[key] || 0) + 1;
-      return acc;
-    }, {});
-  }, [applicants]);
+        console.error("Error fetching scientific fields:", error);
+        setScientificFields([]);
+      })
+      .finally(() => setLoading(false));
+  }, [currentUser]);
 
   const rows = useMemo(() => {
-    return (positions || []).map((pos) => {
-      const startDate = parseIsoDateTime(pos.startDate, pos.startTime);
-      const endDate = parseIsoDateTime(pos.endDate, pos.endTime);
+    return (scientificFields || []).map((sf) => {
+      const startDate = parseIsoDateTime(sf.positionStartDate, sf.positionStartTime);
+      const endDate = parseIsoDateTime(sf.positionEndDate, sf.positionEndTime);
       return {
-        id: pos.id,
-        scientificField: pos.scientificField,
-        school: pos.school,
-        department: pos.department,
-        state: stateLabels[pos.state] || "—",
-        applicants: applicantCounts[pos.scientificField] || 0,
-        startDate: pos.startDate || "",
-        endDate: pos.endDate || "",
-        startTime: pos.startTime || "",
-        endTime: pos.endTime || "",
+        id: sf.id,
+        scientificField: sf.name,
+        school: sf.school,
+        department: sf.department,
+        state: stateLabels[sf.state] || "—",
+        applicants: sf.applications || 0,
+        startDate: sf.positionStartDate || "",
+        endDate: sf.positionEndDate || "",
+        startTime: sf.positionStartTime || "",
+        endTime: sf.positionEndTime || "",
         _startDate: startDate,
         _endDate: endDate,
       };
     });
-  }, [positions, applicantCounts]);
+  }, [scientificFields]);
 
   const filterOptions = useMemo(() => {
     const schools = [...new Set(rows.map((r) => r.school).filter(Boolean))];
     const departments = [...new Set(rows.map((r) => r.department).filter(Boolean))];
-    const scientificFields = [...new Set(rows.map((r) => r.scientificField).filter(Boolean))];
     const statuses = [...new Set(rows.map((r) => r.state).filter(Boolean))];
     return {
       schools,
       departments,
-      scientificFields,
       statuses,
     };
   }, [rows]);
@@ -133,10 +164,13 @@ export default function PositionsTable() {
     const params = {};
     if (filters.schools.length) params.school = filters.schools.join(",");
     if (filters.departments.length) params.department = filters.departments.join(",");
-    if (filters.scientificFields.length) params.scientificField = filters.scientificFields.join(",");
     if (filters.status.length) params.status = filters.status.join(",");
     if (filters.pointsMin) params.pointsMin = filters.pointsMin;
     if (filters.pointsMax) params.pointsMax = filters.pointsMax;
+    if (filters.dateRanges?.startDate?.from) params.startDateFrom = filters.dateRanges.startDate.from;
+    if (filters.dateRanges?.startDate?.to) params.startDateTo = filters.dateRanges.startDate.to;
+    if (filters.dateRanges?.endDate?.from) params.endDateFrom = filters.dateRanges.endDate.from;
+    if (filters.dateRanges?.endDate?.to) params.endDateTo = filters.dateRanges.endDate.to;
     setSearchParams(params);
   }, [filters, setSearchParams]);
 
@@ -146,10 +180,19 @@ export default function PositionsTable() {
       ...prev,
       schools: params.school ? params.school.split(",") : [],
       departments: params.department ? params.department.split(",") : [],
-      scientificFields: params.scientificField ? params.scientificField.split(",") : [],
       status: params.status ? params.status.split(",") : [],
       pointsMin: params.pointsMin || "",
       pointsMax: params.pointsMax || "",
+      dateRanges: {
+        startDate: {
+          from: params.startDateFrom || "",
+          to: params.startDateTo || "",
+        },
+        endDate: {
+          from: params.endDateFrom || "",
+          to: params.endDateTo || "",
+        },
+      },
     }));
     // eslint-disable-next-line
   }, []);
@@ -158,10 +201,35 @@ export default function PositionsTable() {
     return rows.filter((r) => {
       if (filters.schools.length && !filters.schools.includes(r.school)) return false;
       if (filters.departments.length && !filters.departments.includes(r.department)) return false;
-      if (filters.scientificFields.length && !filters.scientificFields.includes(r.scientificField)) return false;
       if (filters.status.length && !filters.status.includes(r.state)) return false;
       if (filters.pointsMin && Number(r.applicants) < Number(filters.pointsMin)) return false;
       if (filters.pointsMax && Number(r.applicants) > Number(filters.pointsMax)) return false;
+      const startRange = filters.dateRanges?.startDate;
+      if (startRange?.from || startRange?.to) {
+        const startDate = parseDateOnly(r.startDate);
+        if (!startDate) return false;
+        if (startRange.from) {
+          const fromDate = parseDateOnly(startRange.from);
+          if (fromDate && startDate < fromDate) return false;
+        }
+        if (startRange.to) {
+          const toDate = parseDateOnly(startRange.to);
+          if (toDate && startDate > toDate) return false;
+        }
+      }
+      const endRange = filters.dateRanges?.endDate;
+      if (endRange?.from || endRange?.to) {
+        const endDate = parseDateOnly(r.endDate);
+        if (!endDate) return false;
+        if (endRange.from) {
+          const fromDate = parseDateOnly(endRange.from);
+          if (fromDate && endDate < fromDate) return false;
+        }
+        if (endRange.to) {
+          const toDate = parseDateOnly(endRange.to);
+          if (toDate && endDate > toDate) return false;
+        }
+      }
       return true;
     });
   }, [rows, filters]);
@@ -218,84 +286,126 @@ export default function PositionsTable() {
     const tags = [];
     filters.schools.forEach((s) => tags.push({ key: "schools", value: s, label: `Σχολή: ${s}` }));
     filters.departments.forEach((d) => tags.push({ key: "departments", value: d, label: `Τμήμα: ${d}` }));
-    filters.scientificFields.forEach((sf) => tags.push({ key: "scientificFields", value: sf, label: `Επιστημονικό πεδίο: ${sf}` }));
     filters.status.forEach((st) => tags.push({ key: "status", value: st, label: `Κατάσταση: ${st}` }));
     if (filters.pointsMin) tags.push({ key: "pointsMin", value: filters.pointsMin, label: `Πλήθος αιτήσεων ≥ ${filters.pointsMin}` });
     if (filters.pointsMax) tags.push({ key: "pointsMax", value: filters.pointsMax, label: `Πλήθος αιτήσεων ≤ ${filters.pointsMax}` });
+    const startRange = filters.dateRanges?.startDate;
+    if (startRange?.from) {
+      tags.push({
+        key: "dateRange",
+        rangeKey: "startDate",
+        bound: "from",
+        label: `Έναρξη από ${formatIsoDateLabel(startRange.from)}`,
+      });
+    }
+    if (startRange?.to) {
+      tags.push({
+        key: "dateRange",
+        rangeKey: "startDate",
+        bound: "to",
+        label: `Έναρξη έως ${formatIsoDateLabel(startRange.to)}`,
+      });
+    }
+    const endRange = filters.dateRanges?.endDate;
+    if (endRange?.from) {
+      tags.push({
+        key: "dateRange",
+        rangeKey: "endDate",
+        bound: "from",
+        label: `Λήξη από ${formatIsoDateLabel(endRange.from)}`,
+      });
+    }
+    if (endRange?.to) {
+      tags.push({
+        key: "dateRange",
+        rangeKey: "endDate",
+        bound: "to",
+        label: `Λήξη έως ${formatIsoDateLabel(endRange.to)}`,
+      });
+    }
     return tags;
   }, [filters]);
 
   const removeTag = (tag) => {
     setFilters((prev) => {
-      if (["schools", "departments", "scientificFields", "status"].includes(tag.key)) {
+      if (["schools", "departments", "status"].includes(tag.key)) {
         return { ...prev, [tag.key]: prev[tag.key].filter((v) => v !== tag.value) };
       }
       if (tag.key === "pointsMin") return { ...prev, pointsMin: "" };
       if (tag.key === "pointsMax") return { ...prev, pointsMax: "" };
+      if (tag.key === "dateRange") {
+        return {
+          ...prev,
+          dateRanges: {
+            ...prev.dateRanges,
+            [tag.rangeKey]: {
+              ...prev.dateRanges?.[tag.rangeKey],
+              [tag.bound]: "",
+            },
+          },
+        };
+      }
       return prev;
     });
   };
 
-  const buildRankingLink = (row) => {
-    const params = new URLSearchParams();
-    if (row.school) params.set("school", row.school);
-    if (row.department) params.set("department", row.department);
-    if (row.scientificField) params.set("scientificField", row.scientificField);
-    return `/ranking?${params.toString()}`;
+  const clearAllFilters = () => {
+    setFilters({
+      schools: [],
+      departments: [],
+      status: [],
+      pointsMin: "",
+      pointsMax: "",
+      dateRanges: {
+        startDate: { from: "", to: "" },
+        endDate: { from: "", to: "" },
+      },
+    });
   };
 
+  const buildFieldLink = (row) => `/scientific-fields/${row.id}`;
+
   return (
-    <div className="grid grid-cols-1 gap-y-5 pt-0">
+    <div className="pt-0">
       <h1 className="text-2xl text-center border-b  pb-2 mb-6 text-gray-800">
-        Θέσεις προγράμματος
+        Επιστημονικά πεδία
       </h1>
-      <div className="flex items-center justify-between ml-1 m-0 p-0">
-        <div>
+      <div className="mb-2 grid grid-cols-[1fr_auto] items-end gap-3 min-h-[36px]">
+        <div className="flex flex-wrap items-center gap-2 min-h-[28px] min-w-[12rem] self-end">
+          {filterTags.map((tag, idx) => (
+            <span
+              key={idx}
+              className="inline-flex items-center bg-patras-buccaneer/10 text-patras-buccaneer px-3 py-1 rounded-full text-xs font-medium border border-patras-buccaneer"
+            >
+              {tag.label}
+              <button
+                className="ml-2 text-patras-sanguineBrown hover:text-red-700 text-xs font-bold"
+                onClick={() => removeTag(tag)}
+                title="Αφαίρεση φίλτρου"
+              >
+                &times;
+              </button>
+            </span>
+          ))}
           {filterTags.length > 0 && (
-            <div className="flex flex-wrap gap-2 pr-24">
-              {filterTags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="inline-flex items-center bg-patras-buccaneer/10 text-patras-buccaneer px-3 py-1 rounded-full text-xs font-medium border border-patras-buccaneer"
-                >
-                  {tag.label}
-                  <button
-                    className="ml-2 text-patras-sanguineBrown hover:text-red-700 text-xs font-bold"
-                    onClick={() => removeTag(tag)}
-                    title="Αφαίρεση φίλτρου"
-                  >
-                    &times;
-                  </button>
-                </span>
-              ))}
-            </div>
+            <button
+              type="button"
+              onClick={clearAllFilters}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border border-patras-buccaneer text-patras-buccaneer hover:bg-patras-buccaneer hover:text-white transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M8 6V4h8v2" />
+                <path d="M19 6l-1 14H6L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+              </svg>
+              Καθαρισμός όλων
+            </button>
           )}
         </div>
-      </div>
-
-      <FilterModal
-        open={filterOpen}
-        onClose={() => setFilterOpen(false)}
-        filters={filters}
-        setFilters={setFilters}
-        options={filterOptions}
-        isAdmin={isAdmin}
-        pointsLabel="Εύρος πλήθους αιτήσεων"
-        title="Φίλτρα Θέσεων"
-        titleClassName="text-gray-900"
-        onReset={() => setFilters({
-          schools: [],
-          departments: [],
-          scientificFields: [],
-          status: [],
-          pointsMin: "",
-          pointsMax: "",
-        })}
-      />
-
-      <div className="relative overflow-visible">
-        <div className="absolute -top-12 right-0 z-50 flex items-center gap-2">
-          <div className="relative w-56">
+        <div className="flex items-center gap-2">
+          <div className="relative w-64">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fillRule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clipRule="evenodd" />
@@ -305,7 +415,7 @@ export default function PositionsTable() {
               type="text"
               value={searchText}
               onChange={(event) => setSearchText(event.target.value)}
-              placeholder="Αναζήτηση θέσεων..."
+              placeholder="Αναζήτηση πεδίων..."
               className="w-full rounded-md border border-patras-capePalliser/50 bg-white/90 py-1.5 pl-9 pr-3 text-sm text-gray-800 shadow-sm focus:border-patras-buccaneer focus:outline-none"
             />
             {searchText && (
@@ -332,6 +442,38 @@ export default function PositionsTable() {
             Φίλτρα
           </button>
         </div>
+      </div>
+
+      <FilterModal
+        open={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        filters={filters}
+        setFilters={setFilters}
+        options={filterOptions}
+        isAdmin={isAdmin}
+        showScientificFields={false}
+        pointsLabel="Εύρος πλήθους αιτήσεων"
+        title="Φίλτρα Θέσεων"
+        titleClassName="text-gray-900"
+        showDateRanges
+        dateRangeFields={[
+          { key: "startDate", label: "Έναρξη" },
+          { key: "endDate", label: "Λήξη" },
+        ]}
+        onReset={() => setFilters({
+          schools: [],
+          departments: [],
+          status: [],
+          pointsMin: "",
+          pointsMax: "",
+          dateRanges: {
+            startDate: { from: "", to: "" },
+            endDate: { from: "", to: "" },
+          },
+        })}
+      />
+
+      <div className="relative overflow-visible">
         <SortableTable
           columns={columns}
           rows={filteredRows}
@@ -347,41 +489,69 @@ export default function PositionsTable() {
           initialSortDirection="desc"
           getSortedRows={getSortedRows}
           renderRow={(row, key) => {
-            const rankingLink = buildRankingLink(row);
+            const fieldLink = buildFieldLink(row);
             return (
               <tr key={key} className="hover:bg-patras-albescentWhite/50">
                 <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words">
-                  <Link to={rankingLink} className="block w-full h-full px-6 py-4">
+                  <Link
+                    to={fieldLink}
+                    state={{ scientificFieldName: row.scientificField }}
+                    className="block w-full h-full px-6 py-4"
+                  >
                     {row.scientificField || "—"}
                   </Link>
                 </td>
                 <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words">
-                  <Link to={rankingLink} className="block w-full h-full px-6 py-4">
+                  <Link
+                    to={fieldLink}
+                    state={{ scientificFieldName: row.scientificField }}
+                    className="block w-full h-full px-6 py-4"
+                  >
                     {row.school || "—"}
                   </Link>
                 </td>
                 <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words">
-                  <Link to={rankingLink} className="block w-full h-full px-6 py-4">
+                  <Link
+                    to={fieldLink}
+                    state={{ scientificFieldName: row.scientificField }}
+                    className="block w-full h-full px-6 py-4"
+                  >
                     {row.department || "—"}
                   </Link>
                 </td>
                 <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words">
-                  <Link to={rankingLink} className="block w-full h-full px-6 py-4">
+                  <Link
+                    to={fieldLink}
+                    state={{ scientificFieldName: row.scientificField }}
+                    className="block w-full h-full px-6 py-4"
+                  >
                     <span className={getStateBadgeClasses(row.state)}>{row.state}</span>
                   </Link>
                 </td>
                 <td className="text-center text-patras-buccaneer text-[13px] whitespace-nowrap">
-                  <Link to={rankingLink} className="block w-full h-full px-6 py-4">
+                  <Link
+                    to={fieldLink}
+                    state={{ scientificFieldName: row.scientificField }}
+                    className="block w-full h-full px-6 py-4"
+                  >
                     {row.applicants}
                   </Link>
                 </td>
                 <td className="text-center text-patras-buccaneer text-[13px] whitespace-nowrap">
-                  <Link to={rankingLink} className="block w-full h-full px-6 py-4">
+                  <Link
+                    to={fieldLink}
+                    state={{ scientificFieldName: row.scientificField }}
+                    className="block w-full h-full px-6 py-4"
+                  >
                     {formatDateTimeCell(row.startDate, row.startTime, "00:00")}
                   </Link>
                 </td>
                 <td className="text-center text-patras-buccaneer text-[13px] whitespace-nowrap">
-                  <Link to={rankingLink} className="block w-full h-full px-6 py-4">
+                  <Link
+                    to={fieldLink}
+                    state={{ scientificFieldName: row.scientificField }}
+                    className="block w-full h-full px-6 py-4"
+                  >
                     {formatDateTimeCell(row.endDate, row.endTime, "23:59")}
                   </Link>
                 </td>

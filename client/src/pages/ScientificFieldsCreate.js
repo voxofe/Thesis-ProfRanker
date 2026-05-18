@@ -221,9 +221,6 @@ export default function ScientificFieldsCreate() {
         <h1 className="text-2xl text-center border-b pb-2 text-gray-800">
           Δημιουργία πεδίου
         </h1>
-        <p className="text-gray-500 mt-10 text-sm text-center">
-          Ορίστε τα στοιχεία του νέου επιστημονικού πεδίου και τα μαθήματά του
-        </p>
       </header>
 
       <form

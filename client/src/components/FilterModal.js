@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import InputField from "./InputField";
+import FlowbiteDateField from "./FlowbiteDateField";
+
+const EMPTY_DATE_FIELDS = [];
 
 export default function FilterModal({
   open,
@@ -16,6 +19,8 @@ export default function FilterModal({
   showDepartments = true,
   showScientificFields = true,
   showGender = false,
+  showDateRanges = false,
+  dateRangeFields = EMPTY_DATE_FIELDS,
   title = "Φίλτρα",
   titleClassName = "text-gray-900",
 }) {
@@ -23,8 +28,25 @@ export default function FilterModal({
   const [localFilters, setLocalFilters] = useState(filters);
 
   useEffect(() => {
-    setLocalFilters(filters);
-  }, [filters, open]);
+    if (!showDateRanges || !dateRangeFields.length) {
+      setLocalFilters(filters);
+      return;
+    }
+
+    const nextDateRanges = {};
+    dateRangeFields.forEach((field) => {
+      const existing = filters?.dateRanges?.[field.key] || { from: "", to: "" };
+      nextDateRanges[field.key] = {
+        from: existing.from || "",
+        to: existing.to || "",
+      };
+    });
+
+    setLocalFilters({
+      ...filters,
+      dateRanges: nextDateRanges,
+    });
+  }, [filters, open, showDateRanges, dateRangeFields]);
 
   const handleMultiSelect = (key, value) => {
     setLocalFilters((prev) => {
@@ -61,6 +83,19 @@ export default function FilterModal({
     }));
   };
 
+  const handleDateRangeChange = (key, bound, value) => {
+    setLocalFilters((prev) => ({
+      ...prev,
+      dateRanges: {
+        ...(prev.dateRanges || {}),
+        [key]: {
+          ...(prev.dateRanges?.[key] || { from: "", to: "" }),
+          [bound]: value,
+        },
+      },
+    }));
+  };
+
   const handleApply = () => {
     // sanitize points before applying
     const sanitized = { ...localFilters };
@@ -93,6 +128,14 @@ export default function FilterModal({
       ...(showGender ? { genders: [] } : {}),
       ...(showStatus ? { status: [] } : {}),
       ...(showPoints ? { pointsMin: "", pointsMax: "" } : {}),
+      ...(showDateRanges
+        ? {
+            dateRanges: dateRangeFields.reduce((acc, field) => {
+              acc[field.key] = { from: "", to: "" };
+              return acc;
+            }, {}),
+          }
+        : {}),
     };
     setLocalFilters(resetFilters);
     setFilters(resetFilters);
@@ -273,6 +316,33 @@ export default function FilterModal({
                   className="w-24"
                   placeholder="Μέγιστο"
                 />
+              </div>
+            </div>
+          )}
+          {showDateRanges && dateRangeFields.length > 0 && (
+            <div className="md:col-span-2">
+              <div className="flex flex-col gap-4">
+                {dateRangeFields.map((field) => {
+                  const range = localFilters?.dateRanges?.[field.key] || { from: "", to: "" };
+                  return (
+                    <div key={field.key}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <FlowbiteDateField
+                          label={`${field.label} από`}
+                          value={range.from}
+                          onChange={(value) => handleDateRangeChange(field.key, "from", value)}
+                          placeholder="DD-MM-YYYY"
+                        />
+                        <FlowbiteDateField
+                          label={`${field.label} έως`}
+                          value={range.to}
+                          onChange={(value) => handleDateRangeChange(field.key, "to", value)}
+                          placeholder="DD-MM-YYYY"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

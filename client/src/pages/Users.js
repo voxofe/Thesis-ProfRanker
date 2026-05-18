@@ -5,7 +5,7 @@ export default function Users() {
   return (
     <div className="max-w-4xl mx-auto p-0">
         <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
-            Διαχείριστη χρηστών
+            Διαχείριση χρηστών
         </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <HomePagePanel

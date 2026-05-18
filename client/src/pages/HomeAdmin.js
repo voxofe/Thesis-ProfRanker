@@ -17,7 +17,7 @@ export default function HomeAdmin() {
           title="Επιστημονικά πεδία και μαθήματα"
           description="Δείτε, επεξεργαστείτε ή δημιουργήστε νέα επιστημονικά πεδία και μαθήματα."
           buttonText="Διαχείριση πεδίων και μαθημάτων"
-          to="/positions-and-fields"
+          to="/scientific-fields"
         />
         <HomePagePanel
           title="Χρήστες"
