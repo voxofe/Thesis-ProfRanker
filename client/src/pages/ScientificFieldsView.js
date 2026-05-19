@@ -453,7 +453,7 @@ export default function ScientificFieldsView() {
         isAdmin={isAdmin}
         showScientificFields={false}
         pointsLabel="Εύρος πλήθους αιτήσεων"
-        title="Φίλτρα Θέσεων"
+        title="Φίλτρα πεδίων"
         titleClassName="text-gray-900"
         showDateRanges
         dateRangeFields={[
@@ -482,7 +482,7 @@ export default function ScientificFieldsView() {
           onSearchTextChange={setSearchText}
           showSearchBar={false}
           loading={loading}
-          loadingMessage="Φόρτωση θέσεων..."
+          loadingMessage="Φόρτωση πεδίων..."
           emptyMessage="Δεν υπάρχουν διαθέσιμες θέσεις."
           headerCellClassName="px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider cursor-pointer select-none"
           initialSortBy="state"

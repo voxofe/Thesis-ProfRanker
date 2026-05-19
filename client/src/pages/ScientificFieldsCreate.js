@@ -4,8 +4,9 @@ import { useToast } from "../contexts/ToastContext";
 import InputField from "../components/InputField";
 import CustomSelect from "../components/CustomSelect";
 import CoursePanel from "../components/CoursePanel";
+import FlowbiteDateField from "../components/FlowbiteDateField";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const SCHOOLS = [
   "ΘΕΤΙΚΩΝ ΕΠΙΣΤΗΜΩΝ",
@@ -51,32 +52,113 @@ const API_BASE_URL = (
 
 export default function ScientificFieldsCreate() {
   const { currentUser } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
   const { updateValidity, isValid, validationErrors } = useCreatePositionValidation();
 
-  const [formData, setFormData] = useState({
-    school: "select",
-    department: "select",
-    scientificField: "",
-    courses: [],
+  const prefillScientificField = location.state?.prefillScientificField || null;
+  const isEditMode = Boolean(prefillScientificField?.id);
+  const isEditHash = location.hash === "#edit";
+  const showPositionFields =
+    isEditMode &&
+    isEditHash &&
+    prefillScientificField?.state === "pending";
+
+  const todayISO = () => new Date().toISOString().split("T")[0];
+
+  const normalizeDateValue = (value) => {
+    if (!value) return "";
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString().split("T")[0];
+    }
+    const normalizeDateOnly = (dateStr) => {
+      if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+        return `${dateStr.slice(6, 10)}-${dateStr.slice(3, 5)}-${dateStr.slice(0, 2)}`;
+      }
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+        return `${dateStr.slice(6, 10)}-${dateStr.slice(3, 5)}-${dateStr.slice(0, 2)}`;
+      }
+      if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+        return dateStr.replace(/\//g, "-");
+      }
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+      return "";
+    };
+
+    const str = String(value).trim();
+    const trimmed = str.includes("T")
+      ? str.split("T")[0]
+      : str.includes(" ")
+        ? str.split(" ")[0]
+        : str;
+    const normalized = normalizeDateOnly(trimmed);
+    if (normalized) return normalized;
+    const parsed = new Date(trimmed);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toISOString().split("T")[0];
+    }
+    return "";
+  };
+
+  const normalizeCourse = (course) => ({
+    code: course?.code || "",
+    name: course?.name || "",
+    description: course?.description || "",
+    semester: course?.semester || "select",
+    teaching_units: course?.teaching_units ?? course?.teachingUnits ?? "",
+    ects: course?.ects ?? "",
+    theory_hours: course?.theory_hours ?? "",
+    lab_hours: course?.lab_hours ?? "",
+    category: course?.category || "select",
   });
+
+  const [formData, setFormData] = useState(() => ({
+    school: prefillScientificField?.school || "select",
+    department: prefillScientificField?.department || "select",
+    scientificField: prefillScientificField?.name || "",
+    courses: Array.isArray(prefillScientificField?.courses)
+      ? prefillScientificField.courses.map(normalizeCourse)
+      : [],
+    startDate: normalizeDateValue(prefillScientificField?.positionStartDate),
+    endDate: normalizeDateValue(prefillScientificField?.positionEndDate),
+    startTime: prefillScientificField?.positionStartTime || "",
+    endTime: prefillScientificField?.positionEndTime || "",
+  }));
 
   const { showToast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [redirectLoading, setRedirectLoading] = useState(false);
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [dateCleared, setDateCleared] = useState({ startDate: false, endDate: false });
 
   const markTouched = (field) =>
     setTouched((prev) => ({ ...prev, [field]: true }));
 
   const showError = (field) => submitted || touched[field];
   const showCourseError = submitted || touched.courses;
+  const showDateTimeError = submitted || touched.startTime || touched.endTime;
 
   // access control
   useEffect(() => {
     if (!currentUser || currentUser.role !== "admin") navigate("/home");
   }, [currentUser, navigate]);
+
+  useEffect(() => {
+    if (!prefillScientificField) return;
+    setFormData({
+      school: prefillScientificField.school || "select",
+      department: prefillScientificField.department || "select",
+      scientificField: prefillScientificField.name || "",
+      courses: Array.isArray(prefillScientificField.courses)
+        ? prefillScientificField.courses.map(normalizeCourse)
+        : [],
+      startDate: normalizeDateValue(prefillScientificField.positionStartDate),
+      endDate: normalizeDateValue(prefillScientificField.positionEndDate),
+      startTime: prefillScientificField.positionStartTime || "",
+      endTime: prefillScientificField.positionEndTime || "",
+    });
+  }, [prefillScientificField]);
 
   // LIVE validation – run on any edit; do NOT depend on updateValidity
   useEffect(() => {
@@ -146,20 +228,70 @@ export default function ScientificFieldsCreate() {
       courses: JSON.stringify(formData.courses || []),
     };
 
+    const hasPositionFields =
+      showPositionFields && (
+        formData.startDate ||
+        formData.endDate ||
+        formData.startTime ||
+        formData.endTime
+      );
+
     try {
       const token = localStorage.getItem("token");
-      await axios({
-        method: "POST",
-        url: `${API_BASE_URL}/api/scientific-fields`,
+      const response = await axios({
+        method: isEditMode ? "PUT" : "POST",
+        url: isEditMode
+          ? `${API_BASE_URL}/api/scientific-fields/${prefillScientificField.id}`
+          : `${API_BASE_URL}/api/scientific-fields`,
         data: payload,
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       showToast({
         type: "success",
-        message: "Το επιστημονικό πεδίο δημιουργήθηκε με επιτυχία!",
+        message: isEditMode
+          ? "Το επιστημονικό πεδίο ενημερώθηκε με επιτυχία!"
+          : "Το επιστημονικό πεδίο δημιουργήθηκε με επιτυχία!",
       });
       setSubmitting(false);
+
+      if (hasPositionFields) {
+        const sfId = isEditMode
+          ? prefillScientificField.id
+          : response?.data?.scientificFieldId;
+        if (sfId) {
+          try {
+            await axios({
+              method: "POST",
+              url: `${API_BASE_URL}/api/positions`,
+              data: {
+                positionId: prefillScientificField?.positionId || undefined,
+                scientificFieldId: sfId,
+                startDate: formData.startDate,
+                endDate: formData.endDate,
+                startTime: formData.startTime,
+                endTime: formData.endTime,
+              },
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
+          } catch (positionError) {
+            const message =
+              positionError?.response?.data?.error ||
+              "Αποτυχία ενημέρωσης ημερομηνιών θέσης.";
+            showToast({ type: "error", message });
+          }
+        }
+      }
+
+      if (isEditMode) {
+        navigate(`/scientific-fields/${prefillScientificField.id}`);
+        return;
+      }
+      const createdId = response?.data?.scientificFieldId;
+      if (createdId) {
+        navigate(`/scientific-fields/${createdId}`);
+        return;
+      }
       setTimeout(() => {
         setRedirectLoading(true);
         setTimeout(() => {
@@ -219,13 +351,14 @@ export default function ScientificFieldsCreate() {
       )}
       <header className="text-center pb-2">
         <h1 className="text-2xl text-center border-b pb-2 text-gray-800">
-          Δημιουργία πεδίου
+          {isEditMode ? "Ενημέρωση πεδίου" : "Δημιουργία πεδίου"}
         </h1>
       </header>
 
       <form
         onSubmit={handleSubmit}
         className="space-y-10 bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-patras-albescentWhite-50"
+        noValidate
       >
         {/* BASIC INFO */}
         <section>
@@ -297,6 +430,111 @@ export default function ScientificFieldsCreate() {
           <p className="-mt-6 text-sm text-red-600">{validationErrors.courses}</p>
         )}
 
+        {showPositionFields && (
+          <section>
+            <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Στοιχεία θέσης</h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <FlowbiteDateField
+                  label="Ημερομηνία έναρξης"
+                  value={formData.startDate}
+                  onChange={(val) => {
+                    markTouched("startDate");
+                    setFormData({ ...formData, startDate: val });
+                    if (val) {
+                      setDateCleared((prev) => ({ ...prev, startDate: false }));
+                    }
+                  }}
+                  onClear={() => {
+                    markTouched("startDate");
+                    setDateCleared((prev) => ({ ...prev, startDate: true }));
+                  }}
+                  minDate={todayISO()}
+                  maxDate={formData.endDate || undefined}
+                  popupAlign="right"
+                  required={Boolean(
+                    formData.startDate ||
+                    formData.endDate ||
+                    formData.startTime ||
+                    formData.endTime
+                  )}
+                />
+                {showError("startDate") && validationErrors.startDate && (
+                  <p className="-mt-3 text-sm text-red-600">{validationErrors.startDate}</p>
+                )}
+              </div>
+              <div>
+                <FlowbiteDateField
+                  label="Ημερομηνία λήξης"
+                  value={formData.endDate}
+                  onChange={(val) => {
+                    markTouched("endDate");
+                    setFormData({ ...formData, endDate: val });
+                    if (val) {
+                      setDateCleared((prev) => ({ ...prev, endDate: false }));
+                    }
+                  }}
+                  onClear={() => {
+                    markTouched("endDate");
+                    setDateCleared((prev) => ({ ...prev, endDate: true }));
+                  }}
+                  minDate={formData.startDate || todayISO()}
+                  popupAlign="right"
+                  required={Boolean(
+                    formData.startDate ||
+                    formData.endDate ||
+                    formData.startTime ||
+                    formData.endTime
+                  )}
+                />
+                {showError("endDate") && validationErrors.endDate && (
+                  <p className="-mt-3 text-sm text-red-600">{validationErrors.endDate}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+              <InputField
+                label="Ώρα έναρξης"
+                type="time"
+                value={formData.startTime}
+                onChange={(val) => {
+                  markTouched("startTime");
+                  setFormData({ ...formData, startTime: val });
+                }}
+                error={showError("startTime") ? validationErrors.startTime : ""}
+                required={Boolean(
+                  formData.startDate ||
+                  formData.endDate ||
+                  formData.startTime ||
+                  formData.endTime
+                )}
+              />
+              <InputField
+                label="Ώρα λήξης"
+                type="time"
+                value={formData.endTime}
+                onChange={(val) => {
+                  markTouched("endTime");
+                  setFormData({ ...formData, endTime: val });
+                }}
+                error={showError("endTime") ? validationErrors.endTime : ""}
+                required={Boolean(
+                  formData.startDate ||
+                  formData.endDate ||
+                  formData.startTime ||
+                  formData.endTime
+                )}
+              />
+            </div>
+
+            {showDateTimeError && validationErrors?.dateTimeRange && (
+              <p className="mt-2 text-sm text-red-600">{validationErrors.dateTimeRange}</p>
+            )}
+          </section>
+        )}
+
         {/* SUBMIT */}
         <div className="pt-6 border-t text-right">
           <button
@@ -305,7 +543,13 @@ export default function ScientificFieldsCreate() {
             aria-disabled={submitDisabled}
             className="px-6 py-2 bg-patras-buccaneer text-white font-medium rounded-lg hover:bg-patras-sanguineBrown transition disabled:opacity-60"
           >
-            {submitting ? "Δημιουργία..." : "Δημιουργία πεδίου"}
+            {submitting
+              ? isEditMode
+                ? "Ενημέρωση..."
+                : "Δημιουργία..."
+              : isEditMode
+                ? "Ενημέρωση πεδίου"
+                : "Δημιουργία πεδίου"}
           </button>
         </div>
       </form>

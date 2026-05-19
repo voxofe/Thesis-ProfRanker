@@ -264,7 +264,7 @@ export default function FilterModal({
           {showStatus && isAdmin && (
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Κατάσταση αιτήσεων
+                Κατάσταση θέσης
               </label>
               <div className="flex flex-wrap gap-2">
                 {options.statuses.map((status) => (

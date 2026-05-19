@@ -16,15 +16,14 @@ const API_BASE_URL = (
   ""
 );
 
-export default function CreatePosition() {
+export default function CreatePosition({ prefillPosition: prefillPositionProp = null, inModal = false, onSuccess }) {
   const { currentUser } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { refreshPositions } = usePositions();
   const { updateValidity, isValid, validationErrors } = useCreatePositionValidation();
 
-  const prefillPosition = location.state?.prefillPosition || null;
-  const isEditMode = Boolean(prefillPosition);
+  const prefillPosition = prefillPositionProp || location.state?.prefillPosition || null;
 
   const todayISO = () => new Date().toISOString().split("T")[0];
 
@@ -193,7 +192,7 @@ export default function CreatePosition() {
 
     try {
       const token = localStorage.getItem("token");
-      await axios({
+      const response = await axios({
         method: "POST",
         url: `${API_BASE_URL}/api/positions`,
         data: payload,
@@ -202,11 +201,13 @@ export default function CreatePosition() {
 
       showToast({
         type: "success",
-        message: isEditMode
-          ? "Η θέση ενημερώθηκε με επιτυχία!"
-          : "Η θέση δημιουργήθηκε με επιτυχία!",
+        message: "Η θέση άνοιξε με επιτυχία!"
       });
       setSubmitting(false);
+      if (inModal && typeof onSuccess === "function") {
+        onSuccess(response?.data);
+        return;
+      }
       if (refreshPositions) {
         await refreshPositions();
       }
@@ -240,9 +241,16 @@ export default function CreatePosition() {
     );
   }
 
+  const wrapperClassName = inModal
+    ? "w-full max-w-5xl mx-auto px-6"
+    : "max-w-5xl mx-auto px-6 py-0 space-y-8";
+  const formClassName = inModal
+    ? "space-y-10 mt-4"
+    : "space-y-10 bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-patras-albescentWhite-50";
+
   return (
-    <div className="max-w-5xl mx-auto px-6 py-0 space-y-8">
-      {submitting && (
+    <div className={wrapperClassName}>
+      {submitting && !inModal && (
         <div className="flex justify-center items-center">
           <svg
             className="animate-spin h-6 w-6 text-patras-buccaneer"
@@ -267,24 +275,13 @@ export default function CreatePosition() {
           <span className="ml-2 text-patras-buccaneer">Υποβολή αίτησης...</span>
         </div>
       )}
-      <header className="text-center pb-2">
-        <h1 className="text-2xl text-center border-b pb-2 text-gray-800">
-          {isEditMode ? "Ενημέρωση θέσης" : "Δημιουργία θέσης"}
-        </h1>
-        <p className="text-gray-500 mt-10 text-sm text-center">
-          {isEditMode
-            ? "Ενημερώστε το επιστημονικό πεδίο και την χρονική περίοδο των αιτήσεων της."
-            : "Ορίστε το επιστημονικό πεδίο και την χρονική περίοδο των αιτήσεων της."}
-        </p>
-      </header>
-
       <form
         onSubmit={handleSubmit}
-        className="space-y-10 bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-patras-albescentWhite-50"
+        className={formClassName}
+        noValidate
       >
         {/* BASIC INFO */}
         <section>
-          <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Βασικές πληροφορίες</h2>
 
           <div className="grid grid-cols-1 gap-6">
             <PositionSelect
@@ -295,6 +292,7 @@ export default function CreatePosition() {
               placeholder="Αναζήτηστε με σχολή, τμήμα ή επιστημονικό πεδίο..."
               maxResults={50}
               error={showError("scientificFieldId") ? validationErrors.scientificFieldId : ""}
+              disabled={inModal}
               required
             />
           </div>
@@ -320,7 +318,6 @@ export default function CreatePosition() {
 
         {/* DATES */}
         <section>
-          <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Ημερομηνίες</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <FlowbiteDateField
@@ -409,7 +406,7 @@ export default function CreatePosition() {
             aria-disabled={submitDisabled}
             className="px-6 py-2 bg-patras-buccaneer text-white font-medium rounded-lg hover:bg-patras-sanguineBrown transition disabled:opacity-60"
           >
-            {submitting ? (isEditMode ? "Ενημέρωση..." : "Δημιουργία...") : (isEditMode ? "Ενημέρωση θέσης" : "Δημιουργία θέσης")}
+            {submitting ? "Άνοιγμα..." : "Άνοιγμα θέσης"}
           </button>
 
         </div>

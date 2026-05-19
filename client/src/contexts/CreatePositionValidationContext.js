@@ -45,6 +45,36 @@ export const CreatePositionValidationProvider = ({ children }) => {
       if (!formData.school || formData.school === "select") errors.school = "Η σχολή είναι υποχρεωτική.";
       if (!formData.department || formData.department === "select") errors.department = "Το τμήμα είναι υποχρεωτικό.";
 
+      const hasPositionFields =
+        formData.startDate ||
+        formData.endDate ||
+        formData.startTime ||
+        formData.endTime;
+
+      if (hasPositionFields) {
+        if (!formData.startDate) errors.startDate = "Η ημερομηνία έναρξης είναι υποχρεωτική.";
+        if (!formData.endDate) errors.endDate = "Η ημερομηνία λήξης είναι υποχρεωτική.";
+        if (!formData.startTime) errors.startTime = "Η ώρα έναρξης είναι υποχρεωτική.";
+        if (!formData.endTime) errors.endTime = "Η ώρα λήξης είναι υποχρεωτική.";
+
+        if (formData.startDate && formData.startTime) {
+          const start = new Date(`${formData.startDate}T${formData.startTime}`);
+          const now = new Date();
+          if (!isNaN(start) && start < now) {
+            errors.startDate = "Η ημερομηνία/ώρα έναρξης πρέπει να είναι σήμερα ή στο μέλλον (όχι πριν από τώρα).";
+          }
+        }
+
+        if (formData.startDate && formData.endDate && formData.startTime && formData.endTime) {
+          const start = new Date(`${formData.startDate}T${formData.startTime}`);
+          const end = new Date(`${formData.endDate}T${formData.endTime}`);
+          if (!isNaN(start) && !isNaN(end) && end <= start) {
+            errors.endDate = "Η ημερομηνία/ώρα λήξης πρέπει να είναι μετά την ημερομηνία/ώρα έναρξης.";
+            errors.dateTimeRange = "Η λήξη πρέπει να είναι αυστηρά μετά την έναρξη (ημερομηνία και ώρα).";
+          }
+        }
+      }
+
       if (!Array.isArray(formData.courses) || formData.courses.length === 0) {
         errors.courses = "Πρέπει να προσθέσετε τουλάχιστον ένα μάθημα.";
       } else {

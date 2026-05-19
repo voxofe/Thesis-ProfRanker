@@ -18,7 +18,6 @@ import MyApplications from "./pages/MyApplications";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Ranking from "./pages/Ranking";
-import PositionsCreate from "./pages/PositionsCreate";
 import ScientificFields from "./pages/ScientificFields";
 import ScientificFieldsView from "./pages/ScientificFieldsView";
 import ScientificFieldsCreate from "./pages/ScientificFieldsCreate";
@@ -62,6 +61,7 @@ function AppContent() {
   const { isLoggedIn, currentUser, isLoading } = useAuth();
   const { positions = [], loading: positionsLoading } = usePositions();
   const location = useLocation();
+  const routesKey = `${location.pathname}${location.search}${location.hash}`;
   const shouldShowBackLink = location.pathname !== "/" && location.pathname !== "/home" && location.pathname !== "/login" && location.pathname !== "/register";
 
   const activePositions = React.useMemo(
@@ -103,7 +103,7 @@ function AppContent() {
           </div>
         )}
         <div className="flex-1 pt-5">
-          <Routes>
+          <Routes location={location} key={routesKey}>
             {isLoggedIn ? (
               <>
                 {/* Routes for logged-in users */}
@@ -158,7 +158,7 @@ function AppContent() {
                     <Route path="/register-admin" element={<RegisterAdmin />} />
                     <Route path="/positions/create" element={
                       <React.Suspense fallback={<div>Φόρτωση...</div>}>
-                        {React.createElement(require("./pages/PositionsCreate").default)}
+                        {React.createElement(require("./pages/PositionCreate").default)}
                       </React.Suspense>
                     } />
                     <Route path="/scientific-fields" element={<ScientificFields />} />

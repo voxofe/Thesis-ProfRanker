@@ -7,7 +7,9 @@ export function getParentPath(pathname) {
   if (path === "/home") return null;
   if (path.startsWith("/positions/")) return "/home";
   if (path === "/scientific-fields") return "/home";
-  if (path.startsWith("/scientific-fields/")) return "/scientific-fields";
+  if (path === "/scientific-fields/view") return "/scientific-fields";
+  if (path === "/scientific-fields/create") return "/scientific-fields/view";
+  if (path.startsWith("/scientific-fields/")) return "/scientific-fields/view";
   if (path === "/users") return "/home";
   if (path === "/users/view") return "/users";
   if (path === "/users/register-admin") return "/users";

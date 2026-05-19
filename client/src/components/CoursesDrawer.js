@@ -15,15 +15,15 @@ export default function CoursesDrawer({ courses = [], scientificField }) {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="w-full max-w-5xl max-h-[80vh] overflow-auto bg-white rounded-lg shadow-lg border">
             <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-semibold text-blackr">
-                Μαθήματα Επιστημονικού πεδίου:{" "}
+              <h4 className="text-lg font-semibold text-blackr">
+                Μαθήματα επιστημονικού πεδίου:{" "}
                 <span className="text-patras-buccaneer font-semibold">
                   {scientificField ?? ""}
                 </span>
-              </h2>
+              </h4>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
