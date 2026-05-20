@@ -107,6 +107,17 @@ export const CreatePositionValidationProvider = ({ children }) => {
           const missing = required.filter((requiredField) => isMissing(requiredField));
           if (missing.length) errors[`course${i}`] = `Το μάθημα #${i + 1} έχει κενά υποχρεωτικά πεδία.`;
 
+          const description = String(course.description || "");
+          const descriptionCount = description.replace(/\s/g, "").length;
+          const wordCount = description.trim().split(/\s+/).filter(Boolean).length;
+          if (
+            (descriptionCount > 0 && descriptionCount < 120) ||
+            (wordCount > 0 && wordCount < 20)
+          ) {
+            errors[`course${i}_description`] =
+              "Η περιγραφή πρέπει να έχει τουλάχιστον 120 χαρακτήρες χωρίς κενά και 20 λέξεις.";
+          }
+
           const ects = numOrNull(course.ects);
           if (ects !== null && ects <= 0) {
             errors[`course${i}_ects`] = "Τα ECTS πρέπει να είναι μεγαλύτερα από 0.";

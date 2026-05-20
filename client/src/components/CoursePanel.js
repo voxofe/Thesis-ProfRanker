@@ -233,6 +233,11 @@ export default function CoursePanel({
                   required
                   disabled={disabled}
                 />
+                {errors[`course${idx}_description`] && (
+                  <p className="mt-2 text-sm text-red-600">
+                    {errors[`course${idx}_description`]}
+                  </p>
+                )}
               </div>
 
               {/* Clear and Delete Buttons */}
