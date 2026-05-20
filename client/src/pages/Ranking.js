@@ -620,7 +620,7 @@ export default function Ranking() {
   return (
     <div className="pt-0">
       <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
-        Λίστα κατάταξης υποψηφίων
+        Λίστα κατάταξης αιτήσεων
       </h1>
 
       {/* Filters row: Checkbox + Φίλτρα button */}
@@ -676,7 +676,7 @@ export default function Ranking() {
         setFilters={setFilters}
         options={filterOptions}
         isAdmin={isAdmin}
-        title="Φίλτρα Λίστας Κατάταξης"
+        title="Φίλτρα λίστας κατάταξης"
         titleClassName="text-gray-900"
         showDateRanges
         dateRangeFields={[{ key: "submitDate", label: "Ημερομηνία υποβολής" }]}

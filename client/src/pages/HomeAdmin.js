@@ -33,7 +33,7 @@ export default function HomeAdmin() {
         />
         <HomePagePanel
           title="Γενική κατάταξη"
-          description="Δείτε τη γενική κατάταξη όλων των αιτούντων σε όλα τα επιστημονικά πεδία."
+          description="Δείτε τη γενική κατάταξη όλων των αιτήσεων σε όλα τα επιστημονικά πεδία."
           buttonText="Δείτε κατάταξη"
           to="/ranking"
           // showInfoMark={true}

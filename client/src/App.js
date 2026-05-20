@@ -163,7 +163,7 @@ function AppContent() {
                     } />
                     <Route path="/scientific-fields" element={<ScientificFields />} />
                     <Route path="/scientific-fields/view" element={<ScientificFieldsView />} />
-                    <Route path="/scientific-fields/:id" element={<ScientificFieldSingle />} />
+                    <Route path="/scientific-fields/view/:id" element={<ScientificFieldSingle />} />
                     <Route path="/scientific-fields/create" element={
                       <React.Suspense fallback={<div>Φόρτωση...</div>}>
                         {React.createElement(require("./pages/ScientificFieldsCreate").default)}

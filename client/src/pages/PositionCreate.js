@@ -179,6 +179,10 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
     const errors = updateValidity(formData, "position");
     if (Object.keys(errors).length > 0) return;
 
+    const confirmMessage =
+      "Από την ημερομηνία/ώρα έναρξης της θέσης και μετά δεν θα μπορείτε να την διαγράψετε ή να την επεξεργαστείτε. Θέλετε να συνεχίσετε;";
+    if (!window.confirm(confirmMessage)) return;
+
     setSubmitting(true);
 
     const payload = {

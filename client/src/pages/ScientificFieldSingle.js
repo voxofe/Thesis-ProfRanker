@@ -256,7 +256,7 @@ export default function ScientificFieldSingle() {
                   onSuccess={async () => {
                     setPositionModalOpen(false);
                     await refreshField();
-                    navigate(`/scientific-fields/${id}`);
+                    navigate(`/scientific-fields/view/${id}`);
                   }}
                 />
               </div>

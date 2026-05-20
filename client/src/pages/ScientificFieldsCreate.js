@@ -284,12 +284,12 @@ export default function ScientificFieldsCreate() {
       }
 
       if (isEditMode) {
-        navigate(`/scientific-fields/${prefillScientificField.id}`);
+        navigate(`/scientific-fields/view/${prefillScientificField.id}`);
         return;
       }
       const createdId = response?.data?.scientificFieldId;
       if (createdId) {
-        navigate(`/scientific-fields/${createdId}`);
+        navigate(`/scientific-fields/view/${createdId}`);
         return;
       }
       setTimeout(() => {

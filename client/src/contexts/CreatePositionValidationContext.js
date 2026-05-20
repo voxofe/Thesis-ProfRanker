@@ -24,7 +24,7 @@ export const CreatePositionValidationProvider = ({ children }) => {
         const start = new Date(`${formData.startDate}T${formData.startTime}`);
         const now = new Date();
         if (!isNaN(start) && start < now) {
-          errors.startDate = "Η ημερομηνία/ώρα έναρξης πρέπει να είναι σήμερα ή στο μέλλον (όχι πριν από τώρα).";
+          errors.startDate = "Η ημερομηνία/ώρα έναρξης πρέπει να είναι μελλοντική.";
         }
       }
 
@@ -61,7 +61,7 @@ export const CreatePositionValidationProvider = ({ children }) => {
           const start = new Date(`${formData.startDate}T${formData.startTime}`);
           const now = new Date();
           if (!isNaN(start) && start < now) {
-            errors.startDate = "Η ημερομηνία/ώρα έναρξης πρέπει να είναι σήμερα ή στο μέλλον (όχι πριν από τώρα).";
+            errors.startDate = "Η ημερομηνία/ώρα έναρξης πρέπει να είναι μελλοντική.";
           }
         }
 

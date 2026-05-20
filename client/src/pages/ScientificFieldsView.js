@@ -363,7 +363,7 @@ export default function ScientificFieldsView() {
     });
   };
 
-  const buildFieldLink = (row) => `/scientific-fields/${row.id}`;
+  const buildFieldLink = (row) => `/scientific-fields/view/${row.id}`;
 
   return (
     <div className="pt-0">

@@ -23,9 +23,13 @@ export default function BackLinkController({ className = "" }) {
     }
     return null;
   }, [stack, current]);
-  const target = stackTarget || parentPath || "/home";
+  const isScientificFieldDetail = location.pathname.startsWith("/scientific-fields/view/");
+  const target = isScientificFieldDetail
+    ? "/scientific-fields/view"
+    : stackTarget || parentPath || "/home";
 
   const handleClick = () => {
+    if (isScientificFieldDetail) return;
     if (stackTarget) {
       let item = pop();
       while (item && (item.pathname + (item.search || "")) !== stackTarget) {
