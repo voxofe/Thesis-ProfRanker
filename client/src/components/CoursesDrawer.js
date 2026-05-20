@@ -1,8 +1,13 @@
 import React, { useState } from "react";
-import TooltipGray from "./TooltipGray";
+import CourseDescriptionModal from "./CourseDescriptionModal";
 
 export default function CoursesDrawer({ courses = [], scientificField }) {
   const [open, setOpen] = useState(false);
+  const [descriptionModal, setDescriptionModal] = useState({
+    open: false,
+    title: "",
+    description: "",
+  });
 
   return (
     <>
@@ -26,7 +31,14 @@ export default function CoursesDrawer({ courses = [], scientificField }) {
               </h4>
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  setDescriptionModal({
+                    open: false,
+                    title: "",
+                    description: "",
+                  });
+                }}
                 className="text-gray-600 hover:text-gray-800 text-2xl leading-none px-2"
                 aria-label="Κλείσιμο"
                 title="Κλείσιμο"
@@ -58,9 +70,19 @@ export default function CoursesDrawer({ courses = [], scientificField }) {
                           <td className="px-2 py-2 border">{c.code}</td>
                           <td className="px-2 py-2 border">{c.name}</td>
                           <td className="px-2 py-2 border">
-                            <TooltipGray content={c.description}>
-                              <span className="underline cursor-pointer text-patras-buccaneer">Περιγραφή</span>
-                            </TooltipGray>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setDescriptionModal({
+                                  open: true,
+                                  title: c.name ? `Περιγραφή μαθήματος: ${c.name}` : "Περιγραφή μαθήματος",
+                                  description: c.description,
+                                })
+                              }
+                              className="underline text-patras-buccaneer hover:text-patras-sanguineBrown"
+                            >
+                              Περιγραφή
+                            </button>
                           </td>
                           <td className="px-2 py-2 border">{c.semester}</td>
                           <td className="px-2 py-2 border">{c.teachingUnits}</td>
@@ -80,6 +102,19 @@ export default function CoursesDrawer({ courses = [], scientificField }) {
           </div>
         </div>
       )}
+
+      <CourseDescriptionModal
+        open={descriptionModal.open}
+        title={descriptionModal.title}
+        description={descriptionModal.description}
+        onClose={() =>
+          setDescriptionModal({
+            open: false,
+            title: "",
+            description: "",
+          })
+        }
+      />
     </>
   );
 }

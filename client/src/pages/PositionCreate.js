@@ -16,7 +16,7 @@ const API_BASE_URL = (
   ""
 );
 
-export default function CreatePosition({ prefillPosition: prefillPositionProp = null, inModal = false, onSuccess }) {
+export default function CreatePosition({ prefillPosition: prefillPositionProp = null, inModal = false, onSuccess, onCancel }) {
   const { currentUser } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -403,7 +403,16 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
         </section>
 
         {/* SUBMIT */}
-        <div className="pt-6 border-t text-right">
+        <div className="pt-6 border-t flex flex-wrap justify-end gap-3">
+          {inModal && typeof onCancel === "function" && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50"
+            >
+              Ακύρωση
+            </button>
+          )}
           <button
             type="submit"
             disabled={submitDisabled}
@@ -412,7 +421,6 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
           >
             {submitting ? "Άνοιγμα..." : "Άνοιγμα θέσης"}
           </button>
-
         </div>
       </form>
     </div>

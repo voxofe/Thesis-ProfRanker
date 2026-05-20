@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import TooltipGray from "../components/TooltipGray";
+import CourseDescriptionModal from "../components/CourseDescriptionModal";
 import { formatDateTimeCell } from "../components/SortableTable";
 import PositionCreate from "./PositionCreate";
 
@@ -44,6 +45,11 @@ export default function ScientificFieldSingle() {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [positionModalOpen, setPositionModalOpen] = useState(false);
+  const [descriptionModal, setDescriptionModal] = useState({
+    open: false,
+    title: "",
+    description: "",
+  });
 
   const isAdmin = !!(
     currentUser?.isAdmin ||
@@ -226,11 +232,11 @@ export default function ScientificFieldSingle() {
         typeof document !== "undefined" &&
         createPortal(
           <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/40 backdrop-blur-sm px-6 py-8">
-            <div className="relative z-[9999] w-full max-w-[880px] max-h-[86vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white px-10 pt-10 pb-8 shadow-2xl">
+            <div className="relative z-[9999] w-full max-w-[700px] max-h-[86vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white px-8 pt-8 pb-6 shadow-2xl">
               <button
                 type="button"
                 onClick={handleClosePositionModal}
-                className="absolute right-6 top-5 z-10 text-2xl leading-none text-gray-600 hover:text-gray-900"
+                className="absolute right-6 top-5 z-10 text-3xl leading-none text-gray-600 hover:text-gray-900"
                 aria-label="Κλείσιμο"
                 title="Κλείσιμο"
               >
@@ -239,7 +245,7 @@ export default function ScientificFieldSingle() {
 
               <div
                 className="
-                    mx-auto w-full max-w-[720px]
+                    mx-auto w-full max-w-[620px]
                   [&_hr]:hidden
                   [&_.border-t]:border-t-0
                   [&_.border-b]:border-b-0
@@ -253,6 +259,7 @@ export default function ScientificFieldSingle() {
                 <PositionCreate
                   prefillPosition={positionPrefill}
                   inModal
+                  onCancel={handleClosePositionModal}
                   onSuccess={async () => {
                     setPositionModalOpen(false);
                     await refreshField();
@@ -349,9 +356,19 @@ export default function ScientificFieldSingle() {
                       </td>
                       <td className="px-4 py-3 text-center text-patras-buccaneer text-sm border-r border-patras-albescentWhite">
                         {course.description ? (
-                          <TooltipGray content={course.description}>
-                            <span className="underline cursor-pointer text-patras-buccaneer">Περιγραφή</span>
-                          </TooltipGray>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setDescriptionModal({
+                                open: true,
+                                title: course.name ? `Περιγραφή μαθήματος: ${course.name}` : "Περιγραφή μαθήματος",
+                                description: course.description,
+                              })
+                            }
+                            className="underline text-patras-buccaneer hover:text-patras-sanguineBrown"
+                          >
+                            Περιγραφή
+                          </button>
                         ) : (
                           "—"
                         )}
@@ -383,6 +400,19 @@ export default function ScientificFieldSingle() {
             <p className="text-sm text-gray-500">Δεν υπάρχουν διαθέσιμα μαθήματα.</p>
           )}
         </div>
+
+        <CourseDescriptionModal
+          open={descriptionModal.open}
+          title={descriptionModal.title}
+          description={descriptionModal.description}
+          onClose={() =>
+            setDescriptionModal({
+              open: false,
+              title: "",
+              description: "",
+            })
+          }
+        />
 
         <div>
           <h2 className="text-xl font-light mb-3">Στοιχεία θέσης</h2>

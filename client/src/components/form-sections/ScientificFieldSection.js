@@ -1,12 +1,18 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useFormData } from "../../contexts/FormDataContext";
 import { usePositions } from "../../contexts/PositionsContext";
 import TooltipGray from "../TooltipGray";
+import CourseDescriptionModal from "../CourseDescriptionModal";
 import PositionSelect from "../PositionSelect";
 
 export default function ScientificFieldSection() {
   const { formData, handleChange, formMode, appliedPositionIds } = useFormData();
   const { positions, loading } = usePositions();
+  const [descriptionModal, setDescriptionModal] = useState({
+    open: false,
+    title: "",
+    description: "",
+  });
 
   const formatDateTime = (dateStr, timeStr) => {
     if (!dateStr) return "—";
@@ -94,7 +100,7 @@ export default function ScientificFieldSection() {
       </div>
 
       <label className="block text-sm font-medium mb-1">
-        Μαθήματα Επιστημονικού πεδίου:{" "}
+        Μαθήματα επιστημονικού πεδίου:{" "}
         <span className="text-patras-buccaneer">
           {selectedPosition?.scientificField ?? ""}
         </span>
@@ -122,9 +128,19 @@ export default function ScientificFieldSection() {
                   <td className="px-2 py-2 border">{course.code}</td>
                   <td className="px-2 py-2 border">{course.name}</td>
                   <td className="px-2 py-2 border">
-                    <TooltipGray content={course.description}>
-                      <span className="underline cursor-pointer text-patras-buccaneer">Περιγραφή</span>
-                    </TooltipGray>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setDescriptionModal({
+                          open: true,
+                          title: course.name ? `Περιγραφή μαθήματος: ${course.name}` : "Περιγραφή μαθήματος",
+                          description: course.description,
+                        })
+                      }
+                      className="underline text-patras-buccaneer hover:text-patras-sanguineBrown"
+                    >
+                      Περιγραφή
+                    </button>
                   </td>
                   <td className="px-2 py-2 border">{course.semester}</td>
                   <td className="px-2 py-2 border">{course.teachingUnits}</td>
@@ -144,6 +160,19 @@ export default function ScientificFieldSection() {
           </tbody>
         </table>
       </div>
+
+      <CourseDescriptionModal
+        open={descriptionModal.open}
+        title={descriptionModal.title}
+        description={descriptionModal.description}
+        onClose={() =>
+          setDescriptionModal({
+            open: false,
+            title: "",
+            description: "",
+          })
+        }
+      />
     </div>
   );
 }
