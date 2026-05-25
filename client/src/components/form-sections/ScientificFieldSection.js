@@ -153,7 +153,7 @@ export default function ScientificFieldSection() {
             ) : (
               <tr>
                 <td colSpan={9} className="text-center text-gray-500 py-6">
-                  Επιλέξτε Θέση για να δείτε τα διαθέσιμα μαθήματα
+                  Επιλέξτε θέση για να δείτε τα διαθέσιμα μαθήματα
                 </td>
               </tr>
             )}

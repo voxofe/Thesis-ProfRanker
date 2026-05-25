@@ -26,6 +26,12 @@ export const FormDataProvider = ({ children }) => {
     [profileData]
   );
   const [profilePolling, setProfilePolling] = useState(false);
+  const [phdCheck, setPhdCheck] = useState(null);
+  const [phdCheckStatus, setPhdCheckStatus] = useState(null);
+  const [phdCheckError, setPhdCheckError] = useState(null);
+  const [phdCheckLoading, setPhdCheckLoading] = useState(false);
+  const [phdCheckUploadProgress, setPhdCheckUploadProgress] = useState(null);
+  const [phdCheckCache, setPhdCheckCache] = useState({});
 
   // Initial form data structure
   const buildDocItem = (doc) => {
@@ -51,6 +57,7 @@ export const FormDataProvider = ({ children }) => {
       phdTitle: "",
       phdAcquisitionDate: "",
       phdIsFromForeignInstitute: false,
+      phdCheckId: null,
       phdDegreeId: null,
       workExperience: "",
       hasNotParticipatedInPastProgram: false,
@@ -83,6 +90,7 @@ export const FormDataProvider = ({ children }) => {
         phdTitle: selectedForm.phdTitle ?? "",
         phdAcquisitionDate: selectedForm.phdAcquisitionDate ?? "",
         phdIsFromForeignInstitute: selectedForm.phdIsFromForeignInstitute ?? false,
+        phdCheckId: null,
         phdDegreeId: selectedForm.phdDegreeId ?? null,
         workExperience: selectedForm.workExperience ?? "",
         hasNotParticipatedInPastProgram: selectedForm.hasNotParticipatedInPastProgram ?? false,
@@ -144,6 +152,7 @@ export const FormDataProvider = ({ children }) => {
       const degrees = Array.isArray(profileSnapshot.phdDegrees)
         ? profileSnapshot.phdDegrees
         : [];
+      const latestPhdChecks = profileSnapshot.latestPhdChecks || {};
       const defaultTitle = (defaults.phdTitle || "").trim();
       const defaultDate = defaults.phdAcquisitionDate || "";
       const profilePhdDocId = profileSnapshot.documents?.phd?.id;
@@ -164,6 +173,12 @@ export const FormDataProvider = ({ children }) => {
       const isForeignInstitute = selectedDegree
         ? !!selectedDegree.isForeignInstitute
         : defaults.phdIsFromForeignInstitute ?? false;
+      const selectedPhdDoc = selectedDegree
+        ? buildDocItem(selectedDegree.document)
+        : buildDocItem(profileSnapshot.documents?.phd);
+      const latestCheckForSelected = selectedPhdDoc?.id
+        ? latestPhdChecks[String(selectedPhdDoc.id)]
+        : null;
 
       return {
         ...baseData,
@@ -179,13 +194,12 @@ export const FormDataProvider = ({ children }) => {
         phdAcquisitionDate:
           selectedDegree?.acquiredAt ?? defaults.phdAcquisitionDate ?? "",
         phdIsFromForeignInstitute: isForeignInstitute,
+        phdCheckId: null,
         phdDegreeId: selectedDegree?.id ?? null,
         workExperience: defaults.workExperience ?? "",
         publications: profileSnapshot.profilePublications ?? [],
         cvDocument: buildDocItem(profileSnapshot.documents?.cv),
-        phdDocument: selectedDegree
-          ? buildDocItem(selectedDegree.document)
-          : buildDocItem(profileSnapshot.documents?.phd),
+        phdDocument: selectedPhdDoc,
         doatapDocument: isForeignInstitute
           ? buildDocItem(
               selectedDegree?.doatapDocument || profileSnapshot.documents?.doatap
@@ -207,6 +221,7 @@ export const FormDataProvider = ({ children }) => {
         ),
         bioSupportingDocuments: (vault.bio_supporting || []).map(buildDocItem).filter(Boolean),
         employmentCertificates: (vault.employment_certificate || []).map(buildDocItem).filter(Boolean),
+        latestPhdCheck: latestCheckForSelected,
       };
     }
 
@@ -305,6 +320,15 @@ export const FormDataProvider = ({ children }) => {
       });
   };
 
+  useEffect(() => {
+    if (profileData?.latestPhdChecks) {
+      setPhdCheckCache((prev) => ({
+        ...prev,
+        ...profileData.latestPhdChecks,
+      }));
+    }
+  }, [profileData]);
+
   // Re-initialize form data when user changes (for auto-fill)
   useEffect(() => {
     refreshProfileData();
@@ -323,7 +347,35 @@ export const FormDataProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
-          setFormData(getInitialFormData(res.data || null, profileData));
+          const payload = res.data || null;
+          setFormData(getInitialFormData(payload, profileData));
+          const latestCheck = payload?.latestPhdCheck || null;
+          if (latestCheck && latestCheck.status && latestCheck.status !== "none") {
+            if (latestCheck.vaultDocument?.id) {
+              setPhdCheckCache((prev) => ({
+                ...prev,
+                [String(latestCheck.vaultDocument.id)]: latestCheck,
+              }));
+            }
+            setPhdCheck(latestCheck);
+            setPhdCheckStatus(latestCheck.status || null);
+            setPhdCheckError(latestCheck.error || null);
+            setPhdCheckUploadProgress(null);
+            setFormData((prev) => ({
+              ...prev,
+              phdCheckId:
+                latestCheck.status === "success" ? latestCheck.id || prev.phdCheckId : null,
+            }));
+          } else {
+            setPhdCheck(null);
+            setPhdCheckStatus(null);
+            setPhdCheckError(null);
+            setPhdCheckUploadProgress(null);
+            setFormData((prev) => ({
+              ...prev,
+              phdCheckId: null,
+            }));
+          }
         })
         .catch((error) => {
           console.error("Error loading application:", error);
@@ -366,6 +418,7 @@ export const FormDataProvider = ({ children }) => {
       const nextState = {
         ...prevData,
         phdDocument: value,
+        phdCheckId: null,
       };
 
       if (!value) {
@@ -422,8 +475,13 @@ export const FormDataProvider = ({ children }) => {
       setFormData((prevData) => ({
         ...prevData,
         phdDocument: null,
+        phdCheckId: null,
         phdDegreeId: null,
       }));
+      setPhdCheck(null);
+      setPhdCheckStatus(null);
+      setPhdCheckError(null);
+      setPhdCheckUploadProgress(null);
       return;
     }
 
@@ -432,6 +490,168 @@ export const FormDataProvider = ({ children }) => {
       [field]: null,
     }));
   };
+
+  useEffect(() => {
+    if (!formData?.phdDocument || formData.phdDocument instanceof File) {
+      setPhdCheck(null);
+      setPhdCheckStatus(null);
+      setPhdCheckError(null);
+      setPhdCheckUploadProgress(null);
+      return;
+    }
+
+    if (!formData.phdDocument.id) {
+      return;
+    }
+
+    const docId = String(formData.phdDocument.id);
+    const cachedCheck = phdCheckCache[docId] || null;
+    if (cachedCheck && cachedCheck.status && cachedCheck.status !== "none") {
+      if (phdCheck?.id !== cachedCheck.id) {
+        setPhdCheck(cachedCheck);
+        setPhdCheckStatus(cachedCheck.status || null);
+        setPhdCheckError(cachedCheck.error || null);
+        setPhdCheckUploadProgress(null);
+        setFormData((prev) => ({
+          ...prev,
+          phdCheckId:
+            cachedCheck.status === "success" ? cachedCheck.id || prev.phdCheckId : null,
+        }));
+      }
+      return;
+    }
+
+    if (
+      phdCheck?.vaultDocument?.id &&
+      String(phdCheck.vaultDocument.id) === String(formData.phdDocument.id)
+    ) {
+      return;
+    }
+    const token = localStorage.getItem("token");
+    axios
+      .get(`${API_BASE_URL}/api/phd/check/latest`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { vaultDocumentId: String(formData.phdDocument.id) },
+      })
+      .then((res) => {
+        const data = res.data || {};
+        if (data.status && data.status !== "none") {
+          setPhdCheck(data);
+          setPhdCheckStatus(data.status || null);
+          setPhdCheckError(data.error || null);
+          setFormData((prev) => ({
+            ...prev,
+            phdCheckId: data.status === "success" ? data.id || prev.phdCheckId : null,
+          }));
+        } else {
+          setPhdCheck(null);
+          setPhdCheckStatus(null);
+          setPhdCheckError(null);
+          setFormData((prev) => ({
+            ...prev,
+            phdCheckId: null,
+          }));
+        }
+      })
+      .catch(() => {
+        setPhdCheck(null);
+        setPhdCheckStatus(null);
+        setPhdCheckError(null);
+        setFormData((prev) => ({
+          ...prev,
+          phdCheckId: null,
+        }));
+      });
+  }, [formData?.phdDocument, phdCheck?.vaultDocument?.id, phdCheck?.id, phdCheckCache]);
+
+  const runPhdCheck = async () => {
+    if (!formData.phdDocument) {
+      setPhdCheckError("Επιλέξτε πρώτα αρχείο PDF.");
+      return;
+    }
+    setPhdCheckLoading(true);
+    setPhdCheckError(null);
+    setPhdCheckStatus("pending");
+    setPhdCheckUploadProgress(
+      formData.phdDocument instanceof File ? 0 : null
+    );
+
+    const token = localStorage.getItem("token");
+    const payload = new FormData();
+
+    if (formData.phdDocument instanceof File) {
+      payload.append("file", formData.phdDocument);
+    } else if (formData.phdDocument?.id) {
+      payload.append("vaultDocumentId", String(formData.phdDocument.id));
+    }
+
+    try {
+      const res = await axios.post(`${API_BASE_URL}/api/phd/check`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+        onUploadProgress: (event) => {
+          if (!event.total) return;
+          const progress = Math.round((event.loaded / event.total) * 100);
+          setPhdCheckUploadProgress(progress);
+        },
+      });
+      const data = res.data || {};
+      setPhdCheck(data);
+      setPhdCheckStatus(data.status || "pending");
+      setPhdCheckError(null);
+      setPhdCheckUploadProgress((prev) => (typeof prev === "number" ? 100 : null));
+      setFormData((prev) => ({
+        ...prev,
+        phdCheckId: null,
+      }));
+    } catch (error) {
+      setPhdCheckStatus("failed");
+      setPhdCheckError(error?.response?.data?.error || "Αποτυχία ελέγχου PDF.");
+      setPhdCheckUploadProgress(null);
+      setFormData((prev) => ({
+        ...prev,
+        phdCheckId: null,
+      }));
+    } finally {
+      setPhdCheckLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!phdCheck?.id || phdCheckStatus !== "pending") {
+      if (phdCheckStatus && phdCheckStatus !== "pending") {
+        setPhdCheckUploadProgress(null);
+      }
+      return undefined;
+    }
+
+    const token = localStorage.getItem("token");
+    const intervalId = setInterval(() => {
+      axios
+        .get(`${API_BASE_URL}/api/phd/check/${phdCheck.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          const data = res.data || {};
+          setPhdCheck(data);
+          setPhdCheckStatus(data.status || null);
+          setPhdCheckError(data.error || null);
+          if (data.status && data.status !== "pending") {
+            setPhdCheckUploadProgress(null);
+          }
+          setFormData((prev) => ({
+            ...prev,
+            phdCheckId: data.status === "success" ? data.id || prev.phdCheckId : null,
+          }));
+        })
+        .catch(() => {
+          setPhdCheckStatus("failed");
+          setPhdCheckError("Αποτυχία ανάκτησης αποτελέσματος ελέγχου PDF.");
+          setPhdCheckUploadProgress(null);
+        });
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [phdCheck?.id, phdCheckStatus]);
 
   const addBioSupportingDocument = (file) => {
     setFormData((prevData) => ({
@@ -501,6 +721,11 @@ export const FormDataProvider = ({ children }) => {
         documentVault,
         phdDegrees,
         phdDocumentStatus,
+        phdCheck,
+        phdCheckStatus,
+        phdCheckError,
+        phdCheckLoading,
+        phdCheckUploadProgress,
         profilePolling,
         handleChange,
         handleFileChange,
@@ -509,6 +734,7 @@ export const FormDataProvider = ({ children }) => {
         handlePhdDateChange,
         handlePhdDocumentChange,
         handlePhdForeignInstituteChange,
+        runPhdCheck,
         addEmploymentCertificate,
         removeEmploymentCertificate,
         addBioSupportingDocument,

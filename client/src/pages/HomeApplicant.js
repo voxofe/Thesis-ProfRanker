@@ -20,11 +20,32 @@ export default function HomeApplicant() {
 
   const userRole = currentUser?.role;
 
+  const appliedPositionIds = useMemo(() => {
+    const applications = currentUser?.applications || [];
+    return applications
+      .map((app) => app?.positionId)
+      .filter((posId) => posId !== null && posId !== undefined && posId !== "");
+  }, [currentUser]);
+
+  const availablePositionsForApplicant = useMemo(() => {
+    if (userRole !== "applicant") return activePositions;
+    const appliedSet = new Set(appliedPositionIds || []);
+    return activePositions.filter((p) => !appliedSet.has(p?.id));
+  }, [userRole, activePositions, appliedPositionIds]);
+
+  const noActivePositions = !loading && activePositions.length === 0;
+  const noNewPositionsForApplicant =
+    userRole === "applicant" &&
+    !loading &&
+    activePositions.length > 0 &&
+    availablePositionsForApplicant.length === 0;
+
   // Derive disabled state for the Application panel
   const applicationDisabled =
     (userRole === "guest" || userRole === "applicant") &&
     !loading &&
-    activePositions.length === 0;
+    (activePositions.length === 0 ||
+      (userRole === "applicant" && availablePositionsForApplicant.length === 0));
 
   // Description text when the panel is disabled (and defaults otherwise)
   const applicationDescription = useMemo(() => {
@@ -35,17 +56,21 @@ export default function HomeApplicant() {
     }
     if (userRole === "applicant") {
       return applicationDisabled
-        ? "Δεν υπάρχουν διαθέσιμες ανοιχτές θέσεις για αίτηση αυτή τη στιγμή."
+        ? noNewPositionsForApplicant
+          ? "Έχετε ήδη υποβάλει αίτηση σε όλες τις διαθέσιμες θέσεις."
+          : "Δεν υπάρχουν διαθέσιμες ανοιχτές θέσεις για αίτηση αυτή τη στιγμή."
         : "Μπορείτε να υποβάλετε νέα αίτηση για οποιαδήποτε ενεργή θέση.";
     }
     return "";
-  }, [userRole, applicationDisabled]);
+  }, [userRole, applicationDisabled, noNewPositionsForApplicant]);
 
   // Info popups
   const applicationInfoPopup =
-    !loading && activePositions.length === 0
+    noActivePositions
       ? <span className="z-10">Δεν υπάρχουν διαθέσιμες θέσεις αυτή τη στιγμή</span>
-      : <span>Κάντε αίτηση για το επιστημονικό πεδίο που σας αφορά</span>;
+      : noNewPositionsForApplicant
+        ? <span className="z-10">Έχετε ήδη υποβάλει αίτηση σε όλες τις διαθέσιμες θέσεις</span>
+        : <span>Κάντε αίτηση για το επιστημονικό πεδίο που σας αφορά</span>;
 
   const scoreInfoPopup = (
     <>

@@ -161,6 +161,8 @@ export default function Profile() {
   }, [phdDegrees]);
 
   const isProfileApplicant = profile?.user?.role === "applicant";
+  const isProfileVaultUser =
+    profile?.user?.role === "applicant" || profile?.user?.role === "guest";
   const today = new Date().toISOString().split("T")[0];
   const todayDisplay = today.split("-").reverse().join("-");
   const workExperienceOptions = Array.from({ length: 11 }, (_, index) => ({
@@ -931,7 +933,7 @@ export default function Profile() {
                 Επιστημονικές δημοσιεύσεις
               </button>
             )}
-            {isProfileApplicant && (
+            {isProfileVaultUser && (
               <button
                 type="button"
                 onClick={() => setActiveSection("vault")}
@@ -1305,7 +1307,7 @@ export default function Profile() {
             </div>
           )}
 
-          {isProfileApplicant && activeSection === "vault" && (
+          {isProfileVaultUser && activeSection === "vault" && (
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
               {vaultItems.length === 0 ? (
                 <p className="text-gray-500">Δεν υπάρχουν καταχωρημένα δικαιολογητικά.</p>

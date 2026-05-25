@@ -238,6 +238,7 @@ export default function FlowbiteDateField({
     const handleClickOutside = (event) => {
       if (!wrapperRef.current) return;
       if (wrapperRef.current.contains(event.target)) return;
+      if (popupRef.current && popupRef.current.contains(event.target)) return;
 
       if (isFocused) {
         const committed = commitTextValue(inputValue) ?? value;
@@ -491,6 +492,9 @@ export default function FlowbiteDateField({
               if (readOnly) return;
               const nextTarget = event.relatedTarget;
               if (nextTarget && wrapperRef.current?.contains(nextTarget)) {
+                return;
+              }
+              if (nextTarget && popupRef.current?.contains(nextTarget)) {
                 return;
               }
 

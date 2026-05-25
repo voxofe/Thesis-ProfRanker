@@ -38,6 +38,7 @@ export default function Form({ academicYear }) {
   const { refreshUser } = useAuth();
   const { positions = [], refreshPositions } = usePositions();
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(null);
   const [redirectLoading, setRedirectLoading] = useState(false);
   const nextButtonRef = useRef(null);
   const [openNextTip, setOpenNextTip] = useState(false);
@@ -267,6 +268,7 @@ export default function Form({ academicYear }) {
     }
 
     setLoading(true);
+    setUploadProgress(0);
 
     // Clean ISSN values before sending
     const cleanedPublications = formData.publications.map(publication => ({
@@ -301,12 +303,12 @@ export default function Form({ academicYear }) {
     formDataToSend.append("phdTitle", formData.phdTitle || "");
     formDataToSend.append("phdAcquisitionDate", formData.phdAcquisitionDate || "");
     formDataToSend.append("phdDegreeId", formData.phdDegreeId ?? "");
+    formDataToSend.append("phdCheckId", formData.phdCheckId ?? "");
     formDataToSend.append("workExperience", String(formData.workExperience ?? ""));
     formDataToSend.append("positionId", formData.positionId || "");
 
     const singleDocFields = [
       "cvDocument",
-      "phdDocument",
       "doatapDocument",
       "coursePlanDocument",
       "militaryObligationsDocument",
@@ -387,13 +389,21 @@ export default function Form({ academicYear }) {
             "Content-Type": "multipart/form-data", // Content type for file uploads
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
+          onUploadProgress: (event) => {
+            if (!event.total) return;
+            const progress = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(progress);
+          },
         }
       );
 
       console.log("Form submitted successfully:", response.data);
       showToast({
         type: "success",
-        message: "Η αίτηση υποβλήθηκε επιτυχώς!",
+        message:
+          formMode === "edit"
+            ? "Η αίτηση επανυποβλήθηκε επιτυχώς!"
+            : "Η αίτηση υποβλήθηκε επιτυχώς!",
       });
 
       refreshUser();
@@ -411,6 +421,7 @@ export default function Form({ academicYear }) {
       });
     } finally {
       setLoading(false);
+      setUploadProgress(null);
     }
   };
 
@@ -437,28 +448,40 @@ export default function Form({ academicYear }) {
   return (
     <div className="w-full max-w-6xl mx-auto">
       {loading && (
-        <div className="flex justify-center items-center mb-4">
-          <svg
-            className="animate-spin h-6 w-6 text-patras-buccaneer"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v8H4z"
-            ></path>
-          </svg>
-          <span className="ml-2 text-patras-buccaneer">{submitLabel}...</span>
+        <div className="mb-4 space-y-2">
+          <div className="flex items-center">
+            <svg
+              className="animate-spin h-6 w-6 text-patras-buccaneer"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v8H4z"
+              ></path>
+            </svg>
+            <span className="ml-2 text-patras-buccaneer">
+              {submitLabel}...{typeof uploadProgress === "number" ? ` ${uploadProgress}%` : ""}
+            </span>
+          </div>
+          {typeof uploadProgress === "number" && (
+            <div className="h-3 w-full rounded-full bg-gray-200">
+              <div
+                className="h-3 rounded-full bg-patras-buccaneer transition-all"
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+          )}
         </div>
       )}
 

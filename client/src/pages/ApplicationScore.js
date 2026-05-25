@@ -200,7 +200,7 @@ export default function ApplicationScore() {
     },
     {
       key: "phd",
-      label: "Διδακτορικό δίπλωμα (Φωτοαντίγραφο ή σκαναρισμένο αντίγραφο)",
+      label: "Διδακτορικό δίπλωμα",
       value: applicantData?.documents?.phd,
     },
     {

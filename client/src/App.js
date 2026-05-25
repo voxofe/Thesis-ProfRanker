@@ -61,6 +61,12 @@ function AppContent() {
   const { isLoggedIn, currentUser, isLoading } = useAuth();
   const { positions = [], loading: positionsLoading } = usePositions();
   const location = useLocation();
+  const searchParams = React.useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search]
+  );
+  const formMode = (searchParams.get("mode") || "new").toLowerCase();
+  const isEditMode = formMode === "edit";
   const routesKey = `${location.pathname}${location.search}${location.hash}`;
   const shouldShowBackLink = location.pathname !== "/" && location.pathname !== "/home" && location.pathname !== "/login" && location.pathname !== "/register";
 
@@ -70,10 +76,26 @@ function AppContent() {
   );
 
   const userRole = currentUser?.role;
+  const appliedPositionIds = React.useMemo(() => {
+    const applications = currentUser?.applications || [];
+    return applications
+      .map((app) => app?.positionId)
+      .filter((posId) => posId !== null && posId !== undefined && posId !== "");
+  }, [currentUser]);
+
+  const availablePositionsForApplicant = React.useMemo(() => {
+    if (userRole !== "applicant") return activePositions;
+    const appliedSet = new Set(appliedPositionIds || []);
+    return activePositions.filter((p) => !appliedSet.has(p?.id));
+  }, [userRole, activePositions, appliedPositionIds]);
+
   const applicationDisabled =
     (userRole === "guest" || userRole === "applicant") &&
     !positionsLoading &&
-    activePositions.length === 0;
+    (activePositions.length === 0 ||
+      (userRole === "applicant" && availablePositionsForApplicant.length === 0));
+
+  const canAccessForm = isEditMode || !applicationDisabled;
 
   // Show loading screen while authentication is being determined
   if (isLoading) {
@@ -124,7 +146,7 @@ function AppContent() {
                   <Route
                     path="/form"
                     element={
-                      applicationDisabled ? (
+                      !canAccessForm ? (
                         <Navigate to="/home" replace />
                       ) : (
                         <FormDataProvider>

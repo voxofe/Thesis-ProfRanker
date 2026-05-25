@@ -7,7 +7,7 @@ const ValidationContext = createContext();
 export const useValidation = () => useContext(ValidationContext);
 
 export const ValidationProvider = ({ children }) => {
-  const { formData } = useFormData();
+  const { formData, phdCheckStatus } = useFormData();
   const { currentUser } = useAuth();
   const [stepValidation, setStepValidation] = useState({
     1: false, // Personal Info
@@ -80,12 +80,14 @@ export const ValidationProvider = ({ children }) => {
         formData.phdAcquisitionDate
       );
 
+      const hasValidCheck = formData.phdCheckId && phdCheckStatus === "success";
+
       // If foreign institute is checked, DOATAP document is required
       if (formData.phdIsFromForeignInstitute) {
-        return basicValid && !!formData.doatapDocument;
+        return basicValid && !!formData.doatapDocument && !!hasValidCheck;
       }
 
-      return basicValid;
+      return basicValid && !!hasValidCheck;
     };
 
     const validatePublications = () => {

@@ -1,12 +1,9 @@
 import React, { useRef, useState } from "react";
-import {
-  DocumentTextIcon,
-  TrashIcon,
-  CheckIcon,
-} from "@heroicons/react/24/solid";
+import { DocumentTextIcon, TrashIcon, CheckIcon } from "@heroicons/react/24/solid";
 import CustomSelect from "./CustomSelect";
+import TooltipGray from "./TooltipGray";
 
-export default function Upload(props) {
+export default function UploadPHD(props) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef(null);
@@ -14,7 +11,6 @@ export default function Upload(props) {
   const contentLabel = props.contentLabel || props.content || "";
   const contentStatus = props.contentStatus || props.content || "";
 
-  // Check if we have an existing file (filename string) or uploaded file (File object)
   const hasExistingFile =
     (typeof props.uploadedFile === "string" && props.uploadedFile) ||
     (props.uploadedFile &&
@@ -37,18 +33,18 @@ export default function Upload(props) {
     props.uploadedFile?.id
       ? String(props.uploadedFile.id)
       : "";
-  const checkEnabled = !!props.checkEnabled;
+
   const checkStatus = props.checkStatus || null;
   const checkError = props.checkError || "";
   const checkPending = checkStatus === "pending";
   const checkSuccess = checkStatus === "success";
   const checkFailed = checkStatus === "failed";
+  const uploadProgress =
+    typeof props.checkUploadProgress === "number" ? props.checkUploadProgress : null;
+  const isUploading = uploadProgress !== null && uploadProgress < 100;
+  const isProcessing = (checkPending || props.checkLoading) && !isUploading;
   const canShowCheckButton =
-    checkEnabled &&
-    hasAnyFile &&
-    !checkSuccess &&
-    typeof props.onCheck === "function";
-  const showCheckMessage = checkEnabled && hasAnyFile && !checkSuccess;
+    hasAnyFile && !checkSuccess && typeof props.onCheck === "function";
 
   const getDisplayName = () => {
     if (hasUploadedFile) {
@@ -150,6 +146,21 @@ export default function Upload(props) {
     return "";
   };
 
+  const renderStatusMessage = () => {
+    if (checkPending) {
+      return "Γίνεται έλεγχος του PDF. Παρακαλώ περιμένετε.";
+    }
+    if (checkFailed) {
+      return checkError || "Αποτυχία ελέγχου PDF.";
+    }
+    if (!checkSuccess) {
+      return 'Πατήστε "Έλεγχος PDF" για να συνεχίσετε.';
+    }
+    return null;
+  };
+
+  const showCheckPrompt = !checkSuccess && !checkPending && !checkFailed;
+
   return (
     <div
       className={`mb-5 w-full min-w-0 ${
@@ -180,10 +191,7 @@ export default function Upload(props) {
         }}
         disabled={props.disabled}
       />
-      <label
-        htmlFor={props.icon}
-        className="block text-sm/6 font-medium text-gray-900"
-      >
+      <label htmlFor={props.icon} className="block text-sm/6 font-medium text-gray-900">
         {props.label}
         {props.required && <span className="text-red-500 ml-1">*</span>}
       </label>
@@ -199,12 +207,11 @@ export default function Upload(props) {
                         ? "border-patras-buccaneer bg-patras-albescentWhite"
                         : ""
                     }
-                    ${props.compact ? "px-2 py-4" : "px-6 py-10"}`}
+                    ${props.compact ? "px-2 py-10" : "px-6 py-10"}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        {/* Trash Icon */}
         {hasAnyFile && (
           <TrashIcon
             aria-hidden="true"
@@ -226,13 +233,7 @@ export default function Upload(props) {
           />
         )}
         <div className="text-center max-w-full">
-          {/* File Icon */}
-          {!hasAnyFile ? (
-            <DocumentTextIcon
-              aria-hidden="true"
-              className="mx-auto h-12 w-12 text-patras-buccaneer"
-            />
-          ) : checkEnabled && !checkSuccess ? (
+          {!hasAnyFile || !checkSuccess ? (
             <DocumentTextIcon
               aria-hidden="true"
               className="mx-auto h-12 w-12 text-patras-buccaneer"
@@ -243,7 +244,6 @@ export default function Upload(props) {
               className="mx-auto h-12 w-12 text-patras-buccaneer"
             />
           )}
-          {/* File Name or Upload Button */}
           {hasAnyFile ? (
             <div className="mt-3 space-y-2">
               <p className="text-gray-800 text-sm font-medium break-words">
@@ -263,10 +263,9 @@ export default function Upload(props) {
           ) : (
             <div className="flex flex-wrap justify-center text-sm/6 text-gray-600 mt-3">
               {!canPickFromVault && (
-                <>
-                  <label
-                    htmlFor={props.id}
-                    className={`relative cursor-pointer rounded-md bg-white font-semibold text-patras-auChico text-center max-w-full break-words 
+                <label
+                  htmlFor={props.id}
+                  className={`relative cursor-pointer rounded-md bg-white font-semibold text-patras-auChico text-center max-w-full break-words 
                                         focus-within:outline-none focus-within:ring-2 focus-within:ring-patras-buccaneer focus-within:ring-offset-2 
                                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer focus-visible:ring-offset-2
                                         hover:text-white hover:bg-patras-buccaneer 
@@ -275,12 +274,9 @@ export default function Upload(props) {
                                             ? "pointer-events-none"
                                             : ""
                                         }`}
-                  >
-                    <span className="m-2 block">
-                      {`Αναρτήστε ${contentLabel} εδώ`}
-                    </span>
-                  </label>
-                </>
+                >
+                  <span className="m-2 block">{`Αναρτήστε ${contentLabel} εδώ`}</span>
+                </label>
               )}
               {canPickFromVault && (
                 <div className="mt-2 w-full">
@@ -326,34 +322,67 @@ export default function Upload(props) {
                 {formatAcceptHint()} · Μέγιστο μέγεθος: {Math.round(maxFileBytes / (1024 * 1024))}MB
               </p>
             </div>
-          ) : (
+          ) : checkSuccess ? (
             <p className="text-sm pt-[14px] mb-[20px] text-patras-buccaneer break-words">
-              {showCheckMessage && checkPending && "Γίνεται έλεγχος του PDF. Παρακαλώ περιμένετε."}
-              {showCheckMessage && checkFailed && (checkError || "Αποτυχία ελέγχου PDF.")}
-              {showCheckMessage && !checkPending && !checkFailed && "Πατήστε Έλεγχος PDF για να συνεχίσετε."}
-              {checkEnabled && checkSuccess &&
-                (hasExistingFile
-                  ? `Το αρχείο "${getDisplayName()}" είναι ήδη αναρτημένο`
-                  : props.id === "milatary-obligations-upload"
-                  ? "Η υπεύθυνη δήλωση"
-                  : contentStatus.charAt(0).toUpperCase() +
-                    contentStatus.slice(1))}{" "}
-              {checkEnabled && checkSuccess && hasUploadedFile && "επιλέχθηκε επιτυχώς"}
-              {!checkEnabled &&
-                (hasExistingFile
-                  ? `Το αρχείο "${getDisplayName()}" είναι ήδη αναρτημένο`
-                  : props.id === "milatary-obligations-upload"
-                  ? "Η υπεύθυνη δήλωση"
-                  : contentStatus.charAt(0).toUpperCase() +
-                    contentStatus.slice(1))}{" "}
-              {!checkEnabled && hasUploadedFile && "επιλέχθηκε επιτυχώς"}
+              {hasExistingFile
+                ? `Το αρχείο "${getDisplayName()}" είναι ήδη αναρτημένο`
+                : props.id === "milatary-obligations-upload"
+                ? "Η υπεύθυνη δήλωση"
+                : contentStatus.charAt(0).toUpperCase() + contentStatus.slice(1)}{" "}
+              {hasUploadedFile && "επιλέχθηκε επιτυχώς"}
             </p>
+          ) : (
+            <div className="pt-[14px] mb-[20px]">
+              <div className="flex flex-wrap items-center gap-2">
+                <p
+                  className={`text-sm break-words ${
+                    checkFailed ? "text-red-600" : "text-patras-buccaneer"
+                  }`}
+                >
+                  {renderStatusMessage()}
+                </p>
+                {showCheckPrompt && (
+                  <TooltipGray content="Ο έλεγχος PDF επιβεβαιώνει ότι η διατριβή είναι αναγνώσιμη και έχει το ελάχιστο απαιτούμενο περιεχόμενο.">
+                    <span className="-mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full border border-gray-400 text-[11px] font-semibold text-gray-600">
+                      i
+                    </span>
+                  </TooltipGray>
+                )}
+              </div>
+              {isUploading && (
+                <div className="mt-3 flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-2 text-xs text-gray-600">
+                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-patras-buccaneer border-t-transparent" />
+                    <span>Ανέβασμα αρχείου... {uploadProgress}%</span>
+                  </div>
+                  <div className="relative h-1 w-full max-w-xs overflow-hidden rounded-full bg-patras-buccaneer/20">
+                    <div
+                      className="absolute left-0 top-0 h-1 rounded-full bg-patras-buccaneer transition-all"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+              {isProcessing && (
+                <div className="mt-3 flex flex-col items-center gap-2">
+                  <style>{"@keyframes phd-progress {0%{transform:translateX(-100%);}50%{transform:translateX(0);}100%{transform:translateX(100%);}}"}</style>
+                  <div className="flex items-center gap-2 text-xs text-gray-600">
+                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-patras-buccaneer border-t-transparent" />
+                    <span>Έλεγχος σε εξέλιξη...</span>
+                  </div>
+                  <div className="relative h-1 w-full max-w-xs overflow-hidden rounded-full bg-patras-buccaneer/20">
+                    <div
+                      className="absolute left-0 top-0 h-1 w-1/2 rounded-full bg-patras-buccaneer"
+                      style={{ animation: "phd-progress 1.2s ease-in-out infinite" }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
-      {error && !hasAnyFile && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
-      )}
+      {error && !hasAnyFile && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </div>
   );
 }
