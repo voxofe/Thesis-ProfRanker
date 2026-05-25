@@ -484,13 +484,13 @@ export default function Profile() {
   };
 
 
-  const renderFilePills = (files) => (
+  const renderFilePills = (files, docType) => (
     <div className="flex flex-wrap gap-2">
       {files.map((file) => (
         <VaultFileActions
           key={file.id || file.name}
           file={file}
-          onReplace={(selected) => handleVaultReplace(file, selected)}
+          onReplace={(selected) => handleVaultReplace(file, selected, docType)}
           onDelete={() => handleVaultDelete(file)}
           onView={() => handleVaultView(file)}
           onDownload={() => handleVaultDownload(file)}
@@ -592,17 +592,25 @@ export default function Profile() {
   const handleVaultUpload = async (docType, selectedFile) => {
     if (isReadOnly) return;
     if (!selectedFile || !docType) return;
-    const allowed = ["pdf", "doc", "docx", "odt"];
+    const allowed = docType === "phd" ? ["pdf"] : ["pdf", "doc", "docx", "odt"];
     const ext = selectedFile.name.split(".").pop()?.toLowerCase();
     if (!ext || !allowed.includes(ext)) {
       showToast({
         type: "error",
-        message: "Επιτρέπονται μόνο αρχεία PDF, DOC, DOCX, ODT.",
+        message:
+          docType === "phd"
+            ? "Επιτρέπονται μόνο αρχεία PDF για το διδακτορικό."
+            : "Επιτρέπονται μόνο αρχεία PDF, DOC, DOCX, ODT.",
       });
       return;
     }
-    if (selectedFile.size > 5 * 1024 * 1024) {
-      showToast({ type: "error", message: "Το αρχείο πρέπει να είναι έως 5MB." });
+    const maxBytes = docType === "phd" ? 30 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (selectedFile.size > maxBytes) {
+      const maxMb = Math.round(maxBytes / (1024 * 1024));
+      showToast({
+        type: "error",
+        message: `Το αρχείο πρέπει να είναι έως ${maxMb}MB.`,
+      });
       return;
     }
     const token = localStorage.getItem("token");
@@ -642,20 +650,28 @@ export default function Profile() {
     }
   };
 
-  const handleVaultReplace = async (file, selectedFile) => {
+  const handleVaultReplace = async (file, selectedFile, docType) => {
     if (isReadOnly) return;
     if (!file?.id || !selectedFile) return;
-    const allowed = ["pdf", "doc", "docx", "odt"];
+    const allowed = docType === "phd" ? ["pdf"] : ["pdf", "doc", "docx", "odt"];
     const ext = selectedFile.name.split(".").pop()?.toLowerCase();
     if (!ext || !allowed.includes(ext)) {
       showToast({
         type: "error",
-        message: "Επιτρέπονται μόνο αρχεία PDF, DOC, DOCX, ODT.",
+        message:
+          docType === "phd"
+            ? "Επιτρέπονται μόνο αρχεία PDF για το διδακτορικό."
+            : "Επιτρέπονται μόνο αρχεία PDF, DOC, DOCX, ODT.",
       });
       return;
     }
-    if (selectedFile.size > 5 * 1024 * 1024) {
-      showToast({ type: "error", message: "Το αρχείο πρέπει να είναι έως 5MB." });
+    const maxBytes = docType === "phd" ? 30 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (selectedFile.size > maxBytes) {
+      const maxMb = Math.round(maxBytes / (1024 * 1024));
+      showToast({
+        type: "error",
+        message: `Το αρχείο πρέπει να είναι έως ${maxMb}MB.`,
+      });
       return;
     }
     const token = localStorage.getItem("token");
@@ -1216,7 +1232,7 @@ export default function Profile() {
                         </div>
                         <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
                           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] items-end gap-3">
-                            {renderFilePills(item.files)}
+                            {renderFilePills(item.files, item.docType)}
                             <div className="flex md:justify-end">
                               {!isReadOnly && (
                                 <label
@@ -1225,7 +1241,7 @@ export default function Profile() {
                                   <input
                                     type="file"
                                     className="hidden"
-                                    accept=".pdf,.doc,.docx,.odt"
+                                    accept={item.docType === "phd" ? ".pdf" : ".pdf,.doc,.docx,.odt"}
                                     onChange={(event) => {
                                       const file = event.target.files?.[0];
                                       event.target.value = "";
@@ -1236,9 +1252,11 @@ export default function Profile() {
                                     + Προσθήκη
                                   </span>
                                   <span className="absolute right-0 top-full mt-2 w-max rounded-md border border-gray-200 bg-white px-3 py-2 text-[11px] text-gray-600 shadow-md opacity-0 translate-y-1 pointer-events-none transition duration-150 group-hover:opacity-100 group-hover:translate-y-0">
-                                    PDF, DOC, DOCX, ODT
+                                    {item.docType === "phd"
+                                      ? "PDF"
+                                      : "PDF, DOC, DOCX, ODT"}
                                     <br />
-                                    Μέγιστο μέγεθος: 5MB
+                                    Μέγιστο μέγεθος: {item.docType === "phd" ? "30MB" : "5MB"}
                                   </span>
                                 </label>
                               )}

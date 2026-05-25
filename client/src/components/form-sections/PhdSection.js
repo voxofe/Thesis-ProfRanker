@@ -9,6 +9,8 @@ export default function PhdSection() {
   const {
     formData,
     documentVault,
+    phdDocumentStatus,
+    profilePolling,
     handleChange,
     handleFileChange,
     handleFileDelete,
@@ -32,7 +34,8 @@ export default function PhdSection() {
             content="το διδακτορικό σας"
             id="phd-upload"
             name="phd-upload"
-            accept=".pdf,.doc,.docx, .odt"
+            accept=".pdf"
+            maxFileBytes={30 * 1024 * 1024}
             uploadedFile={formData.phdDocument}
             onChange={(e) => handlePhdDocumentChange(e)}
             onDelete={() => handleFileDelete("phdDocument")}
@@ -115,6 +118,18 @@ export default function PhdSection() {
           )}
         </div>
       </div>
+
+      {phdDocumentStatus?.status === "pending" && (
+        <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Γίνεται έλεγχος του PDF της διδακτορικής διατριβής. Θα εμφανιστεί ενημέρωση μόλις ολοκληρωθεί.
+          {profilePolling && " (Ανανέωση σε εξέλιξη)"}
+        </div>
+      )}
+      {phdDocumentStatus?.status === "failed" && phdDocumentStatus?.error && (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {phdDocumentStatus.error}
+        </div>
+      )}
     </div>
   );
 }

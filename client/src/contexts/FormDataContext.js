@@ -25,6 +25,7 @@ export const FormDataProvider = ({ children }) => {
     () => (Array.isArray(profileData?.phdDegrees) ? profileData.phdDegrees : []),
     [profileData]
   );
+  const [profilePolling, setProfilePolling] = useState(false);
 
   // Initial form data structure
   const buildDocItem = (doc) => {
@@ -285,15 +286,13 @@ export const FormDataProvider = ({ children }) => {
       .filter((posId) => posId !== null && posId !== undefined && posId !== "");
   }, [profileData]);
 
-  // Re-initialize form data when user changes (for auto-fill)
-  useEffect(() => {
+  const refreshProfileData = () => {
     const token = localStorage.getItem("token");
     if (!token) {
       setProfileData(null);
-      return;
+      return Promise.resolve();
     }
-
-    axios
+    return axios
       .get(`${API_BASE_URL}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -304,6 +303,11 @@ export const FormDataProvider = ({ children }) => {
         console.error("Error loading profile:", error);
         setProfileData(null);
       });
+  };
+
+  // Re-initialize form data when user changes (for auto-fill)
+  useEffect(() => {
+    refreshProfileData();
   }, [currentUser]);
 
   useEffect(() => {
@@ -461,6 +465,33 @@ export const FormDataProvider = ({ children }) => {
     }));
   };
 
+  useEffect(() => {
+    const applications = profileData?.applications || [];
+    const hasPending = applications.some(
+      (app) => app?.phdDocumentStatus?.status === "pending"
+    );
+    if (!hasPending) {
+      setProfilePolling(false);
+      return undefined;
+    }
+
+    setProfilePolling(true);
+    const intervalId = setInterval(() => {
+      refreshProfileData();
+    }, 10000);
+
+    return () => clearInterval(intervalId);
+  }, [profileData]);
+
+  const phdDocumentStatus = useMemo(() => {
+    const applications = profileData?.applications || [];
+    if (!formData?.positionId) return null;
+    const match = applications.find(
+      (app) => String(app.positionId) === String(formData.positionId)
+    );
+    return match?.phdDocumentStatus || null;
+  }, [profileData, formData?.positionId]);
+
   return (
     <FormDataContext.Provider
       value={{
@@ -469,6 +500,8 @@ export const FormDataProvider = ({ children }) => {
         appliedPositionIds,
         documentVault,
         phdDegrees,
+        phdDocumentStatus,
+        profilePolling,
         handleChange,
         handleFileChange,
         handleFileDelete,

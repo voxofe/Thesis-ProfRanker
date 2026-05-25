@@ -10,7 +10,7 @@ export default function Upload(props) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef(null);
-  const maxFileBytes = 5 * 1024 * 1024;
+  const maxFileBytes = props.maxFileBytes ?? 5 * 1024 * 1024;
   const contentLabel = props.contentLabel || props.content || "";
   const contentStatus = props.contentStatus || props.content || "";
 
@@ -85,6 +85,20 @@ export default function Upload(props) {
       .map((item) => item.trim().toLowerCase())
       .filter(Boolean);
 
+  const formatAcceptHint = () => {
+    const acceptList = parseAcceptList();
+    if (acceptList.length === 0) return "PDF, DOC, DOCX, ODT";
+    const normalized = acceptList
+      .map((item) => {
+        if (item.startsWith(".")) return item.slice(1);
+        if (item.includes("/")) return item.split("/")[1].replace("*", "");
+        return item;
+      })
+      .filter(Boolean)
+      .map((item) => item.toUpperCase());
+    return normalized.join(", ");
+  };
+
   const isFileAllowed = (file) => {
     const acceptList = parseAcceptList();
     if (acceptList.length === 0) return true;
@@ -109,7 +123,10 @@ export default function Upload(props) {
     return `Επιτρέπονται μόνο: ${props.accept.replace(/\s+/g, "")}`;
   };
 
-  const getSizeErrorMessage = () => "Μέγιστο μέγεθος αρχείου: 5MB.";
+  const getSizeErrorMessage = () => {
+    const maxMb = Math.round(maxFileBytes / (1024 * 1024));
+    return `Μέγιστο μέγεθος αρχείου: ${maxMb}MB.`;
+  };
 
   const validateFile = (file) => {
     if (!isFileAllowed(file)) {
@@ -143,6 +160,7 @@ export default function Upload(props) {
           if (!validationError) {
             setError("");
             props.onChange(file);
+            e.target.value = "";
           } else {
             setError(validationError);
             e.target.value = "";
@@ -188,6 +206,9 @@ export default function Upload(props) {
               if (hasAnyFile) {
                 props.onDelete(props.name);
                 setIsDragging(false);
+                if (inputRef.current) {
+                  inputRef.current.value = "";
+                }
               }
             }}
           />
@@ -273,7 +294,7 @@ export default function Upload(props) {
             <div>
               <span className="text-sm pl-1 mb-10">ή σύρετε και αφήστε</span>
               <p className="pt-2 text-xs/5 text-gray-600">
-                PDF, DOC, DOCX, ODT · Μέγιστο μέγεθος: 5MB
+                {formatAcceptHint()} · Μέγιστο μέγεθος: {Math.round(maxFileBytes / (1024 * 1024))}MB
               </p>
             </div>
           ) : (
