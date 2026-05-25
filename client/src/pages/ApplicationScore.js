@@ -23,6 +23,7 @@ export default function ApplicationScore() {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState("application");
+  const [docActionState, setDocActionState] = useState({});
   const editApplicationId = id;
   const isAdmin = currentUser?.role === "admin";
 
@@ -263,9 +264,25 @@ export default function ApplicationScore() {
       .filter((item) => item.docs.length > 0);
   }, [documentItems]);
 
-  const handleDownload = async (url, name) => {
+  const setDocAction = (key, action) => {
+    if (!key) return;
+    setDocActionState((prev) => ({ ...prev, [key]: action }));
+  };
+
+  const clearDocAction = (key) => {
+    if (!key) return;
+    setDocActionState((prev) => {
+      if (!(key in prev)) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
+  const handleDownload = async (url, name, key) => {
     if (!url) return;
     try {
+      setDocAction(key, "download");
       const token = localStorage.getItem("token");
       const response = await axios.get(url, {
         responseType: "blob",
@@ -281,12 +298,15 @@ export default function ApplicationScore() {
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error("Error downloading document:", error);
+    } finally {
+      clearDocAction(key);
     }
   };
 
-  const handleView = async (url) => {
+  const handleView = async (url, key) => {
     if (!url) return;
     try {
+      setDocAction(key, "view");
       const viewUrl = url.includes("?") ? `${url}&inline=1` : `${url}?inline=1`;
       const token = localStorage.getItem("token");
       const response = await axios.get(viewUrl, {
@@ -297,6 +317,8 @@ export default function ApplicationScore() {
       window.open(blobUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       console.error("Error viewing document:", error);
+    } finally {
+      clearDocAction(key);
     }
   };
 
@@ -564,22 +586,26 @@ export default function ApplicationScore() {
                       </td>
                       <td className="px-6 py-4 text-patras-buccaneer">
                         <div className="flex flex-wrap gap-2">
-                          {doc.docs.map((file, index) => (
+                          {doc.docs.map((file, index) => {
+                            const docKey = file?.id ? `id-${file.id}` : `name-${file?.name || index}`;
+                            return (
                             <VaultFileActions
                               key={`${doc.key}-${file.id || index}`}
                               file={{ name: file?.name || "Έγγραφο" }}
                               onView={() => {
                                 const viewUrl = buildDownloadUrl(file);
-                                handleView(viewUrl);
+                                handleView(viewUrl, docKey);
                               }}
                               onDownload={() => {
                                 const downloadUrl = buildDownloadUrl(file);
-                                handleDownload(downloadUrl, file?.name);
+                                handleDownload(downloadUrl, file?.name, docKey);
                               }}
+                              loadingAction={docActionState[docKey] || null}
                               showReplace={false}
                               showDelete={false}
                             />
-                          ))}
+                            );
+                          })}
                         </div>
                       </td>
                     </tr>

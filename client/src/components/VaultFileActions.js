@@ -7,6 +7,7 @@ export default function VaultFileActions({
   onDelete,
   onView,
   onDownload,
+  loadingAction = null,
   showReplace = true,
   showDelete = true,
 }) {
@@ -40,6 +41,10 @@ export default function VaultFileActions({
     }
   };
 
+  const isViewing = loadingAction === "view";
+  const isDownloading = loadingAction === "download";
+  const isBusy = isViewing || isDownloading;
+
   return (
     <div
       ref={wrapperRef}
@@ -51,8 +56,18 @@ export default function VaultFileActions({
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         className={open ? "text-white" : "text-patras-buccaneer group-hover:text-white"}
+        disabled={isBusy}
+        aria-busy={isBusy}
       >
-        {file.name}
+        <span className="inline-flex items-center gap-2">
+          {file.name}
+          {isBusy && (
+            <span className="inline-flex items-center gap-1 text-[11px]">
+              <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              {isViewing ? "Ανοίγει" : "Λήψη"}
+            </span>
+          )}
+        </span>
       </button>
       {showReplace && (
         <input
@@ -71,13 +86,14 @@ export default function VaultFileActions({
               onView();
               setOpen(false);
             }}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-buccaneer hover:text-white"
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-buccaneer hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
+            disabled={isBusy}
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
               <circle cx="12" cy="12" r="3" />
             </svg>
-            Δείτε
+            {isViewing ? "Ανοίγει..." : "Δείτε"}
           </button>
           <button
             type="button"
@@ -85,14 +101,15 @@ export default function VaultFileActions({
               onDownload();
               setOpen(false);
             }}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-buccaneer hover:text-white"
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-buccaneer hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
+            disabled={isBusy}
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <path d="M7 10l5 5 5-5" />
               <path d="M12 15V3" />
             </svg>
-            Κατεβάστε
+            {isDownloading ? "Λήψη..." : "Κατεβάστε"}
           </button>
           {(showReplace || showDelete) && <div className="my-1 border-t border-gray-200" />}
           {showReplace && (

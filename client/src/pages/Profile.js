@@ -62,6 +62,8 @@ export default function Profile() {
   const [formErrors, setFormErrors] = useState({});
   const [isRestrictionsModalOpen, setIsRestrictionsModalOpen] = useState(false);
   const [profilePublications, setProfilePublications] = useState([]);
+  const [vaultActionState, setVaultActionState] = useState({});
+  const [pendingUploads, setPendingUploads] = useState({});
   const phdDegrees = useMemo(
     () => (Array.isArray(profile?.phdDegrees) ? profile.phdDegrees : []),
     [profile]
@@ -484,8 +486,23 @@ export default function Profile() {
   };
 
 
-  const renderFilePills = (files, docType) => (
-    <div className="flex flex-wrap gap-2">
+  const renderFilePills = (files, docType) => {
+    const pendingList = pendingUploads[docType] || [];
+    return (
+      <div className="flex flex-wrap gap-2">
+        {pendingList.map((pending) => (
+          <div
+            key={pending.id}
+            className="inline-flex max-w-[260px] items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs text-patras-buccaneer shadow-sm"
+          >
+            {!pending.uploaded && (
+              <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            )}
+            <span className="truncate" title={pending.name}>
+              {pending.name}
+            </span>
+          </div>
+        ))}
       {files.map((file) => (
         <VaultFileActions
           key={file.id || file.name}
@@ -494,12 +511,14 @@ export default function Profile() {
           onDelete={() => handleVaultDelete(file)}
           onView={() => handleVaultView(file)}
           onDownload={() => handleVaultDownload(file)}
+          loadingAction={vaultActionState[file.id] || null}
           showReplace={!isReadOnly}
           showDelete={!isReadOnly}
         />
       ))}
-    </div>
-  );
+      </div>
+    );
+  };
 
   const vaultItems = useMemo(() => {
     const items = [];
@@ -619,12 +638,32 @@ export default function Profile() {
     formData.append("file", selectedFile);
     formData.append("docType", docType);
 
+    const pendingId = `${docType}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+    let uploadSucceeded = false;
     try {
+      setPendingUploads((prev) => {
+        const next = { ...prev };
+        const list = Array.isArray(next[docType]) ? next[docType] : [];
+        next[docType] = [
+          ...list,
+          { id: pendingId, name: selectedFile.name || "Αρχείο", uploaded: false },
+        ];
+        return next;
+      });
       await axios.post(`${API_BASE_URL}/api/profile/vault`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
+      });
+      uploadSucceeded = true;
+      setPendingUploads((prev) => {
+        const list = Array.isArray(prev[docType]) ? prev[docType] : [];
+        const nextList = list.map((item) =>
+          item.id === pendingId ? { ...item, uploaded: true } : item
+        );
+        if (nextList.length === list.length) return prev;
+        return { ...prev, [docType]: nextList };
       });
       showToast({ type: "success", message: "Το αρχείο προστέθηκε." });
       refreshProfileData();
@@ -634,8 +673,49 @@ export default function Profile() {
         type: "error",
         message: error?.response?.data?.error || "Αποτυχία προσθήκης αρχείου.",
       });
+    } finally {
+      if (!uploadSucceeded) {
+        setPendingUploads((prev) => {
+          const list = Array.isArray(prev[docType]) ? prev[docType] : [];
+          const nextList = list.filter((item) => item.id !== pendingId);
+          if (nextList.length === list.length) return prev;
+          const next = { ...prev };
+          if (nextList.length === 0) {
+            delete next[docType];
+          } else {
+            next[docType] = nextList;
+          }
+          return next;
+        });
+      }
     }
   };
+
+  useEffect(() => {
+    if (!profile?.documentVault) return;
+    setPendingUploads((prev) => {
+      const vault = profile.documentVault || {};
+      let updated = false;
+      const next = { ...prev };
+      Object.keys(prev).forEach((docType) => {
+        const list = Array.isArray(prev[docType]) ? prev[docType] : [];
+        const vaultList = Array.isArray(vault[docType]) ? vault[docType] : [];
+        const vaultNames = new Set(
+          vaultList.map((item) => item?.name).filter(Boolean)
+        );
+        const remaining = list.filter((item) => !vaultNames.has(item.name));
+        if (remaining.length !== list.length) {
+          updated = true;
+          if (remaining.length === 0) {
+            delete next[docType];
+          } else {
+            next[docType] = remaining;
+          }
+        }
+      });
+      return updated ? next : prev;
+    });
+  }, [profile]);
 
   const refreshProfileData = async () => {
     const token = localStorage.getItem("token");
@@ -724,6 +804,9 @@ export default function Profile() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
+      if (file.id) {
+        setVaultActionState((prev) => ({ ...prev, [file.id]: "view" }));
+      }
       const response = await axios.get(`${API_BASE_URL}${file.downloadPath}`, {
         responseType: "blob",
         headers: { Authorization: `Bearer ${token}` },
@@ -734,6 +817,15 @@ export default function Profile() {
     } catch (error) {
       console.error("Error opening document:", error);
       showToast({ type: "error", message: "Αποτυχία ανοίγματος αρχείου." });
+    } finally {
+      if (file?.id) {
+        setVaultActionState((prev) => {
+          if (!(file.id in prev)) return prev;
+          const next = { ...prev };
+          delete next[file.id];
+          return next;
+        });
+      }
     }
   };
 
@@ -742,6 +834,9 @@ export default function Profile() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
+      if (file.id) {
+        setVaultActionState((prev) => ({ ...prev, [file.id]: "download" }));
+      }
       const response = await axios.get(`${API_BASE_URL}${file.downloadPath}`, {
         responseType: "blob",
         headers: { Authorization: `Bearer ${token}` },
@@ -757,6 +852,15 @@ export default function Profile() {
     } catch (error) {
       console.error("Error downloading document:", error);
       showToast({ type: "error", message: "Αποτυχία λήψης αρχείου." });
+    } finally {
+      if (file?.id) {
+        setVaultActionState((prev) => {
+          if (!(file.id in prev)) return prev;
+          const next = { ...prev };
+          delete next[file.id];
+          return next;
+        });
+      }
     }
   };
 
@@ -1252,9 +1356,7 @@ export default function Profile() {
                                     + Προσθήκη
                                   </span>
                                   <span className="absolute right-0 top-full mt-2 w-max rounded-md border border-gray-200 bg-white px-3 py-2 text-[11px] text-gray-600 shadow-md opacity-0 translate-y-1 pointer-events-none transition duration-150 group-hover:opacity-100 group-hover:translate-y-0">
-                                    {item.docType === "phd"
-                                      ? "PDF"
-                                      : "PDF, DOC, DOCX, ODT"}
+                                    {item.docType === "phd" ? "PDF" : "PDF, DOC, DOCX, ODT"}
                                     <br />
                                     Μέγιστο μέγεθος: {item.docType === "phd" ? "30MB" : "5MB"}
                                   </span>
