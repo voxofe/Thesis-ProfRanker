@@ -2,12 +2,17 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useFormData } from "./FormDataContext";
 import { useAuth } from "./AuthContext";
 
+const PHD_ABSTRACT_MIN_WORDS = 200;
+const PHD_ABSTRACT_MAX_WORDS = 1000;
+const PHD_KEYWORDS_MIN = 3;
+const PHD_KEYWORDS_MAX = 10;
+
 const ValidationContext = createContext();
 
 export const useValidation = () => useContext(ValidationContext);
 
 export const ValidationProvider = ({ children }) => {
-  const { formData, phdCheckStatus } = useFormData();
+  const { formData } = useFormData();
   const { currentUser } = useAuth();
   const [stepValidation, setStepValidation] = useState({
     1: false, // Personal Info
@@ -80,14 +85,25 @@ export const ValidationProvider = ({ children }) => {
         formData.phdAcquisitionDate
       );
 
-      const hasValidCheck = formData.phdCheckId && phdCheckStatus === "success";
+      const abstractValue = (formData.phdAbstract || "").trim();
+      const wordCount = abstractValue
+        ? abstractValue.split(/\s+/).filter(Boolean).length
+        : 0;
+      const keywordsCount = Array.isArray(formData.phdKeywords)
+        ? formData.phdKeywords.length
+        : 0;
+      const abstractValid =
+        abstractValue &&
+        wordCount >= PHD_ABSTRACT_MIN_WORDS &&
+        wordCount <= PHD_ABSTRACT_MAX_WORDS;
+      const keywordsValid =
+        keywordsCount >= PHD_KEYWORDS_MIN && keywordsCount <= PHD_KEYWORDS_MAX;
 
       // If foreign institute is checked, DOATAP document is required
       if (formData.phdIsFromForeignInstitute) {
-        return basicValid && !!formData.doatapDocument && !!hasValidCheck;
+        return basicValid && abstractValid && keywordsValid && !!formData.doatapDocument;
       }
-
-      return basicValid && !!hasValidCheck;
+      return basicValid && abstractValid && keywordsValid;
     };
 
     const validatePublications = () => {

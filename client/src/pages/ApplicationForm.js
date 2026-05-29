@@ -222,6 +222,7 @@ export default function Form({ academicYear }) {
   const contentOverflow =  stepsNeedingOverflow.has(currentStep) ? "overflow-visible" : "overflow-y-auto";
 
   const handleStepClick = (step) => {
+    if (loading) return;
     // Only allow navigation to accessible steps
     if (canAccessStep(step)) {
       setCurrentStep(step);
@@ -229,6 +230,7 @@ export default function Form({ academicYear }) {
   };
 
   const handleNext = () => {
+    if (loading) return;
     // Only allow progression if current step is valid
     if (canProceedFromStep(currentStep) && currentStep < steps.length) {
       const nextStep = currentStep + 1;
@@ -238,6 +240,7 @@ export default function Form({ academicYear }) {
   };
 
   const handlePrevious = () => {
+    if (loading) return;
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
@@ -303,12 +306,17 @@ export default function Form({ academicYear }) {
     formDataToSend.append("phdTitle", formData.phdTitle || "");
     formDataToSend.append("phdAcquisitionDate", formData.phdAcquisitionDate || "");
     formDataToSend.append("phdDegreeId", formData.phdDegreeId ?? "");
-    formDataToSend.append("phdCheckId", formData.phdCheckId ?? "");
+    formDataToSend.append("phdAbstract", formData.phdAbstract || "");
+    formDataToSend.append(
+      "phdKeywords",
+      JSON.stringify(formData.phdKeywords || [])
+    );
     formDataToSend.append("workExperience", String(formData.workExperience ?? ""));
     formDataToSend.append("positionId", formData.positionId || "");
 
     const singleDocFields = [
       "cvDocument",
+      "phdDocument",
       "doatapDocument",
       "coursePlanDocument",
       "militaryObligationsDocument",
@@ -507,7 +515,7 @@ export default function Form({ academicYear }) {
         currentStep={currentStep}
         maxStepReached={maxStepReached}
         onStepClick={handleStepClick}
-        canAccessStep={canAccessStep}
+        canAccessStep={(step) => !loading && canAccessStep(step)}
       />
 
 
@@ -521,7 +529,7 @@ export default function Form({ academicYear }) {
         <button
           type="button"
           onClick={handlePrevious}
-          disabled={isFirstStep}
+          disabled={isFirstStep || loading}
           className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-patras-buccaneer border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Προηγούμενο
@@ -529,12 +537,12 @@ export default function Form({ academicYear }) {
 
         {isLastStep ? (
           <button
-            disabled={!steps.every((step) => stepValidation[step.id])}
+            disabled={loading || !steps.every((step) => stepValidation[step.id])}
             type="button"
             onClick={handleSubmit}
             className="rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
           >
-            {submitLabel}
+            {loading ? `${submitLabel}...` : submitLabel}
           </button>
         ) : (
           <span
@@ -548,8 +556,8 @@ export default function Form({ academicYear }) {
             <button
               type="button"
               onClick={handleNext}
-              disabled={nextDisabled}
-              aria-disabled={nextDisabled}
+              disabled={nextDisabled || loading}
+              aria-disabled={nextDisabled || loading}
               className="rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
             >
               Επόμενο

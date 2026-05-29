@@ -20,6 +20,11 @@ const API_BASE_URL = (
   ""
 );
 
+const PHD_ABSTRACT_MIN_WORDS = 200;
+const PHD_ABSTRACT_MAX_WORDS = 1000;
+const PHD_KEYWORDS_MIN = 3;
+const PHD_KEYWORDS_MAX = 10;
+
 export default function Profile() {
   const { userId } = useParams();
   const { currentUser, refreshUser } = useAuth();
@@ -45,16 +50,16 @@ export default function Profile() {
     isPublicEmployee: false,
     isEuCitizenNonGreek: false,
     hasNotParticipatedInPastProgram: false,
-    phdTitle: "",
-    phdAcquisitionDate: "",
-    phdIsFromForeignInstitute: false,
     workExperience: "",
   });
   const [phdDraft, setPhdDraft] = useState({
     phdTitle: "",
     phdAcquisitionDate: "",
     phdIsFromForeignInstitute: false,
+    phdAbstract: "",
+    phdKeywords: [],
   });
+  const [phdKeywordInput, setPhdKeywordInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savingAdditional, setSavingAdditional] = useState(false);
@@ -106,9 +111,6 @@ export default function Profile() {
           isPublicEmployee: !!defaults.isPublicEmployee,
           isEuCitizenNonGreek: !!defaults.isEuCitizenNonGreek,
           hasNotParticipatedInPastProgram: !!defaults.hasNotParticipatedInPastProgram,
-          phdTitle: defaults.phdTitle || "",
-          phdAcquisitionDate: defaults.phdAcquisitionDate || "",
-          phdIsFromForeignInstitute: !!defaults.phdIsFromForeignInstitute,
           workExperience:
             defaults.workExperience === null || defaults.workExperience === undefined
               ? ""
@@ -120,13 +122,17 @@ export default function Profile() {
             phdTitle: degrees[0]?.title || "",
             phdAcquisitionDate: degrees[0]?.acquiredAt || "",
             phdIsFromForeignInstitute: !!degrees[0]?.isForeignInstitute,
+            phdAbstract: degrees[0]?.abstract || "",
+            phdKeywords: degrees[0]?.keywords || [],
           });
         } else {
           setActivePhdIndex(0);
           setPhdDraft({
-            phdTitle: defaults.phdTitle || "",
-            phdAcquisitionDate: defaults.phdAcquisitionDate || "",
-            phdIsFromForeignInstitute: !!defaults.phdIsFromForeignInstitute,
+            phdTitle: "",
+            phdAcquisitionDate: "",
+            phdIsFromForeignInstitute: false,
+            phdAbstract: "",
+            phdKeywords: [],
           });
         }
         setProfilePublications(
@@ -153,6 +159,8 @@ export default function Profile() {
             phdTitle: nextDegree.title || "",
             phdAcquisitionDate: nextDegree.acquiredAt || "",
             phdIsFromForeignInstitute: !!nextDegree.isForeignInstitute,
+            phdAbstract: nextDegree.abstract || "",
+            phdKeywords: nextDegree.keywords || [],
           });
         }
       }
@@ -165,6 +173,18 @@ export default function Profile() {
     profile?.user?.role === "applicant" || profile?.user?.role === "guest";
   const today = new Date().toISOString().split("T")[0];
   const todayDisplay = today.split("-").reverse().join("-");
+  const phdAbstractValue = (phdDraft.phdAbstract || "").trim();
+  const phdAbstractWordCount = phdAbstractValue
+    ? phdAbstractValue.split(/\s+/).filter(Boolean).length
+    : 0;
+  const phdAbstractTooShort =
+    phdAbstractWordCount > 0 && phdAbstractWordCount < PHD_ABSTRACT_MIN_WORDS;
+  const phdAbstractTooLong = phdAbstractWordCount > PHD_ABSTRACT_MAX_WORDS;
+  const phdKeywordCount = Array.isArray(phdDraft.phdKeywords)
+    ? phdDraft.phdKeywords.length
+    : 0;
+  const phdKeywordsTooFew = phdKeywordCount > 0 && phdKeywordCount < PHD_KEYWORDS_MIN;
+  const phdKeywordsTooMany = phdKeywordCount > PHD_KEYWORDS_MAX;
   const workExperienceOptions = Array.from({ length: 11 }, (_, index) => ({
     value: String(index),
     label: String(index),
@@ -234,6 +254,45 @@ export default function Profile() {
     setPhdDraft((prev) => ({ ...prev, [key]: value }));
   };
 
+  const addPhdKeyword = (value) => {
+    const nextValue = String(value || "").trim();
+    if (!nextValue) return;
+    setPhdDraft((prev) => {
+      const existing = Array.isArray(prev.phdKeywords) ? prev.phdKeywords : [];
+      if (existing.length >= PHD_KEYWORDS_MAX) {
+        return prev;
+      }
+      const exists = existing.some(
+        (item) => String(item).toLowerCase() === nextValue.toLowerCase()
+      );
+      if (exists) return prev;
+      return { ...prev, phdKeywords: [...existing, nextValue] };
+    });
+  };
+
+  const removePhdKeyword = (value) => {
+    setPhdDraft((prev) => ({
+      ...prev,
+      phdKeywords: (prev.phdKeywords || []).filter(
+        (item) => String(item) !== String(value)
+      ),
+    }));
+  };
+
+  const commitPhdKeyword = () => {
+    const nextValue = phdKeywordInput.trim();
+    if (!nextValue) return;
+    addPhdKeyword(nextValue);
+    setPhdKeywordInput("");
+  };
+
+  const handlePhdKeywordKeyDown = (event) => {
+    if (event.key === "Enter" || event.key === ",") {
+      event.preventDefault();
+      commitPhdKeyword();
+    }
+  };
+
   const handlePrevPhd = () => {
     if (!phdDegrees.length) return;
     if (activePhdIndex <= 0) return;
@@ -247,6 +306,8 @@ export default function Profile() {
           phdTitle: nextDegree.title || "",
           phdAcquisitionDate: nextDegree.acquiredAt || "",
           phdIsFromForeignInstitute: !!nextDegree.isForeignInstitute,
+          phdAbstract: nextDegree.abstract || "",
+          phdKeywords: nextDegree.keywords || [],
         });
         setPhdSliding(true);
       }
@@ -267,6 +328,8 @@ export default function Profile() {
           phdTitle: nextDegree.title || "",
           phdAcquisitionDate: nextDegree.acquiredAt || "",
           phdIsFromForeignInstitute: !!nextDegree.isForeignInstitute,
+          phdAbstract: nextDegree.abstract || "",
+          phdKeywords: nextDegree.keywords || [],
         });
         setPhdSliding(true);
       }
@@ -362,9 +425,6 @@ export default function Profile() {
         isPublicEmployee: !!defaults.isPublicEmployee,
         isEuCitizenNonGreek: !!defaults.isEuCitizenNonGreek,
         hasNotParticipatedInPastProgram: !!defaults.hasNotParticipatedInPastProgram,
-        phdTitle: defaults.phdTitle || "",
-        phdAcquisitionDate: defaults.phdAcquisitionDate || "",
-        phdIsFromForeignInstitute: !!defaults.phdIsFromForeignInstitute,
         workExperience:
           defaults.workExperience === null || defaults.workExperience === undefined
             ? ""
@@ -388,6 +448,46 @@ export default function Profile() {
       showToast({ type: "error", message: "Μόνο ανάγνωση για προφίλ άλλου χρήστη." });
       return;
     }
+    const activeDegree = phdDegrees[activePhdIndex] || null;
+    const abstractValue = (phdDraft.phdAbstract || "").trim();
+    const keywordsValue = Array.isArray(phdDraft.phdKeywords)
+      ? phdDraft.phdKeywords
+      : [];
+    const wordCount = abstractValue.split(/\s+/).filter(Boolean).length;
+    if (activeDegree) {
+      if (!abstractValue) {
+        showToast({ type: "error", message: "Η περίληψη είναι υποχρεωτική." });
+        return;
+      }
+      if (wordCount < PHD_ABSTRACT_MIN_WORDS) {
+        showToast({
+          type: "error",
+          message: `Η περίληψη πρέπει να έχει τουλάχιστον ${PHD_ABSTRACT_MIN_WORDS} λέξεις.`,
+        });
+        return;
+      }
+      if (wordCount > PHD_ABSTRACT_MAX_WORDS) {
+        showToast({
+          type: "error",
+          message: `Η περίληψη δεν μπορεί να ξεπερνά τις ${PHD_ABSTRACT_MAX_WORDS} λέξεις.`,
+        });
+        return;
+      }
+      if (keywordsValue.length < PHD_KEYWORDS_MIN) {
+        showToast({
+          type: "error",
+          message: `Οι λέξεις-κλειδιά πρέπει να είναι τουλάχιστον ${PHD_KEYWORDS_MIN}.`,
+        });
+        return;
+      }
+      if (keywordsValue.length > PHD_KEYWORDS_MAX) {
+        showToast({
+          type: "error",
+          message: `Οι λέξεις-κλειδιά δεν μπορούν να είναι πάνω από ${PHD_KEYWORDS_MAX}.`,
+        });
+        return;
+      }
+    }
     setSavingAdditional(true);
     const token = localStorage.getItem("token");
 
@@ -402,14 +502,20 @@ export default function Profile() {
         isEuCitizenNonGreek: !!additionalForm.isEuCitizenNonGreek,
         hasNotParticipatedInPastProgram:
           !!additionalForm.hasNotParticipatedInPastProgram,
-        phdTitle: phdDraft.phdTitle || null,
-        phdAcquisitionDate: phdDraft.phdAcquisitionDate || null,
-        phdIsFromForeignInstitute: !!phdDraft.phdIsFromForeignInstitute,
         workExperience: Number.isNaN(workExperienceValue)
           ? null
           : workExperienceValue,
       },
     };
+
+    if (activeDegree) {
+      payload.phdDegreeId = activeDegree.id;
+      payload.phdTitle = phdDraft.phdTitle || "";
+      payload.phdAcquisitionDate = phdDraft.phdAcquisitionDate || "";
+      payload.phdIsFromForeignInstitute = !!phdDraft.phdIsFromForeignInstitute;
+      payload.phdAbstract = abstractValue;
+      payload.phdKeywords = keywordsValue;
+    }
 
     try {
       const response = await axios.put(`${API_BASE_URL}/api/profile`, payload, {
@@ -421,9 +527,6 @@ export default function Profile() {
         isPublicEmployee: !!defaults.isPublicEmployee,
         isEuCitizenNonGreek: !!defaults.isEuCitizenNonGreek,
         hasNotParticipatedInPastProgram: !!defaults.hasNotParticipatedInPastProgram,
-        phdTitle: defaults.phdTitle || "",
-        phdAcquisitionDate: defaults.phdAcquisitionDate || "",
-        phdIsFromForeignInstitute: !!defaults.phdIsFromForeignInstitute,
         workExperience:
           defaults.workExperience === null || defaults.workExperience === undefined
             ? ""
@@ -434,9 +537,9 @@ export default function Profile() {
         : [];
       if (!degrees.length) {
         setPhdDraft({
-          phdTitle: defaults.phdTitle || "",
-          phdAcquisitionDate: defaults.phdAcquisitionDate || "",
-          phdIsFromForeignInstitute: !!defaults.phdIsFromForeignInstitute,
+          phdTitle: "",
+          phdAcquisitionDate: "",
+          phdIsFromForeignInstitute: false,
         });
       }
       showToast({ type: "success", message: "Οι αλλαγές αποθηκεύτηκαν." });
@@ -631,15 +734,13 @@ export default function Profile() {
   const handleVaultUpload = async (docType, selectedFile) => {
     if (isReadOnly) return;
     if (!selectedFile || !docType) return;
-    const allowed = docType === "phd" ? ["pdf"] : ["pdf", "doc", "docx", "odt"];
+    const allowed = ["pdf", "doc", "docx", "odt"];
     const ext = selectedFile.name.split(".").pop()?.toLowerCase();
     if (!ext || !allowed.includes(ext)) {
       showToast({
         type: "error",
         message:
-          docType === "phd"
-            ? "Επιτρέπονται μόνο αρχεία PDF για το διδακτορικό."
-            : "Επιτρέπονται μόνο αρχεία PDF, DOC, DOCX, ODT.",
+          "Επιτρέπονται μόνο αρχεία PDF, DOC, DOCX, ODT.",
       });
       return;
     }
@@ -808,15 +909,12 @@ export default function Profile() {
   const handleVaultReplace = async (file, selectedFile, docType) => {
     if (isReadOnly) return;
     if (!file?.id || !selectedFile) return;
-    const allowed = docType === "phd" ? ["pdf"] : ["pdf", "doc", "docx", "odt"];
+    const allowed = ["pdf", "doc", "docx", "odt"];
     const ext = selectedFile.name.split(".").pop()?.toLowerCase();
     if (!ext || !allowed.includes(ext)) {
       showToast({
         type: "error",
-        message:
-          docType === "phd"
-            ? "Επιτρέπονται μόνο αρχεία PDF για το διδακτορικό."
-            : "Επιτρέπονται μόνο αρχεία PDF, DOC, DOCX, ODT.",
+        message: "Επιτρέπονται μόνο αρχεία PDF, DOC, DOCX, ODT.",
       });
       return;
     }
@@ -1293,6 +1391,90 @@ export default function Profile() {
                               readOnly={isReadOnly}
                             />
                           </div>
+                          <div className="md:col-span-2">
+                            <label
+                              htmlFor="phdAbstract"
+                              className="block text-sm/6 font-medium text-gray-900"
+                            >
+                              Περίληψη διδακτορικής διατριβής
+                            </label>
+                            <div className="mt-2">
+                              <textarea
+                                id="phdAbstract"
+                                name="phdAbstract"
+                                rows={4}
+                                value={phdDraft.phdAbstract}
+                                onChange={(e) => updatePhdDraft("phdAbstract", e.target.value)}
+                                className={`block w-full rounded-md px-3 py-2 text-sm text-gray-900 outline outline-1 -outline-offset-1 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer ${
+                                  phdAbstractTooShort ? "outline-red-500 focus:outline-red-500" : ""
+                                }`}
+                                placeholder="Γράψτε μια σύντομη περίληψη της διατριβής"
+                                readOnly={isReadOnly}
+                              />
+                            </div>
+                            <p className="mt-1 text-xs text-gray-500">
+                              {phdAbstractWordCount} λέξεις
+                            </p>
+                            {phdAbstractTooShort && (
+                              <p className="mt-1 text-xs text-red-600">
+                                Ελάχιστο {PHD_ABSTRACT_MIN_WORDS} λέξεις.
+                              </p>
+                            )}
+                            {phdAbstractTooLong && (
+                              <p className="mt-1 text-xs text-red-600">
+                                Μέγιστο {PHD_ABSTRACT_MAX_WORDS} λέξεις.
+                              </p>
+                            )}
+                          </div>
+                          <div className="md:col-span-2">
+                            <label
+                              htmlFor="phdKeywords"
+                              className="block text-sm/6 font-medium text-gray-900"
+                            >
+                              Λέξεις-κλειδιά
+                            </label>
+                            <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2">
+                              {(phdDraft.phdKeywords || []).map((keyword) => (
+                                <span
+                                  key={keyword}
+                                  className="inline-flex items-center gap-1 rounded-full bg-patras-goldSand/30 px-3 py-1 text-xs text-gray-800"
+                                >
+                                  {keyword}
+                                  {!isReadOnly && (
+                                    <button
+                                      type="button"
+                                      onClick={() => removePhdKeyword(keyword)}
+                                      className="text-gray-500 hover:text-gray-800"
+                                      aria-label={`Αφαίρεση λέξης-κλειδιού ${keyword}`}
+                                    >
+                                      ×
+                                    </button>
+                                  )}
+                                </span>
+                              ))}
+                              {!isReadOnly && (
+                                <input
+                                  id="phdKeywords"
+                                  name="phdKeywords"
+                                  type="text"
+                                  value={phdKeywordInput}
+                                  onChange={(e) => setPhdKeywordInput(e.target.value)}
+                                  onKeyDown={handlePhdKeywordKeyDown}
+                                  onBlur={commitPhdKeyword}
+                                  placeholder="Πληκτρολογήστε και πατήστε Enter"
+                                  className="flex-1 min-w-[180px] border-0 p-0 text-sm text-gray-900 outline-none focus:ring-0"
+                                />
+                              )}
+                            </div>
+                            <p className="mt-1 text-xs text-gray-500">
+                              {phdKeywordCount}/{PHD_KEYWORDS_MAX} λέξεις-κλειδιά
+                            </p>
+                            {(phdKeywordsTooFew || phdKeywordsTooMany) && (
+                              <p className="mt-1 text-xs text-red-600">
+                                Επιτρέπονται {PHD_KEYWORDS_MIN} έως {PHD_KEYWORDS_MAX} λέξεις-κλειδιά.
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
                       {phdSliding && phdNextDraft && (
@@ -1331,6 +1513,43 @@ export default function Profile() {
                                 onChange={() => {}}
                                 readOnly={isReadOnly}
                               />
+                            </div>
+                            <div className="md:col-span-2">
+                              <label
+                                htmlFor="phdAbstract-next"
+                                className="block text-sm/6 font-medium text-gray-900"
+                              >
+                                Περίληψη διδακτορικής διατριβής
+                              </label>
+                              <div className="mt-2">
+                                <textarea
+                                  id="phdAbstract-next"
+                                  name="phdAbstract-next"
+                                  rows={4}
+                                  value={phdNextDraft.phdAbstract || ""}
+                                  onChange={() => {}}
+                                  className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 outline outline-1 -outline-offset-1 placeholder:text-gray-400"
+                                  readOnly
+                                />
+                              </div>
+                            </div>
+                            <div className="md:col-span-2">
+                              <label
+                                htmlFor="phdKeywords-next"
+                                className="block text-sm/6 font-medium text-gray-900"
+                              >
+                                Λέξεις-κλειδιά
+                              </label>
+                              <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2">
+                                {(phdNextDraft.phdKeywords || []).map((keyword) => (
+                                  <span
+                                    key={keyword}
+                                    className="inline-flex items-center gap-1 rounded-full bg-patras-goldSand/30 px-3 py-1 text-xs text-gray-800"
+                                  >
+                                    {keyword}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         </div>
