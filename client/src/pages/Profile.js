@@ -490,17 +490,35 @@ export default function Profile() {
 
   const renderFilePills = (files, docType) => {
     const pendingList = pendingUploads[docType] || [];
+    const fileIds = new Set(files.map((file) => file?.id).filter(Boolean));
+    const fileNames = new Set(files.map((file) => file?.name).filter(Boolean));
+    const visiblePending = pendingList.filter((pending) => {
+      if (pending.serverId && fileIds.has(pending.serverId)) return false;
+      if (pending.serverName && fileNames.has(pending.serverName)) return false;
+      if (pending.name && fileNames.has(pending.name)) return false;
+      return true;
+    });
     return (
       <div className="flex flex-wrap gap-2">
-        {pendingList.map((pending) => (
+        {visiblePending.map((pending) => (
           <div
             key={pending.id}
-            className="inline-flex max-w-[260px] items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs text-patras-buccaneer shadow-sm"
+            className="pr-vault-upload-pill inline-flex max-w-[260px] items-center gap-2 rounded-full border border-gray-200 px-3 py-1 text-xs text-patras-buccaneer shadow-sm"
           >
             {!pending.uploaded && (
-              <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              <span className="pr-vault-upload-base" aria-hidden="true" />
             )}
-            <span className="truncate" title={pending.name}>
+            {!pending.uploaded && (
+              <span
+                className="pr-vault-upload-fill"
+                aria-hidden="true"
+                style={{ width: `${Math.min(100, Math.max(0, pending.progress ?? 0))}%` }}
+              />
+            )}
+            {!pending.uploaded && (
+              <span className="relative z-10 h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            )}
+            <span className="relative z-10 truncate" title={pending.name}>
               {pending.name}
             </span>
           </div>
@@ -648,25 +666,80 @@ export default function Profile() {
         const list = Array.isArray(next[docType]) ? next[docType] : [];
         next[docType] = [
           ...list,
-          { id: pendingId, name: selectedFile.name || "Αρχείο", uploaded: false },
+          {
+            id: pendingId,
+            name: selectedFile.name || "Αρχείο",
+            uploaded: false,
+            progress: 0,
+          },
         ];
         return next;
       });
-      await axios.post(`${API_BASE_URL}/api/profile/vault`, formData, {
+      const response = await axios.post(`${API_BASE_URL}/api/profile/vault`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
+        onUploadProgress: (event) => {
+          if (!event.total) return;
+          const progress = Math.round((event.loaded / event.total) * 100);
+          setPendingUploads((prev) => {
+            const list = Array.isArray(prev[docType]) ? prev[docType] : [];
+            const nextList = list.map((item) =>
+              item.id === pendingId ? { ...item, progress } : item
+            );
+            if (nextList.length === list.length) return prev;
+            return { ...prev, [docType]: nextList };
+          });
+        },
       });
       uploadSucceeded = true;
+      const createdDoc = response?.data;
       setPendingUploads((prev) => {
         const list = Array.isArray(prev[docType]) ? prev[docType] : [];
         const nextList = list.map((item) =>
-          item.id === pendingId ? { ...item, uploaded: true } : item
+          item.id === pendingId
+            ? {
+                ...item,
+                uploaded: true,
+                progress: 100,
+                serverId: createdDoc?.id,
+                serverName: createdDoc?.name,
+              }
+            : item
         );
         if (nextList.length === list.length) return prev;
         return { ...prev, [docType]: nextList };
       });
+      if (createdDoc?.id) {
+        setProfile((prev) => {
+          if (!prev) return prev;
+          const vault = prev.documentVault || {};
+          const list = Array.isArray(vault[docType]) ? vault[docType] : [];
+          if (list.some((item) => item?.id === createdDoc.id)) {
+            return prev;
+          }
+          return {
+            ...prev,
+            documentVault: {
+              ...vault,
+              [docType]: [createdDoc, ...list],
+            },
+          };
+        });
+        setPendingUploads((prev) => {
+          const list = Array.isArray(prev[docType]) ? prev[docType] : [];
+          const nextList = list.filter((item) => item.id !== pendingId);
+          if (nextList.length === list.length) return prev;
+          const next = { ...prev };
+          if (nextList.length === 0) {
+            delete next[docType];
+          } else {
+            next[docType] = nextList;
+          }
+          return next;
+        });
+      }
       showToast({ type: "success", message: "Το αρχείο προστέθηκε." });
       refreshProfileData();
     } catch (error) {

@@ -109,6 +109,30 @@
       );
     min-height: 100vh;
   }
+
+  .pr-vault-upload-pill {
+    position: relative;
+    overflow: hidden;
+    background-color: transparent;
+  }
+
+  .pr-vault-upload-base {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(248, 243, 226, 0.9);
+    z-index: 0;
+  }
+
+  .pr-vault-upload-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background-color: rgba(99, 52, 57, 0.45);
+    transition: width 180ms ease-out;
+    z-index: 1;
+  }
 }
 
 /* @layer base {
