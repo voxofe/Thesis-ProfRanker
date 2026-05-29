@@ -70,6 +70,7 @@ function AppContent() {
   const routesKey = `${location.pathname}${location.search}${location.hash}`;
   const shouldShowBackLink = location.pathname !== "/" && location.pathname !== "/home" && location.pathname !== "/login" && location.pathname !== "/register";
 
+
   const activePositions = React.useMemo(
     () => (positions || []).filter((p) => p?.state === "active"),
     [positions]

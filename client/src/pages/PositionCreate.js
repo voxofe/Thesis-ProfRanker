@@ -17,7 +17,7 @@ const API_BASE_URL = (
 );
 
 export default function CreatePosition({ prefillPosition: prefillPositionProp = null, inModal = false, onSuccess, onCancel }) {
-  const { currentUser } = useAuth();
+  const { currentUser, isLoading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { refreshPositions } = usePositions();
@@ -87,8 +87,9 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
 
   // access control
   useEffect(() => {
+    if (isLoading) return;
     if (!currentUser || currentUser.role !== "admin") navigate("/home");
-  }, [currentUser, navigate]);
+  }, [currentUser, isLoading, navigate]);
 
   // LIVE validation – run on any edit; do NOT depend on updateValidity
   useEffect(() => {

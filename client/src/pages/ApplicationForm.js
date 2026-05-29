@@ -12,6 +12,7 @@ import WorkExperienceSection from "../components/form-sections/WorkExperienceSec
 import DocumentsSection from "../components/form-sections/DocumentsSection";
 import Stepper from "../components/Stepper";
 import Tooltip from "../components/Tooltip";
+import SubmissionProgress from "../components/SubmissionProgress";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
@@ -39,8 +40,18 @@ export default function Form({ academicYear }) {
   const { positions = [], refreshPositions } = usePositions();
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(null);
+  const [serverProgress, setServerProgress] = useState(null);
+  const [serverDisplayPercent, setServerDisplayPercent] = useState(0);
+  const [combinedPercent, setCombinedPercent] = useState(0);
   const [redirectLoading, setRedirectLoading] = useState(false);
   const nextButtonRef = useRef(null);
+  const contentScrollRef = useRef(null);
+  const progressTimerRef = useRef(null);
+  const submissionIdRef = useRef(null);
+  const serverProgressDriftRef = useRef(null);
+  const lastServerPercentAtRef = useRef(0);
+  const lastProgressSnapshotRef = useRef(null);
+  const wasUploadingRef = useRef(false);
   const [openNextTip, setOpenNextTip] = useState(false);
   const [countdownText, setCountdownText] = useState("");
   const [showCountdown, setShowCountdown] = useState(false);
@@ -49,6 +60,12 @@ export default function Form({ academicYear }) {
   useEffect(() => {
     expiryAlertedRef.current = false;
   }, [formData.positionId]);
+
+  useEffect(() => {
+    if (sessionStorage.getItem("submissionInProgress") === "1") {
+      navigate("/");
+    }
+  }, [navigate]);
 
   const steps = [
     {
@@ -246,6 +263,124 @@ export default function Form({ academicYear }) {
     }
   };
 
+  const stopProgressPolling = () => {
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+  };
+
+  const stopServerProgressDrift = () => {
+    if (serverProgressDriftRef.current) {
+      clearInterval(serverProgressDriftRef.current);
+      serverProgressDriftRef.current = null;
+    }
+  };
+
+  const maybeApplyProgress = (data) => {
+    if (!data || !data.label) {
+      setServerProgress(data);
+      return;
+    }
+
+    const snapshot = {
+      percent: typeof data.percent === "number" ? data.percent : null,
+      label: data.label,
+      detail: data.detail || "",
+      done: Boolean(data.done),
+      error: data.error || "",
+    };
+    const lastSnapshot = lastProgressSnapshotRef.current;
+    if (
+      lastSnapshot &&
+      lastSnapshot.percent === snapshot.percent &&
+      lastSnapshot.label === snapshot.label &&
+      lastSnapshot.detail === snapshot.detail &&
+      lastSnapshot.done === snapshot.done &&
+      lastSnapshot.error === snapshot.error
+    ) {
+      return;
+    }
+    lastProgressSnapshotRef.current = snapshot;
+    if (typeof data.percent === "number") {
+      lastServerPercentAtRef.current = Date.now();
+    }
+
+    setServerProgress(data);
+  };
+
+
+
+  const startProgressPolling = (submissionId) => {
+    stopProgressPolling();
+    const fetchProgress = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/submit-progress`, {
+          params: { submissionId },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        const data = response.data || {};
+        maybeApplyProgress(data);
+        if (data.done || data.error) {
+          stopProgressPolling();
+        }
+      } catch (error) {
+        // Ignore polling errors to avoid interrupting submission.
+      }
+    };
+    fetchProgress();
+    progressTimerRef.current = setInterval(fetchProgress, 250);
+  };
+
+  useEffect(() => {
+    if (!serverProgress) return;
+    const rawTarget = typeof serverProgress.percent === "number" ? serverProgress.percent : 0;
+    const target = serverProgress.done ? 100 : Math.min(rawTarget, 99);
+    setServerDisplayPercent(target);
+  }, [serverProgress]);
+
+  useEffect(() => {
+    stopServerProgressDrift();
+    const label = serverProgress?.label || "";
+    if (!loading || !serverProgress || label === "Σε αναμονή" || serverProgress.done || serverProgress.error) {
+      return () => {
+        stopServerProgressDrift();
+      };
+    }
+
+    serverProgressDriftRef.current = setInterval(() => {
+      const now = Date.now();
+      if (now - lastServerPercentAtRef.current < 900) return;
+      setServerDisplayPercent((prev) => Math.min(100, prev + 1));
+    }, 250);
+
+    return () => {
+      stopServerProgressDrift();
+    };
+  }, [loading, serverProgress]);
+
+
+  useEffect(() => {
+    const isUploading = typeof uploadProgress === "number" && uploadProgress < 100;
+    const uploadPercent = typeof uploadProgress === "number" ? uploadProgress : 0;
+    const serverPercent = typeof serverDisplayPercent === "number" ? serverDisplayPercent : 0;
+
+    if (isUploading) {
+      setCombinedPercent(Math.max(0, Math.min(100, uploadPercent)));
+      wasUploadingRef.current = true;
+      return;
+    }
+
+    if (wasUploadingRef.current) {
+      setCombinedPercent(0);
+      setServerDisplayPercent(0);
+      wasUploadingRef.current = false;
+      return;
+    }
+
+    setCombinedPercent(Math.max(0, Math.min(100, serverPercent)));
+  }, [uploadProgress, serverDisplayPercent]);
+
   const handleSubmit = async () => {
     const remainingMs = getRemainingMs();
     if (remainingMs !== null && remainingMs <= 0) {
@@ -270,6 +405,28 @@ export default function Form({ academicYear }) {
       return;
     }
 
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+      if (document?.documentElement) document.documentElement.scrollTop = 0;
+      if (document?.body) document.body.scrollTop = 0;
+      if (contentScrollRef.current) {
+        contentScrollRef.current.scrollTop = 0;
+      }
+    }
+
+    const submissionId =
+      (typeof crypto !== "undefined" && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    submissionIdRef.current = submissionId;
+    lastProgressSnapshotRef.current = null;
+    lastServerPercentAtRef.current = Date.now();
+    setServerProgress({ percent: 0, label: "Σε αναμονή", done: false });
+    setServerDisplayPercent(0);
+    setCombinedPercent(0);
+    wasUploadingRef.current = false;
+    sessionStorage.setItem("submissionInProgress", "1");
+    startProgressPolling(submissionId);
     setLoading(true);
     setUploadProgress(0);
 
@@ -282,6 +439,7 @@ export default function Form({ academicYear }) {
     const formDataToSend = new FormData();
 
     // Append other fields
+    formDataToSend.append("submissionId", submissionId);
     formDataToSend.append("email", formData.email || "");
     formDataToSend.append("phoneNumber", formData.phoneNumber || "");
     formDataToSend.append("landlineNumber", formData.landlineNumber || "");
@@ -430,8 +588,18 @@ export default function Form({ academicYear }) {
     } finally {
       setLoading(false);
       setUploadProgress(null);
+      stopProgressPolling();
+      stopServerProgressDrift();
+      sessionStorage.removeItem("submissionInProgress");
     }
   };
+
+  useEffect(() => {
+    return () => {
+      stopProgressPolling();
+      stopServerProgressDrift();
+    };
+  }, []);
 
   if (redirectLoading) {
     return (
@@ -455,43 +623,16 @@ export default function Form({ academicYear }) {
 
   return (
     <div className="w-full max-w-6xl mx-auto">
-      {loading && (
-        <div className="mb-4 space-y-2">
-          <div className="flex items-center">
-            <svg
-              className="animate-spin h-6 w-6 text-patras-buccaneer"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v8H4z"
-              ></path>
-            </svg>
-            <span className="ml-2 text-patras-buccaneer">
-              {submitLabel}...{typeof uploadProgress === "number" ? ` ${uploadProgress}%` : ""}
-            </span>
-          </div>
-          {typeof uploadProgress === "number" && (
-            <div className="h-3 w-full rounded-full bg-gray-200">
-              <div
-                className="h-3 rounded-full bg-patras-buccaneer transition-all"
-                style={{ width: `${uploadProgress}%` }}
-              ></div>
-            </div>
-          )}
-        </div>
-      )}
+      <SubmissionProgress
+        loading={loading}
+        submitLabel={submitLabel}
+        statusText={
+          typeof uploadProgress === "number" && uploadProgress < 100
+            ? "Ανέβασμα αρχείων"
+            : serverProgress?.label || "Σε αναμονή"
+        }
+        percent={combinedPercent}
+      />
 
       <h1 className="text-2xl text-center border-b pb-2 mb-8 text-gray-800">
         {headerTitle}
@@ -520,7 +661,10 @@ export default function Form({ academicYear }) {
 
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 min-h-[450px] flex flex-col">
-        <div className={`flex-1 ${contentOverflow} p-6`}>
+        <div
+          ref={contentScrollRef}
+          className={`flex-1 ${contentOverflow} p-6 ${loading ? "pointer-events-none opacity-70" : ""}`}
+        >
           <CurrentStepComponent academicYear={academicYear} />
         </div>
       </div>

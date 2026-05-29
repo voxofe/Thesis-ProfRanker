@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { TrashIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -11,6 +12,7 @@ import CustomSelect from "../components/CustomSelect";
 import VaultFileActions from "../components/VaultFileActions";
 import TermsModal from "../components/TermsModal";
 import PublicationsSection from "../components/form-sections/PublicationsSection";
+import PhdAbstractField from "../components/PhdAbstractField";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -60,6 +62,7 @@ export default function Profile() {
     phdKeywords: [],
   });
   const [phdKeywordInput, setPhdKeywordInput] = useState("");
+  const phdKeywordInputRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savingAdditional, setSavingAdditional] = useState(false);
@@ -68,7 +71,9 @@ export default function Profile() {
   const [isRestrictionsModalOpen, setIsRestrictionsModalOpen] = useState(false);
   const [profilePublications, setProfilePublications] = useState([]);
   const [vaultActionState, setVaultActionState] = useState({});
+  const [vaultActionProgress, setVaultActionProgress] = useState({});
   const [pendingUploads, setPendingUploads] = useState({});
+  const uploadTimersRef = useRef({});
   const phdDegrees = useMemo(
     () => (Array.isArray(profile?.phdDegrees) ? profile.phdDegrees : []),
     [profile]
@@ -78,6 +83,15 @@ export default function Profile() {
   const isAdminViewingOther =
     isAdmin && userId && String(userId) !== String(currentUser?.id);
   const isReadOnly = isAdminViewingOther;
+
+  useEffect(() => {
+    return () => {
+      Object.values(uploadTimersRef.current).forEach((timerId) => {
+        clearInterval(timerId);
+      });
+      uploadTimersRef.current = {};
+    };
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -168,23 +182,18 @@ export default function Profile() {
     });
   }, [phdDegrees]);
 
+
   const isProfileApplicant = profile?.user?.role === "applicant";
   const isProfileVaultUser =
     profile?.user?.role === "applicant" || profile?.user?.role === "guest";
   const today = new Date().toISOString().split("T")[0];
   const todayDisplay = today.split("-").reverse().join("-");
-  const phdAbstractValue = (phdDraft.phdAbstract || "").trim();
-  const phdAbstractWordCount = phdAbstractValue
-    ? phdAbstractValue.split(/\s+/).filter(Boolean).length
-    : 0;
-  const phdAbstractTooShort =
-    phdAbstractWordCount > 0 && phdAbstractWordCount < PHD_ABSTRACT_MIN_WORDS;
-  const phdAbstractTooLong = phdAbstractWordCount > PHD_ABSTRACT_MAX_WORDS;
   const phdKeywordCount = Array.isArray(phdDraft.phdKeywords)
     ? phdDraft.phdKeywords.length
     : 0;
   const phdKeywordsTooFew = phdKeywordCount > 0 && phdKeywordCount < PHD_KEYWORDS_MIN;
   const phdKeywordsTooMany = phdKeywordCount > PHD_KEYWORDS_MAX;
+  const phdKeywordLimitReached = phdKeywordCount >= PHD_KEYWORDS_MAX;
   const workExperienceOptions = Array.from({ length: 11 }, (_, index) => ({
     value: String(index),
     label: String(index),
@@ -291,6 +300,11 @@ export default function Profile() {
       event.preventDefault();
       commitPhdKeyword();
     }
+  };
+
+  const clearPhdKeywords = () => {
+    updatePhdDraft("phdKeywords", []);
+    setPhdKeywordInput("");
   };
 
   const handlePrevPhd = () => {
@@ -606,7 +620,7 @@ export default function Profile() {
         {visiblePending.map((pending) => (
           <div
             key={pending.id}
-            className="pr-vault-upload-pill inline-flex max-w-[260px] items-center gap-2 rounded-full border border-gray-200 px-3 py-1 text-xs text-patras-buccaneer shadow-sm"
+            className="pr-vault-upload-pill inline-flex max-w-[260px] items-center gap-2 rounded-full border border-gray-200 px-3 py-1 text-sm text-patras-buccaneer shadow-sm"
           >
             {!pending.uploaded && (
               <span className="pr-vault-upload-base" aria-hidden="true" />
@@ -619,10 +633,30 @@ export default function Profile() {
               />
             )}
             {!pending.uploaded && (
-              <span className="relative z-10 h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              <span className="relative z-10">
+                <svg
+                  className="pr-uploading-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <path d="M12 16V4" />
+                  <path d="M7 9l5-5 5 5" />
+                </svg>
+              </span>
             )}
             <span className="relative z-10 truncate" title={pending.name}>
               {pending.name}
+              {!pending.uploaded && (
+                <span className="ml-2 text-xs text-patras-buccaneer/70">
+                  {Math.min(100, Math.max(0, pending.progress ?? 0))}%
+                </span>
+              )}
             </span>
           </div>
         ))}
@@ -635,6 +669,7 @@ export default function Profile() {
           onView={() => handleVaultView(file)}
           onDownload={() => handleVaultDownload(file)}
           loadingAction={vaultActionState[file.id] || null}
+          actionProgress={vaultActionProgress[file.id]}
           showReplace={!isReadOnly}
           showDelete={!isReadOnly}
         />
@@ -759,7 +794,69 @@ export default function Profile() {
     formData.append("file", selectedFile);
     formData.append("docType", docType);
 
+    const uploadVaultFile = (url, data, authToken, onProgress) =>
+      new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", url);
+        xhr.responseType = "json";
+        xhr.setRequestHeader("Authorization", `Bearer ${authToken}`);
+        xhr.upload.onprogress = onProgress;
+        xhr.onload = () => {
+          const contentType = xhr.getResponseHeader("Content-Type") || "";
+          const isJson = contentType.includes("application/json");
+          let payload = xhr.response;
+          if (!payload && xhr.responseText) {
+            if (isJson) {
+              try {
+                payload = JSON.parse(xhr.responseText);
+              } catch (parseError) {
+                payload = null;
+              }
+            } else {
+              payload = xhr.responseText;
+            }
+          }
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(payload || null);
+            return;
+          }
+          const error = new Error("Upload failed");
+          error.response = { data: payload || { error: xhr.responseText } };
+          reject(error);
+        };
+        xhr.onerror = () => {
+          reject(new Error("Network error"));
+        };
+        xhr.send(data);
+      });
+
     const pendingId = `${docType}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+    const stopUploadTicker = () => {
+      const timerId = uploadTimersRef.current[pendingId];
+      if (timerId) {
+        clearInterval(timerId);
+        delete uploadTimersRef.current[pendingId];
+      }
+    };
+    const startUploadTicker = () => {
+      if (uploadTimersRef.current[pendingId]) return;
+      uploadTimersRef.current[pendingId] = setInterval(() => {
+        setPendingUploads((prev) => {
+          const list = Array.isArray(prev[docType]) ? prev[docType] : [];
+          let updated = false;
+          const nextList = list.map((item) => {
+            if (item.id !== pendingId) return item;
+            const current = Number.isFinite(item.progress) ? item.progress : 0;
+            if (current >= 95 || item.uploaded) return item;
+            const bump = 2 + Math.round(Math.random() * 4);
+            updated = true;
+            return { ...item, progress: Math.min(95, current + bump) };
+          });
+          if (!updated) return prev;
+          return { ...prev, [docType]: nextList };
+        });
+      }, 350);
+    };
     let uploadSucceeded = false;
     try {
       setPendingUploads((prev) => {
@@ -776,40 +873,46 @@ export default function Profile() {
         ];
         return next;
       });
-      const response = await axios.post(`${API_BASE_URL}/api/profile/vault`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-        onUploadProgress: (event) => {
-          if (!event.total) return;
-          const progress = Math.round((event.loaded / event.total) * 100);
+      startUploadTicker();
+      const createdDoc = await uploadVaultFile(
+        `${API_BASE_URL}/api/profile/vault`,
+        formData,
+        token,
+        (event) => {
+          const total = event.total || selectedFile.size;
+          if (!total) return;
+          stopUploadTicker();
+          const progress = Math.round((event.loaded / total) * 100);
           setPendingUploads((prev) => {
             const list = Array.isArray(prev[docType]) ? prev[docType] : [];
-            const nextList = list.map((item) =>
-              item.id === pendingId ? { ...item, progress } : item
-            );
-            if (nextList.length === list.length) return prev;
+            let updated = false;
+            const nextList = list.map((item) => {
+              if (item.id !== pendingId) return item;
+              updated = true;
+              return { ...item, progress };
+            });
+            if (!updated) return prev;
             return { ...prev, [docType]: nextList };
           });
-        },
-      });
+        }
+      );
       uploadSucceeded = true;
-      const createdDoc = response?.data;
+      stopUploadTicker();
       setPendingUploads((prev) => {
         const list = Array.isArray(prev[docType]) ? prev[docType] : [];
-        const nextList = list.map((item) =>
-          item.id === pendingId
-            ? {
-                ...item,
-                uploaded: true,
-                progress: 100,
-                serverId: createdDoc?.id,
-                serverName: createdDoc?.name,
-              }
-            : item
-        );
-        if (nextList.length === list.length) return prev;
+        let updated = false;
+        const nextList = list.map((item) => {
+          if (item.id !== pendingId) return item;
+          updated = true;
+          return {
+            ...item,
+            uploaded: true,
+            progress: 100,
+            serverId: createdDoc?.id,
+            serverName: createdDoc?.name,
+          };
+        });
+        if (!updated) return prev;
         return { ...prev, [docType]: nextList };
       });
       if (createdDoc?.id) {
@@ -844,12 +947,14 @@ export default function Profile() {
       showToast({ type: "success", message: "Το αρχείο προστέθηκε." });
       refreshProfileData();
     } catch (error) {
+      stopUploadTicker();
       console.error("Error uploading document:", error);
       showToast({
         type: "error",
         message: error?.response?.data?.error || "Αποτυχία προσθήκης αρχείου.",
       });
     } finally {
+      stopUploadTicker();
       if (!uploadSucceeded) {
         setPendingUploads((prev) => {
           const list = Array.isArray(prev[docType]) ? prev[docType] : [];
@@ -932,21 +1037,78 @@ export default function Profile() {
     const formData = new FormData();
     formData.append("file", selectedFile);
 
-    try {
-      await axios.put(`${API_BASE_URL}/api/profile/vault/${file.id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
+    const uploadReplaceFile = (url, data, authToken, onProgress) =>
+      new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", url);
+        xhr.responseType = "json";
+        xhr.setRequestHeader("Authorization", `Bearer ${authToken}`);
+        xhr.upload.onprogress = onProgress;
+        xhr.onload = () => {
+          const contentType = xhr.getResponseHeader("Content-Type") || "";
+          const isJson = contentType.includes("application/json");
+          let payload = xhr.response;
+          if (!payload && xhr.responseText) {
+            if (isJson) {
+              try {
+                payload = JSON.parse(xhr.responseText);
+              } catch (parseError) {
+                payload = null;
+              }
+            } else {
+              payload = xhr.responseText;
+            }
+          }
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(payload || null);
+            return;
+          }
+          const error = new Error("Replace failed");
+          error.response = { data: payload || { error: xhr.responseText } };
+          reject(error);
+        };
+        xhr.onerror = () => {
+          reject(new Error("Network error"));
+        };
+        xhr.send(data);
       });
+
+    try {
+      setVaultActionState((prev) => ({ ...prev, [file.id]: "replace" }));
+      setVaultActionProgress((prev) => ({ ...prev, [file.id]: 0 }));
+      await uploadReplaceFile(
+        `${API_BASE_URL}/api/profile/vault/${file.id}`,
+        formData,
+        token,
+        (event) => {
+          const total = event.total || selectedFile.size;
+          if (!total) return;
+          const progress = Math.round((event.loaded / total) * 100);
+          setVaultActionProgress((prev) => ({ ...prev, [file.id]: progress }));
+        }
+      );
+      setVaultActionProgress((prev) => ({ ...prev, [file.id]: 100 }));
       showToast({ type: "success", message: "Το αρχείο αντικαταστάθηκε." });
-      refreshProfileData();
+      await refreshProfileData();
     } catch (error) {
       console.error("Error replacing document:", error);
       showToast({
         type: "error",
         message:
           error?.response?.data?.error || "Αποτυχία αντικατάστασης αρχείου.",
+      });
+    } finally {
+      setVaultActionState((prev) => {
+        if (!(file.id in prev)) return prev;
+        const next = { ...prev };
+        delete next[file.id];
+        return next;
+      });
+      setVaultActionProgress((prev) => {
+        if (!(file.id in prev)) return prev;
+        const next = { ...prev };
+        delete next[file.id];
+        return next;
       });
     }
   };
@@ -957,11 +1119,14 @@ export default function Profile() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
+      setVaultActionState((prev) => ({ ...prev, [file.id]: "delete" }));
+      setVaultActionProgress((prev) => ({ ...prev, [file.id]: 0 }));
       await axios.delete(`${API_BASE_URL}/api/profile/vault/${file.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      setVaultActionProgress((prev) => ({ ...prev, [file.id]: 100 }));
       showToast({ type: "success", message: "Το αρχείο διαγράφηκε." });
-      refreshProfileData();
+      await refreshProfileData();
     } catch (error) {
       console.error("Error deleting document:", error);
       showToast({
@@ -969,8 +1134,57 @@ export default function Profile() {
         message:
           error?.response?.data?.error || "Αποτυχία διαγραφής αρχείου.",
       });
+      setVaultActionState((prev) => {
+        if (!(file.id in prev)) return prev;
+        const next = { ...prev };
+        delete next[file.id];
+        return next;
+      });
+      setVaultActionProgress((prev) => {
+        if (!(file.id in prev)) return prev;
+        const next = { ...prev };
+        delete next[file.id];
+        return next;
+      });
     }
   };
+
+  useEffect(() => {
+    if (!profile?.documentVault) return;
+    const ids = new Set();
+    Object.values(profile.documentVault).forEach((list) => {
+      if (!Array.isArray(list)) return;
+      list.forEach((item) => {
+        if (item?.id) ids.add(String(item.id));
+      });
+    });
+    setVaultActionState((prev) => {
+      const keys = Object.keys(prev);
+      if (keys.length === 0) return prev;
+      let changed = false;
+      const next = { ...prev };
+      keys.forEach((id) => {
+        if (!ids.has(id)) {
+          delete next[id];
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
+    setVaultActionProgress((prev) => {
+      const keys = Object.keys(prev);
+      if (keys.length === 0) return prev;
+      let changed = false;
+      const next = { ...prev };
+      keys.forEach((id) => {
+        if (!ids.has(id)) {
+          delete next[id];
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, [profile]);
 
   const handleVaultView = async (file) => {
     if (!file?.downloadPath) return;
@@ -1046,7 +1260,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6">
+    <div className="pr-profile-labels max-w-6xl mx-auto px-6">
       <div>
         <h1 className="text-2xl text-center border-b pb-2 mb-2 text-gray-800">
           {isAdminViewingOther ? (
@@ -1058,13 +1272,13 @@ export default function Profile() {
           )}
         </h1>
       </div>
-        <h2 className="text-lg text-center font-semibold text-patras-buccaneer ">
+        <h2 className="text-lg text-center font-semibold text-patras-buccaneer/100 py-2">
             {activeSection === "general" && "Γενικά στοιχεία"}
             {activeSection === "additional" && "Πρόσθετα στοιχεία"}
             {activeSection === "vault" && "Αρχεία"}
             {activeSection === "publications" && "Επιστημονικές δημοσιεύσεις"}
         </h2>
-      <div className="mt-2 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
+      <div className="mt-2 grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-6">
         <aside className="rounded-xl border border-gray-200/70 bg-white/15 p-4 h-fit lg:sticky lg:top-6">
           <nav className="space-y-2 text-sm">
             <button
@@ -1134,7 +1348,7 @@ export default function Profile() {
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Βασικά</h3>
+                  <h3 className="text-sm/6 font-semibold text-gray-900 mb-5">Βασικά</h3>
                   <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <InputField
@@ -1158,7 +1372,6 @@ export default function Profile() {
                         onChange={(value) => handleFieldChange("firstName", value)}
                         disabled={!canEditIdentity && !isReadOnly}
                         readOnly={isReadOnly}
-                        required
                         error={formErrors.firstName}
                       />
                       <InputField
@@ -1170,7 +1383,6 @@ export default function Profile() {
                         onChange={(value) => handleFieldChange("lastName", value)}
                         disabled={!canEditIdentity && !isReadOnly}
                         readOnly={isReadOnly}
-                        required
                         error={formErrors.lastName}
                       />
                     </div>
@@ -1178,7 +1390,7 @@ export default function Profile() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Τηλέφωνα</h3>
+                  <h3 className="text-sm/6 font-semibold text-gray-900 mb-5">Τηλέφωνα</h3>
                   <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <InputField
@@ -1206,7 +1418,7 @@ export default function Profile() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Διεύθυνση</h3>
+                  <h3 className="text-sm/6 font-semibold text-gray-900 mb-5">Διεύθυνση</h3>
                   <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <InputField
@@ -1260,7 +1472,7 @@ export default function Profile() {
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Ιδιότητες υποψηφίου</h3>
+                  <h3 className="text-sm/6 font-semibold text-gray-900 mb-5">Ιδιότητες υποψηφίου</h3>
                   <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
                     <div className="flex flex-col gap-3">
                       <Checkbox
@@ -1305,8 +1517,8 @@ export default function Profile() {
                 </div>
 
                 <div>
-                  <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                    <h3 className="text-sm font-semibold text-patras-buccaneer">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <h3 className="text-sm/6 font-semibold text-gray-900 mb-5">
                       Στοιχεία διδακτορικού
                     </h3>
                     {phdDegrees.length > 1 && (
@@ -1361,6 +1573,11 @@ export default function Profile() {
                             value={phdDraft.phdTitle}
                             onChange={(value) => updatePhdDraft("phdTitle", value)}
                             readOnly={isReadOnly}
+                            inputTitle={
+                              (phdDraft.phdTitle || "").trim().length > 60
+                                ? (phdDraft.phdTitle || "").trim()
+                                : ""
+                            }
                           />
                           <div>
                             <FlowbiteDateField
@@ -1379,65 +1596,39 @@ export default function Profile() {
                             </p>
                           </div>
                           <div className="md:col-span-2">
-                            <Checkbox
-                              id="phdIsFromForeignInstitute"
-                              name="phdIsFromForeignInstitute"
-                              label="Τίτλος από ίδρυμα εξωτερικού"
-                              description=""
-                              checked={phdDraft.phdIsFromForeignInstitute}
-                              onChange={(value) =>
-                                updatePhdDraft("phdIsFromForeignInstitute", value)
-                              }
+                            <PhdAbstractField
+                              id="phdAbstract"
+                              name="phdAbstract"
+                              value={phdDraft.phdAbstract}
+                              onChange={(value) => updatePhdDraft("phdAbstract", value)}
+                              minWords={PHD_ABSTRACT_MIN_WORDS}
+                              maxWords={PHD_ABSTRACT_MAX_WORDS}
+                              placeholder="Γράψτε μια σύντομη περίληψη της διατριβής"
                               readOnly={isReadOnly}
                             />
                           </div>
                           <div className="md:col-span-2">
-                            <label
-                              htmlFor="phdAbstract"
-                              className="block text-sm/6 font-medium text-gray-900"
-                            >
-                              Περίληψη διδακτορικής διατριβής
-                            </label>
-                            <div className="mt-2">
-                              <textarea
-                                id="phdAbstract"
-                                name="phdAbstract"
-                                rows={4}
-                                value={phdDraft.phdAbstract}
-                                onChange={(e) => updatePhdDraft("phdAbstract", e.target.value)}
-                                className={`block w-full rounded-md px-3 py-2 text-sm text-gray-900 outline outline-1 -outline-offset-1 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer ${
-                                  phdAbstractTooShort ? "outline-red-500 focus:outline-red-500" : ""
-                                }`}
-                                placeholder="Γράψτε μια σύντομη περίληψη της διατριβής"
-                                readOnly={isReadOnly}
-                              />
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <label
+                                htmlFor="phdKeywords"
+                                className="block text-sm/6 font-medium text-gray-900"
+                              >
+                                Λέξεις-κλειδιά
+                              </label>
                             </div>
-                            <p className="mt-1 text-xs text-gray-500">
-                              {phdAbstractWordCount} λέξεις
-                            </p>
-                            {phdAbstractTooShort && (
-                              <p className="mt-1 text-xs text-red-600">
-                                Ελάχιστο {PHD_ABSTRACT_MIN_WORDS} λέξεις.
-                              </p>
-                            )}
-                            {phdAbstractTooLong && (
-                              <p className="mt-1 text-xs text-red-600">
-                                Μέγιστο {PHD_ABSTRACT_MAX_WORDS} λέξεις.
-                              </p>
-                            )}
-                          </div>
-                          <div className="md:col-span-2">
-                            <label
-                              htmlFor="phdKeywords"
-                              className="block text-sm/6 font-medium text-gray-900"
+                            <div
+                              className="relative mt-2 flex w-full flex-wrap items-center gap-2 rounded-md bg-white px-3 py-3 text-base sm:text-sm/6 outline outline-1 -outline-offset-1 outline-patras-buccaneer focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-patras-buccaneer focus-within:ring-1 focus-within:ring-offset-0 focus-within:ring-patras-buccaneer"
+                              onClick={(event) => {
+                                if (event.target.closest("button") || event.target.tagName === "INPUT") {
+                                  return;
+                                }
+                                phdKeywordInputRef.current?.focus();
+                              }}
                             >
-                              Λέξεις-κλειδιά
-                            </label>
-                            <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2">
                               {(phdDraft.phdKeywords || []).map((keyword) => (
                                 <span
                                   key={keyword}
-                                  className="inline-flex items-center gap-1 rounded-full bg-patras-goldSand/30 px-3 py-1 text-xs text-gray-800"
+                                  className="inline-flex items-center gap-1 rounded-full bg-patras-goldSand/30 px-3 py-1 text-sm text-gray-800"
                                 >
                                   {keyword}
                                   {!isReadOnly && (
@@ -1452,7 +1643,7 @@ export default function Profile() {
                                   )}
                                 </span>
                               ))}
-                              {!isReadOnly && (
+                              {!isReadOnly && !phdKeywordLimitReached && (
                                 <input
                                   id="phdKeywords"
                                   name="phdKeywords"
@@ -1461,11 +1652,27 @@ export default function Profile() {
                                   onChange={(e) => setPhdKeywordInput(e.target.value)}
                                   onKeyDown={handlePhdKeywordKeyDown}
                                   onBlur={commitPhdKeyword}
-                                  placeholder="Πληκτρολογήστε και πατήστε Enter"
-                                  className="flex-1 min-w-[180px] border-0 p-0 text-sm text-gray-900 outline-none focus:ring-0"
+                                  placeholder=""
+                                  className="flex-1 min-w-[180px] border-0 p-0 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:ring-0"
+                                  ref={phdKeywordInputRef}
                                 />
                               )}
+                              {!isReadOnly && (
+                                <button
+                                  type="button"
+                                  onClick={clearPhdKeywords}
+                                  disabled={phdKeywordCount === 0}
+                                  className="absolute bottom-2 right-2 inline-flex items-center justify-center text-patras-buccaneer hover:text-patras-sanguineBrown disabled:cursor-not-allowed disabled:text-gray-400"
+                                  aria-label="Καθαρισμός λέξεων-κλειδιών"
+                                  title="Καθαρισμός"
+                                >
+                                  <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                                </button>
+                              )}
                             </div>
+                            <p className="mt-2 text-sm text-gray-500">
+                              Πληκτρολογήστε και πατήστε Enter ή κόμμα για να προσθέσετε λέξη-κλειδί.
+                            </p>
                             <p className="mt-1 text-xs text-gray-500">
                               {phdKeywordCount}/{PHD_KEYWORDS_MAX} λέξεις-κλειδιά
                             </p>
@@ -1474,6 +1681,19 @@ export default function Profile() {
                                 Επιτρέπονται {PHD_KEYWORDS_MIN} έως {PHD_KEYWORDS_MAX} λέξεις-κλειδιά.
                               </p>
                             )}
+                          </div>
+                          <div className="md:col-span-2">
+                            <Checkbox
+                              id="phdIsFromForeignInstitute"
+                              name="phdIsFromForeignInstitute"
+                              label="Τίτλος από ίδρυμα εξωτερικού"
+                              description=""
+                              checked={phdDraft.phdIsFromForeignInstitute}
+                              onChange={(value) =>
+                                updatePhdDraft("phdIsFromForeignInstitute", value)
+                              }
+                              readOnly={isReadOnly}
+                            />
                           </div>
                         </div>
                       </div>
@@ -1488,6 +1708,11 @@ export default function Profile() {
                               value={phdNextDraft.phdTitle}
                               onChange={() => {}}
                               readOnly={isReadOnly}
+                              inputTitle={
+                                (phdNextDraft.phdTitle || "").trim().length > 60
+                                  ? (phdNextDraft.phdTitle || "").trim()
+                                  : ""
+                              }
                             />
                             <div>
                               <FlowbiteDateField
@@ -1504,17 +1729,6 @@ export default function Profile() {
                               </p>
                             </div>
                             <div className="md:col-span-2">
-                              <Checkbox
-                                id="phdIsFromForeignInstitute-next"
-                                name="phdIsFromForeignInstitute-next"
-                                label="Τίτλος από ίδρυμα εξωτερικού"
-                                description=""
-                                checked={phdNextDraft.phdIsFromForeignInstitute}
-                                onChange={() => {}}
-                                readOnly={isReadOnly}
-                              />
-                            </div>
-                            <div className="md:col-span-2">
                               <label
                                 htmlFor="phdAbstract-next"
                                 className="block text-sm/6 font-medium text-gray-900"
@@ -1525,7 +1739,7 @@ export default function Profile() {
                                 <textarea
                                   id="phdAbstract-next"
                                   name="phdAbstract-next"
-                                  rows={4}
+                                  rows={12}
                                   value={phdNextDraft.phdAbstract || ""}
                                   onChange={() => {}}
                                   className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 outline outline-1 -outline-offset-1 placeholder:text-gray-400"
@@ -1540,16 +1754,27 @@ export default function Profile() {
                               >
                                 Λέξεις-κλειδιά
                               </label>
-                              <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2">
+                              <div className="relative mt-2 flex w-full flex-wrap items-center gap-2 rounded-md bg-white px-3 py-3 text-base sm:text-sm/6 outline outline-1 -outline-offset-1 outline-patras-buccaneer focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-patras-buccaneer focus-within:ring-1 focus-within:ring-offset-0 focus-within:ring-patras-buccaneer">
                                 {(phdNextDraft.phdKeywords || []).map((keyword) => (
                                   <span
                                     key={keyword}
-                                    className="inline-flex items-center gap-1 rounded-full bg-patras-goldSand/30 px-3 py-1 text-xs text-gray-800"
+                                    className="inline-flex items-center gap-1 rounded-full bg-patras-goldSand/30 px-3 py-1 text-sm text-gray-800"
                                   >
                                     {keyword}
                                   </span>
                                 ))}
                               </div>
+                            </div>
+                            <div className="md:col-span-2">
+                              <Checkbox
+                                id="phdIsFromForeignInstitute-next"
+                                name="phdIsFromForeignInstitute-next"
+                                label="Τίτλος από ίδρυμα εξωτερικού"
+                                description=""
+                                checked={phdNextDraft.phdIsFromForeignInstitute}
+                                onChange={() => {}}
+                                readOnly={isReadOnly}
+                              />
                             </div>
                           </div>
                         </div>
@@ -1559,7 +1784,7 @@ export default function Profile() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-semibold text-patras-buccaneer mb-2">Εργασιακή εμπειρία</h3>
+                  <h3 className="text-sm/6 font-semibold text-gray-900 mb-5">Εργασιακή εμπειρία</h3>
                   <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
                     <CustomSelect
                       label="Χρόνια μεταδιδακτορικής εργασιακής εμπειρίας (εξαιρείται η διδακτική εμπειρία)"
@@ -1623,8 +1848,8 @@ export default function Profile() {
 
                     const renderItem = (item) => (
                       <div key={item.key} className="mt-6 first:mt-0">
-                        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                          <div className="text-sm font-semibold text-patras-buccaneer">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="text-sm/6 font-semibold text-gray-900 mb-5">
                             {item.label}
                           </div>
                         </div>
@@ -1634,12 +1859,12 @@ export default function Profile() {
                             <div className="flex md:justify-end">
                               {!isReadOnly && (
                                 <label
-                                  className="group inline-flex items-center gap-2 text-xs font-semibold text-patras-buccaneer cursor-pointer relative"
+                                  className="group inline-flex items-center gap-2 text-sm font-semibold text-patras-buccaneer cursor-pointer relative"
                                 >
                                   <input
                                     type="file"
                                     className="hidden"
-                                    accept={item.docType === "phd" ? ".pdf" : ".pdf,.doc,.docx,.odt"}
+                                    accept=".pdf,.doc,.docx,.odt"
                                     onChange={(event) => {
                                       const file = event.target.files?.[0];
                                       event.target.value = "";
@@ -1650,7 +1875,7 @@ export default function Profile() {
                                     + Προσθήκη
                                   </span>
                                   <span className="absolute right-0 top-full mt-2 w-max rounded-md border border-gray-200 bg-white px-3 py-2 text-[11px] text-gray-600 shadow-md opacity-0 translate-y-1 pointer-events-none transition duration-150 group-hover:opacity-100 group-hover:translate-y-0">
-                                    {item.docType === "phd" ? "PDF" : "PDF, DOC, DOCX, ODT"}
+                                    {item.docType === "phd" ? "PDF, DOC, DOCX, ODT" : "PDF, DOC, DOCX, ODT"}
                                     <br />
                                     Μέγιστο μέγεθος: {item.docType === "phd" ? "30MB" : "5MB"}
                                   </span>

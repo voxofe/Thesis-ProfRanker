@@ -5,6 +5,7 @@ import InputField from "../components/InputField";
 import CustomSelect from "../components/CustomSelect";
 import CoursePanel from "../components/CoursePanel";
 import FlowbiteDateField from "../components/FlowbiteDateField";
+import SubmissionProgress from "../components/SubmissionProgress";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -51,7 +52,7 @@ const API_BASE_URL = (
 );
 
 export default function ScientificFieldsCreate() {
-  const { currentUser } = useAuth();
+  const { currentUser, isLoading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { updateValidity, isValid, validationErrors } = useCreatePositionValidation();
@@ -127,10 +128,13 @@ export default function ScientificFieldsCreate() {
 
   const { showToast } = useToast();
   const [submitting, setSubmitting] = useState(false);
+  const [progressPercent, setProgressPercent] = useState(0);
+  const [progressTarget, setProgressTarget] = useState(0);
   const [redirectLoading, setRedirectLoading] = useState(false);
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [dateCleared, setDateCleared] = useState({ startDate: false, endDate: false });
+  const progressTimerRef = React.useRef(null);
 
   const markTouched = (field) =>
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -138,11 +142,42 @@ export default function ScientificFieldsCreate() {
   const showError = (field) => submitted || touched[field];
   const showCourseError = submitted || touched.courses;
   const showDateTimeError = submitted || touched.startTime || touched.endTime;
+  const progressLabel = isEditMode
+    ? `Ενημέρωση πεδίου ${formData.scientificField || ""}`
+    : `Δημιουργία πεδίου ${formData.scientificField || ""}`;
+
+  useEffect(() => {
+    if (!submitting) {
+      if (progressTimerRef.current) {
+        clearInterval(progressTimerRef.current);
+        progressTimerRef.current = null;
+      }
+      return;
+    }
+
+    if (progressTimerRef.current) return;
+    progressTimerRef.current = setInterval(() => {
+      setProgressPercent((prev) => {
+        const nextTarget = typeof progressTarget === "number" ? progressTarget : 0;
+        if (prev >= nextTarget) return prev;
+        const step = Math.max(1, Math.ceil((nextTarget - prev) * 0.05));
+        return Math.min(nextTarget, prev + step);
+      });
+    }, 160);
+
+    return () => {
+      if (progressTimerRef.current) {
+        clearInterval(progressTimerRef.current);
+        progressTimerRef.current = null;
+      }
+    };
+  }, [submitting, progressTarget]);
 
   // access control
   useEffect(() => {
+    if (isLoading) return;
     if (!currentUser || currentUser.role !== "admin") navigate("/home");
-  }, [currentUser, navigate]);
+  }, [currentUser, isLoading, navigate]);
 
   useEffect(() => {
     if (!prefillScientificField) return;
@@ -219,7 +254,15 @@ export default function ScientificFieldsCreate() {
     const errors = updateValidity(formData, "scientificField");
     if (Object.keys(errors).length > 0) return;
 
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+      if (document?.documentElement) document.documentElement.scrollTop = 0;
+      if (document?.body) document.body.scrollTop = 0;
+    }
+
     setSubmitting(true);
+    setProgressPercent(0);
+    setProgressTarget(0);
 
     const payload = {
       name: formData.scientificField,
@@ -245,6 +288,13 @@ export default function ScientificFieldsCreate() {
           : `${API_BASE_URL}/api/scientific-fields`,
         data: payload,
         headers: token ? { Authorization: `Bearer ${token}` } : {},
+        onUploadProgress: (event) => {
+          if (!event.total) return;
+          const raw = Math.round((event.loaded / event.total) * 100);
+          const scaled = hasPositionFields ? Math.round(raw * 0.8) : raw;
+          const capped = hasPositionFields ? Math.min(80, scaled) : Math.min(100, scaled);
+          setProgressTarget(capped);
+        },
       });
 
       showToast({
@@ -253,7 +303,7 @@ export default function ScientificFieldsCreate() {
           ? "Το επιστημονικό πεδίο ενημερώθηκε με επιτυχία!"
           : "Το επιστημονικό πεδίο δημιουργήθηκε με επιτυχία!",
       });
-      setSubmitting(false);
+      setProgressTarget(hasPositionFields ? 80 : 100);
 
       if (hasPositionFields) {
         const sfId = isEditMode
@@ -273,7 +323,14 @@ export default function ScientificFieldsCreate() {
                 endTime: formData.endTime,
               },
               headers: token ? { Authorization: `Bearer ${token}` } : {},
+              onUploadProgress: (event) => {
+                if (!event.total) return;
+                const raw = Math.round((event.loaded / event.total) * 100);
+                const scaled = 80 + Math.round(raw * 0.2);
+                setProgressTarget(Math.min(98, scaled));
+              },
             });
+            setProgressTarget(100);
           } catch (positionError) {
             const message =
               positionError?.response?.data?.error ||
@@ -284,14 +341,17 @@ export default function ScientificFieldsCreate() {
       }
 
       if (isEditMode) {
+        setSubmitting(false);
         navigate(`/scientific-fields/view/${prefillScientificField.id}`);
         return;
       }
       const createdId = response?.data?.scientificFieldId;
       if (createdId) {
+        setSubmitting(false);
         navigate(`/scientific-fields/view/${createdId}`);
         return;
       }
+      setSubmitting(false);
       setTimeout(() => {
         setRedirectLoading(true);
         setTimeout(() => {
@@ -302,6 +362,8 @@ export default function ScientificFieldsCreate() {
       const message = error?.response?.data?.error || "Αποτυχία δημιουργίας πεδίου. Παρακαλώ δοκιμάστε ξανά.";
       showToast({ type: "error", message });
       setSubmitting(false);
+      setProgressPercent(0);
+      setProgressTarget(0);
     }
   };
 
@@ -324,31 +386,12 @@ export default function ScientificFieldsCreate() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-0 space-y-8">
-      {submitting && (
-        <div className="flex justify-center items-center">
-          <svg
-            className="animate-spin h-6 w-6 text-patras-buccaneer"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v8H4z"
-            ></path>
-          </svg>
-          <span className="ml-2 text-patras-buccaneer">Υποβολή αίτησης...</span>
-        </div>
-      )}
+      <SubmissionProgress
+        loading={submitting}
+        submitLabel={progressLabel}
+        statusText=""
+        percent={progressPercent}
+      />
       <header className="text-center pb-2">
         <h1 className="text-2xl text-center border-b pb-2 text-gray-800">
           {isEditMode ? "Ενημέρωση πεδίου" : "Δημιουργία πεδίου"}
@@ -372,6 +415,7 @@ export default function ScientificFieldsCreate() {
                 markTouched("scientificField");
                 setFormData((prev) => ({ ...prev, scientificField: val }));
               }}
+              disabled={submitting}
               required
               error={showError("scientificField") ? validationErrors.scientificField : ""}
             />
@@ -388,6 +432,7 @@ export default function ScientificFieldsCreate() {
                 setFormData((prev) => ({ ...prev, school: val, department: "select" }));
               }}
               options={SCHOOLS.map((s) => ({ value: s, label: s }))}
+              disabled={submitting}
               required
               error={showError("school") ? validationErrors.school : ""}
             />
@@ -409,6 +454,7 @@ export default function ScientificFieldsCreate() {
                 }
               }
               options={departmentOptions.map((d) => ({ value: d, label: d }))}
+              disabled={submitting}
               required
               error={showError("department") ? validationErrors.department : ""}
             />
@@ -422,7 +468,7 @@ export default function ScientificFieldsCreate() {
           onAddCourse={addCourse}
           onRemoveCourse={removeCourse}
           showAddButton
-          disabled={false}
+          disabled={submitting}
           scientificFieldValue={formData.scientificField}
           errors={validationErrors}
         />
@@ -453,6 +499,8 @@ export default function ScientificFieldsCreate() {
                   minDate={todayISO()}
                   maxDate={formData.endDate || undefined}
                   popupAlign="right"
+                  readOnly={submitting}
+                  disabled={submitting}
                   required={Boolean(
                     formData.startDate ||
                     formData.endDate ||
@@ -481,6 +529,8 @@ export default function ScientificFieldsCreate() {
                   }}
                   minDate={formData.startDate || todayISO()}
                   popupAlign="right"
+                  readOnly={submitting}
+                  disabled={submitting}
                   required={Boolean(
                     formData.startDate ||
                     formData.endDate ||
@@ -503,6 +553,7 @@ export default function ScientificFieldsCreate() {
                   markTouched("startTime");
                   setFormData({ ...formData, startTime: val });
                 }}
+                disabled={submitting}
                 error={showError("startTime") ? validationErrors.startTime : ""}
                 required={Boolean(
                   formData.startDate ||
@@ -519,6 +570,7 @@ export default function ScientificFieldsCreate() {
                   markTouched("endTime");
                   setFormData({ ...formData, endTime: val });
                 }}
+                disabled={submitting}
                 error={showError("endTime") ? validationErrors.endTime : ""}
                 required={Boolean(
                   formData.startDate ||

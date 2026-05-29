@@ -13,6 +13,24 @@ const getDisplayName = (fileItem) => {
   return "";
 };
 
+const formatFileSize = (bytes) => {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
+  const base = 1024;
+  const exponent = Math.min(
+    Math.floor(Math.log(bytes) / Math.log(base)),
+    units.length - 1
+  );
+  const value = bytes / Math.pow(base, exponent);
+  const formatted = exponent === 0 ? Math.round(value) : value.toFixed(1);
+  return `${formatted} ${units[exponent]}`;
+};
+
+const getDisplaySize = (fileItem) => {
+  if (fileItem instanceof File) return formatFileSize(fileItem.size);
+  return "";
+};
+
 export default function MultipleUploadStrip({
   files = [],
   onAddFile,
@@ -148,6 +166,9 @@ export default function MultipleUploadStrip({
               <DocumentTextIcon className="h-10 w-10 text-patras-buccaneer" />
               <p className="mt-2 line-clamp-3 break-all text-xs text-gray-700">
                 {getDisplayName(file)}
+                {file instanceof File && (
+                  <span className="text-gray-500"> ({getDisplaySize(file)})</span>
+                )}
               </p>
             </div>
           </div>

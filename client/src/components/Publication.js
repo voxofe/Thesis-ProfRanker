@@ -135,7 +135,6 @@ export default function Publication({ index, readOnly = false }) {
               },
               { label: "Άλλες δημοσιεύσεις", value: "other" },
             ]}
-            required={true}
           />
         </div>
         <div className="col-span-1">
@@ -145,7 +144,6 @@ export default function Publication({ index, readOnly = false }) {
             onChange={(value) => updatePublicationField("year", value)}
             readOnly={readOnly}
             options={scimagoYears}
-            required={true}
           />
         </div>
         <div className="col-span-2">
@@ -157,7 +155,6 @@ export default function Publication({ index, readOnly = false }) {
             value={publication.publicationTitle || ""}
             onChange={(value) => updatePublicationField("publicationTitle", value)}
             readOnly={readOnly}
-            required={true}
           />
         </div>
 
@@ -170,7 +167,6 @@ export default function Publication({ index, readOnly = false }) {
             value={authorsValue}
             onChange={(value) => updatePublicationField("authors", value)}
             readOnly={readOnly}
-            required={true}
           />
         </div>
       </div>
@@ -208,7 +204,6 @@ export default function Publication({ index, readOnly = false }) {
                 value={publication.journalConfTitle || ""}
                 onChange={(value) => updatePublicationField("journalConfTitle", value)}
                 readOnly={readOnly}
-                required={true}
               />
             )}
             {(isBookType || isMonographType) && (
@@ -220,7 +215,6 @@ export default function Publication({ index, readOnly = false }) {
                 value={publication.publisher || ""}
                 onChange={(value) => updatePublicationField("publisher", value)}
                 readOnly={readOnly}
-                required={true}
               />
             )}
           </div>
@@ -242,7 +236,6 @@ export default function Publication({ index, readOnly = false }) {
               value={publication.journalConfTitle || ""}
               onChange={(value) => updatePublicationField("journalConfTitle", value)}
               readOnly={readOnly}
-              required={true}
             />
           )}
 
@@ -259,7 +252,6 @@ export default function Publication({ index, readOnly = false }) {
                 value={(publication.issn || "").replace(/\(wrong\)/gi, "").trim()}
                 onChange={(value) => updatePublicationField("issn", value)}
                 readOnly={readOnly}
-                required={true}
               />
               {getIssnErrorMessage(publication.issn) && (
                 <span className="text-xs text-red-600 block pb-3">
@@ -278,7 +270,6 @@ export default function Publication({ index, readOnly = false }) {
               value={publication.publisher || ""}
               onChange={(value) => updatePublicationField("publisher", value)}
               readOnly={readOnly}
-              required={true}
             />
           )}
         </div>

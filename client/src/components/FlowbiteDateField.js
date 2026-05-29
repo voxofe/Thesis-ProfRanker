@@ -188,6 +188,7 @@ export default function FlowbiteDateField({
   minDate,
   maxDate,
   popupAlign = "left",
+  popupPlacement = "auto",
   usePortal = false,
   placeholder = "DD-MM-YYYY",
   readOnly = false,
@@ -254,15 +255,22 @@ export default function FlowbiteDateField({
 
   // Popup alignment
   const popupPos = useMemo(() => {
+    const isBottom = popupPlacement === "bottom";
     switch (popupAlign) {
       case "center":
-        return "absolute left-1/2 -translate-x-1/2 top-0 -translate-y-full mb-2 z-50 block";
+        return isBottom
+          ? "absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 block"
+          : "absolute left-1/2 -translate-x-1/2 top-0 -translate-y-full mb-2 z-50 block";
       case "right":
-        return "absolute right-0 top-0 -translate-y-full mb-2 z-50 block";
+        return isBottom
+          ? "absolute right-0 top-full mt-2 z-50 block"
+          : "absolute right-0 top-0 -translate-y-full mb-2 z-50 block";
       default:
-        return "absolute left-0 top-0 -translate-y-full mb-2 z-50 block";
+        return isBottom
+          ? "absolute left-0 top-full mt-2 z-50 block"
+          : "absolute left-0 top-0 -translate-y-full mb-2 z-50 block";
     }
-  }, [popupAlign]);
+  }, [popupAlign, popupPlacement]);
 
   const updatePopupPosition = useCallback(() => {
     if (!popupRef.current || !inputRef.current) return;
@@ -279,7 +287,9 @@ export default function FlowbiteDateField({
     }
 
     let top = inputRect.top - popupRect.height - 8;
-    if (top < 8) {
+    if (popupPlacement === "bottom") {
+      top = inputRect.bottom + 8;
+    } else if (top < 8) {
       top = inputRect.bottom + 8;
     }
 
@@ -291,7 +301,7 @@ export default function FlowbiteDateField({
       visibility: "visible",
     });
     setPopupReady(true);
-  }, [popupAlign]);
+  }, [popupAlign, popupPlacement]);
 
   useLayoutEffect(() => {
     if (!usePortal || !isOpen) return;
@@ -636,6 +646,7 @@ FlowbiteDateField.propTypes = {
   minDate: PropTypes.string,
   maxDate: PropTypes.string,
   popupAlign: PropTypes.oneOf(["left", "center", "right"]),
+  popupPlacement: PropTypes.oneOf(["auto", "bottom"]),
   usePortal: PropTypes.bool,
   placeholder: PropTypes.string,
   readOnly: PropTypes.bool,

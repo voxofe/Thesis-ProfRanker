@@ -8,12 +8,15 @@ export default function VaultFileActions({
   onView,
   onDownload,
   loadingAction = null,
+  actionProgress,
   showReplace = true,
   showDelete = true,
 }) {
   const [open, setOpen] = useState(false);
+  const [localProgress, setLocalProgress] = useState(0);
   const wrapperRef = useRef(null);
   const inputRef = useRef(null);
+  const actionTimerRef = useRef(null);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -43,28 +46,112 @@ export default function VaultFileActions({
 
   const isViewing = loadingAction === "view";
   const isDownloading = loadingAction === "download";
-  const isBusy = isViewing || isDownloading;
+  const isReplacing = loadingAction === "replace";
+  const isDeleting = loadingAction === "delete";
+  const isBusy = isViewing || isDownloading || isReplacing || isDeleting;
+  const hasExternalProgress = isReplacing && typeof actionProgress === "number";
+  const displayProgress = Math.min(
+    100,
+    Math.max(0, hasExternalProgress ? actionProgress : localProgress)
+  );
+  const busyIcon = isViewing
+    ? (
+        <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      )
+    : isDownloading
+      ? (
+          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <path d="M7 10l5 5 5-5" />
+            <path d="M12 15V3" />
+          </svg>
+        )
+      : isReplacing
+        ? (
+            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M16 3h5v5" />
+              <path d="M21 8l-6-6" />
+              <path d="M20 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
+            </svg>
+          )
+        : isDeleting
+          ? (
+              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18" />
+                <path d="M8 6V4h8v2" />
+                <path d="M6 6l1 14h10l1-14" />
+              </svg>
+            )
+          : null;
+
+  useEffect(() => {
+    if (!isBusy || hasExternalProgress) {
+      if (actionTimerRef.current) {
+        clearInterval(actionTimerRef.current);
+        actionTimerRef.current = null;
+      }
+      if (!isBusy) {
+        setLocalProgress(0);
+      }
+      return undefined;
+    }
+    setLocalProgress(0);
+    const interval = isDeleting ? 140 : 350;
+    actionTimerRef.current = setInterval(() => {
+      setLocalProgress((prev) => {
+        if (prev >= 90) return prev;
+        const bump = isDeleting
+          ? 10 + Math.round(Math.random() * 8)
+          : 3 + Math.round(Math.random() * 4);
+        return Math.min(90, prev + bump);
+      });
+    }, interval);
+    return () => {
+      if (actionTimerRef.current) {
+        clearInterval(actionTimerRef.current);
+        actionTimerRef.current = null;
+      }
+    };
+  }, [isBusy, loadingAction, hasExternalProgress, isDeleting]);
 
   return (
     <div
       ref={wrapperRef}
-      className={`group relative inline-flex items-center rounded-full border border-gray-200 px-3 py-1 text-xs shadow-sm transition-colors duration-150 ${
+      className={`pr-vault-upload-pill group relative inline-flex items-center rounded-full border border-gray-200 px-3 py-1 text-sm shadow-sm transition-colors duration-150 ${
         open ? "bg-patras-buccaneer text-white" : "bg-white hover:bg-patras-buccaneer hover:text-white"
       }`}
+      style={{ overflow: "visible" }}
     >
+      {isBusy && <span className="pr-vault-upload-base" aria-hidden="true" />}
+      {isBusy && (
+        <span
+          className="pr-vault-upload-fill"
+          aria-hidden="true"
+          style={{ width: `${displayProgress}%` }}
+        />
+      )}
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className={open ? "text-white" : "text-patras-buccaneer group-hover:text-white"}
+        className={`relative z-10 ${open ? "text-white" : "text-patras-buccaneer group-hover:text-white"}`}
         disabled={isBusy}
         aria-busy={isBusy}
       >
         <span className="inline-flex items-center gap-2">
-          {file.name}
           {isBusy && (
-            <span className="inline-flex items-center gap-1 text-[11px]">
-              <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              {isViewing ? "Ανοίγει" : "Λήψη"}
+            <span className="inline-flex items-center">
+              <span className="pr-uploading-icon" aria-hidden="true">
+                {busyIcon}
+              </span>
+            </span>
+          )}
+          <span className="truncate" title={file.name}>{file.name}</span>
+          {isBusy && (
+            <span className="text-xs text-patras-buccaneer/70">
+              {displayProgress}%
             </span>
           )}
         </span>
@@ -134,7 +221,8 @@ export default function VaultFileActions({
               <button
                 type="button"
                 onClick={triggerReplace}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-whiskey hover:text-white"
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-whiskey hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
+                disabled={isBusy}
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M16 3h5v5" />
@@ -170,7 +258,8 @@ export default function VaultFileActions({
                   onDelete();
                   setOpen(false);
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-red-700 hover:text-white"
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-red-700 hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
+                disabled={isBusy}
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 6h18" />

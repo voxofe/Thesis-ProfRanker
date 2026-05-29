@@ -19,6 +19,7 @@ import React, { useState } from "react";
  * @param {function} [props.onBlur] - The function to call when the input loses focus.
  * @param {boolean} [props.required=false] - Whether the field is required.
  * @param {string} [props.error] - Error message to display.
+ * @param {string} [props.inputTitle] - Optional title attribute for the input.
  * @returns {JSX.Element} The rendered input field or dropdown.
  */
 export default function InputField(props) {
@@ -62,6 +63,7 @@ export default function InputField(props) {
             value={props.value}
             onChange={(e) => props.onChange(e.target.value)}
             disabled={props.disabled}
+            title={props.inputTitle}
             className={getInputStyle()}
           >
             <option value="">Επιλέξτε...</option>
@@ -87,6 +89,7 @@ export default function InputField(props) {
             }}
             disabled={props.disabled}
             readOnly={props.readOnly}
+            title={props.inputTitle}
             className={`${getInputStyle()} ${isPassword ? "pr-10" : ""}`}
           />
         )}

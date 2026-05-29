@@ -362,6 +362,30 @@ export const FormDataProvider = ({ children }) => {
     }));
   };
 
+  const handlePhdDegreeSelect = (degreeId) => {
+    setFormData((prevData) => {
+      if (!degreeId) {
+        return {
+          ...prevData,
+          phdDegreeId: null,
+        };
+      }
+
+      const match = phdDegrees.find(
+        (degree) => String(degree.id) === String(degreeId)
+      );
+
+      if (!match) {
+        return {
+          ...prevData,
+          phdDegreeId: null,
+        };
+      }
+
+      return applyPhdDegree(prevData, match);
+    });
+  };
+
   const handlePhdDateChange = (value) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -535,6 +559,7 @@ export const FormDataProvider = ({ children }) => {
         handlePhdKeywordsChange,
         addPhdKeyword,
         removePhdKeyword,
+        handlePhdDegreeSelect,
         handlePhdDocumentChange,
         handlePhdForeignInstituteChange,
         addEmploymentCertificate,

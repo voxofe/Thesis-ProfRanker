@@ -120,6 +120,7 @@
     position: absolute;
     inset: 0;
     background-color: rgba(248, 243, 226, 0.9);
+    border-radius: 12px;
     z-index: 0;
   }
 
@@ -130,8 +131,34 @@
     bottom: 0;
     width: 0;
     background-color: rgba(99, 52, 57, 0.45);
+    border-radius: 12px;
     transition: width 180ms ease-out;
     z-index: 1;
+  }
+
+
+  .pr-uploading-icon {
+    width: 14px;
+    height: 14px;
+    animation: pr-uploading-bounce 900ms ease-in-out infinite;
+  }
+
+  @keyframes pr-uploading-bounce {
+    0%,
+    100% {
+      transform: translateY(1px);
+      opacity: 0.75;
+    }
+    50% {
+      transform: translateY(-3px);
+      opacity: 1;
+    }
+  }
+}
+
+@layer utilities {
+  .pr-profile-labels label {
+    @apply text-patras-buccaneer;
   }
 }
 

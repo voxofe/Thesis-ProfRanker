@@ -150,6 +150,24 @@ export default function Upload(props) {
     return "";
   };
 
+  const formatFileSize = (bytes) => {
+    if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+    const units = ["B", "KB", "MB", "GB"];
+    const base = 1024;
+    const exponent = Math.min(
+      Math.floor(Math.log(bytes) / Math.log(base)),
+      units.length - 1
+    );
+    const value = bytes / Math.pow(base, exponent);
+    const formatted = exponent === 0 ? Math.round(value) : value.toFixed(1);
+    return `${formatted} ${units[exponent]}`;
+  };
+
+  const getDisplaySize = () => {
+    if (hasUploadedFile) return formatFileSize(props.uploadedFile.size);
+    return "";
+  };
+
   return (
     <div
       className={`mb-5 w-full min-w-0 ${
@@ -246,9 +264,12 @@ export default function Upload(props) {
           {/* File Name or Upload Button */}
           {hasAnyFile ? (
             <div className="mt-3 space-y-2">
-              <p className="text-gray-800 text-sm font-medium break-words">
+              <div className="text-gray-800 text-sm font-medium break-words">
                 {getDisplayName()}
-              </p>
+                {hasUploadedFile && (
+                  <span className="text-gray-500 font-normal"> ({getDisplaySize()})</span>
+                )}
+              </div>
               {canShowCheckButton && (
                 <button
                   type="button"

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import HomePagePanel from "../components/HomePagePanel";
 import { useAuth } from "../contexts/AuthContext";
 import { usePositions } from "../contexts/PositionsContext";
@@ -6,6 +6,16 @@ import { usePositions } from "../contexts/PositionsContext";
 export default function HomeApplicant() {
   const { currentUser } = useAuth();
   const { positions = [], loading } = usePositions();
+  const [submissionInProgress, setSubmissionInProgress] = useState(false);
+
+  useEffect(() => {
+    const readSubmissionState = () => {
+      setSubmissionInProgress(sessionStorage.getItem("submissionInProgress") === "1");
+    };
+    readSubmissionState();
+    const intervalId = window.setInterval(readSubmissionState, 500);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const activePositions = useMemo(() => {
     return (positions || []).filter((p) => p?.state === "active");
@@ -44,11 +54,15 @@ export default function HomeApplicant() {
   const applicationDisabled =
     (userRole === "guest" || userRole === "applicant") &&
     !loading &&
-    (activePositions.length === 0 ||
+    (submissionInProgress ||
+      activePositions.length === 0 ||
       (userRole === "applicant" && availablePositionsForApplicant.length === 0));
 
   // Description text when the panel is disabled (and defaults otherwise)
   const applicationDescription = useMemo(() => {
+    if (submissionInProgress) {
+      return "Η υποβολή βρίσκεται σε εξέλιξη. Παρακαλώ περιμένετε να ολοκληρωθεί.";
+    }
     if (userRole === "guest") {
       return applicationDisabled
         ? "Δεν υπάρχουν διαθέσιμες ανοιχτές θέσεις για αίτηση αυτή τη στιγμή."
@@ -62,7 +76,7 @@ export default function HomeApplicant() {
         : "Μπορείτε να υποβάλετε νέα αίτηση για οποιαδήποτε ενεργή θέση.";
     }
     return "";
-  }, [userRole, applicationDisabled, noNewPositionsForApplicant]);
+  }, [submissionInProgress, userRole, applicationDisabled, noNewPositionsForApplicant]);
 
   // Info popups
   const applicationInfoPopup =
