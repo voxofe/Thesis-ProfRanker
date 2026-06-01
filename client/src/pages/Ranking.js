@@ -676,7 +676,7 @@ export default function Ranking() {
         setFilters={setFilters}
         options={filterOptions}
         isAdmin={isAdmin}
-        title="Φίλτρα λίστας κατάταξης"
+        title="Φίλτρα αιτήσεων"
         titleClassName="text-gray-900"
         showDateRanges
         dateRangeFields={[{ key: "submitDate", label: "Ημερομηνία υποβολής" }]}

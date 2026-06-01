@@ -8,6 +8,14 @@ export default function CoursesDrawer({ courses = [], scientificField }) {
     title: "",
     description: "",
   });
+  const handleClose = () => {
+    setOpen(false);
+    setDescriptionModal({
+      open: false,
+      title: "",
+      description: "",
+    });
+  };
 
   return (
     <>
@@ -20,8 +28,14 @@ export default function CoursesDrawer({ courses = [], scientificField }) {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-5xl max-h-[80vh] overflow-auto bg-white rounded-lg shadow-lg border">
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          onClick={handleClose}
+        >
+          <div
+            className="w-full max-w-5xl max-h-[80vh] overflow-auto bg-white rounded-lg shadow-lg border"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="flex items-center justify-between p-4 border-b">
               <h4 className="text-lg font-semibold text-blackr">
                 Μαθήματα επιστημονικού πεδίου:{" "}
@@ -31,14 +45,7 @@ export default function CoursesDrawer({ courses = [], scientificField }) {
               </h4>
               <button
                 type="button"
-                onClick={() => {
-                  setOpen(false);
-                  setDescriptionModal({
-                    open: false,
-                    title: "",
-                    description: "",
-                  });
-                }}
+                onClick={handleClose}
                 className="text-gray-600 hover:text-gray-800 text-2xl leading-none px-2"
                 aria-label="Κλείσιμο"
                 title="Κλείσιμο"

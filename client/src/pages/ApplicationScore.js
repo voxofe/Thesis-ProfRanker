@@ -3,6 +3,8 @@ import axios from "axios";
 import PublicationsDrawer from "../components/PublicationsDrawer";
 import CoursesDrawer from "../components/CoursesDrawer";
 import VaultFileActions from "../components/VaultFileActions";
+import PhdDetailsModal from "../components/PhdDetailsModal";
+import TooltipGray from "../components/TooltipGray";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { usePositions } from "../contexts/PositionsContext";
@@ -15,6 +17,61 @@ const API_BASE_URL = (
   ""
 );
 
+const POINTS_MAX = {
+  coursePlanRelevancePoints: 25,
+  courseMaterialStructurePoints: 5,
+  thesisRelevancePoints: 20,
+  publicationPoints: 20,
+  workExperiencePoints: 10,
+  notPastProgramPoints: 16,
+  totalPoints: 96,
+};
+
+const formatPoints = (value, maxValue) => {
+  if (value === null || value === undefined) return "—";
+  if (!maxValue) return <span className="font-semibold">{value}</span>;
+  return (
+    <span className="inline-flex items-center gap-1">
+      <span className="font-semibold">{value}</span>
+      <span>/</span>
+      <span>{maxValue}</span>
+    </span>
+  );
+};
+
+const thesisRelevanceLabel = (score) => {
+  if (score === null || score === undefined) return "";
+  if (score <= 4) return "Πολύ χαμηλή συνάφεια";
+  if (score <= 8) return "Χαμηλή συνάφεια";
+  if (score <= 12) return "Μέτρια συνάφεια";
+  if (score <= 16) return "Υψηλή συνάφεια";
+  return "Πολύ υψηλή συνάφεια";
+};
+
+const thesisRelevanceRanges = [
+  { min: 0, max: 4, label: "Πολύ χαμηλή συνάφεια" },
+  { min: 5, max: 8, label: "Χαμηλή συνάφεια" },
+  { min: 9, max: 12, label: "Μέτρια συνάφεια" },
+  { min: 13, max: 16, label: "Υψηλή συνάφεια" },
+  { min: 17, max: 20, label: "Πολύ υψηλή συνάφεια" },
+];
+
+const renderThesisRelevanceTooltip = (score) => {
+  if (score === null || score === undefined) return null;
+  return (
+    <div className="text-xs text-gray-800">
+      {thesisRelevanceRanges.map((range) => {
+        const isActive = score >= range.min && score <= range.max;
+        return (
+          <div key={`${range.min}-${range.max}`} className={isActive ? "font-semibold" : ""}>
+            {range.min}-{range.max}: {range.label}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 export default function ApplicationScore() {
   const { currentUser } = useAuth();
   const { id } = useParams();
@@ -24,6 +81,8 @@ export default function ApplicationScore() {
   const [deleting, setDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState("application");
   const [docActionState, setDocActionState] = useState({});
+  const [isPhdDetailsOpen, setIsPhdDetailsOpen] = useState(false);
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const editApplicationId = id;
   const isAdmin = currentUser?.role === "admin";
 
@@ -147,6 +206,9 @@ export default function ApplicationScore() {
 
   const schoolName = applicantData?.school || matchedPosition?.school || "—";
   const departmentName = applicantData?.department || matchedPosition?.department || "—";
+  const phdTitle = applicantData?.phdTitle || "—";
+  const phdAbstract = applicantData?.phdAbstract || "";
+  const phdKeywords = applicantData?.phdKeywords || [];
 
   const courses = useMemo(() => {
     if (Array.isArray(applicantData?.courses) && applicantData.courses.length)
@@ -394,15 +456,22 @@ export default function ApplicationScore() {
       </h1>
       {canEditApplication && (
         <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3">
-          <div className="flex flex-col items-center gap-3">
-            <p className="text-sm text-center">
+          <button
+            type="button"
+            onClick={() => setIsEditDrawerOpen((prev) => !prev)}
+            className="w-full flex items-center justify-between gap-3 text-patras-buccaneer"
+          >
+            <span className="text-sm text-center flex-1">
               Μπορείτε να επεξεργαστείτε ή να διαγράψετε την αίτηση έως{" "}
               <span className="font-semibold">
                 {toDDMMYYYYHHMM(endDate, endTime) || "—"}
               </span>
               .
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-2">
+            </span>
+            <span className="text-lg">{isEditDrawerOpen ? "▼" : "\u25B6\uFE0E"}</span>
+          </button>
+          {isEditDrawerOpen && (
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
               <Link
                 to="#"
                 onClick={(event) => {
@@ -422,7 +491,7 @@ export default function ApplicationScore() {
                 Διαγραφή αίτησης
               </button>
             </div>
-          </div>
+          )}
         </div>
       )}
       <div className="flex items-center justify-center">
@@ -544,7 +613,13 @@ export default function ApplicationScore() {
                     {applicantData?.lastName}
                   </td>
                   <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
-                    {applicantData?.phdTitle}
+                    <button
+                      type="button"
+                      onClick={() => setIsPhdDetailsOpen(true)}
+                      className="underline underline-offset-2 text-patras-buccaneer hover:text-patras-sanguineBrown"
+                    >
+                      {phdTitle}
+                    </button>
                   </td>
                   <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
                     {toDDMMYYYY(applicantData?.phdAcquisitionDate)}
@@ -566,8 +641,9 @@ export default function ApplicationScore() {
            
 
             <h1 className="text-xl font-light mb-3">Υποβληθέντα δικαιολογητικά</h1>
-            <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
-              <table className="min-w-full bg-white/25">
+            <div className="relative overflow-visible shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
+              <div className="overflow-x-auto">
+                <table className="min-w-full bg-white/25">
                 <thead className="bg-patras-buccaneer">
                   <tr>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
@@ -611,7 +687,8 @@ export default function ApplicationScore() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+                </table>
+              </div>
             </div>
           </div>
                 ) : (
@@ -638,7 +715,10 @@ export default function ApplicationScore() {
                               συνόλου των μαθημάτων του Επιστημονικού Πεδίου
                             </td>
                             <td className="px-6 py-4 text-center text-patras-buccaneer">
-                              {applicantData?.coursePlanRelevancePoints}
+                              {formatPoints(
+                                applicantData?.coursePlanRelevancePoints,
+                                POINTS_MAX.coursePlanRelevancePoints
+                              )}
                             </td>
                           </tr>
                           <tr className="">
@@ -646,7 +726,10 @@ export default function ApplicationScore() {
                               Δομή, οργάνωση, κατανομή ύλης
                             </td>
                             <td className="px-6 py-4 text-center text-patras-buccaneer">
-                              {applicantData?.courseMaterialStructurePoints}
+                              {formatPoints(
+                                applicantData?.courseMaterialStructurePoints,
+                                POINTS_MAX.courseMaterialStructurePoints
+                              )}
                             </td>
                           </tr>
                           <tr className="">
@@ -655,7 +738,26 @@ export default function ApplicationScore() {
                               επιστημονικό πεδίο
                             </td>
                             <td className="px-6 py-4 text-center text-patras-buccaneer">
-                              {applicantData?.thesisRelevancePoints}
+                              <span className="inline-flex items-center justify-center gap-2">
+                                {formatPoints(
+                                  applicantData?.thesisRelevancePoints,
+                                  POINTS_MAX.thesisRelevancePoints
+                                )}
+                                {applicantData?.thesisRelevancePoints !== null &&
+                                applicantData?.thesisRelevancePoints !== undefined ? (
+                                  <TooltipGray
+                                    content={renderThesisRelevanceTooltip(applicantData?.thesisRelevancePoints)}
+                                    className="w-auto max-w-xs whitespace-nowrap"
+                                  >
+                                    <span
+                                      className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer text-xs font-semibold cursor-help"
+                                      aria-label="Σημείωση συνάφειας διδακτορικής διατριβής"
+                                    >
+                                      i
+                                    </span>
+                                  </TooltipGray>
+                                ) : null}
+                              </span>
                             </td>
                           </tr>
                           <tr className="">
@@ -663,7 +765,10 @@ export default function ApplicationScore() {
                               <PublicationsDrawer publications={applicantData?.publications || []} />
                             </td>
                             <td className="px-6 py-4 text-center text-patras-buccaneer">
-                              {applicantData?.publicationPoints}
+                              {formatPoints(
+                                applicantData?.publicationPoints,
+                                POINTS_MAX.publicationPoints
+                              )}
                             </td>
                           </tr>
                           <tr className="">
@@ -671,7 +776,10 @@ export default function ApplicationScore() {
                               Μεταδιδακτορική εργασιακή εμπειρία
                             </td>
                             <td className="px-6 py-4 text-center text-patras-buccaneer">
-                              {applicantData?.workExperiencePoints}
+                              {formatPoints(
+                                applicantData?.workExperiencePoints,
+                                POINTS_MAX.workExperiencePoints
+                              )}
                             </td>
                           </tr>
                           <tr className="">
@@ -685,13 +793,19 @@ export default function ApplicationScore() {
                               και 2020‐2021) του ΕΠ ΑΝΑΔ ΕΔΒΜ 2014‐2020
                             </td>
                             <td className="px-6 py-4 text-center text-patras-buccaneer">
-                              {applicantData?.notPastProgramPoints}
+                              {formatPoints(
+                                applicantData?.notPastProgramPoints,
+                                POINTS_MAX.notPastProgramPoints
+                              )}
                             </td>
                           </tr>
                           <tr className="bg-patras-buccaneer font-semibold bg-wh">
                             <td className="px-6 py-4 text-white">Συνολικά μόρια</td>
                             <td className="px-6 py-4 text-center text-white">
-                              {applicantData?.totalPoints}
+                              {formatPoints(
+                                applicantData?.totalPoints,
+                                POINTS_MAX.totalPoints
+                              )}
                             </td>
                           </tr>
                         </tbody>
@@ -699,6 +813,13 @@ export default function ApplicationScore() {
                     </div>
                   </div>
                 )}
+      <PhdDetailsModal
+        open={isPhdDetailsOpen}
+        onClose={() => setIsPhdDetailsOpen(false)}
+        title={phdTitle}
+        abstract={phdAbstract}
+        keywords={phdKeywords}
+      />
     </div>
   );
 }

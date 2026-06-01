@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import TooltipGray from "./TooltipGray";
 
 export default function VaultFileActions({
@@ -14,20 +15,82 @@ export default function VaultFileActions({
 }) {
   const [open, setOpen] = useState(false);
   const [localProgress, setLocalProgress] = useState(0);
+  const [menuPosition, setMenuPosition] = useState(null);
+  const [bodyPad, setBodyPad] = useState(0);
   const wrapperRef = useRef(null);
+  const menuRef = useRef(null);
   const inputRef = useRef(null);
   const actionTimerRef = useRef(null);
 
+  const updateMenuPosition = () => {
+    if (!wrapperRef.current) return;
+    const rect = wrapperRef.current.getBoundingClientRect();
+    const menuRect = menuRef.current?.getBoundingClientRect();
+    const menuHeight = menuRect?.height || 0;
+    const menuWidth = menuRect?.width || 0;
+    const viewportWidth = window.innerWidth || 0;
+    const viewportHeight = window.innerHeight || 0;
+    const verticalOffset = 8;
+    const horizontalPadding = 8;
+    const top = rect.bottom + verticalOffset + window.scrollY;
+    let left = rect.left;
+    if (menuWidth) {
+      const maxLeft = Math.max(horizontalPadding, viewportWidth - menuWidth - horizontalPadding);
+      left = Math.min(Math.max(left, horizontalPadding), maxLeft);
+    }
+    setMenuPosition({
+      top,
+      left: left + window.scrollX,
+    });
+    if (menuHeight) {
+      const menuBottom = rect.bottom + verticalOffset + menuHeight;
+      const overflow = Math.max(0, menuBottom - viewportHeight);
+      setBodyPad(overflow + 16);
+    } else {
+      setBodyPad(0);
+    }
+  };
+
   useEffect(() => {
     if (!open) return undefined;
+    updateMenuPosition();
     const handleClick = (event) => {
-      if (!wrapperRef.current?.contains(event.target)) {
-        setOpen(false);
-      }
+      const target = event.target;
+      if (wrapperRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    const handleReposition = () => {
+      updateMenuPosition();
     };
     document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    window.addEventListener("resize", handleReposition);
+    window.addEventListener("scroll", handleReposition, true);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      window.removeEventListener("resize", handleReposition);
+      window.removeEventListener("scroll", handleReposition, true);
+    };
   }, [open]);
+
+  useEffect(() => {
+    if (!open) {
+      setBodyPad(0);
+      return undefined;
+    }
+    return () => setBodyPad(0);
+  }, [open]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+    const previous = document.body.style.paddingBottom;
+    if (bodyPad > 0) {
+      document.body.style.paddingBottom = `${bodyPad}px`;
+    }
+    return () => {
+      document.body.style.paddingBottom = previous;
+    };
+  }, [bodyPad]);
 
   const triggerReplace = () => {
     if (inputRef.current) {
@@ -165,113 +228,124 @@ export default function VaultFileActions({
           onChange={handleReplaceChange}
         />
       )}
-      {open && (
-        <div className="absolute left-0 top-full mt-2 w-max rounded-md border border-gray-200 bg-white shadow-lg z-20">
-          <button
-            type="button"
-            onClick={() => {
-              onView();
-              setOpen(false);
+      {open &&
+        typeof document !== "undefined" &&
+        menuPosition &&
+        createPortal(
+          <div
+            ref={menuRef}
+            className="absolute z-[9999] w-max rounded-md border border-gray-200 bg-white shadow-lg"
+            style={{
+              top: `${menuPosition.top}px`,
+              left: `${menuPosition.left}px`,
             }}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-buccaneer hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
-            disabled={isBusy}
           >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-            {isViewing ? "Ανοίγει..." : "Δείτε"}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              onDownload();
-              setOpen(false);
-            }}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-buccaneer hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
-            disabled={isBusy}
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <path d="M7 10l5 5 5-5" />
-              <path d="M12 15V3" />
-            </svg>
-            {isDownloading ? "Λήψη..." : "Κατεβάστε"}
-          </button>
-          {(showReplace || showDelete) && <div className="my-1 border-t border-gray-200" />}
-          {showReplace && (
-            file.isUsed ? (
-              <div className="block w-full">
-                <TooltipGray content="Το αρχείο χρησιμοποιείται σε υποβληθείσα αίτηση.">
-                  <button
-                    type="button"
-                    disabled
-                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
-                  >
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M16 3h5v5" />
-                      <path d="M21 8l-6-6" />
-                      <path d="M20 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
-                    </svg>
-                    Αντικατάσταση
-                  </button>
-                </TooltipGray>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={triggerReplace}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-whiskey hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
-                disabled={isBusy}
-              >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M16 3h5v5" />
-                  <path d="M21 8l-6-6" />
-                  <path d="M20 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
-                </svg>
-                Αντικατάσταση
-              </button>
-            )
-          )}
-          {showDelete && (
-            file.isUsed ? (
-              <div className="block w-full">
-                <TooltipGray content="Το αρχείο χρησιμοποιείται σε υποβληθείσα αίτηση.">
-                  <button
-                    type="button"
-                    disabled
-                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
-                  >
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M3 6h18" />
-                      <path d="M8 6V4h8v2" />
-                      <path d="M6 6l1 14h10l1-14" />
-                    </svg>
-                    Διαγραφή
-                  </button>
-                </TooltipGray>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  onDelete();
-                  setOpen(false);
-                }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-red-700 hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
-                disabled={isBusy}
-              >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 6h18" />
-                  <path d="M8 6V4h8v2" />
-                  <path d="M6 6l1 14h10l1-14" />
-                </svg>
-                Διαγραφή
-              </button>
-            )
-          )}
-        </div>
-      )}
+            <button
+              type="button"
+              onClick={() => {
+                onView();
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-buccaneer hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
+              disabled={isBusy}
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              {isViewing ? "Ανοίγει..." : "Δείτε"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onDownload();
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-buccaneer hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
+              disabled={isBusy}
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <path d="M7 10l5 5 5-5" />
+                <path d="M12 15V3" />
+              </svg>
+              {isDownloading ? "Λήψη..." : "Κατεβάστε"}
+            </button>
+            {(showReplace || showDelete) && <div className="my-1 border-t border-gray-200" />}
+            {showReplace && (
+              file.isUsed ? (
+                <div className="block w-full">
+                  <TooltipGray content="Το αρχείο χρησιμοποιείται σε υποβληθείσα αίτηση.">
+                    <button
+                      type="button"
+                      disabled
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M16 3h5v5" />
+                        <path d="M21 8l-6-6" />
+                        <path d="M20 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
+                      </svg>
+                      Αντικατάσταση
+                    </button>
+                  </TooltipGray>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={triggerReplace}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-whiskey hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
+                  disabled={isBusy}
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 3h5v5" />
+                    <path d="M21 8l-6-6" />
+                    <path d="M20 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
+                  </svg>
+                  Αντικατάσταση
+                </button>
+              )
+            )}
+            {showDelete && (
+              file.isUsed ? (
+                <div className="block w-full">
+                  <TooltipGray content="Το αρχείο χρησιμοποιείται σε υποβληθείσα αίτηση.">
+                    <button
+                      type="button"
+                      disabled
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 6h18" />
+                        <path d="M8 6V4h8v2" />
+                        <path d="M6 6l1 14h10l1-14" />
+                      </svg>
+                      Διαγραφή
+                    </button>
+                  </TooltipGray>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onDelete();
+                    setOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-red-700 hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
+                  disabled={isBusy}
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 6h18" />
+                    <path d="M8 6V4h8v2" />
+                    <path d="M6 6l1 14h10l1-14" />
+                  </svg>
+                  Διαγραφή
+                </button>
+              )
+            )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

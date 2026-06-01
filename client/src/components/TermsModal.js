@@ -6,8 +6,14 @@ export default function TermsModal({ open, onClose }) {
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4 w-screen h-screen">
-      <div className="bg-white rounded-lg shadow-lg border w-full max-w-lg relative flex flex-col max-h-[80vh] h-[80vh]">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4 w-screen h-screen"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg shadow-lg border w-full max-w-lg relative flex flex-col max-h-[80vh] h-[80vh]"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-4">
           <h2 className="text-lg font-semibold text-gray-900">Όροι Πράξης</h2>
           <button

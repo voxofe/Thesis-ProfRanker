@@ -623,6 +623,9 @@ export default function Form({ academicYear }) {
 
   return (
     <div className="w-full max-w-6xl mx-auto">
+      <h1 className="text-2xl text-center border-b pb-2 mb-8 text-gray-800">
+        {headerTitle}
+      </h1>
       <SubmissionProgress
         loading={loading}
         submitLabel={submitLabel}
@@ -633,10 +636,6 @@ export default function Form({ academicYear }) {
         }
         percent={combinedPercent}
       />
-
-      <h1 className="text-2xl text-center border-b pb-2 mb-8 text-gray-800">
-        {headerTitle}
-      </h1>
       {showCountdown && (
         <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           <span>Η θέση </span>

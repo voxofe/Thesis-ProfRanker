@@ -1,7 +1,7 @@
 // Custom Tooltip Component
 import { useState } from "react";
 
-const TooltipGray = ({ children, content }) => {
+const TooltipGray = ({ children, content, className = "" }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -61,7 +61,7 @@ const TooltipGray = ({ children, content }) => {
           <div
             className={`px-3 py-2 text-sm text-gray-800 bg-gray-100 bg-opacity-95 backdrop-blur-sm rounded-lg shadow-lg w-64 max-w-xs border border-gray-200 transition-opacity duration-200 ease-out ${
               isVisible ? "opacity-100" : "opacity-0"
-            }`}
+            } ${className}`}
           >
             <div className="relative">
               {content}

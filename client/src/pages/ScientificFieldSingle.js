@@ -231,8 +231,14 @@ export default function ScientificFieldSingle() {
       {positionModalOpen &&
         typeof document !== "undefined" &&
         createPortal(
-          <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/40 backdrop-blur-sm px-6 py-8">
-            <div className="relative z-[9999] w-full max-w-[700px] max-h-[86vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white px-8 pt-8 pb-6 shadow-2xl">
+          <div
+            className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/40 backdrop-blur-sm px-6 py-8"
+            onClick={handleClosePositionModal}
+          >
+            <div
+              className="relative z-[9999] w-full max-w-[700px] max-h-[86vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white px-8 pt-8 pb-6 shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+            >
               <button
                 type="button"
                 onClick={handleClosePositionModal}
@@ -464,7 +470,7 @@ export default function ScientificFieldSingle() {
             </table>
           </div>
           {isAdmin && (
-            <div className="mt-4 flex items-center justify-end gap-2">
+            <div className="mt-8 flex items-center justify-end gap-2">
               {isPositionLocked ? (
                 <TooltipGray content={positionDisabledTooltip}>
                   <button

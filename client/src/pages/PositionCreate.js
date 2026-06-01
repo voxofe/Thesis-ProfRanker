@@ -409,7 +409,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
             <button
               type="button"
               onClick={onCancel}
-              className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50"
+              className="px-6 py-2 border border-gray-300 text-gray-700 text-sm/6 font-medium rounded-lg hover:bg-gray-50"
             >
               Ακύρωση
             </button>
@@ -418,7 +418,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
             type="submit"
             disabled={submitDisabled}
             aria-disabled={submitDisabled}
-            className="px-6 py-2 bg-patras-buccaneer text-white font-medium rounded-lg hover:bg-patras-sanguineBrown transition disabled:opacity-60"
+            className="px-6 py-2 bg-patras-buccaneer text-white text-sm/6 font-medium rounded-lg hover:bg-patras-sanguineBrown transition disabled:opacity-60"
           >
             {submitting ? "Άνοιγμα..." : "Άνοιγμα θέσης"}
           </button>
