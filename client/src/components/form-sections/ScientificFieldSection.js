@@ -61,7 +61,7 @@ export default function ScientificFieldSection() {
   }, [positions, appliedPositionIds, formMode, formData.positionId]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <div className="grid grid-cols-1 gap-8 h-auto mb-0">
         <PositionSelect
           positions={activePositions}
@@ -84,7 +84,7 @@ export default function ScientificFieldSection() {
 
       {/* Optional chips summary ... */}
 
-      <div className="mb-4 rounded-lg border border-patras-albescentWhite/60 bg-patras-albescentWhite/30 px-4 py-3 text-sm text-patras-buccaneer">
+      <div className=" rounded-lg border border-patras-albescentWhite/60 bg-patras-albescentWhite/30 px-4 py-3 text-sm text-patras-buccaneer">
         <div className="flex items-center gap-2">
           <span>Έναρξη αιτήσεων θέσης:</span>
           <span className="font-semibold">
@@ -99,7 +99,7 @@ export default function ScientificFieldSection() {
         </div>
       </div>
 
-      <label className="block text-sm font-medium mb-1">
+      <label className="block text-sm font-medium pt-5 mb-0">
         Μαθήματα επιστημονικού πεδίου:{" "}
         <span className="text-patras-buccaneer">
           {selectedPosition?.scientificField ?? ""}

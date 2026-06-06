@@ -409,7 +409,7 @@ export default function ScientificFieldsCreate() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InputField
-              label="Επιστημονικό πεδίο"
+              label="Όνομα επιστημονικού πεδίου"
               value={formData.scientificField}
               onChange={(val) => {
                 markTouched("scientificField");

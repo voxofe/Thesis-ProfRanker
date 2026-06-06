@@ -82,13 +82,7 @@ export default function Form({ academicYear }) {
     {
       id: 3,
       title: "Σχεδιάγραμμα διδασκαλίας",
-      component: (props) => (
-        <CoursePlanSection
-          formData={formData}
-          handleFileChange={props.handleFileChange}
-          handleFileDelete={props.handleFileDelete}
-        />
-      ),
+      component: CoursePlanSection,
     },
     {
       id: 4,
@@ -538,6 +532,7 @@ export default function Form({ academicYear }) {
 
     // Convert publications to a JSON string and append it to the FormData
     formDataToSend.append("publications", JSON.stringify(cleanedPublications));
+    formDataToSend.append("coursePlans", JSON.stringify(formData.coursePlans || {}));
 
     // Debugging: Log the FormData contents
     console.log("FormData contents:");

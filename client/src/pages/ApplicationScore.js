@@ -4,6 +4,7 @@ import PublicationsDrawer from "../components/PublicationsDrawer";
 import CoursesDrawer from "../components/CoursesDrawer";
 import VaultFileActions from "../components/VaultFileActions";
 import PhdDetailsModal from "../components/PhdDetailsModal";
+import CoursePlanDetailsModal from "../components/CoursePlanDetailsModal";
 import TooltipGray from "../components/TooltipGray";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -82,6 +83,7 @@ export default function ApplicationScore() {
   const [activeTab, setActiveTab] = useState("application");
   const [docActionState, setDocActionState] = useState({});
   const [isPhdDetailsOpen, setIsPhdDetailsOpen] = useState(false);
+  const [isCoursePlanDetailsOpen, setIsCoursePlanDetailsOpen] = useState(false);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const editApplicationId = id;
   const isAdmin = currentUser?.role === "admin";
@@ -602,6 +604,9 @@ export default function ApplicationScore() {
                   <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider">
                     Mεταδιδακτορική εργασιακή εμπειρία
                   </th>
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-l border-patras-albescentWhite">
+                    Σχεδιάγραμμα διδασκαλίας
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -632,6 +637,15 @@ export default function ApplicationScore() {
                             : "χρόνια"
                         }`
                       : "Καμία"}
+                  </td>
+                  <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-l border-patras-albescentWhite whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => setIsCoursePlanDetailsOpen(true)}
+                      className="bg-patras-buccaneer text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors"
+                    >
+                      Προβολή
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -712,7 +726,7 @@ export default function ApplicationScore() {
                             <td className="px-6 py-4 text-patras-buccaneer">
                               Συνάφεια σχεδιαγράμματος διδασκαλίας και καινοτόμων
                               μεθοδολογιών/θεωριών & βιβλιογραφίας με την περιγραφή του
-                              συνόλου των μαθημάτων του Επιστημονικού Πεδίου
+                              συνόλου των μαθημάτων του Επιστημονικού πεδίου
                             </td>
                             <td className="px-6 py-4 text-center text-patras-buccaneer">
                               {formatPoints(
@@ -819,6 +833,13 @@ export default function ApplicationScore() {
         title={phdTitle}
         abstract={phdAbstract}
         keywords={phdKeywords}
+      />
+      <CoursePlanDetailsModal
+        open={isCoursePlanDetailsOpen}
+        onClose={() => setIsCoursePlanDetailsOpen(false)}
+        scientificField={applicantData?.scientificField || matchedPosition?.scientificField}
+        courses={courses}
+        coursePlans={applicantData?.coursePlans || {}}
       />
     </div>
   );

@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import CourseDescriptionModal from "./CourseDescriptionModal";
+import useBodyScrollLock from "../utils/useBodyScrollLock";
 
 export default function CoursesDrawer({ courses = [], scientificField }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
+
   const [descriptionModal, setDescriptionModal] = useState({
     open: false,
     title: "",

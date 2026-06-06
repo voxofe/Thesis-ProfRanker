@@ -7,6 +7,7 @@ import { useToast } from "../contexts/ToastContext";
 import TooltipGray from "../components/TooltipGray";
 import CourseDescriptionModal from "../components/CourseDescriptionModal";
 import { formatDateTimeCell } from "../components/SortableTable";
+import useBodyScrollLock from "../utils/useBodyScrollLock";
 import PositionCreate from "./PositionCreate";
 
 const API_BASE_URL = (
@@ -50,6 +51,8 @@ export default function ScientificFieldSingle() {
     title: "",
     description: "",
   });
+
+  useBodyScrollLock(positionModalOpen);
 
   const isAdmin = !!(
     currentUser?.isAdmin ||

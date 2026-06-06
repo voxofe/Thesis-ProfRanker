@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useFormData } from "./FormDataContext";
 import { useAuth } from "./AuthContext";
+import { usePositions } from "./PositionsContext";
 
 const PHD_ABSTRACT_MIN_WORDS = 200;
 const PHD_ABSTRACT_MAX_WORDS = 1000;
@@ -14,6 +15,7 @@ export const useValidation = () => useContext(ValidationContext);
 export const ValidationProvider = ({ children }) => {
   const { formData } = useFormData();
   const { currentUser } = useAuth();
+  const { positions = [] } = usePositions();
   const [stepValidation, setStepValidation] = useState({
     1: false, // Personal Info
     2: false, // Scientific Field
@@ -75,7 +77,34 @@ export const ValidationProvider = ({ children }) => {
     };
 
     const validateCoursePlan = () => {
-      return true; // Not yet implemented
+      const selectedPosition = positions.find(
+        (position) => String(position.id) === String(formData.positionId)
+      );
+      if (!selectedPosition || !Array.isArray(selectedPosition.courses)) {
+        return false;
+      }
+
+      if (selectedPosition.courses.length === 0) {
+        return false;
+      }
+
+      const requiredFields = [
+        "generalDescription",
+        "learningObjectives",
+        "courseSchedule",
+        "deliveryMethods",
+        "bibliographyMaterial",
+        "learningOutcomes",
+        "assessmentMethodsCriteria",
+      ];
+
+      return selectedPosition.courses.every((course) => {
+        const coursePlan = (formData.coursePlans || {})[String(course.id)] || {};
+        return requiredFields.every((field) => {
+          const value = coursePlan[field];
+          return typeof value === "string" && value.trim().length > 0;
+        });
+      });
     };
 
     const validatePhd = () => {
@@ -206,7 +235,7 @@ export const ValidationProvider = ({ children }) => {
       7: validateWorkExperience(),
       8: validateDocuments(),
     });
-  }, [formData, currentUser?.gender]);
+  }, [formData, currentUser?.gender, positions]);
 
   // Check if a step can be accessed
   const canAccessStep = (stepNumber) => {

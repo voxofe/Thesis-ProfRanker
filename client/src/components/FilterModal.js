@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import InputField from "./InputField";
 import FlowbiteDateField from "./FlowbiteDateField";
+import useBodyScrollLock from "../utils/useBodyScrollLock";
 
 const EMPTY_DATE_FIELDS = [];
 
@@ -24,6 +25,8 @@ export default function FilterModal({
   title = "Φίλτρα",
   titleClassName = "text-gray-900",
 }) {
+  useBodyScrollLock(open);
+
   // Local state for multi-selects
   const [localFilters, setLocalFilters] = useState(filters);
 

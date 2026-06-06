@@ -68,6 +68,7 @@ export const FormDataProvider = ({ children }) => {
       responsibleDeclarationDocument: null,
       publications: [],
       positionId: "",
+      coursePlans: {},
     };
 
     // Auto-fill with existing form data if user is applicant and has submitted before
@@ -138,6 +139,7 @@ export const FormDataProvider = ({ children }) => {
             }
           : null,
         publications: selectedForm.publications ?? [],
+        coursePlans: selectedForm.coursePlans ?? {},
       };
     }
 
@@ -509,6 +511,20 @@ export const FormDataProvider = ({ children }) => {
     }));
   };
 
+  const handleCoursePlanFieldChange = (courseId, field, value) => {
+    const key = String(courseId);
+    setFormData((prevData) => ({
+      ...prevData,
+      coursePlans: {
+        ...(prevData.coursePlans || {}),
+        [key]: {
+          ...((prevData.coursePlans || {})[key] || {}),
+          [field]: value,
+        },
+      },
+    }));
+  };
+
 
   const addBioSupportingDocument = (file) => {
     setFormData((prevData) => ({
@@ -566,6 +582,7 @@ export const FormDataProvider = ({ children }) => {
         removeEmploymentCertificate,
         addBioSupportingDocument,
         removeBioSupportingDocument,
+        handleCoursePlanFieldChange,
       }}
     >
       {children}

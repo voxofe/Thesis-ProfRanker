@@ -76,10 +76,13 @@ export default function CoursePanel({
           courses.map((c, idx) => (
             <div
               key={idx}
-              className={`bg-patras-albescentWhite/20 p-5 rounded-xl border mb-4 shadow-sm relative ${
+              className={`pr-publication-card bg-patras-albescentWhite/20 px-5 pt-8 pb-5 rounded-xl border mb-4 shadow-sm relative ${
                 disabled ? "opacity-50 pointer-events-none" : ""
               }`}
             >
+              <div className="pr-publication-number" aria-hidden="true">
+                <span>{idx + 1}</span>
+              </div>
               {(() => {
                 const ectsValue = toNumberOrNull(c.ects);
                 const teachingUnitsValue = toNumberOrNull(c.teaching_units);

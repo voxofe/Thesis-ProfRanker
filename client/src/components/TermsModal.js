@@ -1,7 +1,10 @@
 import React from "react";
 import { createPortal } from "react-dom";
+import useBodyScrollLock from "../utils/useBodyScrollLock";
 
 export default function TermsModal({ open, onClose }) {
+  useBodyScrollLock(open);
+
   if (!open) return null;
   if (typeof document === "undefined") return null;
 

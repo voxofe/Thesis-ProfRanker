@@ -21,6 +21,7 @@ export default function VaultFileActions({
   const menuRef = useRef(null);
   const inputRef = useRef(null);
   const actionTimerRef = useRef(null);
+  const isApplicationUsed = file?.isUsedInApplication ?? file?.isUsed;
 
   const updateMenuPosition = () => {
     if (!wrapperRef.current) return;
@@ -273,7 +274,7 @@ export default function VaultFileActions({
             </button>
             {(showReplace || showDelete) && <div className="my-1 border-t border-gray-200" />}
             {showReplace && (
-              file.isUsed ? (
+              isApplicationUsed ? (
                 <div className="block w-full">
                   <TooltipGray content="Το αρχείο χρησιμοποιείται σε υποβληθείσα αίτηση.">
                     <button
@@ -307,7 +308,7 @@ export default function VaultFileActions({
               )
             )}
             {showDelete && (
-              file.isUsed ? (
+              isApplicationUsed ? (
                 <div className="block w-full">
                   <TooltipGray content="Το αρχείο χρησιμοποιείται σε υποβληθείσα αίτηση.">
                     <button
