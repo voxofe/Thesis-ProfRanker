@@ -221,7 +221,7 @@ export default function CoursePlanDetailsModal({
                     {COURSE_PLAN_FIELDS.map((field) => {
                       const coursePlan = coursePlans?.[String(activeCourse.id)] || {};
                       return (
-                        <div key={`${activeCourse.id}-${field.key}`} className="space-y-1">
+                        <div key={`${activeCourse.id}-${field.key}`} className="space-y-3 pb-3">
                           <label className="block text-sm font-medium text-gray-700">
                             {field.label}
                           </label>

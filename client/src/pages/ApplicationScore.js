@@ -57,11 +57,35 @@ const thesisRelevanceRanges = [
   { min: 17, max: 20, label: "Πολύ υψηλή συνάφεια" },
 ];
 
+const coursePlanRelevanceRanges = [
+  { min: 0, max: 5, label: "Πολύ χαμηλή συνάφεια" },
+  { min: 6, max: 10, label: "Χαμηλή συνάφεια" },
+  { min: 11, max: 15, label: "Μέτρια συνάφεια" },
+  { min: 16, max: 20, label: "Υψηλή συνάφεια" },
+  { min: 21, max: 25, label: "Πολύ υψηλή συνάφεια" },
+];
+
 const renderThesisRelevanceTooltip = (score) => {
   if (score === null || score === undefined) return null;
   return (
     <div className="text-xs text-gray-800">
       {thesisRelevanceRanges.map((range) => {
+        const isActive = score >= range.min && score <= range.max;
+        return (
+          <div key={`${range.min}-${range.max}`} className={isActive ? "font-semibold" : ""}>
+            {range.min}-{range.max}: {range.label}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const renderCoursePlanRelevanceTooltip = (score) => {
+  if (score === null || score === undefined) return null;
+  return (
+    <div className="text-xs text-gray-800">
+      {coursePlanRelevanceRanges.map((range) => {
         const isActive = score >= range.min && score <= range.max;
         return (
           <div key={`${range.min}-${range.max}`} className={isActive ? "font-semibold" : ""}>
@@ -729,10 +753,26 @@ export default function ApplicationScore() {
                               συνόλου των μαθημάτων του Επιστημονικού πεδίου
                             </td>
                             <td className="px-6 py-4 text-center text-patras-buccaneer">
-                              {formatPoints(
-                                applicantData?.coursePlanRelevancePoints,
-                                POINTS_MAX.coursePlanRelevancePoints
-                              )}
+                              <span className="inline-flex items-center justify-center gap-2">
+                                {formatPoints(
+                                  applicantData?.coursePlanRelevancePoints,
+                                  POINTS_MAX.coursePlanRelevancePoints
+                                )}
+                                {applicantData?.coursePlanRelevancePoints !== null &&
+                                applicantData?.coursePlanRelevancePoints !== undefined ? (
+                                  <TooltipGray
+                                    content={renderCoursePlanRelevanceTooltip(applicantData?.coursePlanRelevancePoints)}
+                                    className="w-auto max-w-xs whitespace-nowrap"
+                                  >
+                                    <span
+                                      className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer text-xs font-semibold cursor-help"
+                                      aria-label="Σημείωση συνάφειας σχεδιαγράμματος διδασκαλίας"
+                                    >
+                                      i
+                                    </span>
+                                  </TooltipGray>
+                                ) : null}
+                              </span>
                             </td>
                           </tr>
                           <tr className="">
