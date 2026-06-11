@@ -74,6 +74,8 @@ export default function SortableTable({
   theadClassName = "bg-patras-buccaneer",
   tbodyClassName = "divide-y divide-patras-cameo text-[13px]",
   headerCellClassName = "",
+  showEntriesCount = true,
+  formatEntriesCount,
 }) {
   const [sortBy, setSortBy] = useState(initialSortBy || columns[0]?.key);
   const [sortDirection, setSortDirection] = useState(initialSortDirection);
@@ -163,6 +165,9 @@ export default function SortableTable({
     });
   }, [rows, debouncedSearchText, searchableKeys, enableSearch]);
 
+  const totalRows = Array.isArray(rows) ? rows.length : 0;
+  const visibleRows = filteredRows.length;
+
   const sortedRows = useMemo(() => {
     if (typeof getSortedRows === "function") {
       return getSortedRows(filteredRows, sortBy, sortDirection);
@@ -182,6 +187,11 @@ export default function SortableTable({
     }
     return headerCellClassName;
   };
+
+  const entriesCountLabel =
+    typeof formatEntriesCount === "function"
+      ? formatEntriesCount({ visibleRows, totalRows })
+      : `Εμφάνιση: ${visibleRows} από ${totalRows}`;
 
   return (
     <div className="w-full">
@@ -213,6 +223,11 @@ export default function SortableTable({
               </button>
             )}
           </div>
+        </div>
+      )}
+      {showEntriesCount && !loading && (
+        <div className="mb-2 flex justify-end">
+          <div className="text-sm font-medium text-gray-700">{entriesCountLabel}</div>
         </div>
       )}
       <div className={wrapperClassName}>
