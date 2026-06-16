@@ -428,7 +428,7 @@ export default function UsersView() {
         />
         {rowMenu && isApplicantsTab && (
           <div
-            className="absolute z-50 w-max min-w-[14rem] rounded-md border border-gray-200 bg-white shadow-lg"
+            className="absolute z-50 w-max min-w-[14rem] overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg"
             style={{ top: rowMenu.top, left: rowMenu.left }}
             onClick={(event) => event.stopPropagation()}
           >

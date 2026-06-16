@@ -35,7 +35,7 @@ export default function DocumentsSection({ academicYear }) {
             <div className="mt-4 p-4 bg-white rounded-md border border-blue-200 overflow-y-auto">
               <Upload
                 icon="document-text"
-                label="Πρωτοκολλημένη αίτηση για έκδοση σχετικής άδειας από το αρμόδιο όργανο"
+                label="Πρωτοκολλημένη αίτηση για έκδοση σχετικής άδειας από το αρμόδιο όργανο για δημοσίους υπαλλήλους"
                 contentLabel="την πρωτοκολλημένη αίτηση"
                 contentStatus="η αίτηση"
                 id="public-employee-permission-upload"

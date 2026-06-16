@@ -72,44 +72,50 @@ export default function Settings() {
           </h2>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <InputField
-              label="Τρέχων κωδικός πρόσβασης"
-              id="currentPassword"
-              name="currentPassword"
-              type="password"
-              autoComplete="current-password"
-              value={currentPassword}
-              onChange={setCurrentPassword}
-            />
+            <div className="space-y-1 -mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+                <InputField
+                  label="Τρέχων κωδικός πρόσβασης"
+                  id="currentPassword"
+                  name="currentPassword"
+                  type="password"
+                  autoComplete="current-password"
+                  value={currentPassword}
+                  onChange={setCurrentPassword}
+                />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 -mb-4">
-              <InputField
-                label="Νέος κωδικός πρόσβασης"
-                id="newPassword"
-                name="newPassword"
-                type="password"
-                autoComplete="new-password"
-                value={newPassword}
-                onChange={setNewPassword}
-                onBlur={checkPasswordMatch}
-              />
+                <div className="hidden sm:block" />
+              </div>
 
-              <InputField
-                label="Επιβεβαίωση νέου κωδικού"
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={setConfirmPassword}
-                onBlur={checkPasswordMatch}
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+                <InputField
+                  label="Νέος κωδικός πρόσβασης"
+                  id="newPassword"
+                  name="newPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  value={newPassword}
+                  onChange={setNewPassword}
+                  onBlur={checkPasswordMatch}
+                />
 
-              {confirmPasswordError && (
-                <p className="col-span-2 text-xs text-red-600 mt-1">
-                  {confirmPasswordError}
-                </p>
-              )}
+                <InputField
+                  label="Επιβεβαίωση νέου κωδικού"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={setConfirmPassword}
+                  onBlur={checkPasswordMatch}
+                />
+
+                {confirmPasswordError && (
+                  <p className="col-span-2 text-xs text-red-600 mt-1">
+                    {confirmPasswordError}
+                  </p>
+                )}
+              </div>
             </div>
 
             <button

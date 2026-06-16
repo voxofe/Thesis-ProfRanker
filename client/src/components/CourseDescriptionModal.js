@@ -5,6 +5,26 @@ import useBodyScrollLock from "../utils/useBodyScrollLock";
 export default function CourseDescriptionModal({ open, onClose, title, description }) {
   useBodyScrollLock(open);
 
+  const renderTitle = () => {
+    const baseTitle = title || "Περιγραφή μαθήματος";
+    const prefix = "Περιγραφή μαθήματος:";
+    if (!baseTitle.startsWith(prefix)) {
+      return baseTitle;
+    }
+
+    const courseName = baseTitle.slice(prefix.length).trim();
+    if (!courseName) {
+      return baseTitle;
+    }
+
+    return (
+      <>
+        {prefix}{" "}
+        <span className="text-patras-buccaneer">{courseName}</span>
+      </>
+    );
+  };
+
   if (!open) return null;
   if (typeof document === "undefined") return null;
 
@@ -19,7 +39,7 @@ export default function CourseDescriptionModal({ open, onClose, title, descripti
       >
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-4">
           <h2 className="text-base font-semibold text-gray-900">
-            {title || "Περιγραφή μαθήματος"}
+            {renderTitle()}
           </h2>
           <button
             type="button"

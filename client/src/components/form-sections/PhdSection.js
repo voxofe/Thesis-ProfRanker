@@ -293,20 +293,23 @@ export default function PhdSection() {
                 ref={keywordInputRef}
               />
             )}
+          </div>
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm text-gray-500">
+              Πληκτρολογήστε και πατήστε Enter ή κόμμα για να προσθέσετε λέξη-κλειδί.
+            </p>
             <button
               type="button"
               onClick={clearKeywords}
               disabled={keywordCount === 0}
-              className="absolute bottom-2 right-2 inline-flex items-center justify-center text-patras-buccaneer hover:text-patras-sanguineBrown disabled:cursor-not-allowed disabled:text-gray-400"
+              className="inline-flex items-center gap-1 rounded-md border border-patras-buccaneer/30 bg-patras-albescentWhite/30 px-3 py-1 text-sm text-patras-buccaneer hover:bg-patras-albescentWhite disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
               aria-label="Καθαρισμός λέξεων-κλειδιών"
               title="Καθαρισμός"
             >
-              <TrashIcon className="h-5 w-5" aria-hidden="true" />
+              <span>Καθαρισμός</span>
+              <TrashIcon className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
-          <p className="mt-2 text-sm text-gray-500">
-            Πληκτρολογήστε και πατήστε Enter ή κόμμα για να προσθέσετε λέξη-κλειδί.
-          </p>
           <p className="mt-1 text-xs text-gray-500">
             {keywordCount}/{PHD_KEYWORDS_MAX} λέξεις-κλειδιά
           </p>

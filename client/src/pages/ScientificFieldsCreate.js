@@ -445,7 +445,7 @@ export default function ScientificFieldsCreate() {
             <div className="hidden md:block" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-3">
             <CustomSelect
               label="Σχολή"
               value={formData.school}

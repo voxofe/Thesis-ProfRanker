@@ -33,7 +33,16 @@ const statusLabels = ["Ενεργή", "Ολοκληρωμένη"];
 function parseDDMMYYYY(dateStr, timeStr, fallbackTime = "00:00") {
   if (!dateStr) return null;
   const [datePart, timePart] = String(dateStr).split(" ");
-  const [d, m, y] = datePart.split("-").map((v) => parseInt(v, 10));
+  const parts = datePart.split("-").map((v) => parseInt(v, 10));
+  let d;
+  let m;
+  let y;
+  // Support both DD-MM-YYYY and ISO YYYY-MM-DD.
+  if (parts.length === 3 && parts[0] > 999) {
+    [y, m, d] = parts;
+  } else {
+    [d, m, y] = parts;
+  }
   if (!d || !m || !y) return null;
   const rawTime = timeStr || timePart || fallbackTime;
   const [hh, mm] = String(rawTime).split(":").map((v) => parseInt(v, 10));
@@ -111,6 +120,50 @@ function getStatusBadgeClasses(status) {
   return `${base} bg-gray-100 text-gray-700 border border-gray-200`;
 }
 
+function parseBooleanLike(value) {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["true", "1", "yes", "active", "ενεργή", "ενεργο"].includes(normalized)) return true;
+    if (["false", "0", "no", "inactive", "completed", "ολοκληρωμένη"].includes(normalized)) return false;
+  }
+  if (typeof value === "number") {
+    if (value === 1) return true;
+    if (value === 0) return false;
+  }
+  return null;
+}
+
+function isCompletedForAppliedFilter(app) {
+  const explicitActive = parseBooleanLike(app?.isActive ?? app?.active ?? app?.is_active);
+  if (explicitActive !== null) return !explicitActive;
+
+  const rawStatus = String(
+    app?.status || app?.applicationStatus || app?.positionStatus || app?.state || ""
+  )
+    .trim()
+    .toLowerCase();
+  if (rawStatus) {
+    if (rawStatus.includes("ολοκληρ") || rawStatus.includes("completed") || rawStatus.includes("inactive")) {
+      return true;
+    }
+    if (rawStatus.includes("ενεργ") || rawStatus.includes("active")) {
+      return false;
+    }
+  }
+
+  const endDate =
+    app?.positionEndDate || app?.endDate || app?.applicationEndDate || app?.position_end_date || "";
+  const endTime = app?.positionEndTime || app?.endTime || app?.position_end_time || "";
+
+  if (endDate) {
+    const derivedStatus = getApplicationStatus(endDate, endTime);
+    return derivedStatus === "Ολοκληρωμένη";
+  }
+
+  return false;
+}
+
 export default function Ranking() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -147,12 +200,11 @@ export default function Ranking() {
     const apps = Array.isArray(currentUser?.applications)
       ? currentUser.applications
       : [];
-    const fields = apps
+    const completedApps = apps.filter(isCompletedForAppliedFilter);
+
+    const fields = completedApps
       .map((app) => (app?.scientificField || "").trim())
       .filter(Boolean);
-    if (!fields.length && currentUser?.form?.scientificField) {
-      fields.push(String(currentUser.form.scientificField).trim());
-    }
     return Array.from(new Set(fields));
   }, [currentUser]);
 
@@ -161,7 +213,6 @@ export default function Ranking() {
     [appliedScientificFields]
   );
 
-  const suppressAutoUncheckRef = useRef(false);
   const guestVisitRecordedRef = useRef(false);
 
   const fetchUsers = useCallback(async () => {
@@ -402,30 +453,31 @@ export default function Ranking() {
 
   // Applicant: checkbox to show only applications for positions they've applied to
   const [showMyPosition, setShowMyPosition] = useState(false);
-  
-  useEffect(() => {
-    if (suppressAutoUncheckRef.current) {
-      suppressAutoUncheckRef.current = false;
-      return;
-    }
 
-    if (!showMyPosition) return;
-
+  const isMyPositionFilterActive = useMemo(() => {
+    const submitFrom = filters.dateRanges?.submitDate?.from || "";
+    const submitTo = filters.dateRanges?.submitDate?.to || "";
     const onlyScientificFields =
       !filters.schools.length &&
       !filters.departments.length &&
       !filters.status.length &&
       !filters.pointsMin &&
-      !filters.pointsMax;
+      !filters.pointsMax &&
+      !submitFrom &&
+      !submitTo;
 
     const sameFields =
       filters.scientificFields.length === appliedScientificFields.length &&
       filters.scientificFields.every((sf) => appliedScientificFieldSet.has(sf));
 
-    if (!(onlyScientificFields && sameFields)) {
-      setShowMyPosition(false);
-    }
-  }, [filters, showMyPosition, appliedScientificFields, appliedScientificFieldSet]);
+    return onlyScientificFields && sameFields;
+  }, [filters, appliedScientificFields, appliedScientificFieldSet]);
+
+  useEffect(() => {
+    setShowMyPosition((prev) =>
+      prev === isMyPositionFilterActive ? prev : isMyPositionFilterActive
+    );
+  }, [isMyPositionFilterActive]);
 
   // Filter tags
   const filterTags = useMemo(() => {
@@ -458,7 +510,7 @@ export default function Ranking() {
 
   const [searchText, setSearchText] = useState("");
   const removeTag = (tag) => {
-    if (showMyPosition) {
+    if (isMyPositionFilterActive) {
       setShowMyPosition(false);
     }
     setFilters((prev) => {
@@ -484,7 +536,7 @@ export default function Ranking() {
   };
 
   const clearAllFilters = () => {
-    if (showMyPosition) {
+    if (isMyPositionFilterActive) {
       setShowMyPosition(false);
     }
     setFilters({
@@ -631,51 +683,6 @@ export default function Ranking() {
         Λίστα κατάταξης αιτήσεων
       </h1>
 
-      {/* Filters row: Checkbox + Φίλτρα button */}
-      <div className="flex items-center justify-between ml-1 m-0 p-0">
-        {/* Left side: Checkbox for applicant only */}
-        <div>
-          {isApplicant && appliedScientificFields.length > 0 && (
-            <Checkbox
-              id="show-my-field"
-              name="show-my-field"
-              checked={showMyPosition}
-              onChange={(checked) => {
-                suppressAutoUncheckRef.current = true;
-                setShowMyPosition(checked);
-                if (checked) {
-                  setFilters({
-                    schools: [],
-                    departments: [],
-                    scientificFields: appliedScientificFields,
-                    status: [],
-                    pointsMin: "",
-                    pointsMax: "",
-                    dateRanges: {
-                      submitDate: { from: "", to: "" },
-                    },
-                  });
-                } else {
-                  setFilters({
-                    schools: [],
-                    departments: [],
-                    scientificFields: [],
-                    status: [],
-                    pointsMin: "",
-                    pointsMax: "",
-                    dateRanges: {
-                      submitDate: { from: "", to: "" },
-                    },
-                  });
-                }
-              }}
-              label="Εμφάνιση αιτήσεων για τις θέσεις που έχω επιλέξει"
-            />
-          )}
-        </div>
-        {/* Right side: (button moved to be positioned relative to the table) */}
-      </div>
-
       {/* Filter Modal */}
       <FilterModal
         open={filterOpen}
@@ -703,6 +710,44 @@ export default function Ranking() {
 
       <div className="mb-2 grid grid-cols-[1fr_auto] items-end gap-3 min-h-[36px]">
         <div className="flex flex-wrap items-center gap-2 min-h-[28px] min-w-[12rem] self-end">
+          {isApplicant && appliedScientificFields.length > 0 && (
+            <div className="w-full basis-full">
+              <Checkbox
+                id="show-my-field"
+                name="show-my-field"
+                checked={isMyPositionFilterActive}
+                onChange={(checked) => {
+                  setShowMyPosition(checked);
+                  if (checked) {
+                    setFilters({
+                      schools: [],
+                      departments: [],
+                      scientificFields: appliedScientificFields,
+                      status: [],
+                      pointsMin: "",
+                      pointsMax: "",
+                      dateRanges: {
+                        submitDate: { from: "", to: "" },
+                      },
+                    });
+                  } else {
+                    setFilters({
+                      schools: [],
+                      departments: [],
+                      scientificFields: [],
+                      status: [],
+                      pointsMin: "",
+                      pointsMax: "",
+                      dateRanges: {
+                        submitDate: { from: "", to: "" },
+                      },
+                    });
+                  }
+                }}
+                label="Εμφάνιση αιτήσεων για τις θέσεις που έχω επιλέξει (μόνο ολοκληρωμένες)"
+              />
+            </div>
+          )}
           {filterTags.map((tag, idx) => (
             <span
               key={idx}
@@ -735,7 +780,7 @@ export default function Ranking() {
             </button>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           <RefreshButton
             onClick={handleRefresh}
             loading={refreshing}
@@ -780,7 +825,7 @@ export default function Ranking() {
         </div>
       </div>
 
-      <div className="relative overflow-visible">
+      <div className="relative overflow-visible mt-3">
         <SortableTable
           columns={columns}
           rows={searchableUsers}

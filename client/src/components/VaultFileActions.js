@@ -15,6 +15,7 @@ export default function VaultFileActions({
 }) {
   const [open, setOpen] = useState(false);
   const [localProgress, setLocalProgress] = useState(0);
+  const [replaceFileName, setReplaceFileName] = useState("");
   const [menuPosition, setMenuPosition] = useState(null);
   const [bodyPad, setBodyPad] = useState(0);
   const wrapperRef = useRef(null);
@@ -103,6 +104,7 @@ export default function VaultFileActions({
     const selected = event.target.files?.[0];
     event.target.value = "";
     if (selected) {
+      setReplaceFileName(selected.name || "");
       onReplace(selected);
       setOpen(false);
     }
@@ -113,6 +115,7 @@ export default function VaultFileActions({
   const isReplacing = loadingAction === "replace";
   const isDeleting = loadingAction === "delete";
   const isBusy = isViewing || isDownloading || isReplacing || isDeleting;
+  const displayedFileName = isReplacing && replaceFileName ? replaceFileName : file.name;
   const hasExternalProgress = isReplacing && typeof actionProgress === "number";
   const displayProgress = Math.min(
     100,
@@ -181,6 +184,12 @@ export default function VaultFileActions({
     };
   }, [isBusy, loadingAction, hasExternalProgress, isDeleting]);
 
+  useEffect(() => {
+    if (!isReplacing && replaceFileName) {
+      setReplaceFileName("");
+    }
+  }, [isReplacing, replaceFileName]);
+
   return (
     <div
       ref={wrapperRef}
@@ -212,7 +221,7 @@ export default function VaultFileActions({
               </span>
             </span>
           )}
-          <span className="truncate" title={file.name}>{file.name}</span>
+          <span className="truncate" title={displayedFileName}>{displayedFileName}</span>
           {isBusy && (
             <span className="text-xs text-patras-buccaneer/70">
               {displayProgress}%
@@ -235,7 +244,7 @@ export default function VaultFileActions({
         createPortal(
           <div
             ref={menuRef}
-            className="absolute z-[9999] w-max rounded-md border border-gray-200 bg-white shadow-lg"
+            className="absolute z-[9999] w-max overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg"
             style={{
               top: `${menuPosition.top}px`,
               left: `${menuPosition.left}px`,

@@ -97,6 +97,28 @@ const renderCoursePlanRelevanceTooltip = (score) => {
   );
 };
 
+const AiIndicatorIcon = ({ className = "h-4 w-4" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <path d="M12 3v3" />
+    <rect x="5" y="6" width="14" height="12" rx="3" />
+    <circle cx="9.5" cy="12" r="1" />
+    <circle cx="14.5" cy="12" r="1" />
+    <path d="M9 15h6" />
+    <path d="M3 10h2" />
+    <path d="M19 10h2" />
+  </svg>
+);
+
 export default function ApplicationScore() {
   const { currentUser } = useAuth();
   const { id } = useParams();
@@ -235,6 +257,10 @@ export default function ApplicationScore() {
   const phdTitle = applicantData?.phdTitle || "—";
   const phdAbstract = applicantData?.phdAbstract || "";
   const phdKeywords = applicantData?.phdKeywords || [];
+  const applicantGender = String(
+    applicantData?.gender || applicantData?.user?.gender || ""
+  ).toLowerCase();
+  const requiresMilitaryDoc = applicantGender === "male";
 
   const courses = useMemo(() => {
     if (Array.isArray(applicantData?.courses) && applicantData.courses.length)
@@ -304,7 +330,7 @@ export default function ApplicationScore() {
     },
     {
       key: "publicEmployeePermission",
-      label: "Πρωτοκολλημένη αίτηση για έκδοση σχετικής άδειας από το αρμόδιο όργανο",
+      label: "Πρωτοκολλημένη αίτηση για έκδοση σχετικής άδειας από το αρμόδιο όργανο για δημοσίους υπαλλήλους",
       value: applicantData?.documents?.publicEmployeePermission,
     },
     {
@@ -317,11 +343,15 @@ export default function ApplicationScore() {
       label: "Υπεύθυνη δήλωση μη προηγούμενης συμμετοχής",
       value: applicantData?.documents?.notParticipatedDeclaration,
     },
-    {
-      key: "military",
-      label: `Υπεύθυνη δήλωση εκπλήρωσης στρατιωτικών υποχρεώσεων ή νόμιμης απαλλαγής από αυτές ή αναβολής για το ακαδημαϊκό έτος ${academicYear}`,
-      value: applicantData?.documents?.military,
-    },
+    ...(requiresMilitaryDoc
+      ? [
+          {
+            key: "military",
+            label: `Υπεύθυνη δήλωση εκπλήρωσης στρατιωτικών υποχρεώσεων ή νόμιμης απαλλαγής από αυτές ή αναβολής για το ακαδημαϊκό έτος ${academicYear}`,
+            value: applicantData?.documents?.military,
+          },
+        ]
+      : []),
     {
       key: "responsibleDeclaration",
       label: "Υπεύθυνη δήλωση σχετικά με τους περιορισμούς της Πράξης",
@@ -481,7 +511,7 @@ export default function ApplicationScore() {
         )}
       </h1>
       {canEditApplication && (
-        <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3">
+        <div className="mb-6 mx-auto w-full max-w-2xl rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3">
           <button
             type="button"
             onClick={() => setIsEditDrawerOpen((prev) => !prev)}
@@ -731,7 +761,15 @@ export default function ApplicationScore() {
           </div>
                 ) : (
                   <div>
-                    <h1 className="text-xl font-light mb-3">Αξιολόγηση αίτησης</h1>
+                    <div className="mb-3 flex flex-wrap items-center gap-3">
+                      <h1 className="text-xl font-light">Αξιολόγηση αίτησης</h1>
+                      <span className="inline-flex items-center gap-1.5 text-xs text-gray-600">
+                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer">
+                          <AiIndicatorIcon className="h-3.5 w-3.5" />
+                        </span>
+                        <span>Κριτήρια των οποίων ο υπολογισμός έγινε με χρήση εργαλείων AI/LLM</span>
+                      </span>
+                    </div>
                     <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50">
                       
                       <table className="min-w-full bg-white/50">
@@ -765,10 +803,10 @@ export default function ApplicationScore() {
                                     className="w-auto max-w-xs whitespace-nowrap"
                                   >
                                     <span
-                                      className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer text-xs font-semibold cursor-help"
+                                      className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer cursor-help"
                                       aria-label="Σημείωση συνάφειας σχεδιαγράμματος διδασκαλίας"
                                     >
-                                      i
+                                      <AiIndicatorIcon className="h-3.5 w-3.5" />
                                     </span>
                                   </TooltipGray>
                                 ) : null}
@@ -804,10 +842,10 @@ export default function ApplicationScore() {
                                     className="w-auto max-w-xs whitespace-nowrap"
                                   >
                                     <span
-                                      className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer text-xs font-semibold cursor-help"
+                                      className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer cursor-help"
                                       aria-label="Σημείωση συνάφειας διδακτορικής διατριβής"
                                     >
-                                      i
+                                      <AiIndicatorIcon className="h-3.5 w-3.5" />
                                     </span>
                                   </TooltipGray>
                                 ) : null}

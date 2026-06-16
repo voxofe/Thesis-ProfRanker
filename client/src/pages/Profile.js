@@ -199,7 +199,10 @@ export default function Profile() {
     label: String(index),
   }));
   const canEditIdentity = !isAdminViewingOther && profile?.canEditIdentity !== false;
-  const requiresMilitaryDoc = profile?.user?.gender === "male";
+  const normalizedProfileGender = String(
+    profile?.user?.gender || form?.gender || ""
+  ).toLowerCase();
+  const requiresMilitaryDoc = normalizedProfileGender === "male";
   const publicationsContextValue = useMemo(
     () => ({
       formData: { publications: profilePublications },
@@ -731,7 +734,7 @@ export default function Profile() {
     );
     addSection(
       "public-employee-permission",
-      "Πρωτοκολλημένη αίτηση για έκδοση σχετικής άδειας από το αρμόδιο όργανο",
+      "Πρωτοκολλημένη αίτηση για έκδοση σχετικής άδειας από το αρμόδιο όργανο για δημοσίους υπαλλήλους",
       "public_employee_permission",
       vault.public_employee_permission
     );
@@ -1653,26 +1656,30 @@ export default function Profile() {
                                   onKeyDown={handlePhdKeywordKeyDown}
                                   onBlur={commitPhdKeyword}
                                   placeholder=""
-                                  className="flex-1 min-w-[180px] border-0 p-0 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:ring-0"
+                                  className="flex-none min-w-[4ch] max-w-full border-0 p-0 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:ring-0"
+                                  style={{ width: `${Math.max(8, phdKeywordInput.length + 1)}ch` }}
                                   ref={phdKeywordInputRef}
                                 />
                               )}
+                            </div>
+                            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                              <p className="text-sm text-gray-500">
+                                Πληκτρολογήστε και πατήστε Enter ή κόμμα για να προσθέσετε λέξη-κλειδί.
+                              </p>
                               {!isReadOnly && (
                                 <button
                                   type="button"
                                   onClick={clearPhdKeywords}
                                   disabled={phdKeywordCount === 0}
-                                  className="absolute bottom-2 right-2 inline-flex items-center justify-center text-patras-buccaneer hover:text-patras-sanguineBrown disabled:cursor-not-allowed disabled:text-gray-400"
+                                  className="inline-flex items-center gap-1 rounded-md border border-patras-buccaneer/30 bg-patras-albescentWhite/30 px-3 py-1 text-sm text-patras-buccaneer hover:bg-patras-albescentWhite disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
                                   aria-label="Καθαρισμός λέξεων-κλειδιών"
                                   title="Καθαρισμός"
                                 >
-                                  <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                                  <span>Καθαρισμός</span>
+                                  <TrashIcon className="h-4 w-4" aria-hidden="true" />
                                 </button>
                               )}
                             </div>
-                            <p className="mt-2 text-sm text-gray-500">
-                              Πληκτρολογήστε και πατήστε Enter ή κόμμα για να προσθέσετε λέξη-κλειδί.
-                            </p>
                             <p className="mt-1 text-xs text-gray-500">
                               {phdKeywordCount}/{PHD_KEYWORDS_MAX} λέξεις-κλειδιά
                             </p>
