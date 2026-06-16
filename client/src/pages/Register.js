@@ -90,7 +90,7 @@ export default function Register() {
     <div className="flex flex-col justify-start pt-4 sm:px-6 lg:px-8 -mt-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
         <h2 className="text-center text-2xl font-semibold tracking-tight text-gray-600">
-          Εγγραφή στο σύστημα
+          Εγγραφή στην εφαρμογή
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Συμπληρώστε τα στοιχεία σας για δημιουργία λογαριασμού

@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import SortableTable from "../components/SortableTable";
 import FilterModal from "../components/FilterModal";
+import TooltipGray from "../components/TooltipGray";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -10,6 +11,20 @@ const API_BASE_URL = (
 ).replace(
   /\/+$/,
   ""
+);
+
+const guestRankingVisitsLabel = (
+  <span className="inline-flex items-center justify-center gap-1 align-middle normal-case text-[10px] leading-tight">
+    <span className="normal-case">Επισκέψεις</span>
+    <TooltipGray content="Σύνολο επισκέψεων του χρήστη στη γενική κατάταξη αιτήσεων.">
+      <span
+        className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer text-[9px] font-semibold normal-case cursor-help"
+        aria-label="Πληροφορίες για τις επισκέψεις κατάταξης"
+      >
+        i
+      </span>
+    </TooltipGray>
+  </span>
 );
 
 const TAB_CONFIG = {
@@ -35,11 +50,11 @@ const TAB_CONFIG = {
       { key: "firstName", label: "Όνομα" },
       { key: "lastName", label: "Επώνυμο" },
       { key: "email", label: "Email" },
-      { key: "rankingVisits", label: "Επισκέψεις κατάταξης" },
+      { key: "rankingVisits", label: guestRankingVisitsLabel },
     ],
     searchableColumns: ["firstName", "lastName", "email"],
     countKey: "rankingVisits",
-    countLabel: "Επισκέψεις κατάταξης",
+    countLabel: "Επισκέψεις",
   },
   admins: {
     label: "Διαχειριστές",

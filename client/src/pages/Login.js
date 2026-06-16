@@ -41,7 +41,7 @@ export default function Login() {
     <div className="flex flex-col justify-start pt-4 sm:px-6 lg:px-8 -mt-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="text-center text-2xl font-semibold tracking-tight text-gray-600">
-          Σύνδεση στο σύστημα
+          Σύνδεση στην εφαρμογή
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Εισάγετε τα στοιχεία σας για πρόσβαση

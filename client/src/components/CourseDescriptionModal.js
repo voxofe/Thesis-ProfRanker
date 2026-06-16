@@ -18,7 +18,7 @@ export default function CourseDescriptionModal({ open, onClose, title, descripti
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-base font-semibold text-gray-900">
             {title || "Περιγραφή μαθήματος"}
           </h2>
           <button

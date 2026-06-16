@@ -85,6 +85,12 @@ function formatIsoDateLabel(iso) {
   return `${d}-${m}-${y}`;
 }
 
+function parseTimestamp(value) {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 export default function ScientificFieldsView() {
   const { currentUser } = useAuth();
   const [scientificFields, setScientificFields] = useState([]);
@@ -137,12 +143,14 @@ export default function ScientificFieldsView() {
         scientificField: sf.name,
         school: sf.school,
         department: sf.department,
+        createdAt: sf.createdAt || null,
         state: stateLabels[sf.state] || "—",
         applicants: sf.applications || 0,
         startDate: sf.positionStartDate || "",
         endDate: sf.positionEndDate || "",
         startTime: sf.positionStartTime || "",
         endTime: sf.positionEndTime || "",
+        _createdAt: parseTimestamp(sf.createdAt),
         _startDate: startDate,
         _endDate: endDate,
       };
@@ -235,6 +243,30 @@ export default function ScientificFieldsView() {
   }, [rows, filters]);
 
   const getSortedRows = useMemo(() => (rows, sortBy, sortDirection) => {
+    const byCreationDate = (a, b) => {
+      const aCreated = a._createdAt;
+      const bCreated = b._createdAt;
+      if (aCreated && bCreated) {
+        const diff = bCreated - aCreated;
+        if (diff !== 0) return diff;
+      } else if (aCreated || bCreated) {
+        return aCreated ? -1 : 1;
+      }
+
+      const aId = Number(a.id);
+      const bId = Number(b.id);
+      if (Number.isFinite(aId) && Number.isFinite(bId) && aId !== bId) {
+        return bId - aId;
+      }
+      return 0;
+    };
+
+    const withTieBreaker = (compare) => (a, b) => {
+      const result = compare(a, b);
+      if (result !== 0) return result;
+      return byCreationDate(a, b);
+    };
+
     const byDate = (a, b, key) => {
       const da = a[key];
       const db = b[key];
@@ -245,17 +277,17 @@ export default function ScientificFieldsView() {
     };
 
     if (sortBy === "startDate") {
-      return [...rows].sort((a, b) => byDate(a, b, "_startDate"));
+      return [...rows].sort(withTieBreaker((a, b) => byDate(a, b, "_startDate")));
     }
 
     if (sortBy === "endDate") {
-      return [...rows].sort((a, b) => byDate(a, b, "_endDate"));
+      return [...rows].sort(withTieBreaker((a, b) => byDate(a, b, "_endDate")));
     }
 
     if (sortBy === "applicants") {
-      return [...rows].sort((a, b) =>
+      return [...rows].sort(withTieBreaker((a, b) =>
         sortDirection === "asc" ? a.applicants - b.applicants : b.applicants - a.applicants
-      );
+      ));
     }
 
     if (sortBy === "state") {
@@ -265,21 +297,21 @@ export default function ScientificFieldsView() {
         if (value === "Προσεχής") return 0;
         return -1;
       };
-      return [...rows].sort((a, b) => {
+      return [...rows].sort(withTieBreaker((a, b) => {
         const ra = rank(a.state);
         const rb = rank(b.state);
         if (ra === rb) return 0;
         return sortDirection === "asc" ? ra - rb : rb - ra;
-      });
+      }));
     }
 
-    return [...rows].sort((a, b) => {
+    return [...rows].sort(withTieBreaker((a, b) => {
       const valA = a[sortBy]?.toString().toLowerCase() || "";
       const valB = b[sortBy]?.toString().toLowerCase() || "";
       if (valA < valB) return sortDirection === "asc" ? -1 : 1;
       if (valA > valB) return sortDirection === "asc" ? 1 : -1;
       return 0;
-    });
+    }));
   }, []);
 
   const filterTags = useMemo(() => {

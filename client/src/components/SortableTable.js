@@ -225,12 +225,12 @@ export default function SortableTable({
           </div>
         </div>
       )}
-      {showEntriesCount && !loading && (
-        <div className="mb-2 flex justify-end">
-          <div className="text-sm font-medium text-gray-700">{entriesCountLabel}</div>
-        </div>
-      )}
       <div className={wrapperClassName}>
+        {showEntriesCount && !loading && (
+          <div className="flex items-center justify-end border-b border-patras-capePalliser/40 bg-white/70 px-4 py-1 text-[13px] font-medium text-gray-500">
+            {entriesCountLabel}
+          </div>
+        )}
         <table className={tableClassName}>
         <thead className={theadClassName}>
           <tr>

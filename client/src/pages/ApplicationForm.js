@@ -28,7 +28,7 @@ const API_BASE_URL = (
 
 
 export default function Form({ academicYear }) {
-  const { formData, formMode, handleChange } = useFormData();
+  const { formData, formMode, handleChange, applyDraftData, isFormDataReady } = useFormData();
   const { canAccessStep, canProceedFromStep, stepValidation } = useValidation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -56,6 +56,9 @@ export default function Form({ academicYear }) {
   const [countdownText, setCountdownText] = useState("");
   const [showCountdown, setShowCountdown] = useState(false);
   const expiryAlertedRef = useRef(false);
+  const draftLoadPositionRef = useRef(null);
+  const draftPayloadByPositionRef = useRef({});
+  const draftHydratedByPositionRef = useRef({});
 
   useEffect(() => {
     expiryAlertedRef.current = false;
@@ -66,6 +69,98 @@ export default function Form({ academicYear }) {
       navigate("/");
     }
   }, [navigate]);
+
+  useEffect(() => {
+    if (formMode === "edit" || !isFormDataReady) return;
+    const positionId = formData.positionId;
+    if (!positionId) {
+      draftLoadPositionRef.current = null;
+      return;
+    }
+
+    const key = String(positionId);
+    if (draftLoadPositionRef.current === key) return;
+    draftLoadPositionRef.current = key;
+
+    let isCancelled = false;
+
+    const loadDraftForPosition = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`${API_BASE_URL}/api/application-drafts`, {
+          params: { positionId },
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        if (isCancelled) return;
+        if (response?.data?.exists && response?.data?.draft) {
+          draftPayloadByPositionRef.current[key] = response.data.draft;
+          draftHydratedByPositionRef.current[key] = false;
+          applyDraftData(response.data.draft);
+          showToast({
+            type: "success",
+            message: "Φορτώθηκε αποθηκευμένο πρόχειρο για τη θέση.",
+          });
+          return;
+        }
+
+        draftPayloadByPositionRef.current[key] = null;
+        draftHydratedByPositionRef.current[key] = true;
+      } catch (error) {
+        if (isCancelled) return;
+        showToast({
+          type: "error",
+          message: error?.response?.data?.error || "Αποτυχία φόρτωσης προχείρου.",
+        });
+      }
+    };
+
+    loadDraftForPosition();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [formMode, formData.positionId, applyDraftData, showToast, isFormDataReady]);
+
+  useEffect(() => {
+    if (formMode === "edit" || !isFormDataReady) return;
+    const positionId = formData.positionId;
+    if (!positionId) return;
+
+    const key = String(positionId);
+    const cachedDraft = draftPayloadByPositionRef.current[key];
+    if (!cachedDraft || draftHydratedByPositionRef.current[key]) return;
+
+    const hasAnyFilledCoursePlanText = (coursePlans) => {
+      if (!coursePlans || typeof coursePlans !== "object") return false;
+      return Object.values(coursePlans).some((plan) => {
+        if (!plan || typeof plan !== "object") return false;
+        return Object.values(plan).some((value) =>
+          typeof value === "string" ? value.trim().length > 0 : false
+        );
+      });
+    };
+
+    const currentCoursePlans = formData.coursePlans && typeof formData.coursePlans === "object"
+      ? formData.coursePlans
+      : {};
+    const draftCoursePlans = cachedDraft.coursePlans && typeof cachedDraft.coursePlans === "object"
+      ? cachedDraft.coursePlans
+      : {};
+
+    const draftHasFilledTexts = hasAnyFilledCoursePlanText(draftCoursePlans);
+    const currentHasFilledTexts = hasAnyFilledCoursePlanText(currentCoursePlans);
+
+    if (draftHasFilledTexts && !currentHasFilledTexts) {
+      applyDraftData(cachedDraft);
+      draftHydratedByPositionRef.current[key] = true;
+      return;
+    }
+
+    if (!draftHasFilledTexts || currentHasFilledTexts) {
+      draftHydratedByPositionRef.current[key] = true;
+    }
+  }, [formMode, isFormDataReady, formData.positionId, formData.coursePlans, applyDraftData]);
 
   const steps = [
     {
@@ -663,53 +758,59 @@ export default function Form({ academicYear }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={handlePrevious}
-          disabled={isFirstStep || loading}
-          className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-patras-buccaneer border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Προηγούμενο
-        </button>
-
-        {isLastStep ? (
+      <div className="grid grid-cols-3 items-center pb-4">
+        <div className="justify-self-start">
           <button
-            disabled={loading || !steps.every((step) => stepValidation[step.id])}
             type="button"
-            onClick={handleSubmit}
-            className="rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
+            onClick={handlePrevious}
+            disabled={isFirstStep || loading}
+            className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-patras-buccaneer border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? `${submitLabel}...` : submitLabel}
+            Προηγούμενο
           </button>
-        ) : (
-          <span
-            className="inline-block"
-            ref={nextButtonRef}
-            onMouseEnter={() => nextDisabled && setOpenNextTip(true)}
-            onMouseLeave={() => setOpenNextTip(false)}
-            onFocus={() => nextDisabled && setOpenNextTip(true)}
-            onBlur={() => setOpenNextTip(false)}
-          >
+        </div>
+
+        <div className="justify-self-center"></div>
+
+        <div className="justify-self-end">
+          {isLastStep ? (
             <button
+              disabled={loading || !steps.every((step) => stepValidation[step.id])}
               type="button"
-              onClick={handleNext}
-              disabled={nextDisabled || loading}
-              aria-disabled={nextDisabled || loading}
+              onClick={handleSubmit}
               className="rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
             >
-              Επόμενο
+              {loading ? `${submitLabel}...` : submitLabel}
             </button>
-            <Tooltip
-              anchorRef={nextButtonRef}
-              open={openNextTip && nextDisabled}
-              placement="top-left"
-              className="bg-white border border-patras-buccaneer text-patras-buccaneer text-xs px-2 py-1 rounded-lg shadow-lg whitespace-nowrap min-w-max"
+          ) : (
+            <span
+              className="inline-block"
+              ref={nextButtonRef}
+              onMouseEnter={() => nextDisabled && setOpenNextTip(true)}
+              onMouseLeave={() => setOpenNextTip(false)}
+              onFocus={() => nextDisabled && setOpenNextTip(true)}
+              onBlur={() => setOpenNextTip(false)}
             >
-              Συμπληρώστε όλα τα υποχρεωτικά πεδία για να συνεχίσετε
-            </Tooltip>
-          </span>
-        )}
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={nextDisabled || loading}
+                aria-disabled={nextDisabled || loading}
+                className="rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
+              >
+                Επόμενο
+              </button>
+              <Tooltip
+                anchorRef={nextButtonRef}
+                open={openNextTip && nextDisabled}
+                placement="top-center"
+                className="bg-white border border-gray-300 text-gray-700 text-xs px-2 py-1 rounded-lg shadow-lg whitespace-nowrap min-w-max"
+              >
+                Συμπληρώστε όλα τα υποχρεωτικά πεδία για να συνεχίσετε
+              </Tooltip>
+            </span>
+          )}
+        </div>
       </div>
 
 

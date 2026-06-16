@@ -308,6 +308,14 @@ export default function Ranking() {
     });
   }, [users, filters, isAdmin]);
 
+  const searchableUsers = useMemo(
+    () => filteredUsers.map((user) => ({
+      ...user,
+      status: getApplicationStatus(user.positionEndDate, user.positionEndTime),
+    })),
+    [filteredUsers]
+  );
+
   const getSortedUsers = (rows, sortBy, sortDirection) => {
     const byDate = (a, b, key) => {
       const isStart = key === "positionStartDate";
@@ -775,8 +783,8 @@ export default function Ranking() {
       <div className="relative overflow-visible">
         <SortableTable
           columns={columns}
-          rows={filteredUsers}
-          searchableColumns={["applicationId", "firstName", "lastName", "school", "department", "scientificField"]}
+          rows={searchableUsers}
+          searchableColumns={["applicationId", "firstName", "lastName", "school", "department", "scientificField", "status"]}
           searchText={searchText}
           onSearchTextChange={setSearchText}
           showSearchBar={false}

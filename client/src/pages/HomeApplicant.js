@@ -189,7 +189,7 @@ export default function HomeApplicant() {
           <HomePagePanel
             title="Γενική κατάταξη"
             description="Δείτε τη γενική κατάταξη όλων των αιτήσεων σε όλα τα επιστημονικά πεδία."
-            buttonText="Δείτε Κατάταξη"
+            buttonText="Δείτε κατάταξη"
             to="/ranking"
           />
         </div>
@@ -246,7 +246,7 @@ export default function HomeApplicant() {
           <HomePagePanel
             title="Γενική κατάταξη"
             description="Δείτε τη γενική κατάταξη όλων των αιτήσεων σε όλα τα επιστημονικά πεδία."
-            buttonText="Δείτε Κατάταξη"
+            buttonText="Δείτε κατάταξη"
             to="/ranking"
             // showInfoMark={true}
             // infoPopup={rankingInfoPopup}

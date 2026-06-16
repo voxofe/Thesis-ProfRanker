@@ -135,6 +135,7 @@ export default function ScientificFieldsCreate() {
   const [submitted, setSubmitted] = useState(false);
   const [dateCleared, setDateCleared] = useState({ startDate: false, endDate: false });
   const progressTimerRef = React.useRef(null);
+  const progressPercentRef = React.useRef(0);
 
   const markTouched = (field) =>
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -145,6 +146,10 @@ export default function ScientificFieldsCreate() {
   const progressLabel = isEditMode
     ? `Ενημέρωση πεδίου ${formData.scientificField || ""}`
     : `Δημιουργία πεδίου ${formData.scientificField || ""}`;
+
+  useEffect(() => {
+    progressPercentRef.current = progressPercent;
+  }, [progressPercent]);
 
   useEffect(() => {
     if (!submitting) {
@@ -172,6 +177,20 @@ export default function ScientificFieldsCreate() {
       }
     };
   }, [submitting, progressTarget]);
+
+  const waitForProgressToComplete = async (timeoutMs = 2400) => {
+    const start = Date.now();
+    while (progressPercentRef.current < 100 && Date.now() - start < timeoutMs) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  };
+
+  const completeProgressBar = async () => {
+    setProgressTarget(100);
+    await waitForProgressToComplete();
+    // Guarantee completion even if interval ticks are delayed.
+    setProgressPercent(100);
+  };
 
   // access control
   useEffect(() => {
@@ -297,12 +316,6 @@ export default function ScientificFieldsCreate() {
         },
       });
 
-      showToast({
-        type: "success",
-        message: isEditMode
-          ? "Το επιστημονικό πεδίο ενημερώθηκε με επιτυχία!"
-          : "Το επιστημονικό πεδίο δημιουργήθηκε με επιτυχία!",
-      });
       setProgressTarget(hasPositionFields ? 80 : 100);
 
       if (hasPositionFields) {
@@ -339,6 +352,15 @@ export default function ScientificFieldsCreate() {
           }
         }
       }
+
+      await completeProgressBar();
+
+      showToast({
+        type: "success",
+        message: isEditMode
+          ? "Το επιστημονικό πεδίο ενημερώθηκε με επιτυχία!"
+          : "Το επιστημονικό πεδίο δημιουργήθηκε με επιτυχία!",
+      });
 
       if (isEditMode) {
         setSubmitting(false);
@@ -385,7 +407,7 @@ export default function ScientificFieldsCreate() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-0 space-y-8">
+    <div className="max-w-5xl mx-auto px-6 py-0 space-y-4">
       <SubmissionProgress
         loading={submitting}
         submitLabel={progressLabel}

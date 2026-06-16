@@ -8,7 +8,7 @@ export default function Analytics() {
            Στατιστικά
         </h1>
         <p className="text-gray-600 text-[17px]">
-          Placeholder για στατιστικά. Θα προστεθεί ανάλυση σύντομα.
+          Placeholder για στατιστικά
         </p>
       </div>
     </div>
