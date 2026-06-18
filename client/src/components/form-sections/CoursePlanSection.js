@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useFormData } from "../../contexts/FormDataContext";
 import { usePositions } from "../../contexts/PositionsContext";
 import TooltipGray from "../TooltipGray";
+import { WeeklyScheduleTable, COURSE_SCHEDULE_WEEK_FIELDS } from "../WeeklyScheduleTable";
 
-function AutoGrowTextarea({ value, onChange, placeholder, id }) {
+function AutoGrowTextarea({ value, onChange, placeholder, id, rows = 12 }) {
   const textareaRef = useRef(null);
   const [minHeight, setMinHeight] = useState(0);
 
@@ -31,9 +32,9 @@ function AutoGrowTextarea({ value, onChange, placeholder, id }) {
       value={value || ""}
       onChange={(event) => onChange(event.target.value)}
       ref={textareaRef}
-      rows={12}
+      rows={rows}
       placeholder={placeholder}
-      className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 outline outline-1 -outline-offset-1 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer focus:ring-offset-0 focus:ring-patras-buccaneer"
+      className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 outline outline-1 -outline-offset-1 outline-patras-buccaneer/70 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer focus:ring-offset-0 focus:ring-patras-buccaneer"
     />
   );
 }
@@ -48,11 +49,6 @@ const COURSE_PLAN_FIELDS = [
     key: "learningObjectives",
     label: "Μαθησιακοί στόχοι",
     placeholder: "Συμπληρώστε μαθησιακούς στόχους...",
-  },
-  {
-    key: "courseSchedule",
-    label: "Προγραμματισμός μαθημάτων - Διδακτέα ύλη",
-    placeholder: "Συμπληρώστε προγραμματισμό μαθημάτων και διδακτέα ύλη...",
   },
   {
     key: "deliveryMethods",
@@ -75,6 +71,8 @@ const COURSE_PLAN_FIELDS = [
     placeholder: "Συμπληρώστε μεθόδους και κριτήρια αξιολόγησης...",
   },
 ];
+
+const ALL_REQUIRED_FIELDS = [...COURSE_PLAN_FIELDS, ...COURSE_SCHEDULE_WEEK_FIELDS];
 
 export default function CoursePlanSection() {
   const { formData, handleCoursePlanFieldChange } = useFormData();
@@ -142,7 +140,7 @@ export default function CoursePlanSection() {
 
   const isCourseComplete = (courseId) => {
     const coursePlan = (formData.coursePlans || {})[String(courseId)] || {};
-    return COURSE_PLAN_FIELDS.every((field) => {
+    return ALL_REQUIRED_FIELDS.every((field) => {
       const value = coursePlan[field.key];
       return typeof value === "string" && value.trim().length > 0;
     });
@@ -253,7 +251,7 @@ export default function CoursePlanSection() {
 
         {activeCourse ? (
           <article key={activeCourse.id}>
-            <div className="rounded-md border border-gray-300 p-4 md:p-5">
+            <div className="rounded-md border border-patras-buccaneer p-4 md:p-5">
               <div className="grid grid-cols-1 gap-4">
                 {COURSE_PLAN_FIELDS.map((field) => {
                   const coursePlan = (formData.coursePlans || {})[String(activeCourse.id)] || {};
@@ -269,10 +267,17 @@ export default function CoursePlanSection() {
                           handleCoursePlanFieldChange(activeCourse.id, field.key, nextValue)
                         }
                         placeholder={field.placeholder}
+                        rows={2}
                       />
                     </div>
                   );
                 })}
+
+                <WeeklyScheduleTable
+                  courseId={activeCourse.id}
+                  coursePlans={formData.coursePlans || {}}
+                  onFieldChange={handleCoursePlanFieldChange}
+                />
               </div>
             </div>
           </article>

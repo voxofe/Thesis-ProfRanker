@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import useBodyScrollLock from "../utils/useBodyScrollLock";
+import { ReadOnlyWeeklyScheduleTable, COURSE_SCHEDULE_WEEK_FIELDS } from "./WeeklyScheduleTable";
 
 const COURSE_PLAN_FIELDS = [
   {
@@ -10,10 +11,6 @@ const COURSE_PLAN_FIELDS = [
   {
     key: "learningObjectives",
     label: "Μαθησιακοί στόχοι",
-  },
-  {
-    key: "courseSchedule",
-    label: "Προγραμματισμός μαθημάτων - Διδακτέα ύλη",
   },
   {
     key: "deliveryMethods",
@@ -50,7 +47,7 @@ function ReadOnlyAutoGrowTextarea({ value, id }) {
       readOnly
       rows={1}
       ref={textareaRef}
-      className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 bg-gray-50 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 resize-none overflow-hidden"
+      className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 bg-gray-50 outline outline-1 -outline-offset-1 outline-patras-buccaneer/70 placeholder:text-gray-400 resize-none overflow-hidden"
     />
   );
 }
@@ -232,6 +229,11 @@ export default function CoursePlanDetailsModal({
                         </div>
                       );
                     })}
+
+                    <ReadOnlyWeeklyScheduleTable
+                      courseId={activeCourse.id}
+                      coursePlans={coursePlans}
+                    />
                   </div>
                 </div>
               </article>

@@ -30,7 +30,7 @@ export default function ApplicationCard({ app, toDDMMYYYYHHMM }) {
                 </span>
               </div>
               <div>
-                Ημερομηνία τελευταίας επανυποβολής:{" "}
+                Ημερομηνία επανυποβολής:{" "}
                 <span className="text-sm font-semibold text-gray-700">
                   {toDDMMYYYYHHMM(lastResubmissionDate)}
                 </span>

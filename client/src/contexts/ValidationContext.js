@@ -91,11 +91,11 @@ export const ValidationProvider = ({ children }) => {
       const requiredFields = [
         "generalDescription",
         "learningObjectives",
-        "courseSchedule",
         "deliveryMethods",
         "bibliographyMaterial",
         "learningOutcomes",
         "assessmentMethodsCriteria",
+        ...Array.from({ length: 13 }, (_, index) => `courseScheduleWeek${index + 1}`),
       ];
 
       return selectedPosition.courses.every((course) => {
