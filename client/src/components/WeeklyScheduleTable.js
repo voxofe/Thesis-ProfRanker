@@ -27,7 +27,7 @@ function AutoGrowTextarea({ value, onChange, placeholder, id, rows = 2 }) {
       ref={textareaRef}
       rows={rows}
       placeholder={placeholder}
-      className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 outline outline-1 -outline-offset-1 outline-patras-buccaneer/50 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer focus:ring-offset-0 focus:ring-patras-buccaneer"
+      className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 outline outline-1 -outline-offset-1 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer focus:ring-offset-0 focus:ring-patras-buccaneer"
     />
   );
 }
@@ -49,7 +49,7 @@ function ReadOnlyTextarea({ value, id }) {
       readOnly
       rows={2}
       ref={textareaRef}
-      className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 bg-gray-50 outline outline-1 -outline-offset-1 outline-patras-buccaneer/50 resize-none overflow-hidden"
+      className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 bg-gray-50 outline outline-1 -outline-offset-1 outline-gray-300 resize-none overflow-hidden"
     />
   );
 }
@@ -61,7 +61,7 @@ function TableShell({ children }) {
         Προγραμματισμός μαθημάτων - Διδακτέα ύλη{" "}
         <span className="text-red-500">*</span>
       </label>
-      <div className="overflow-hidden rounded-md outline outline-1 -outline-offset-1 outline-patras-buccaneer/70">
+      <div className="overflow-hidden rounded-md outline outline-1 -outline-offset-1 outline-gray-300">
         <table className="w-full border-collapse">
           <thead>
             <tr>

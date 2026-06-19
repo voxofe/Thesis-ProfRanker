@@ -18,6 +18,9 @@ export default function PositionSelect({
   required = false,
   error,
   style = "",
+  showAllOnFocus = false,
+  selectedLabelFormatter,
+  clearButtonClearsQueryOnly = false,
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -63,15 +66,20 @@ export default function PositionSelect({
     [enriched, value]
   );
 
-  const shownText = selected ? selected._label : "";
+  const shownText = selected
+    ? selectedLabelFormatter?.(selected) ?? selected._label
+    : "";
 
   // Filtered results
   const results = useMemo(() => {
+    if (open && showAllOnFocus && document.activeElement === inputRef.current && query === shownText) {
+      return enriched.slice(0, maxResults);
+    }
     const nq = normalize(query);
     if (!nq) return enriched.slice(0, maxResults);
     const filtered = enriched.filter((p) => p._norm.includes(nq));
     return filtered.slice(0, maxResults);
-  }, [enriched, query, maxResults]);
+  }, [enriched, query, maxResults, open, showAllOnFocus, shownText]);
 
   // Keep query in sync with selected
   useEffect(() => {
@@ -96,13 +104,15 @@ export default function PositionSelect({
   const commitSelection = (pos) => {
     onChange?.(String(pos.id));
     setOpen(false);
-    setQuery(pos._label);
+    setQuery(selectedLabelFormatter?.(pos) ?? pos._label);
   };
 
   const clearSelection = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    onChange?.("");
+    if (!clearButtonClearsQueryOnly) {
+      onChange?.("");
+    }
     setQuery("");
     setHighlight(0);
     setOpen(true);
@@ -166,7 +176,20 @@ export default function PositionSelect({
             if (!open) setOpen(true);
             setHighlight(0);
           }}
-          onFocus={() => setOpen(true)}
+          onFocus={() => {
+            setOpen(true);
+            setHighlight(0);
+            if (showAllOnFocus) {
+              inputRef.current?.select();
+            }
+          }}
+          onClick={() => {
+            if (showAllOnFocus) {
+              setOpen(true);
+              setHighlight(0);
+              inputRef.current?.select();
+            }
+          }}
           onKeyDown={onKeyDown}
           placeholder={placeholder}
           className={getInputStyle()}
