@@ -5,6 +5,7 @@ import {
   Route,
   Navigate,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import Header from "./components/Header";
 import Login from "./pages/Login";
@@ -25,6 +26,8 @@ import ScientificFieldSingle from "./pages/ScientificFieldSingle";
 import Users from "./pages/Users";
 import UsersView from "./pages/UsersView";
 import Analytics from "./pages/Analytics";
+import VerifyEmail from "./pages/VerifyEmail";
+import { EMAIL_VERIFICATION_ENABLED } from "./utils/featureFlags";
 import {
   FormDataProvider,
   AuthProvider,
@@ -61,6 +64,7 @@ function AppContent() {
   const { isLoggedIn, currentUser, isLoading } = useAuth();
   const { positions = [], loading: positionsLoading } = usePositions();
   const location = useLocation();
+  const navigate = useNavigate();
   const searchParams = React.useMemo(
     () => new URLSearchParams(location.search),
     [location.search]
@@ -97,6 +101,18 @@ function AppContent() {
       (userRole === "applicant" && availablePositionsForApplicant.length === 0));
 
   const canAccessForm = isEditMode || !applicationDisabled;
+  const isUnverified =
+    EMAIL_VERIFICATION_ENABLED &&
+    !!isLoggedIn &&
+    currentUser?.verified === false;
+
+  React.useEffect(() => {
+    if (!isUnverified) return;
+    const allowedPaths = new Set(["/home", "/settings", "/verify-email"]);
+    if (!allowedPaths.has(location.pathname)) {
+      navigate("/home", { replace: true });
+    }
+  }, [isUnverified, location.pathname, navigate]);
 
   // Show loading screen while authentication is being determined
   if (isLoading) {
@@ -140,6 +156,7 @@ function AppContent() {
 
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
 
 
                 {(currentUser?.role === "guest" ||
@@ -203,6 +220,7 @@ function AppContent() {
                 {/* Routes for non-logged-in users - only login and register */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
                 {/* Redirect all other routes to login */}
                 <Route path="*" element={<Navigate to="/login" replace />} />
               </>

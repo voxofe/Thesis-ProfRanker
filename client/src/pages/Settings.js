@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import InputField from "../components/InputField";
 import { useToast } from "../contexts/ToastContext";
 import { useAuth } from "../contexts/AuthContext";
+import { EMAIL_VERIFICATION_ENABLED } from "../utils/featureFlags";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"
@@ -11,7 +12,7 @@ const API_BASE_URL = (
 
 export default function Settings() {
   const { showToast } = useToast();
-  const { logout } = useAuth();
+  const { logout, currentUser } = useAuth();
   const navigate = useNavigate();
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -19,6 +20,7 @@ export default function Settings() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const isUnverified = EMAIL_VERIFICATION_ENABLED && currentUser?.verified === false;
 
   const isPasswordMatch = newPassword === confirmPassword;
   const isFormValid =
@@ -34,6 +36,7 @@ export default function Settings() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isUnverified) return;
     if (!isFormValid) return;
     setIsLoading(true);
     const token = localStorage.getItem("token");
@@ -66,10 +69,20 @@ export default function Settings() {
       </h1>
 
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-200">
+        <div
+          className={`bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-200 ${
+            isUnverified ? "opacity-70" : ""
+          }`}
+        >
           <h2 className="text-lg font-semibold  text-gray-800 mb-6 border-b pb-1">
             Αλλαγή κωδικού
           </h2>
+
+          {isUnverified && (
+            <div className="mb-4 rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+              Η αλλαγή κωδικού είναι διαθέσιμη μόνο μετά την επιβεβαίωση του email σας.
+            </div>
+          )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-1 -mb-4">
@@ -82,6 +95,7 @@ export default function Settings() {
                   autoComplete="current-password"
                   value={currentPassword}
                   onChange={setCurrentPassword}
+                  disabled={isUnverified}
                 />
 
                 <div className="hidden sm:block" />
@@ -97,6 +111,7 @@ export default function Settings() {
                   value={newPassword}
                   onChange={setNewPassword}
                   onBlur={checkPasswordMatch}
+                  disabled={isUnverified}
                 />
 
                 <InputField
@@ -108,6 +123,7 @@ export default function Settings() {
                   value={confirmPassword}
                   onChange={setConfirmPassword}
                   onBlur={checkPasswordMatch}
+                  disabled={isUnverified}
                 />
 
                 {confirmPasswordError && (
@@ -120,7 +136,7 @@ export default function Settings() {
 
             <button
               type="submit"
-              disabled={isLoading || !isFormValid}
+              disabled={isUnverified || isLoading || !isFormValid}
               className="flex w-full justify-center rounded-md bg-patras-buccaneer px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Αποθήκευση..." : "Αλλαγή κωδικού"}

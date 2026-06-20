@@ -43,7 +43,14 @@ export default function Register() {
 
     register(firstName, lastName, email, password, gender)
       .then(() => {
-        navigate("/login?registered=1");
+        navigate("/login", {
+          state: {
+            message: {
+              type: "success",
+              text: "Η εγγραφή ολοκληρώθηκε με επιτυχία. Για να ενεργοποιήσετε όλες τις λειτουργίες, επιβεβαιώστε το email σας από το link που λάβατε και στη συνέχεια συνδεθείτε.",
+            },
+          },
+        });
       })
       .catch(() =>
         setError(

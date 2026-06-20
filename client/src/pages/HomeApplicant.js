@@ -1,12 +1,33 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import HomePagePanel from "../components/HomePagePanel";
+import CollapsibleNotice from "../components/CollapsibleNotice";
 import { useAuth } from "../contexts/AuthContext";
 import { usePositions } from "../contexts/PositionsContext";
+import { useToast } from "../contexts/ToastContext";
+import { EMAIL_VERIFICATION_ENABLED } from "../utils/featureFlags";
+
+const API_BASE_URL = (
+  process.env.REACT_APP_API_URL ||
+  "http://127.0.0.1:8000"
+).replace(/\/+$/, "");
 
 export default function HomeApplicant() {
   const { currentUser } = useAuth();
+  const { showToast } = useToast();
   const { positions = [], loading } = usePositions();
   const [submissionInProgress, setSubmissionInProgress] = useState(false);
+  const [sendingVerificationEmail, setSendingVerificationEmail] = useState(false);
+  const [verificationCooldownSeconds, setVerificationCooldownSeconds] = useState(0);
+  const [isVerificationNoticeOpen, setIsVerificationNoticeOpen] = useState(false);
+
+  useEffect(() => {
+    if (verificationCooldownSeconds <= 0) return;
+    const timer = window.setInterval(() => {
+      setVerificationCooldownSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [verificationCooldownSeconds]);
 
   useEffect(() => {
     const readSubmissionState = () => {
@@ -29,6 +50,7 @@ export default function HomeApplicant() {
   const formatDate = useCallback((date) => (date ? dateFormatter.format(date) : ""), [dateFormatter]);
 
   const userRole = currentUser?.role;
+  const isUnverified = EMAIL_VERIFICATION_ENABLED && currentUser?.verified === false;
 
   const appliedPositionIds = useMemo(() => {
     const applications = currentUser?.applications || [];
@@ -58,8 +80,79 @@ export default function HomeApplicant() {
       activePositions.length === 0 ||
       (userRole === "applicant" && availablePositionsForApplicant.length === 0));
 
+  const isPanelLocked = isUnverified;
+
+  const sendVerificationEmail = async () => {
+    if (sendingVerificationEmail || verificationCooldownSeconds > 0) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    setSendingVerificationEmail(true);
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/user/send-verification-email`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      showToast({
+        type: "success",
+        message:
+          response?.data?.message ||
+          "Το email επιβεβαίωσης στάλθηκε επιτυχώς.",
+      });
+      const retryAfter = Number(response?.data?.retryAfterSeconds || 0);
+      if (Number.isFinite(retryAfter) && retryAfter > 0) {
+        setVerificationCooldownSeconds(Math.ceil(retryAfter));
+      }
+    } catch (error) {
+      const message =
+        error?.response?.data?.error ||
+        "Αποτυχία αποστολής email επιβεβαίωσης.";
+      showToast({ type: "error", message });
+      const retryAfter = Number(error?.response?.data?.retryAfterSeconds || 0);
+      if (Number.isFinite(retryAfter) && retryAfter > 0) {
+        setVerificationCooldownSeconds(Math.ceil(retryAfter));
+      }
+    } finally {
+      setSendingVerificationEmail(false);
+    }
+  };
+
+  const verificationNotice = isUnverified ? (
+    <CollapsibleNotice
+      mainText={`Σας έχουμε ήδη στείλει email επιβεβαίωσης στη διεύθυνση που δηλώσατε κατά την εγγραφή.
+Ελέγξτε τα εισερχόμενα και τον φάκελο ανεπιθύμητης αλληλογραφίας (spam). Αν δεν το λάβατε, ζητήστε νέα αποστολή.`}
+      isOpen={isVerificationNoticeOpen}
+      onToggle={() => setIsVerificationNoticeOpen((prev) => !prev)}
+    >
+      <button
+        type="button"
+        onClick={sendVerificationEmail}
+        disabled={sendingVerificationEmail || verificationCooldownSeconds > 0}
+        className="inline-flex shrink-0 items-center justify-center rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-patras-sanguineBrown disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {sendingVerificationEmail
+          ? "Αποστολή..."
+          : verificationCooldownSeconds > 0
+            ? `Επανάληψη αποστολής σε ${verificationCooldownSeconds}s`
+            : "Νέα αποστολή email επιβεβαίωσης"}
+      </button>
+    </CollapsibleNotice>
+  ) : null;
+
   // Description text when the panel is disabled (and defaults otherwise)
   const applicationDescription = useMemo(() => {
+    if (isUnverified) {
+      if (userRole === "guest") {
+        return "Συμπληρώστε και υποβάλετε την αίτησή σας για το πρόγραμμα.";
+      }
+      if (userRole === "applicant") {
+        return "Μπορείτε να υποβάλετε νέα αίτηση για οποιαδήποτε ενεργή θέση.";
+      }
+    }
+
     if (submissionInProgress) {
       return "Η υποβολή βρίσκεται σε εξέλιξη. Παρακαλώ περιμένετε να ολοκληρωθεί.";
     }
@@ -76,7 +169,7 @@ export default function HomeApplicant() {
         : "Μπορείτε να υποβάλετε νέα αίτηση για οποιαδήποτε ενεργή θέση.";
     }
     return "";
-  }, [submissionInProgress, userRole, applicationDisabled, noNewPositionsForApplicant]);
+  }, [isUnverified, submissionInProgress, userRole, applicationDisabled, noNewPositionsForApplicant]);
 
   // Info popups
   const applicationInfoPopup =
@@ -154,6 +247,7 @@ export default function HomeApplicant() {
             Το πρόγραμμα απευθύνεται σε νέους επιστήμονες, κατόχους διδακτορικού τίτλου, που επιθυμούν να αποκτήσουν διδακτική-ακαδημαϊκή εμπειρία.
           </p>
         </div>
+        {verificationNotice}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <HomePagePanel
             title="Υποβολή νέας αίτησης"
@@ -161,10 +255,10 @@ export default function HomeApplicant() {
             buttonText="Δημιουργία αίτησης"
             // Disable for applicants when no active positions
             buttonAction={applicationDisabled ? undefined : undefined}
-            to={applicationDisabled ? undefined : "/form?mode=new"}
-            buttonDisabled={applicationDisabled}
+            to={applicationDisabled || isPanelLocked ? undefined : "/form?mode=new"}
+            buttonDisabled={applicationDisabled || isPanelLocked}
             colorClass={
-              applicationDisabled
+              applicationDisabled || isPanelLocked
                 ? "bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
                 : "bg-patras-albescentWhite/20 border border-patras-albescentWhite"
             }
@@ -176,21 +270,39 @@ export default function HomeApplicant() {
             title="Ο φάκελός μου"
             description="Δείτε ή ενημερώστε τα στοιχεία σας, τα αρχεία και τις δημοσιεύσεις σας."
             buttonText="Προβολή φακέλου"
-            to="/profile"
+            to={isPanelLocked ? undefined : "/profile"}
+            buttonDisabled={isPanelLocked}
+            colorClass={
+              isPanelLocked
+                ? "bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
+                : "bg-patras-albescentWhite/20 border border-patras-albescentWhite"
+            }
           />
 
           <HomePagePanel
             title="Οι αιτήσεις μου"
             description="Δείτε τις αιτήσεις σας και τις βαθμολογίες τους ή επεξεργαστείτε τις ενεργές αιτήσεις."
             buttonText="Προβολή αιτήσεων"
-            to="/my-applications"
+            to={isPanelLocked ? undefined : "/my-applications"}
+            buttonDisabled={isPanelLocked}
+            colorClass={
+              isPanelLocked
+                ? "bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
+                : "bg-patras-albescentWhite/20 border border-patras-albescentWhite"
+            }
           />
 
           <HomePagePanel
             title="Γενική κατάταξη"
             description="Δείτε τη γενική κατάταξη όλων των αιτήσεων σε όλα τα επιστημονικά πεδία."
             buttonText="Δείτε κατάταξη"
-            to="/ranking"
+            to={isPanelLocked ? undefined : "/ranking"}
+            buttonDisabled={isPanelLocked}
+            colorClass={
+              isPanelLocked
+                ? "bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
+                : "bg-patras-albescentWhite/20 border border-patras-albescentWhite"
+            }
           />
         </div>
       </div>
@@ -208,6 +320,7 @@ export default function HomeApplicant() {
             Το πρόγραμμα απευθύνεται σε νέους επιστήμονες, κατόχους διδακτορικού τίτλου, που επιθυμούν να αποκτήσουν διδακτική-ακαδημαϊκή εμπειρία.
           </p>
         </div>
+        {verificationNotice}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <HomePagePanel
             title="Υποβολή αίτησης"
@@ -215,10 +328,10 @@ export default function HomeApplicant() {
             buttonText="Δημιουργία αίτησης"
             // Disable for guests when no active positions
             buttonAction={applicationDisabled ? undefined : undefined}
-            to={applicationDisabled ? undefined : "/form?mode=new"}
-            buttonDisabled={applicationDisabled}
+            to={applicationDisabled || isPanelLocked ? undefined : "/form?mode=new"}
+            buttonDisabled={applicationDisabled || isPanelLocked}
             colorClass={
-              applicationDisabled
+              applicationDisabled || isPanelLocked
                 ? "bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
                 : "bg-patras-albescentWhite/20 border border-patras-albescentWhite"
             }
@@ -230,14 +343,20 @@ export default function HomeApplicant() {
             title="Ο φάκελός μου"
             description="Δείτε ή ενημερώστε τα στοιχεία σας, τα αρχεία και τις δημοσιεύσεις σας."
             buttonText="Προβολή φακέλου"
-            to="/profile"
+            to={isPanelLocked ? undefined : "/profile"}
+            buttonDisabled={isPanelLocked}
+            colorClass={
+              isPanelLocked
+                ? "bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
+                : "bg-patras-albescentWhite/20 border border-patras-albescentWhite"
+            }
           />
 
           <HomePagePanel
             title="Οι αιτήσεις μου"
             description="Δείτε τις αιτήσεις σας και τις βαθμολογίες τους ή επεξεργαστείτε τις ενεργές αιτήσεις."
             buttonText="Προβολή αιτήσεων"
-            buttonDisabled={true}
+            buttonDisabled={true || isPanelLocked}
             colorClass="bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
             // showInfoMark={true}
             // infoPopup={scoreInfoPopup}
@@ -247,7 +366,13 @@ export default function HomeApplicant() {
             title="Γενική κατάταξη"
             description="Δείτε τη γενική κατάταξη όλων των αιτήσεων σε όλα τα επιστημονικά πεδία."
             buttonText="Δείτε κατάταξη"
-            to="/ranking"
+            to={isPanelLocked ? undefined : "/ranking"}
+            buttonDisabled={isPanelLocked}
+            colorClass={
+              isPanelLocked
+                ? "bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
+                : "bg-patras-albescentWhite/20 border border-patras-albescentWhite"
+            }
             // showInfoMark={true}
             // infoPopup={rankingInfoPopup}
           />

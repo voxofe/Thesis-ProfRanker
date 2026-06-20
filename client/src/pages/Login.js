@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import InputField from "../components/InputField";
@@ -7,14 +7,23 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState({ type: "", text: "" });
 
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isRegistrationSuccess =
-    new URLSearchParams(location.search).get("registered") === "1";
+  useEffect(() => {
+    const incomingMessage = location.state?.message;
+    if (!incomingMessage) return;
+
+    setMessage({
+      type: incomingMessage.type || "success",
+      text: incomingMessage.text || "",
+    });
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state, navigate]);
 
   const emailRegex =
     /^(?=[a-zA-Z0-9@._%+-]{6,254}$)(?=[a-zA-Z0-9._%+-]{1,64}@)([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
@@ -24,7 +33,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setMessage({ type: "", text: "" });
     setIsLoading(true);
 
     login(email, password)
@@ -34,7 +43,10 @@ export default function Login() {
       })
       .catch((err) => {
         console.log("Login error:", err);
-        setError("Σφάλμα κατά τη σύνδεση. Παρακαλώ ελέγξτε τα στοιχεία σας.");
+        setMessage({
+          type: "error",
+          text: "Σφάλμα κατά τη σύνδεση. Παρακαλώ ελέγξτε τα στοιχεία σας.",
+        });
       })
       .finally(() => setIsLoading(false));
   };
@@ -55,18 +67,23 @@ export default function Login() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-200">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {isRegistrationSuccess && (
-              <div className="rounded-md bg-green-50 p-4 border border-green-200">
-                <div className="text-sm text-green-800">
-                  Η εγγραφή ολοκληρώθηκε με επιτυχία. Συνδεθείτε με τα στοιχεία
-                  που δηλώσατε.
+            {message.text && (
+              <div
+                className={`rounded-md p-4 border ${
+                  message.type === "success"
+                    ? "bg-green-50 border-green-200"
+                    : "bg-red-50 border-red-200"
+                }`}
+              >
+                <div
+                  className={`text-sm ${
+                    message.type === "success"
+                      ? "text-green-800"
+                      : "text-red-800"
+                  }`}
+                >
+                  {message.text}
                 </div>
-              </div>
-            )}
-
-            {error && (
-              <div className="rounded-md bg-red-50 p-4 border border-red-200">
-                <div className="text-sm text-red-800">{error}</div>
               </div>
             )}
 

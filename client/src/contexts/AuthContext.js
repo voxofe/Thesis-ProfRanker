@@ -1,5 +1,5 @@
 import axios from "axios";
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext, useEffect, useCallback } from "react";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -33,15 +33,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true); // Add loading state
   const [hasInitialized, setHasInitialized] = useState(false); // Prevent double initialization
 
-  useEffect(() => {
-    if (!hasInitialized) {
-      getUser();
-      setHasInitialized(true);
-    }
-  }, [hasInitialized]);
-
-  
-  const getUser = () => {
+  const getUser = useCallback(() => {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -66,14 +58,21 @@ export const AuthProvider = ({ children }) => {
         setCurrentUser(null);
       })
       .finally(() => setIsLoading(false));
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!hasInitialized) {
+      getUser();
+      setHasInitialized(true);
+    }
+  }, [hasInitialized, getUser]);
 
   /**
    * @param {string} email
    * @param {string} password
    */
 
-  const refreshUser = () => getUser();
+  const refreshUser = useCallback(() => getUser(), [getUser]);
   
   const login = async (email, password) => {
     if (email === "a" && password === "a") {
@@ -90,7 +89,7 @@ export const AuthProvider = ({ children }) => {
       .then((response) => {
         const token = response.data.token;
         localStorage.setItem("token", token);
-        getUser();
+        return getUser();
       })
       .catch((error) => Promise.reject(error));
   };
@@ -153,6 +152,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         refreshUser,
         isLoggedIn: !!currentUser,
+        isVerified: !!currentUser?.verified,
         isLoading,
       }}
     >
