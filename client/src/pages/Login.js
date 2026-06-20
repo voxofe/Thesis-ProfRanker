@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import InputField from "../components/InputField";
 
@@ -11,6 +11,10 @@ export default function Login() {
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isRegistrationSuccess =
+    new URLSearchParams(location.search).get("registered") === "1";
 
   const emailRegex =
     /^(?=[a-zA-Z0-9@._%+-]{6,254}$)(?=[a-zA-Z0-9._%+-]{1,64}@)([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
@@ -51,6 +55,15 @@ export default function Login() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-200">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {isRegistrationSuccess && (
+              <div className="rounded-md bg-green-50 p-4 border border-green-200">
+                <div className="text-sm text-green-800">
+                  Η εγγραφή ολοκληρώθηκε με επιτυχία. Συνδεθείτε με τα στοιχεία
+                  που δηλώσατε.
+                </div>
+              </div>
+            )}
+
             {error && (
               <div className="rounded-md bg-red-50 p-4 border border-red-200">
                 <div className="text-sm text-red-800">{error}</div>

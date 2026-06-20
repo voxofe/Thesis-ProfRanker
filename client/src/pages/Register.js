@@ -43,7 +43,7 @@ export default function Register() {
 
     register(firstName, lastName, email, password, gender)
       .then(() => {
-        navigate("/login");
+        navigate("/login?registered=1");
       })
       .catch(() =>
         setError(

@@ -208,7 +208,7 @@ export default function Publication({ index, readOnly = false }) {
             )}
             {(isBookType || isMonographType) && (
               <InputField
-                label="Εκδοτικός Οίκος"
+                label="Εκδοτικός οίκος"
                 id={`publisher-${index}`}
                 name={`publisher-${index}`}
                 type="text"
@@ -263,7 +263,7 @@ export default function Publication({ index, readOnly = false }) {
 
           {isConferenceProceedingsType && (
             <InputField
-              label="Εκδοτικός Οίκος"
+              label="Εκδοτικός οίκος"
               id={`publisher-${index}`}
               name={`publisher-${index}`}
               type="text"
