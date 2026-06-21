@@ -65,7 +65,7 @@ export default function Settings() {
   return (
     <div className="max-w-5xl mx-auto p-0">
       <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
-        Ρυθμίσεις
+        Αλλαγή κωδικού πρόσβασης
       </h1>
 
       <div className="max-w-2xl mx-auto">
@@ -74,10 +74,6 @@ export default function Settings() {
             isUnverified ? "opacity-70" : ""
           }`}
         >
-          <h2 className="text-lg font-semibold  text-gray-800 mb-6 border-b pb-1">
-            Αλλαγή κωδικού
-          </h2>
-
           {isUnverified && (
             <div className="mb-4 rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
               Η αλλαγή κωδικού είναι διαθέσιμη μόνο μετά την επιβεβαίωση του email σας.

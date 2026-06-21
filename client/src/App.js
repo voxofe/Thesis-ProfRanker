@@ -105,14 +105,25 @@ function AppContent() {
     EMAIL_VERIFICATION_ENABLED &&
     !!isLoggedIn &&
     currentUser?.verified === false;
+  const mustChangePassword =
+    !!isLoggedIn &&
+    currentUser?.role === "admin" &&
+    currentUser?.mustChangePassword === true;
 
   React.useEffect(() => {
     if (!isUnverified) return;
-    const allowedPaths = new Set(["/home", "/settings", "/verify-email"]);
+    const allowedPaths = new Set(["/home", "/change-password", "/verify-email"]);
     if (!allowedPaths.has(location.pathname)) {
       navigate("/home", { replace: true });
     }
   }, [isUnverified, location.pathname, navigate]);
+
+  React.useEffect(() => {
+    if (!mustChangePassword) return;
+    if (location.pathname !== "/change-password") {
+      navigate("/change-password", { replace: true });
+    }
+  }, [mustChangePassword, location.pathname, navigate]);
 
   // Show loading screen while authentication is being determined
   if (isLoading) {
@@ -155,8 +166,14 @@ function AppContent() {
                 <Route path="/my-applications" element={<MyApplications />} />
 
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
+                <Route path="/change-password" element={<Settings />} />
+                <Route path="/settings" element={<Navigate to="/change-password" replace />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
+
+                {mustChangePassword ? (
+                  <Route path="*" element={<Navigate to="/change-password" replace />} />
+                ) : (
+                  <>
 
 
                 {(currentUser?.role === "guest" ||
@@ -212,8 +229,10 @@ function AppContent() {
                   </>
                 )}
 
-                {/* Fallback for logged in users */}
-                <Route path="*" element={<Navigate to="/home" replace />} />
+                    {/* Fallback for logged in users */}
+                    <Route path="*" element={<Navigate to="/home" replace />} />
+                  </>
+                )}
               </>
             ) : (
               <>
