@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { KeyRound } from "lucide-react";
 
 export default function UserMenu({ currentUser, initials, roleLabel, onLogout }) {
   const [open, setOpen] = useState(false);
+  const [showNameTooltip, setShowNameTooltip] = useState(false);
   const wrapperRef = useRef(null);
+  const fullNameRef = useRef(null);
   const fullName = `${currentUser?.firstName || ""} ${currentUser?.lastName || ""}`.trim();
 
   useEffect(() => {
@@ -18,6 +20,15 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useLayoutEffect(() => {
+    if (!open || !fullNameRef.current) {
+      setShowNameTooltip(false);
+      return;
+    }
+    const el = fullNameRef.current;
+    setShowNameTooltip(el.scrollWidth > el.clientWidth);
+  }, [open, fullName]);
+
   return (
     <div className="relative inline-block" ref={wrapperRef}>
       <button
@@ -27,9 +38,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-patras-buccaneer shadow">
-          <span className="text-white font-bold text-lg">{initials}</span>
-        </div>
+        <span className="px-1 text-lg font-bold text-patras-buccaneer">{initials}</span>
         <svg
           className={`w-4 h-4 text-patras-buccaneer transition-transform ${open ? "rotate-180" : ""}`}
           viewBox="0 0 20 20"
@@ -52,14 +61,17 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
           <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/90 text-right">
             <div className="group relative">
               <div
+                ref={fullNameRef}
                 className="text-sm font-semibold text-patras-buccaneer truncate"
-                title={fullName || "Χρήστης"}
+                title={showNameTooltip ? (fullName || "Χρήστης") : undefined}
               >
                 {fullName || "Χρήστης"}
               </div>
-              <div className="pointer-events-none absolute right-0 top-full z-10 mt-1 hidden max-w-64 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs text-gray-700 shadow-md group-hover:block">
-                {fullName || "Χρήστης"}
-              </div>
+              {showNameTooltip && (
+                <div className="pointer-events-none absolute right-0 top-full z-10 mt-1 hidden max-w-64 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs text-gray-700 shadow-md group-hover:block">
+                  {fullName || "Χρήστης"}
+                </div>
+              )}
             </div>
             <div className="text-xs text-gray-500 mt-0.5">{roleLabel}</div>
           </div>
