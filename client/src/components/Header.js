@@ -1,11 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import logo from "../assets/images/ProfRanker-logo.png";
 import { Link } from "react-router-dom";
 import UserMenu from "./UserMenu";
+import { Moon, Sun } from "lucide-react";
 
 export default function Header({ academicYear }) {
   const { currentUser, isLoggedIn, logout } = useAuth();
+  const [selectedLanguage, setSelectedLanguage] = useState("EL");
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const rolesInGreek = {
     admin: "Διαχειριστής",
@@ -52,39 +55,74 @@ export default function Header({ academicYear }) {
     : resolveRoleLabel(currentUser?.role, currentUser?.gender);
 
   return (
-    <div className="w-full flex items-center gap-4">
-      <header className="flex-1 rounded-xl border border-gray-200 shadow-lg">
-        <div className="max-w-7xl mx-auto flex items-center px-6 py-3">
-          {/* Left: Logo (clickable anchor so middle-click opens in new tab) */}
-          <Link to="/" className="flex items-center">
-            <img
-              src={logo}
-              alt="ProfRanker logo"
-              className="max-h-24 w-auto object-contain"
-            />
-          </Link>
-          {/* Center: Title and Subtitle */}
-          <div className="flex-1 flex flex-col items-center justify-center">
-            <h1 className="text-xl lg:text-xl font-semibold text-gray-700 text-center">
-              ΑΙΤΗΣΗ ΥΠΟΨΗΦΙΟΤΗΤΑΣ ΔΙΔΑΣΚΟΝΤΩΝ ΠΑΝΕΠΙΣΤΗΜΙΟΥ ΠΑΤΡΩΝ {academicYear}
-            </h1>
-            <p className="mt-1 text-base lg:text-[15px] text-gray-600 text-center">
-              Πρόσκληση απόκτησης διδακτικής-ακαδημαϊκής εμπειρίας για νέους επιστήμονες, κατόχους διδακτορικού
-            </p>
-          </div>
-        </div>
-      </header>
-      {/* Right: User Info Panel (outside header) */}
-      {isLoggedIn && currentUser && (
-        <div className="shrink-0 rounded-xl border border-gray-200 shadow-lg px-4 py-3 flex items-center justify-center">
-          <UserMenu
-            currentUser={currentUser}
-            initials={initials}
-            roleLabel={roleLabel}
-            onLogout={logout}
+    <header className="w-full rounded-xl border border-gray-200 shadow-lg bg-white/95">
+      <div className="w-full flex flex-col gap-3 px-6 py-3 lg:flex-row lg:items-center lg:gap-5">
+        <Link to="/" className="shrink-0 flex items-center justify-center lg:justify-start">
+          <img
+            src={logo}
+            alt="ProfRanker logo"
+            className="max-h-24 w-auto object-contain"
           />
+        </Link>
+
+        <div className="flex-1 flex flex-col items-center justify-center text-center lg:px-2">
+          <h1 className="text-xl lg:text-xl font-semibold text-gray-700">
+            ΑΙΤΗΣΗ ΥΠΟΨΗΦΙΟΤΗΤΑΣ ΔΙΔΑΣΚΟΝΤΩΝ ΠΑΝΕΠΙΣΤΗΜΙΟΥ ΠΑΤΡΩΝ {academicYear}
+          </h1>
+          <p className="mt-1 text-base lg:text-[15px] text-gray-600">
+            Πρόσκληση απόκτησης διδακτικής-ακαδημαϊκής εμπειρίας για νέους επιστήμονες, κατόχους διδακτορικού
+          </p>
         </div>
-      )}
-    </div>
+
+        <div className="flex items-center justify-center gap-3 lg:justify-end">
+          <div className="inline-flex rounded-md border border-gray-300 overflow-hidden bg-white">
+            <button
+              type="button"
+              onClick={() => setSelectedLanguage("EN")}
+              className={`px-3 py-1.5 text-xs font-semibold tracking-wide ${
+                selectedLanguage === "EN"
+                  ? "bg-patras-buccaneer text-white"
+                  : "text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedLanguage("EL")}
+              className={`px-3 py-1.5 text-xs font-semibold tracking-wide ${
+                selectedLanguage === "EL"
+                  ? "bg-patras-buccaneer text-white"
+                  : "text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              ΕΛ
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsDarkMode((prev) => !prev)}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 text-patras-buccaneer hover:bg-patras-albescentWhite/40"
+            aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+            title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+
+          {isLoggedIn && currentUser && (
+            <>
+              <span className="hidden lg:block h-12 border-l border-gray-300" aria-hidden="true" />
+              <UserMenu
+                currentUser={currentUser}
+                initials={initials}
+                roleLabel={roleLabel}
+                onLogout={logout}
+              />
+            </>
+          )}
+        </div>
+      </div>
+    </header>
   );
 }
