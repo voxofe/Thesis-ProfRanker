@@ -42,10 +42,25 @@ export default function Login() {
         navigate("/");
       })
       .catch((err) => {
+        const status = err?.response?.status;
+        const serverError = (err?.response?.data?.error || "").toLowerCase();
+        let text = "Προέκυψε σφάλμα κατά τη σύνδεση. Παρακαλώ δοκιμάστε ξανά.";
+
+        if (!err?.response) {
+          text =
+            "Δεν ήταν δυνατή η επικοινωνία με τον διακομιστή. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.";
+        } else if (status === 401 || status === 404 || serverError.includes("invalid credentials") || serverError.includes("user not found")) {
+          text =
+            "Τα στοιχεία σύνδεσης δεν είναι σωστά. Ελέγξτε email και κωδικό και δοκιμάστε ξανά.";
+        } else if (status >= 500) {
+          text =
+            "Η σύνδεση δεν ήταν δυνατή λόγω τεχνικού προβλήματος. Παρακαλώ δοκιμάστε ξανά σε λίγο.";
+        }
+
         console.log("Login error:", err);
         setMessage({
           type: "error",
-          text: "Σφάλμα κατά τη σύνδεση. Παρακαλώ ελέγξτε τα στοιχεία σας.",
+          text,
         });
       })
       .finally(() => setIsLoading(false));

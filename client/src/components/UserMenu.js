@@ -57,17 +57,15 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
           className="absolute -right-4 top-full mt-3 w-max rounded-xl border border-gray-200 bg-white shadow-xl z-50"
           role="menu"
         >
-          <div className="py-2 text-left">
-            <Link
-              to="/change-password"
-              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-patras-albescentWhite/40"
-              onClick={() => setOpen(false)}
-              role="menuitem"
-            >
-              <KeyRound className="w-4 h-4 text-patras-buccaneer" aria-hidden="true" />
-              <span className="font-medium">Αλλαγή κωδικού</span>
-            </Link>
-          </div>
+          <Link
+            to="/change-password"
+            className="w-full flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-patras-albescentWhite/40"
+            onClick={() => setOpen(false)}
+            role="menuitem"
+          >
+            <KeyRound className="w-4 h-4 text-patras-buccaneer" aria-hidden="true" />
+            <span className="font-medium">Αλλαγή κωδικού</span>
+          </Link>
           <div className="border-t" />
           <button
             type="button"
@@ -75,7 +73,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
               setOpen(false);
               onLogout();
             }}
-            className="w-full flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-patras-albescentWhite/40"
+            className="w-full flex items-center justify-between gap-0 pl-5 pr-4 py-3 text-sm text-gray-700 hover:bg-patras-albescentWhite/40"
             role="menuitem"
           >
             <span className="font-medium">Αποσύνδεση</span>
@@ -85,7 +83,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
               fill="none"
               viewBox="0 0 32 32"
               stroke="currentColor"
-              className="text-patras-buccaneer ml-2"
+              className="text-patras-buccaneer"
             >
               <path d="m25.853 13.146-2-2a.5.5 0 0 0-.708.708L24.293 13H15.5a.5.5 0 0 0 0 1h8.793l-1.147 1.146a.5.5 0 0 0 .708.708l2-2a.5.5 0 0 0-.001-.708z" />
               <path d="M20 15v6h-6v1h6.5a.5.5 0 0 0 .5-.5V15z" />

@@ -52,11 +52,24 @@ export default function Register() {
           },
         });
       })
-      .catch(() =>
-        setError(
-          "Σφάλμα κατά την εγγραφή χρήστη. Παρακαλώ προσπαθήστε ξανά."
-        )
-      )
+      .catch((err) => {
+        const status = err?.response?.status;
+        const serverError = (err?.response?.data?.error || "").toLowerCase();
+        let text = "Προέκυψε απρόβλεπτο σφάλμα κατά την εγγραφή. Παρακαλώ δοκιμάστε ξανά.";
+
+        if (!err?.response) {
+          text =
+            "Δεν ήταν δυνατή η επικοινωνία με τον διακομιστή. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.";
+        } else if (status === 400 && serverError.includes("email already registered")) {
+          text =
+            "Υπάρχει ήδη λογαριασμός με αυτό το email. Χρησιμοποιήστε άλλο email ή συνδεθείτε.";
+        } else if (status >= 500) {
+          text =
+            "Η εγγραφή δεν ολοκληρώθηκε λόγω τεχνικού προβλήματος. Παρακαλώ δοκιμάστε ξανά σε λίγο.";
+        }
+
+        setError(text);
+      })
       .finally(() => setIsLoading(false));
   };
 

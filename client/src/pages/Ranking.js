@@ -97,12 +97,30 @@ function getApplicationScoreLink(applicant) {
 }
 
 function resolveSubmitDateRaw(applicant) {
-  return (
+  const firstSubmissionDate =
+    applicant?.firstSubmissionDate ||
     applicant?.submitDate ||
     applicant?.submittedAt ||
     applicant?.submissionDate ||
-    ""
+    "";
+
+  const latestResubmissionDate =
+    applicant?.lastResubmissionDate ||
+    applicant?.resubmissionDate ||
+    applicant?.lastResubmittedAt ||
+    "";
+
+  const explicitResubmission = parseBooleanLike(
+    applicant?.resubmission ?? applicant?.isResubmission ?? applicant?.hasResubmission
   );
+  const hasResubmission =
+    explicitResubmission === true ||
+    (explicitResubmission === null && Boolean(latestResubmissionDate));
+
+  if (hasResubmission && latestResubmissionDate) {
+    return latestResubmissionDate;
+  }
+  return firstSubmissionDate;
 }
 
 

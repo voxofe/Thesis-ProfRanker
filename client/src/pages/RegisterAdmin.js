@@ -52,11 +52,29 @@ export default function RegisterAdmin() {
           }, 1500);
         }, 500);
       })
-      .catch(() =>
-        setError(
-          "Σφάλμα κατά την εγγραφή διαχειριστή. Παρακαλώ προσπαθήστε ξανά."
-        )
-      )
+      .catch((err) => {
+        const status = err?.response?.status;
+        const serverError = (err?.response?.data?.error || "").toLowerCase();
+        let text = "Προέκυψε απρόβλεπτο σφάλμα κατά την εγγραφή διαχειριστή. Παρακαλώ δοκιμάστε ξανά.";
+
+        if (!err?.response) {
+          text =
+            "Δεν ήταν δυνατή η επικοινωνία με τον διακομιστή. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.";
+        } else if (status === 400 && serverError.includes("email already registered")) {
+          text =
+            "Υπάρχει ήδη λογαριασμός με αυτό το email. Χρησιμοποιήστε άλλο email.";
+        } else if (status === 401 || serverError.includes("authorization token missing") || serverError.includes("invalid or expired token")) {
+          text =
+            "Η συνεδρία σας έληξε ή δεν είναι έγκυρη. Συνδεθείτε ξανά και δοκιμάστε ξανά.";
+        } else if (status === 403 || serverError.includes("only admins can register a new admin")) {
+          text = "Δεν έχετε δικαίωμα δημιουργίας νέου διαχειριστή.";
+        } else if (status >= 500) {
+          text =
+            "Η εγγραφή διαχειριστή δεν ολοκληρώθηκε λόγω τεχνικού προβλήματος. Παρακαλώ δοκιμάστε ξανά σε λίγο.";
+        }
+
+        setError(text);
+      })
       .finally(() => setIsLoading(false));
   };
 
@@ -103,9 +121,8 @@ export default function RegisterAdmin() {
         <div
           className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-200"
         >
-          <div className="text-[13px] text-red-900 font-medium pb-4">
-            Εγγραφή Διαχειριστή - Αυτή η φόρμα δημιουργεί λογαριασμό
-            διαχειριστή με ειδικά δικαιώματα
+          <div className="text-[13px] text-red-900 font-medium pb-4 text-center">
+            Αυτή η φόρμα δημιουργεί λογαριασμό διαχειριστή με ειδικά δικαιώματα
           </div>
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (

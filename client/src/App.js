@@ -72,7 +72,6 @@ function AppContent() {
   const formMode = (searchParams.get("mode") || "new").toLowerCase();
   const isEditMode = formMode === "edit";
   const routesKey = `${location.pathname}${location.search}${location.hash}`;
-  const shouldShowBackLink = location.pathname !== "/" && location.pathname !== "/home" && location.pathname !== "/login" && location.pathname !== "/register";
 
 
   const activePositions = React.useMemo(
@@ -109,14 +108,26 @@ function AppContent() {
     !!isLoggedIn &&
     currentUser?.role === "admin" &&
     currentUser?.mustChangePassword === true;
+  const shouldShowBackLink =
+    location.pathname !== "/" &&
+    location.pathname !== "/home" &&
+    location.pathname !== "/login" &&
+    location.pathname !== "/register" &&
+    !(mustChangePassword && location.pathname === "/change-password");
+  const shouldReserveBackLinkSpace =
+    shouldShowBackLink || (mustChangePassword && location.pathname === "/change-password");
+
+  const unverifiedAllowedPaths = React.useMemo(
+    () => new Set(["/home", "/change-password", "/verify-email"]),
+    []
+  );
+  const shouldForceUnverifiedHomeRedirect =
+    isUnverified && !unverifiedAllowedPaths.has(location.pathname);
 
   React.useEffect(() => {
-    if (!isUnverified) return;
-    const allowedPaths = new Set(["/home", "/change-password", "/verify-email"]);
-    if (!allowedPaths.has(location.pathname)) {
+    if (!shouldForceUnverifiedHomeRedirect) return;
       navigate("/home", { replace: true });
-    }
-  }, [isUnverified, location.pathname, navigate]);
+  }, [shouldForceUnverifiedHomeRedirect, navigate]);
 
   React.useEffect(() => {
     if (!mustChangePassword) return;
@@ -142,14 +153,26 @@ function AppContent() {
     );
   }
 
+  if (shouldForceUnverifiedHomeRedirect) {
+    return <Navigate to="/home" replace />;
+  }
+
+  if (mustChangePassword && location.pathname !== "/change-password") {
+    return <Navigate to="/change-password" replace />;
+  }
+
   return (
     <div className="flex justify-center min-h-screen min-w-screen">
       <div className="w-[1330px] px-7 py-4 flex flex-col min-h-screen">
         <Header academicYear={academicYear} />
-        {/* Back link shown below header on non-home routes */}
-        {shouldShowBackLink && (
+        {/* Back link row shown below header; keep spacing during forced password change */}
+        {shouldReserveBackLinkSpace && (
           <div className="mt-4">
-            <BackLinkController />
+            {shouldShowBackLink ? (
+              <BackLinkController />
+            ) : (
+              <div className="h-10" aria-hidden="true" />
+            )}
           </div>
         )}
         <div className="flex-1 pt-5">

@@ -6,10 +6,10 @@ todo.txt
 notes for official paper.txt
 81700_prosklisi_2-theseis_Tm.-Mousiologias_epanaprokiriski_6ΩΗΟ469Β7Θ-Θ0Κ.pdf
 INTED2025_82.docx
-run.cmd
-run-back.cmd
-run-front.cmd
-run-host.cmd
+run-dev.cmd
+run-back-dev.cmd
+run-front-dev.cmd
+run-host-dev.cmd
 position states.txt
 Untitled.png
 uploadable dummie files
@@ -29,3 +29,16 @@ course plans.txt
 cloudflare r2 token value.txt
 github split profranker token.txt
 neon password.txt
+
+# Environment files
+server/.env
+server/.env.*
+!server/.env.development.example
+!server/.env.production.example
+
+client/.env
+client/.env.*
+!client/.env.development.example
+!client/.env.production.example
+dev checklist.txt
+docker-compose.redis.dev.yml
