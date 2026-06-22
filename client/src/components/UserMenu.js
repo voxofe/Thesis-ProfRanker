@@ -5,6 +5,7 @@ import { KeyRound } from "lucide-react";
 export default function UserMenu({ currentUser, initials, roleLabel, onLogout }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
+  const fullName = `${currentUser?.firstName || ""} ${currentUser?.lastName || ""}`.trim();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -22,24 +23,15 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-4"
+        className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white/90 px-2 py-1 shadow-sm hover:bg-patras-albescentWhite/40"
         aria-haspopup="menu"
         aria-expanded={open}
       >
         <div className="flex items-center justify-center w-10 h-10 rounded-full bg-patras-buccaneer shadow">
           <span className="text-white font-bold text-lg">{initials}</span>
         </div>
-        <div className="flex flex-col leading-tight items-start">
-          <span className="text-patras-buccaneer font-semibold text-base">
-            {currentUser.firstName}
-          </span>
-          <span className="text-patras-buccaneer font-semibold text-base -mt-1">
-            {currentUser.lastName}
-          </span>
-          <span className="text-xs text-gray-500 font-medium">{roleLabel}</span>
-        </div>
         <svg
-          className="w-4 h-4 text-patras-buccaneer"
+          className={`w-4 h-4 text-patras-buccaneer transition-transform ${open ? "rotate-180" : ""}`}
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"
@@ -54,12 +46,27 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
 
       {open && (
         <div
-          className="absolute -right-4 top-full mt-3 w-max rounded-xl border border-gray-200 bg-white shadow-xl z-50"
+          className="absolute right-0 top-full mt-3 w-max min-w-[11rem] max-w-64 rounded-xl border border-gray-300 bg-white shadow-xl z-50 overflow-hidden"
           role="menu"
         >
+          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/90 text-right">
+            <div className="group relative">
+              <div
+                className="text-sm font-semibold text-patras-buccaneer truncate"
+                title={fullName || "Χρήστης"}
+              >
+                {fullName || "Χρήστης"}
+              </div>
+              <div className="pointer-events-none absolute right-0 top-full z-10 mt-1 hidden max-w-64 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs text-gray-700 shadow-md group-hover:block">
+                {fullName || "Χρήστης"}
+              </div>
+            </div>
+            <div className="text-xs text-gray-500 mt-0.5">{roleLabel}</div>
+          </div>
+
           <Link
             to="/change-password"
-            className="w-full flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-patras-albescentWhite/40"
+            className="w-full flex items-center justify-end gap-2 px-4 py-3 text-sm text-gray-700 text-right hover:bg-patras-albescentWhite/40"
             onClick={() => setOpen(false)}
             role="menuitem"
           >
@@ -73,7 +80,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
               setOpen(false);
               onLogout();
             }}
-            className="w-full flex items-center justify-between gap-0 pl-5 pr-4 py-3 text-sm text-gray-700 hover:bg-patras-albescentWhite/40"
+            className="w-full flex items-center justify-end gap-2 px-4 py-3 text-sm text-gray-700 text-right hover:bg-patras-albescentWhite/40"
             role="menuitem"
           >
             <span className="font-medium">Αποσύνδεση</span>

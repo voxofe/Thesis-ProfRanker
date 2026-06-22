@@ -140,11 +140,17 @@ function AppContent() {
   // Show loading screen while authentication is being determined
   if (isLoading) {
     return (
-      <div className="flex justify-center min-h-screen min-w-screen">
-        <div className="w-[1300px] px-7 py-4 flex flex-col min-h-screen">
-          <Header academicYear={academicYear} />
+      <div className="min-h-screen w-full">
+        <div className="flex justify-center w-full">
+          <div className="w-[1330px] px-7 py-4">
+            <Header academicYear={academicYear} />
+          </div>
+        </div>
+        <div className="flex justify-center w-full">
+          <div className="w-[1300px] px-7 py-4 flex flex-col min-h-screen">
           <div className="flex flex-1 justify-center items-center py-4">
             <LoadingIndicator />
+          </div>
           </div>
         </div>
       </div>
@@ -160,19 +166,24 @@ function AppContent() {
   }
 
   return (
-    <div className="flex justify-center min-h-screen min-w-screen">
-      <div className="w-[1330px] px-7 py-4 flex flex-col min-h-screen">
-        <Header academicYear={academicYear} />
-        {/* Back link row shown below header; keep spacing during forced password change */}
-        {shouldReserveBackLinkSpace && (
-          <div className="mt-4">
-            {shouldShowBackLink ? (
-              <BackLinkController />
-            ) : (
-              <div className="h-10" aria-hidden="true" />
-            )}
-          </div>
-        )}
+    <div className="min-h-screen w-full">
+      <div className="flex justify-center w-full">
+        <div className="w-[1330px] px-7 py-4">
+          <Header academicYear={academicYear} />
+          {/* Back link row shown below header; keep spacing during forced password change */}
+          {shouldReserveBackLinkSpace && (
+            <div className="mt-4">
+              {shouldShowBackLink ? (
+                <BackLinkController />
+              ) : (
+                <div className="h-10" aria-hidden="true" />
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="flex justify-center w-full">
+        <div className="w-[1330px] px-7 py-4 flex flex-col min-h-screen">
         <div className="flex-1 pt-5">
           <Routes location={location} key={routesKey}>
             {isLoggedIn ? (
@@ -266,6 +277,7 @@ function AppContent() {
               </>
             )}
           </Routes>
+        </div>
         </div>
       </div>
     </div>

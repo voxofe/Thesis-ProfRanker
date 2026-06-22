@@ -55,9 +55,9 @@ export default function Header({ academicYear }) {
     : resolveRoleLabel(currentUser?.role, currentUser?.gender);
 
   return (
-    <header className="w-full rounded-xl border border-gray-200 shadow-lg bg-white/95">
-      <div className="w-full flex flex-col gap-3 px-6 py-3 lg:flex-row lg:items-center lg:gap-5">
-        <Link to="/" className="shrink-0 flex items-center justify-center lg:justify-start">
+    <header className="w-full rounded-xl border border-gray-200 shadow-lg bg-patras-albescentWhite/15">
+      <div className="w-full flex flex-col gap-3 px-6 py-3 md:flex-row md:items-center md:gap-5">
+        <Link to="/" className="shrink-0 flex items-center justify-start">
           <img
             src={logo}
             alt="ProfRanker logo"
@@ -65,7 +65,7 @@ export default function Header({ academicYear }) {
           />
         </Link>
 
-        <div className="flex-1 flex flex-col items-center justify-center text-center lg:px-2">
+        <div className="flex-1 flex flex-col items-start justify-center text-left md:px-2">
           <h1 className="text-xl lg:text-xl font-semibold text-gray-700">
             ΑΙΤΗΣΗ ΥΠΟΨΗΦΙΟΤΗΤΑΣ ΔΙΔΑΣΚΟΝΤΩΝ ΠΑΝΕΠΙΣΤΗΜΙΟΥ ΠΑΤΡΩΝ {academicYear}
           </h1>
@@ -74,7 +74,7 @@ export default function Header({ academicYear }) {
           </p>
         </div>
 
-        <div className="flex items-center justify-center gap-3 lg:justify-end">
+        <div className="flex items-center justify-start gap-3 md:justify-end">
           <div className="inline-flex rounded-md border border-gray-300 overflow-hidden bg-white">
             <button
               type="button"
@@ -104,8 +104,8 @@ export default function Header({ academicYear }) {
             type="button"
             onClick={() => setIsDarkMode((prev) => !prev)}
             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 text-patras-buccaneer hover:bg-patras-albescentWhite/40"
-            aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-            title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+            aria-label={isDarkMode ? "Αλλάξτε σε φωτεινή λειτουργία" : "Αλλάξτε σε σκοτεινή λειτουργία"}
+            title={isDarkMode ? "Αλλάξτε σε φωτεινή λειτουργία" : "Αλλάξτε σε σκοτεινή λειτουργία"}
           >
             {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>

@@ -5,7 +5,7 @@ export default function BackLink({ className = "", to, onClick }) {
   const target = to || "/home";
 
   return (
-    <div className={`w-full max-w-7xl mx-auto  ${className}`}>
+    <div className={`w-full ${className}`}>
       <Link
         to={target}
         onClick={onClick}
