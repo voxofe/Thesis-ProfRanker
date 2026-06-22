@@ -275,10 +275,16 @@ export default function ApplicationScore() {
   const startTime = applicantData?.positionStartTime || matchedPosition?.startTime || "";
   const endTime = applicantData?.positionEndTime || matchedPosition?.endTime || "";
   const submitDate =
+    applicantData?.lastResubmissionDate ||
+    applicantData?.resubmissionDate ||
+    applicantData?.firstSubmissionDate ||
     applicantData?.submitDate ||
     applicantData?.submittedAt ||
     applicantData?.submissionDate ||
     "";
+  const hasResubmissionDate = Boolean(
+    applicantData?.lastResubmissionDate || applicantData?.resubmissionDate
+  );
 
   const isPositionActive = (() => {
     const now = new Date();
@@ -625,8 +631,24 @@ export default function ApplicationScore() {
                     <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
                       {toDDMMYYYYHHMM(endDate, endTime)}
                     </td>
-                    <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
-                      {toDDMMYYYYHHMM(submitDate)}
+                    <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite">
+                      <div className="inline-flex items-center gap-2 whitespace-nowrap">
+                        <span>{toDDMMYYYYHHMM(submitDate)}</span>
+                        <TooltipGray
+                          content={
+                            hasResubmissionDate
+                              ? "Τελευταία επανυποβολή"
+                              : "Αρχική υποβολή"
+                          }
+                        >
+                          <span
+                            className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-patras-buccaneer/50 text-[10px] font-semibold text-patras-buccaneer/80"
+                            aria-label="Πληροφορίες ημερομηνίας υποβολής"
+                          >
+                            i
+                          </span>
+                        </TooltipGray>
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-center align-middle">
                       <CoursesDrawer

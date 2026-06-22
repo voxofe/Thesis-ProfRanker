@@ -26,8 +26,12 @@ export default function PublicationsSection({ readOnly = false }) {
       <div className="">
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-8 pt-1 pb-0 sm:pb-2"></div>
         <div className="grid grid-cols-1 pt-2 gap-y-6">
-          {formData.publications.map((_, index) => (
-            <Publication key={index} index={index} readOnly={readOnly} />
+          {formData.publications.map((publication, index) => (
+            <Publication
+              key={publication?.id ?? `publication-${index}`}
+              index={index}
+              readOnly={readOnly}
+            />
           ))}
           {formData.publications.length === 0 && (
             <div className="text-center text-gray-500 py-8">
