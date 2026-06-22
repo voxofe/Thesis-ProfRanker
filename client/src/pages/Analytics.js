@@ -19,6 +19,7 @@ import {
   Cell,
   Legend,
 } from "recharts";
+import LoadingIndicator from "../components/LoadingIndicator";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -837,7 +838,7 @@ export default function Analytics() {
 
       {loading ? (
         <div className="rounded-lg border border-patras-capePalliser/50 bg-white p-6 text-sm text-patras-buccaneer shadow-md">
-          Φόρτωση analytics...
+          <LoadingIndicator size="sm" textClassName="mt-2 text-patras-buccaneer" />
         </div>
       ) : error ? (
         <div className="rounded-lg border border-red-300 bg-red-50 p-6 text-sm text-red-700 shadow-md">

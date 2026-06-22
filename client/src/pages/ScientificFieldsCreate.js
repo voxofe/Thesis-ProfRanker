@@ -6,6 +6,7 @@ import CustomSelect from "../components/CustomSelect";
 import CoursePanel from "../components/CoursePanel";
 import FlowbiteDateField from "../components/FlowbiteDateField";
 import SubmissionProgress from "../components/SubmissionProgress";
+import LoadingIndicator from "../components/LoadingIndicator";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -396,10 +397,7 @@ export default function ScientificFieldsCreate() {
       <div className="flex justify-center min-h-screen min-w-screen">
         <div className="w-[1270px] px-7 py-4 flex flex-col min-h-screen">
           <div className="flex flex-1 justify-center items-center py-4">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-patras-buccaneer"></div>
-              <p className="mt-4 text-gray-600">Φόρτωση...</p>
-            </div>
+            <LoadingIndicator />
           </div>
         </div>
       </div>

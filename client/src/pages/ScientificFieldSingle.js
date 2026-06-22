@@ -7,6 +7,7 @@ import { useToast } from "../contexts/ToastContext";
 import TooltipGray from "../components/TooltipGray";
 import CourseDescriptionModal from "../components/CourseDescriptionModal";
 import { formatDateTimeCell } from "../components/SortableTable";
+import LoadingIndicator from "../components/LoadingIndicator";
 import useBodyScrollLock from "../utils/useBodyScrollLock";
 import PositionCreate from "./PositionCreate";
 
@@ -207,7 +208,7 @@ export default function ScientificFieldSingle() {
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-y-5 pt-5">
-        <p className="text-center text-gray-600">Φόρτωση...</p>
+        <LoadingIndicator size="sm" textClassName="mt-2 text-gray-600" />
       </div>
     );
   }

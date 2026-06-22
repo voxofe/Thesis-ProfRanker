@@ -6,6 +6,7 @@ import VaultFileActions from "../components/VaultFileActions";
 import PhdDetailsModal from "../components/PhdDetailsModal";
 import CoursePlanDetailsModal from "../components/CoursePlanDetailsModal";
 import TooltipGray from "../components/TooltipGray";
+import LoadingIndicator from "../components/LoadingIndicator";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { usePositions } from "../contexts/PositionsContext";
@@ -498,7 +499,7 @@ export default function ApplicationScore() {
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-y-5 pt-5">
-        <p className="text-center text-gray-600">Φόρτωση...</p>
+        <LoadingIndicator size="sm" textClassName="mt-2 text-gray-600" />
       </div>
     );
   }

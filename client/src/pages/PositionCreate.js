@@ -4,6 +4,7 @@ import InputField from "../components/InputField";
 import CoursePanel from "../components/CoursePanel";
 import FlowbiteDateField from "../components/FlowbiteDateField";
 import PositionSelect from "../components/PositionSelect";
+import LoadingIndicator from "../components/LoadingIndicator";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "../contexts/ToastContext";
@@ -236,10 +237,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
       <div className="flex justify-center min-h-screen min-w-screen">
         <div className="w-[1270px] px-7 py-4 flex flex-col min-h-screen">
           <div className="flex flex-1 justify-center items-center py-4">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-patras-buccaneer"></div>
-              <p className="mt-4 text-gray-600">Φόρτωση...</p>
-            </div>
+            <LoadingIndicator />
           </div>
         </div>
       </div>
@@ -257,26 +255,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
     <div className={wrapperClassName}>
       {submitting && !inModal && (
         <div className="flex justify-center items-center">
-          <svg
-            className="animate-spin h-6 w-6 text-patras-buccaneer"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v8H4z"
-            ></path>
-          </svg>
+          <LoadingIndicator size="sm" showText={false} />
           <span className="ml-2 text-patras-buccaneer">Υποβολή αίτησης...</span>
         </div>
       )}

@@ -1,5 +1,6 @@
 import React from "react";
 import { RefreshCw } from "lucide-react";
+import LoadingIndicator from "./LoadingIndicator";
 
 export default function RefreshButton({
   onClick,
@@ -20,7 +21,11 @@ export default function RefreshButton({
       title={label}
       className={`flex items-center gap-2 px-3 py-1 rounded-full bg-patras-buccaneer text-white font-medium text-sm shadow-sm hover:bg-patras-sanguineBrown transition border border-patras-buccaneer disabled:opacity-60 ${className}`}
     >
-      <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+      {loading ? (
+        <LoadingIndicator size="sm" showText={false} className="leading-none" />
+      ) : (
+        <RefreshCw className="w-4 h-4" />
+      )}
       <span>{label}</span>
     </button>
   );

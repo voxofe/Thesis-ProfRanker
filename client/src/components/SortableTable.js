@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import LoadingIndicator from "./LoadingIndicator";
 
 export const formatDateTimeCell = (dateValue, timeValue, fallbackTime = "00:00") => {
   if (!dateValue) return "—";
@@ -250,7 +251,7 @@ export default function SortableTable({
           {loading ? (
             <tr>
               <td colSpan={columns.length} className="text-center text-gray-400 py-8">
-                {loadingMessage}
+                <LoadingIndicator text={loadingMessage} size="sm" textClassName="mt-2 text-gray-400" />
               </td>
             </tr>
           ) : sortedRows.length === 0 ? (

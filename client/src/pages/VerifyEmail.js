@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { EMAIL_VERIFICATION_ENABLED } from "../utils/featureFlags";
+import LoadingIndicator from "../components/LoadingIndicator";
 
 const verificationRequestByToken = new Map();
 
@@ -96,7 +97,7 @@ export default function VerifyEmail() {
 
 
         {loading ? (
-          <p className="text-gray-600 text-center">Επεξεργασία επιβεβαίωσης...</p>
+          <LoadingIndicator text="Φόρτωση..." size="sm" textClassName="mt-2 text-gray-600" />
         ) : (
           <>
             <p

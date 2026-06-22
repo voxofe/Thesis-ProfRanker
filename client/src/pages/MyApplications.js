@@ -3,6 +3,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import ApplicationCard from "../components/ApplicationCard";
+import LoadingIndicator from "../components/LoadingIndicator";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -171,7 +172,7 @@ export default function MyApplications() {
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-y-5 pt-5">
-        <p className="text-center text-gray-600">Φόρτωση...</p>
+        <LoadingIndicator size="sm" textClassName="mt-2 text-gray-600" />
       </div>
     );
   }

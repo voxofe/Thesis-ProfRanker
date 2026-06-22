@@ -27,6 +27,7 @@ import Users from "./pages/Users";
 import UsersView from "./pages/UsersView";
 import Analytics from "./pages/Analytics";
 import VerifyEmail from "./pages/VerifyEmail";
+import LoadingIndicator from "./components/LoadingIndicator";
 import { EMAIL_VERIFICATION_ENABLED } from "./utils/featureFlags";
 import {
   FormDataProvider,
@@ -143,10 +144,7 @@ function AppContent() {
         <div className="w-[1300px] px-7 py-4 flex flex-col min-h-screen">
           <Header academicYear={academicYear} />
           <div className="flex flex-1 justify-center items-center py-4">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-patras-buccaneer"></div>
-              <p className="mt-4 text-gray-600">Φόρτωση...</p>
-            </div>
+            <LoadingIndicator />
           </div>
         </div>
       </div>
@@ -237,7 +235,7 @@ function AppContent() {
                     <Route path="/analytics" element={<Analytics />} />
                     <Route path="/register-admin" element={<RegisterAdmin />} />
                     <Route path="/positions/create" element={
-                      <React.Suspense fallback={<div>Φόρτωση...</div>}>
+                      <React.Suspense fallback={<LoadingIndicator size="sm" textClassName="mt-2 text-gray-600" />}>
                         {React.createElement(require("./pages/PositionCreate").default)}
                       </React.Suspense>
                     } />
@@ -245,7 +243,7 @@ function AppContent() {
                     <Route path="/scientific-fields/view" element={<ScientificFieldsView />} />
                     <Route path="/scientific-fields/view/:id" element={<ScientificFieldSingle />} />
                     <Route path="/scientific-fields/create" element={
-                      <React.Suspense fallback={<div>Φόρτωση...</div>}>
+                      <React.Suspense fallback={<LoadingIndicator size="sm" textClassName="mt-2 text-gray-600" />}>
                         {React.createElement(require("./pages/ScientificFieldsCreate").default)}
                       </React.Suspense>
                     } />

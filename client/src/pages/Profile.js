@@ -13,6 +13,7 @@ import VaultFileActions from "../components/VaultFileActions";
 import TermsModal from "../components/TermsModal";
 import PublicationsSection from "../components/form-sections/PublicationsSection";
 import PhdAbstractField from "../components/PhdAbstractField";
+import LoadingIndicator from "../components/LoadingIndicator";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -1257,7 +1258,7 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-y-5 pt-5">
-        <p className="text-center text-gray-600">Φόρτωση...</p>
+        <LoadingIndicator size="sm" textClassName="mt-2 text-gray-600" />
       </div>
     );
   }

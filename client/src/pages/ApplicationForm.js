@@ -13,6 +13,7 @@ import DocumentsSection from "../components/form-sections/DocumentsSection";
 import Stepper from "../components/Stepper";
 import Tooltip from "../components/Tooltip";
 import SubmissionProgress from "../components/SubmissionProgress";
+import LoadingIndicator from "../components/LoadingIndicator";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
@@ -696,10 +697,7 @@ export default function Form({ academicYear }) {
       <div className="flex justify-center min-h-screen min-w-screen">
         <div className="w-[1270px] px-7 py-4 flex flex-col min-h-screen">
           <div className="flex flex-1 justify-center items-center py-4">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-patras-buccaneer"></div>
-              <p className="mt-4 text-gray-600">Φόρτωση...</p>
-            </div>
+            <LoadingIndicator />
           </div>
         </div>
       </div>
