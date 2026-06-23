@@ -10,25 +10,25 @@ export default function TermsModal({ open, onClose }) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4 w-screen h-screen"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4 w-screen h-screen dark:bg-[var(--color-bg-overlay)]"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-lg border w-full max-w-lg relative flex flex-col max-h-[80vh] h-[80vh]"
+        className="bg-white rounded-lg shadow-lg border w-full max-w-lg relative flex flex-col max-h-[80vh] h-[80vh] dark:bg-[var(--color-bg-card)] dark:border-[var(--color-border)] dark:shadow-[0_20px_45px_var(--color-shadow-strong)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">Όροι Πράξης</h2>
+        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-4 dark:border-[var(--color-border-soft)]">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">Όροι Πράξης</h2>
           <button
             type="button"
-            className="text-gray-600 hover:text-red-700 text-2xl leading-none"
+            className="text-gray-600 hover:text-red-700 text-2xl leading-none dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
             onClick={onClose}
             title="Κλείσιμο"
           >
             &times;
           </button>
         </div>
-        <div className="text-sm text-gray-700 space-y-4 overflow-y-auto px-6 py-4 flex-1 min-h-0">
+        <div className="text-sm text-gray-700 space-y-4 overflow-y-auto px-6 py-4 flex-1 min-h-0 dark:text-[var(--color-text-secondary)]">
           <p>
             Υπεύθυνη Δήλωση αρ. 8, παρ. 4, του Ν.1599/1986 στην οποία
             δηλώνεται ότι ο/η υποψήφιος/α:

@@ -28,7 +28,7 @@ function IssnCell({ issn }) {
             </text>
           </svg>
           {/* Tooltip */}
-          <span className="absolute left-6 top-1 z-10 hidden group-hover:block bg-white border border-red-400 text-red-600 text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap">
+          <span className="absolute left-6 top-1 z-10 hidden group-hover:block bg-white dark:bg-[var(--color-bg-card)] border border-red-400 text-red-600 text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap">
             Το ISSN δεν βρέθηκε 
           </span>
         </span>
@@ -76,7 +76,7 @@ export default function PublicationsDrawer({ publications }) {
     return (
       <span className="relative group inline-flex items-center">
         <span>{truncate(fullAuthors)}</span>
-        <span className="absolute bottom-full left-0 z-10 mb-2 hidden w-max max-w-xs rounded border border-gray-200 bg-white px-2 py-1 text-xs text-gray-700 shadow-lg group-hover:block">
+        <span className="absolute bottom-full left-0 z-10 mb-2 hidden w-max max-w-xs rounded border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-card)] px-2 py-1 text-xs text-gray-700 dark:text-[var(--color-text-secondary)] shadow-lg group-hover:block">
           {fullAuthors}
         </span>
       </span>
@@ -112,9 +112,9 @@ export default function PublicationsDrawer({ publications }) {
         className="flex items-center justify-between px-0 py-4 cursor-pointer bg-patras-[#fffbf6]"
         onClick={toggleDrawer}
       >
-        <span className="flex items-center text-patras-buccaneer">
+        <span className="flex items-center text-patras-buccaneer dark:text-patras-albescentWhite">
           Επιστημονικές δημοσιεύσεις
-          <span className="text-patras-buccaneer text-lg ml-2">
+          <span className="text-patras-buccaneer dark:text-patras-albescentWhite text-lg ml-2">
             {isOpen ? "▼" : "\u25B6\uFE0E"}
           </span>
         </span>
@@ -122,7 +122,7 @@ export default function PublicationsDrawer({ publications }) {
 
       {/* Drawer Content */}
       {isOpen && (
-        <div className="overflow-x-auto px-0 pb-4">
+        <div className="overflow-x-auto px-0 pb-4 dark:[&_h3]:text-white dark:[&_table]:bg-[var(--color-bg-card)] dark:[&_table]:border-[var(--color-border)] dark:[&_tbody]:divide-[var(--color-border)] dark:[&_td]:text-[var(--color-text-primary)] dark:[&_td]:border-[var(--color-border)] dark:[&_th]:border-[var(--color-border)]">
           <div className="space-y-6">
             {journalRows.length > 0 && (
               <div>

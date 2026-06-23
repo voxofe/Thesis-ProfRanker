@@ -30,6 +30,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import LoadingIndicator from "./components/LoadingIndicator";
 import { EMAIL_VERIFICATION_ENABLED } from "./utils/featureFlags";
 import {
+  ThemeProvider,
   FormDataProvider,
   AuthProvider,
   useAuth,
@@ -44,19 +45,21 @@ import { ToastProvider } from "./contexts/ToastContext";
 
 export default function App() {
   return (
-    <CreatePositionValidationProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <PositionsProvider>
-            <Router>
-              <PreviousLocationProvider>
-                <AppContent />
-              </PreviousLocationProvider>
-            </Router>
-          </PositionsProvider>
-        </ToastProvider>
-      </AuthProvider>
-    </CreatePositionValidationProvider>
+    <ThemeProvider>
+      <CreatePositionValidationProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <PositionsProvider>
+              <Router>
+                <PreviousLocationProvider>
+                  <AppContent />
+                </PreviousLocationProvider>
+              </Router>
+            </PositionsProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </CreatePositionValidationProvider>
+    </ThemeProvider>
   );
 }
 
@@ -246,7 +249,7 @@ function AppContent() {
                     <Route path="/analytics" element={<Analytics />} />
                     <Route path="/register-admin" element={<RegisterAdmin />} />
                     <Route path="/positions/create" element={
-                      <React.Suspense fallback={<LoadingIndicator size="sm" textClassName="mt-2 text-gray-600" />}>
+                      <React.Suspense fallback={<LoadingIndicator size="sm" textClassName="mt-2 text-gray-600 dark:text-[var(--color-text-secondary)]" />}>
                         {React.createElement(require("./pages/PositionCreate").default)}
                       </React.Suspense>
                     } />
@@ -254,7 +257,7 @@ function AppContent() {
                     <Route path="/scientific-fields/view" element={<ScientificFieldsView />} />
                     <Route path="/scientific-fields/view/:id" element={<ScientificFieldSingle />} />
                     <Route path="/scientific-fields/create" element={
-                      <React.Suspense fallback={<LoadingIndicator size="sm" textClassName="mt-2 text-gray-600" />}>
+                      <React.Suspense fallback={<LoadingIndicator size="sm" textClassName="mt-2 text-gray-600 dark:text-[var(--color-text-secondary)]" />}>
                         {React.createElement(require("./pages/ScientificFieldsCreate").default)}
                       </React.Suspense>
                     } />

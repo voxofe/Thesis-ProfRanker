@@ -9,6 +9,7 @@ import SubmissionProgress from "../components/SubmissionProgress";
 import LoadingIndicator from "../components/LoadingIndicator";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import PageTitle from "../components/PageTitle";
 
 const SCHOOLS = [
   "ΘΕΤΙΚΩΝ ΕΠΙΣΤΗΜΩΝ",
@@ -413,19 +414,19 @@ export default function ScientificFieldsCreate() {
         percent={progressPercent}
       />
       <header className="text-center pb-2">
-        <h1 className="text-2xl text-center border-b pb-2 text-gray-800">
+        <PageTitle>
           {isEditMode ? "Ενημέρωση πεδίου" : "Δημιουργία πεδίου"}
-        </h1>
+        </PageTitle>
       </header>
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-10 bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-patras-albescentWhite-50"
+        className="space-y-10 bg-white dark:bg-[var(--color-bg-card)] backdrop-blur-md p-8 rounded-2xl shadow-lg border border-patras-albescentWhite-50 dark:border-transparent"
         noValidate
       >
         {/* BASIC INFO */}
         <section>
-          <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Βασικές πληροφορίες</h2>
+          <h2 className="text-lg font-semibold text-gray-700 dark:text-[var(--color-text-secondary)] mb-4 border-b pb-1">Βασικές πληροφορίες</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InputField
@@ -493,12 +494,14 @@ export default function ScientificFieldsCreate() {
           errors={validationErrors}
         />
         {showCourseError && validationErrors.courses && (
-          <p className="-mt-6 text-sm text-red-600">{validationErrors.courses}</p>
+          <p className="-mt-6 text-sm text-red-600 dark:text-[var(--color-danger)] dark:bg-[var(--color-danger)]/15 dark:rounded-md">
+            {validationErrors.courses}
+          </p>
         )}
 
         {showPositionFields && (
           <section>
-            <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Στοιχεία θέσης</h2>
+            <h2 className="text-lg font-semibold text-gray-700 dark:text-[var(--color-text-secondary)] mb-4 border-b pb-1">Στοιχεία θέσης</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>

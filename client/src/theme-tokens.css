@@ -1,0 +1,82 @@
+/*
+  Centralized semantic theme tokens.
+  This file intentionally defines variables only.
+  No component/class migration is applied in this phase.
+
+  Light-source anchors (audited):
+  - Patras core: #f2e0c6, #633439, #833234, #9b6447, #ae6c4a, #e4c48c
+  - Neutral grays from Tailwind utilities (gray-50..900)
+  - Existing literal surfaces: #fffbf6, #fbf8f1, #ffffff
+*/
+
+:root {
+  /* Page and surfaces */
+  --color-bg-page: #fffbf6;
+  --color-bg-surface: #fbf8f1;
+  --color-bg-card: #fffbf6;
+  --color-bg-muted: #f3f4f6;
+  --color-bg-overlay: rgba(0, 0, 0, 0.4);
+
+  /* Typography */
+  --color-text-primary: #633439;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #6b7280;
+  --color-text-inverse: #ffffff;
+
+  /* Borders and emphasis */
+  --color-border: #d1d5db;
+  --color-border-soft: #e5e7eb;
+  --color-border-accent: #f2e0c6;
+
+  /* Brand actions */
+  --color-primary: #633439;
+  --color-primary-hover: #833234;
+  --color-primary-contrast: #ffffff;
+
+  /* Disabled and feedback */
+  --color-disabled-bg: #9ca3af;
+  --color-disabled-text: #ffffff;
+  --color-success: #166534;
+  --color-warning: #92400e;
+  --color-danger: #b91c1c;
+
+  /* Effects */
+  --color-shadow: rgba(0, 0, 0, 0.18);
+  --color-shadow-strong: rgba(0, 0, 0, 0.28);
+}
+
+.dark {
+  /* Page and surfaces */
+  --color-bg-page: #1b1412;
+  --color-bg-surface: #241916;
+  --color-bg-card: #2a1d1a;
+  --color-bg-muted: #3a2b27;
+  --color-bg-overlay: rgba(0, 0, 0, 0.55);
+
+  /* Typography */
+  --color-text-primary: #f4e7d2;
+  --color-text-secondary: #d7bfa5;
+  --color-text-muted: #b89d83;
+  --color-text-inverse: #ffffff;
+
+  /* Borders and emphasis */
+  --color-border: #5b3b33;
+  --color-border-soft: #4a312a;
+  --color-border-accent: #9b6447;
+
+  /* Brand actions */
+  --color-primary: #9b6447;
+  --color-primary-hover: #ae6c4a;
+  --color-primary-contrast: #ffffff;
+
+  /* Disabled and feedback */
+  --color-disabled-bg: #6b5a52;
+  --color-disabled-text: #ede0d0;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
+  /* Effects */
+  --color-shadow: rgba(0, 0, 0, 0.35);
+  --color-shadow-strong: rgba(0, 0, 0, 0.5);
+}

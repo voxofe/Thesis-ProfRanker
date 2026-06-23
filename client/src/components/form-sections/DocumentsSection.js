@@ -32,7 +32,7 @@ export default function DocumentsSection({ academicYear }) {
           />
 
           {formData.isPublicEmployee && (
-            <div className="mt-4 p-4 bg-white rounded-md border border-blue-200 overflow-y-auto">
+            <div className="mt-4 p-4 bg-white dark:bg-[var(--color-bg-card)] rounded-md border border-blue-200 overflow-y-auto">
               <Upload
                 icon="document-text"
                 label="Πρωτοκολλημένη αίτηση για έκδοση σχετικής άδειας από το αρμόδιο όργανο για δημοσίους υπαλλήλους"
@@ -70,7 +70,7 @@ export default function DocumentsSection({ academicYear }) {
           />
 
           {formData.isEuCitizenNonGreek && (
-            <div className="mt-4 p-4 bg-white rounded-md border border-blue-200 overflow-y-auto">
+            <div className="mt-4 p-4 bg-white dark:bg-[var(--color-bg-card)] rounded-md border border-blue-200 overflow-y-auto">
               <Upload
                 icon="document-text"
                 label="Πιστοποιητικό ελληνομάθειας Δ΄ επιπέδου από το Κέντρο Ελληνικής Γλώσσας"
@@ -120,7 +120,7 @@ export default function DocumentsSection({ academicYear }) {
           />
 
           {formData.hasNotParticipatedInPastProgram && (
-            <div className="mt-4 p-4 bg-white rounded-md border border-blue-200 overflow-y-auto">
+            <div className="mt-4 p-4 bg-white dark:bg-[var(--color-bg-card)] rounded-md border border-blue-200 overflow-y-auto">
               <Upload
                 icon="document-text"
                 label="Υπεύθυνη δήλωση μη προηγούμενης συμμετοχής"
@@ -175,7 +175,7 @@ export default function DocumentsSection({ academicYear }) {
                 Υπεύθυνη δήλωση σχετικά με τους{" "}
                 <button
                     type="button"
-                    className="text-patras-buccaneer underline hover:text-patras-auChico"
+                  className="text-patras-buccaneer underline hover:text-patras-auChico dark:text-[var(--color-text-primary)] dark:hover:text-[var(--color-text-secondary)]"
                     onClick={() => setIsRestrictionsModalOpen(true)}
                 >
                     περιορισμούς της Πράξης

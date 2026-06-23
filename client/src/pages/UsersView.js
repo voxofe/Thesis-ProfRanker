@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import SortableTable from "../components/SortableTable";
 import FilterModal from "../components/FilterModal";
 import TooltipGray from "../components/TooltipGray";
+import PageTitle from "../components/PageTitle";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -309,13 +310,11 @@ export default function UsersView() {
   return (
     <div className="max-w-5xl mx-auto p-0">
       <div className="mb-4">
-        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
-          Λίστα χρηστών
-        </h1>
+        <PageTitle className="mb-6">Λίστα χρηστών</PageTitle>
       </div>
 
       <div className="flex items-center justify-center pb-4">
-        <div className="inline-flex rounded-full border border-patras-buccaneer/40 bg-white">
+        <div className="inline-flex rounded-full border border-patras-buccaneer/40 bg-white dark:bg-[var(--color-bg-card)]">
           {Object.entries(TAB_CONFIG).map(([key, tab]) => (
             <button
               key={key}
@@ -324,7 +323,7 @@ export default function UsersView() {
               className={`px-5 py-2 text-sm font-semibold rounded-full transition-colors ${
                 activeTab === key
                   ? "bg-patras-buccaneer text-white"
-                  : "text-patras-buccaneer hover:bg-patras-albescentWhite"
+                  : "text-patras-buccaneer dark:text-[var(--color-text-secondary)] hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-bg-muted)]"
               }`}
             >
               {tab.label}
@@ -338,11 +337,11 @@ export default function UsersView() {
           {filterTags.map((tag, idx) => (
             <span
               key={idx}
-              className="inline-flex items-center bg-patras-buccaneer/10 text-patras-buccaneer px-3 py-1 rounded-full text-xs font-medium border border-patras-buccaneer"
+              className="inline-flex items-center bg-patras-buccaneer/10 text-patras-buccaneer dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-secondary)] px-3 py-1 rounded-full text-xs font-medium border border-patras-buccaneer dark:border-[var(--color-border-accent)]"
             >
               {tag.label}
               <button
-                className="ml-2 text-patras-sanguineBrown hover:text-red-700 text-xs font-bold"
+                className="ml-2 text-patras-sanguineBrown hover:text-red-700 dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] text-xs font-bold"
                 onClick={() => removeTag(tag)}
                 title="Αφαίρεση φίλτρου"
               >
@@ -354,7 +353,7 @@ export default function UsersView() {
             <button
               type="button"
               onClick={clearAllFilters}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border border-patras-buccaneer text-patras-buccaneer hover:bg-patras-buccaneer hover:text-white transition"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border border-patras-buccaneer text-patras-buccaneer hover:bg-patras-buccaneer hover:text-white dark:border-[var(--color-border-accent)] dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-primary)] dark:hover:text-[var(--color-text-inverse)] transition"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M3 6h18" />
@@ -369,7 +368,7 @@ export default function UsersView() {
         </div>
         <div className="flex items-center gap-2">
           <div className="relative w-56">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[var(--color-text-muted)]">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fillRule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clipRule="evenodd" />
               </svg>
@@ -379,7 +378,7 @@ export default function UsersView() {
               value={searchText}
               onChange={(event) => setSearchText(event.target.value)}
               placeholder="Αναζήτηση χρηστών..."
-              className="w-full rounded-md border border-patras-capePalliser/50 bg-white/90 py-1.5 pl-9 pr-3 text-sm text-gray-800 shadow-sm focus:border-patras-buccaneer focus:outline-none"
+              className="w-full rounded-md border border-patras-capePalliser/50 bg-white dark:bg-[var(--color-bg-card)] py-1.5 pl-9 pr-3 text-sm text-gray-800 dark:text-[var(--color-text-primary)] shadow-sm focus:border-patras-buccaneer focus:outline-none"
             />
             {searchText && (
               <button
@@ -417,6 +416,7 @@ export default function UsersView() {
           searchText={searchText}
           onSearchTextChange={setSearchText}
           showSearchBar={false}
+          tbodyClassName="divide-y divide-patras-cameo text-[13px] [&_tr]:transition-none [&_td]:text-patras-buccaneer dark:[&_td]:text-[var(--color-text-primary)]"
           getSortedRows={getSortedRows}
           getRowKey={(row) => row?.id}
           initialSortBy="lastName"
@@ -428,7 +428,7 @@ export default function UsersView() {
         />
         {rowMenu && isApplicantsTab && (
           <div
-            className="absolute z-50 w-max min-w-[14rem] overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg"
+            className="absolute z-50 w-max min-w-[14rem] overflow-hidden rounded-md border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-card)] shadow-lg"
             style={{ top: rowMenu.top, left: rowMenu.left }}
             onClick={(event) => event.stopPropagation()}
           >
@@ -439,7 +439,7 @@ export default function UsersView() {
                 setRowMenu(null);
                 setSelectedRowId(null);
               }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-buccaneer hover:text-white whitespace-nowrap"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-[var(--color-text-secondary)] hover:bg-patras-buccaneer hover:text-white whitespace-nowrap"
             >
               {`Αιτήσεις χρήστη: ${rowMenu.label || ""}`.trim()}
             </button>
@@ -450,7 +450,7 @@ export default function UsersView() {
                 setRowMenu(null);
                 setSelectedRowId(null);
               }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-buccaneer hover:text-white whitespace-nowrap"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-[var(--color-text-secondary)] hover:bg-patras-buccaneer hover:text-white whitespace-nowrap"
             >
               {`Φάκελος χρήστη: ${rowMenu.label || ""}`.trim()}
             </button>

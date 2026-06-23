@@ -42,3 +42,4 @@ client/.env.*
 !client/.env.production.example
 dev checklist.txt
 docker-compose.redis.dev.yml
+docs

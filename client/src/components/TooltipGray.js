@@ -59,14 +59,14 @@ const TooltipGray = ({ children, content, className = "" }) => {
           }}
         >
           <div
-            className={`px-3 py-2 text-sm text-gray-800 bg-gray-100 bg-opacity-95 backdrop-blur-sm rounded-lg shadow-lg w-64 max-w-xs border border-gray-200 transition-opacity duration-200 ease-out ${
+            className={`px-3 py-2 text-sm text-gray-800 dark:text-[var(--color-text-secondary)] bg-gray-100 dark:bg-[var(--color-bg-card)] bg-opacity-95 backdrop-blur-sm rounded-lg shadow-lg w-64 max-w-xs border border-gray-200 dark:border-[var(--color-border)] transition-opacity duration-200 ease-out ${
               isVisible ? "opacity-100" : "opacity-0"
             } ${className}`}
           >
             <div className="relative">
               {content}
               {/* Arrow */}
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-100"></div>
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-100 dark:border-t-[var(--color-bg-card)]"></div>
             </div>
           </div>
         </div>

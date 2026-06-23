@@ -20,7 +20,7 @@ export default function PublicationsSection({ readOnly = false }) {
 
   return (
     <div className="overflow-hidden"> 
-      <legend className="text-sm/6 font-semibold text-gray-900">
+      <legend className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">
         Επιστημονικές δημοσιεύσεις
       </legend>
       <div className="">
@@ -34,7 +34,7 @@ export default function PublicationsSection({ readOnly = false }) {
             />
           ))}
           {formData.publications.length === 0 && (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-gray-500 dark:text-[var(--color-text-muted)] py-8">
               <p>Δεν έχετε προσθέσει ακόμη κάποια επιστημονική δημοσίευση.</p>
               {!readOnly && (
                 <p className="text-sm mt-2">

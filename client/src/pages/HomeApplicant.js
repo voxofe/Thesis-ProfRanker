@@ -193,7 +193,7 @@ export default function HomeApplicant() {
       {userRole === "applicant" ? (
         <>
           <span> και παρακολουθήστε τη θέση σας στην κατάταξη.</span>
-          <span className="block mt-2 text-patras-buccaneer font-semibold">
+          <span className="block mt-2 text-patras-buccaneer dark:text-[var(--color-text-muted)] font-semibold">
             *Η βαθμολογία σας θα εμφανιστεί <b>μετά</b> το πέρας της προθεσμίας των αιτήσεων για τη θέση που ενδιαφέρεστε.
           </span>
         </>
@@ -240,10 +240,10 @@ export default function HomeApplicant() {
     return (
       <div className="max-w-4xl mx-auto p-6">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-700 mb-2">
+          <h1 className="text-2xl font-bold text-gray-700 dark:text-[var(--color-text-primary)] mb-2">
             Καλώς ήρθατε στο Πρόγραμμα Απόκτησης Διδακτικής Εμπειρίας
           </h1>
-          <p className="text-gray-600 text-[17px]">
+          <p className="text-gray-600 dark:text-[var(--color-text-secondary)] text-[17px]">
             Το πρόγραμμα απευθύνεται σε νέους επιστήμονες, κατόχους διδακτορικού τίτλου, που επιθυμούν να αποκτήσουν διδακτική-ακαδημαϊκή εμπειρία.
           </p>
         </div>
@@ -313,10 +313,10 @@ export default function HomeApplicant() {
     return (
       <div className="max-w-4xl mx-auto p-6">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-700 mb-2">
+          <h1 className="text-2xl font-bold text-gray-700 dark:text-[var(--color-text-primary)] mb-2">
             Καλώς ήρθατε στο Πρόγραμμα Απόκτησης Διδακτικής Εμπειρίας
           </h1>
-          <p className="text-gray-600 text-[17px]">
+          <p className="text-gray-600 dark:text-[var(--color-text-secondary)] text-[17px]">
             Το πρόγραμμα απευθύνεται σε νέους επιστήμονες, κατόχους διδακτορικού τίτλου, που επιθυμούν να αποκτήσουν διδακτική-ακαδημαϊκή εμπειρία.
           </p>
         </div>
