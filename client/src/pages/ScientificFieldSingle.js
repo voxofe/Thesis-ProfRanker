@@ -247,7 +247,7 @@ export default function ScientificFieldSingle() {
               <button
                 type="button"
                 onClick={handleClosePositionModal}
-                className="absolute right-6 top-5 z-10 text-3xl leading-none text-gray-600 dark:text-[var(--color-text-secondary)] hover:text-gray-900 dark:text-[var(--color-text-primary)]"
+                className="absolute right-6 top-5 z-10 text-3xl leading-none text-gray-600 hover:text-gray-900 dark:text-[var(--color-text-primary)]"
                 aria-label="Κλείσιμο"
                 title="Κλείσιμο"
               >
@@ -284,8 +284,8 @@ export default function ScientificFieldSingle() {
         )}
       <div className="grid grid-cols-1 gap-6">
         <div>
-          <h2 className="text-xl font-light mb-3">Στοιχεία επιστημονικού πεδίου</h2>
-          <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50">
+          <h2 className="text-xl font-light mb-3 text-gray-900 dark:text-[var(--color-text-primary)]">Στοιχεία επιστημονικού πεδίου</h2>
+          <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 dark:border-[var(--color-border)]">
             <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
               <thead className="bg-patras-buccaneer">
                 <tr>
@@ -300,15 +300,15 @@ export default function ScientificFieldSingle() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-patras-cameo">
+              <tbody className="divide-y divide-patras-cameo dark:divide-[var(--color-border)]">
                 <tr>
-                  <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite font-semibold">
+                  <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle border-r border-patras-albescentWhite dark:border-[var(--color-border)] font-semibold">
                     {fieldName || "—"}
                   </td>
-                  <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite">
+                  <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle border-r border-patras-albescentWhite dark:border-[var(--color-border)]">
                     {fieldData?.school || "—"}
                   </td>
-                  <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle">
+                  <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle">
                     {fieldData?.department || "—"}
                   </td>
                 </tr>
@@ -319,11 +319,11 @@ export default function ScientificFieldSingle() {
 
         <div>
           <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="text-xl font-light">Μαθήματα</h2>
+            <h2 className="text-xl font-light text-gray-900 dark:text-[var(--color-text-primary)]">Μαθήματα</h2>
           </div>
 
           {courses.length ? (
-            <div className="w-full overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50">
+            <div className="w-full overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 dark:border-[var(--color-border)]">
               <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
                 <thead className="bg-patras-buccaneer">
                   <tr>
@@ -356,16 +356,16 @@ export default function ScientificFieldSingle() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-patras-cameo">
+                <tbody className="divide-y divide-patras-cameo dark:divide-[var(--color-border)]">
                   {courses.map((course) => (
                     <tr key={course.id || course.code}>
-                      <td className="px-4 py-3 text-center text-patras-buccaneer text-sm border-r border-patras-albescentWhite">
+                      <td className="px-4 py-3 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm border-r border-patras-albescentWhite dark:border-[var(--color-border)]">
                         {course.code || "—"}
                       </td>
-                      <td className="px-4 py-3 text-center text-patras-buccaneer text-sm border-r border-patras-albescentWhite font-semibold">
+                      <td className="px-4 py-3 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm border-r border-patras-albescentWhite dark:border-[var(--color-border)] font-semibold">
                         {course.name || "—"}
                       </td>
-                      <td className="px-4 py-3 text-center text-patras-buccaneer text-sm border-r border-patras-albescentWhite">
+                      <td className="px-4 py-3 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm border-r border-patras-albescentWhite dark:border-[var(--color-border)]">
                         {course.description ? (
                           <button
                             type="button"
@@ -376,7 +376,7 @@ export default function ScientificFieldSingle() {
                                 description: course.description,
                               })
                             }
-                            className="underline text-patras-buccaneer hover:text-patras-sanguineBrown"
+                            className="underline text-patras-buccaneer hover:text-patras-sanguineBrown dark:text-[var(--color-text-secondary)] dark:hover:text-[var(--color-primary)]"
                           >
                             Περιγραφή
                           </button>
@@ -384,22 +384,22 @@ export default function ScientificFieldSingle() {
                           "—"
                         )}
                       </td>
-                      <td className="px-4 py-3 text-center text-patras-buccaneer text-sm border-r border-patras-albescentWhite">
+                      <td className="px-4 py-3 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm border-r border-patras-albescentWhite dark:border-[var(--color-border)]">
                         {course.semester || "—"}
                       </td>
-                      <td className="px-4 py-3 text-center text-patras-buccaneer text-sm border-r border-patras-albescentWhite">
+                      <td className="px-4 py-3 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm border-r border-patras-albescentWhite dark:border-[var(--color-border)]">
                         {course.teachingUnits || "—"}
                       </td>
-                      <td className="px-4 py-3 text-center text-patras-buccaneer text-sm border-r border-patras-albescentWhite">
+                      <td className="px-4 py-3 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm border-r border-patras-albescentWhite dark:border-[var(--color-border)]">
                         {course.ects || "—"}
                       </td>
-                      <td className="px-4 py-3 text-center text-patras-buccaneer text-sm border-r border-patras-albescentWhite">
+                      <td className="px-4 py-3 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm border-r border-patras-albescentWhite dark:border-[var(--color-border)]">
                         {course.theory_hours ?? "—"}
                       </td>
-                      <td className="px-4 py-3 text-center text-patras-buccaneer text-sm border-r border-patras-albescentWhite">
+                      <td className="px-4 py-3 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm border-r border-patras-albescentWhite dark:border-[var(--color-border)]">
                         {course.lab_hours ?? "—"}
                       </td>
-                      <td className="px-4 py-3 text-center text-patras-buccaneer text-sm">
+                      <td className="px-4 py-3 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm">
                         {course.category || "—"}
                       </td>
                     </tr>
@@ -426,8 +426,8 @@ export default function ScientificFieldSingle() {
         />
 
         <div>
-          <h2 className="text-xl font-light mb-3">Στοιχεία θέσης</h2>
-          <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50">
+          <h2 className="text-xl font-light mb-3 text-gray-900 dark:text-[var(--color-text-primary)]">Στοιχεία θέσης</h2>
+          <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 dark:border-[var(--color-border)]">
             <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
               <thead className="bg-patras-buccaneer">
                 <tr>
@@ -445,22 +445,22 @@ export default function ScientificFieldSingle() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-patras-cameo">
+              <tbody className="divide-y divide-patras-cameo dark:divide-[var(--color-border)]">
                 <tr>
-                  <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                  <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle border-r border-patras-albescentWhite dark:border-[var(--color-border)] whitespace-nowrap">
                     {formatDateTimeCell(fieldData?.positionStartDate, fieldData?.positionStartTime, "00:00")}
                   </td>
-                  <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                  <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle border-r border-patras-albescentWhite dark:border-[var(--color-border)] whitespace-nowrap">
                     {formatDateTimeCell(fieldData?.positionEndDate, fieldData?.positionEndTime, "23:59")}
                   </td>
-                  <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite">
+                  <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle border-r border-patras-albescentWhite dark:border-[var(--color-border)]">
                     <span className={getStateBadgeClasses(stateLabel)}>{stateLabel}</span>
                   </td>
-                  <td className="p-0 text-patras-buccaneer text-sm text-center align-middle">
+                  <td className="p-0 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle">
                     {fieldData?.applications !== undefined && fieldData?.applications !== null ? (
                       <Link
                         to={rankingLink}
-                        className="group flex h-full w-full flex-col items-center justify-center py-4 font-semibold text-patras-buccaneer transition hover:bg-patras-buccaneer/10 hover:text-patras-sanguineBrown focus:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer"
+                        className="group flex h-full w-full flex-col items-center justify-center py-4 font-semibold text-patras-buccaneer dark:text-[var(--color-text-secondary)] transition hover:bg-patras-buccaneer/10 hover:text-patras-sanguineBrown dark:hover:bg-[var(--color-bg-muted)] dark:hover:text-[var(--color-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer"
                         title={fieldName ? `Δείτε αιτήσεις για ${fieldName}` : "Δείτε αιτήσεις"}
                         aria-label={fieldName ? `Δείτε αιτήσεις για ${fieldName}` : "Δείτε αιτήσεις"}
                       >
@@ -482,7 +482,7 @@ export default function ScientificFieldSingle() {
                     type="button"
                     onClick={handleOpenPositionClick}
                     disabled={positionButtonDisabled}
-                    className="inline-flex items-center justify-center rounded-md border border-patras-buccaneer px-4 py-2 text-sm font-medium text-patras-buccaneer transition-colors hover:bg-patras-buccaneer hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center justify-center rounded-md border border-patras-buccaneer px-4 py-2 text-sm font-medium text-patras-buccaneer dark:text-white transition-colors hover:bg-patras-buccaneer hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {positionButtonLabel}
                   </button>
@@ -492,7 +492,7 @@ export default function ScientificFieldSingle() {
                   type="button"
                   onClick={handleOpenPositionClick}
                   disabled={positionButtonDisabled}
-                  className="inline-flex items-center justify-center rounded-md border border-patras-buccaneer px-4 py-2 text-sm font-medium text-patras-buccaneer transition-colors hover:bg-patras-buccaneer hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-md border border-patras-buccaneer px-4 py-2 text-sm font-medium text-patras-buccaneer dark:text-white transition-colors hover:bg-patras-buccaneer hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {positionButtonLabel}
                 </button>

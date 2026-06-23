@@ -76,7 +76,7 @@ export default function CoursePanel({
           courses.map((c, idx) => (
             <div
               key={idx}
-              className={`pr-publication-card bg-patras-albescentWhite/20 px-5 pt-8 pb-5 rounded-xl border mb-4 shadow-sm relative ${
+              className={`pr-publication-card bg-patras-albescentWhite/20 dark:bg-[var(--color-bg-surface)] px-5 pt-8 pb-5 rounded-xl border dark:border-[var(--color-border)] mb-4 shadow-sm relative ${
                 disabled ? "opacity-50 pointer-events-none" : ""
               }`}
             >
@@ -208,7 +208,9 @@ export default function CoursePanel({
               </div>
 
               {hoursError && (
-                <p className="-mt-2 mb-3 text-sm text-red-600">{hoursError}</p>
+                <p className="-mt-2 mb-3 text-sm text-red-600 dark:text-[var(--color-danger)] dark:bg-[var(--color-danger)]/15 dark:rounded-md">
+                  {hoursError}
+                </p>
               )}
 
               {/* Description */}
@@ -223,7 +225,7 @@ export default function CoursePanel({
                       el.style.height = `${el.scrollHeight}px`;
                     }
                   }}
-                  className="block w-full rounded-md bg-white dark:bg-[var(--color-bg-card)] text-gray-900 dark:text-[var(--color-text-primary)] px-3 py-1.5 text-base placeholder:text-gray-400 dark:text-[var(--color-text-muted)] 
+                  className="block w-full rounded-md bg-white dark:bg-[var(--color-bg-card)] text-gray-900 dark:text-[var(--color-text-primary)] px-3 py-1.5 text-base placeholder:text-gray-400 dark:placeholder:text-[var(--color-text-muted)] 
                   outline outline-1 -outline-offset-1 outline-patras-buccaneer 
                   focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer 
                   focus:ring-0 sm:text-sm/6"
@@ -237,7 +239,7 @@ export default function CoursePanel({
                   disabled={disabled}
                 />
                 {errors[`course${idx}_description`] && (
-                  <p className="mt-2 text-sm text-red-600">
+                  <p className="mt-2 text-sm text-red-600 dark:text-[var(--color-danger)] dark:bg-[var(--color-danger)]/15 dark:rounded-md">
                     {errors[`course${idx}_description`]}
                   </p>
                 )}

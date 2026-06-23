@@ -116,9 +116,9 @@ export default function RegisterAdmin() {
 
       <div className="mt-0 sm:mx-auto sm:w-full sm:max-w-2xl">
         <div
-          className="bg-white dark:bg-[var(--color-bg-card)] py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-200 dark:border-[var(--color-border)]"
+          className="bg-white dark:bg-[var(--color-bg-card)] py-8 px-4 shadow-lg dark:shadow-lg dark:shadow-gray-500/30 sm:rounded-lg sm:px-10 border border-gray-200 dark:border-transparent"
         >
-          <div className="text-[13px] text-red-900 font-medium pb-4 text-center">
+          <div className="text-[13px] text-red-900 dark:text-red-400 font-medium pb-4 text-center">
             Αυτή η φόρμα δημιουργεί λογαριασμό διαχειριστή με ειδικά δικαιώματα
           </div>
           <form className="space-y-6" onSubmit={handleSubmit}>

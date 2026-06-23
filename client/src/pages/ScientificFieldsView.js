@@ -406,11 +406,11 @@ export default function ScientificFieldsView() {
           {filterTags.map((tag, idx) => (
             <span
               key={idx}
-              className="inline-flex items-center bg-patras-buccaneer/10 text-patras-buccaneer px-3 py-1 rounded-full text-xs font-medium border border-patras-buccaneer"
+              className="inline-flex items-center bg-patras-buccaneer/10 text-patras-buccaneer dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-secondary)] px-3 py-1 rounded-full text-xs font-medium border border-patras-buccaneer dark:border-[var(--color-border-accent)]"
             >
               {tag.label}
               <button
-                className="ml-2 text-patras-sanguineBrown hover:text-red-700 text-xs font-bold"
+                className="ml-2 text-patras-sanguineBrown hover:text-red-700 dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] text-xs font-bold"
                 onClick={() => removeTag(tag)}
                 title="Αφαίρεση φίλτρου"
               >
@@ -422,7 +422,7 @@ export default function ScientificFieldsView() {
             <button
               type="button"
               onClick={clearAllFilters}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border border-patras-buccaneer text-patras-buccaneer hover:bg-patras-buccaneer hover:text-white transition"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border border-patras-buccaneer text-patras-buccaneer hover:bg-patras-buccaneer hover:text-white dark:border-[var(--color-border-accent)] dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-primary)] dark:hover:text-[var(--color-text-inverse)] transition"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M3 6h18" />
@@ -515,6 +515,7 @@ export default function ScientificFieldsView() {
           loading={loading}
           loadingMessage="Φόρτωση πεδίων..."
           emptyMessage="Δεν υπάρχουν διαθέσιμες θέσεις."
+          tbodyClassName="divide-y divide-patras-cameo text-[13px] [&_tr]:transition-none [&_td]:text-patras-buccaneer dark:[&_td]:text-[var(--color-text-primary)]"
           headerCellClassName="px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider cursor-pointer select-none"
           initialSortBy="state"
           initialSortDirection="desc"

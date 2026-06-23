@@ -421,7 +421,7 @@ export default function ScientificFieldsCreate() {
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-10 bg-white dark:bg-[var(--color-bg-card)] backdrop-blur-md p-8 rounded-2xl shadow-lg border border-patras-albescentWhite-50"
+        className="space-y-10 bg-white dark:bg-[var(--color-bg-card)] backdrop-blur-md p-8 rounded-2xl shadow-lg border border-patras-albescentWhite-50 dark:border-transparent"
         noValidate
       >
         {/* BASIC INFO */}
@@ -494,7 +494,9 @@ export default function ScientificFieldsCreate() {
           errors={validationErrors}
         />
         {showCourseError && validationErrors.courses && (
-          <p className="-mt-6 text-sm text-red-600">{validationErrors.courses}</p>
+          <p className="-mt-6 text-sm text-red-600 dark:text-[var(--color-danger)] dark:bg-[var(--color-danger)]/15 dark:rounded-md">
+            {validationErrors.courses}
+          </p>
         )}
 
         {showPositionFields && (

@@ -54,7 +54,7 @@ export default function PhdAbstractField({
           value={safeValue}
           onChange={(event) => onChange(event.target.value)}
           ref={textareaRef}
-          className={`block w-full rounded-md px-3 py-2 text-sm text-gray-900 dark:text-[var(--color-text-primary)] outline outline-1 -outline-offset-1 placeholder:text-gray-400 dark:text-[var(--color-text-muted)] focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer focus:ring-offset-0 focus:ring-patras-buccaneer ${
+          className={`block w-full rounded-md px-3 py-2 text-sm text-gray-900 outline outline-1 -outline-offset-1 placeholder:text-gray-400 dark:text-[var(--color-text-muted)] focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer focus:ring-offset-0 focus:ring-patras-buccaneer ${
             tooShort ? "outline-red-500 focus:outline-red-500" : ""
           }`}
           placeholder={placeholder}

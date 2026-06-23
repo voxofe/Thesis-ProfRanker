@@ -113,7 +113,7 @@ export default function Register() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
         <div
-          className={`bg-white dark:bg-[var(--color-bg-card)] py-8 px-4 shadow-lg dark:shadow-lg dark:shadow-gray-500/30 sm:rounded-lg sm:px-10 border border-gray-200 dark:border-[var(--color-border)]`}
+          className={`bg-white dark:bg-[var(--color-bg-card)] py-8 px-4 shadow-lg dark:shadow-lg dark:shadow-gray-500/30 sm:rounded-lg sm:px-10 border border-gray-200 dark:border-transparent`}
         >
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (

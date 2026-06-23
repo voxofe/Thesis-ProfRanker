@@ -21,6 +21,7 @@ import {
 } from "recharts";
 import LoadingIndicator from "../components/LoadingIndicator";
 import PageTitle from "../components/PageTitle";
+import { useTheme } from "../contexts";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -30,12 +31,19 @@ const API_BASE_URL = (
   ""
 );
 
+const CHART_TICK_COLOR = "var(--color-text-secondary)";
+const TIMELINE_PERIOD_COLOR_LIGHT = "#7f3b2e";
+const TIMELINE_CUMULATIVE_COLOR_LIGHT = "#b97f58";
+const TIMELINE_PERIOD_COLOR_DARK = "#f59e7a";
+const TIMELINE_CUMULATIVE_COLOR_DARK = "#f7d08a";
+const CHART_CURSOR_FILL = "rgba(215, 179, 156, 0.18)";
+
 function StatCard({ title, value, subtitle }) {
   return (
-    <div className="rounded-lg border border-patras-buccaneer/20 bg-patras-albescentWhite/20 p-4 shadow-sm">
-      <p className="text-sm font-medium text-patras-buccaneer/70">{title}</p>
-      <p className="mt-2 text-3xl font-semibold text-patras-buccaneer">{value}</p>
-      {subtitle ? <p className="mt-1 text-xs text-patras-buccaneer/70">{subtitle}</p> : null}
+    <div className="rounded-lg border border-patras-buccaneer/20 bg-patras-albescentWhite/20 p-4 shadow-sm dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)]">
+      <p className="text-sm font-medium text-patras-buccaneer/70 dark:text-[var(--color-text-muted)]">{title}</p>
+      <p className="mt-2 text-3xl font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)]">{value}</p>
+      {subtitle ? <p className="mt-1 text-xs text-patras-buccaneer/70 dark:text-[var(--color-text-muted)]">{subtitle}</p> : null}
     </div>
   );
 }
@@ -52,17 +60,17 @@ function ChartContainer({ title, children }) {
 }
 
 function EmptyChartState() {
-  return <p className="text-sm text-patras-buccaneer/70">Δεν υπάρχουν διαθέσιμα δεδομένα.</p>;
+  return <p className="text-sm text-patras-buccaneer/70 dark:text-[var(--color-text-muted)]">Δεν υπάρχουν διαθέσιμα δεδομένα.</p>;
 }
 
 function UnifiedTooltip({ title, rows }) {
   if (!rows?.length) return null;
   return (
     <div className="rounded-md border border-patras-capePalliser/60 bg-white dark:bg-[var(--color-bg-card)] px-4 py-3 text-sm shadow-lg">
-      {title ? <div className="mb-1 font-semibold text-patras-buccaneer">{title}</div> : null}
+      {title ? <div className="mb-1 font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)]">{title}</div> : null}
       <div className="space-y-1">
         {rows.map((row, idx) => (
-          <div key={`${row.label}-${idx}`} className="text-patras-buccaneer/90">
+          <div key={`${row.label}-${idx}`} className="text-patras-buccaneer/90 dark:text-[var(--color-text-secondary)]">
             {row?.text ? (
               <span>{row.text}</span>
             ) : (
@@ -118,22 +126,22 @@ function BarChartCard({
             <CartesianGrid strokeDasharray="3 3" stroke="#eadccf" />
             {isHorizontal ? (
               <>
-                <XAxis dataKey="name" tick={{ fill: "#7f3b2e", fontSize: 12 }} />
-                <YAxis allowDecimals={false} tick={{ fill: "#7f3b2e", fontSize: 12 }} />
+                <XAxis dataKey="name" tick={{ fill: CHART_TICK_COLOR, fontSize: 12 }} />
+                <YAxis allowDecimals={false} tick={{ fill: CHART_TICK_COLOR, fontSize: 12 }} />
               </>
             ) : (
               <>
-                <XAxis type="number" allowDecimals={false} tick={{ fill: "#7f3b2e", fontSize: 12 }} />
+                <XAxis type="number" allowDecimals={false} tick={{ fill: CHART_TICK_COLOR, fontSize: 12 }} />
                 <YAxis
                   type="category"
                   dataKey="name"
                   width={160}
-                  tick={{ fill: "#7f3b2e", fontSize: 12 }}
+                  tick={{ fill: CHART_TICK_COLOR, fontSize: 12 }}
                 />
               </>
             )}
             <Tooltip
-              cursor={{ fill: "#f7eee5" }}
+              cursor={{ fill: CHART_CURSOR_FILL }}
               content={({ active, payload, label }) => {
                 if (!active || !payload?.length) return null;
                 const row = payload[0]?.payload || {};
@@ -192,7 +200,7 @@ function BarChartCard({
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <div className="pt-2 text-sm font-medium text-patras-buccaneer/80">
+      <div className="pt-2 text-sm font-medium text-patras-buccaneer/80 dark:text-[var(--color-text-secondary)]">
         Σύνολο: {resolvedTotal}
       </div>
     </ChartContainer>
@@ -234,10 +242,10 @@ function PublicationCountCard({ title, data }) {
         <ResponsiveContainer>
           <BarChart data={histogramData} layout="horizontal" margin={{ top: 8, right: 24, left: 12, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#eadccf" />
-            <XAxis dataKey="name" tick={{ fill: "#7f3b2e", fontSize: 12 }} />
-            <YAxis allowDecimals={false} tick={{ fill: "#7f3b2e", fontSize: 12 }} />
+            <XAxis dataKey="name" tick={{ fill: CHART_TICK_COLOR, fontSize: 12 }} />
+            <YAxis allowDecimals={false} tick={{ fill: CHART_TICK_COLOR, fontSize: 12 }} />
             <Tooltip
-              cursor={{ fill: "#f7eee5" }}
+              cursor={{ fill: CHART_CURSOR_FILL }}
               content={({ active, payload }) => {
                 if (!active || !payload?.length) return null;
                 const row = payload[0]?.payload || {};
@@ -262,7 +270,7 @@ function PublicationCountCard({ title, data }) {
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <div className="pt-2 text-sm font-medium text-patras-buccaneer/80">
+      <div className="pt-2 text-sm font-medium text-patras-buccaneer/80 dark:text-[var(--color-text-secondary)]">
         Σύνολο: {total} αιτήσεις
       </div>
     </ChartContainer>
@@ -286,10 +294,10 @@ function WorkExperienceVerticalCard({ title, data, fixedHeight = 300 }) {
         <ResponsiveContainer>
           <BarChart data={data} layout="horizontal" margin={{ top: 8, right: 24, left: 12, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#eadccf" />
-            <XAxis dataKey="name" tick={{ fill: "#7f3b2e", fontSize: 12 }} />
-            <YAxis allowDecimals={false} tick={{ fill: "#7f3b2e", fontSize: 12 }} />
+            <XAxis dataKey="name" tick={{ fill: CHART_TICK_COLOR, fontSize: 12 }} />
+            <YAxis allowDecimals={false} tick={{ fill: CHART_TICK_COLOR, fontSize: 12 }} />
             <Tooltip
-              cursor={{ fill: "#f7eee5" }}
+              cursor={{ fill: CHART_CURSOR_FILL }}
               content={({ active, payload, label }) => {
                 if (!active || !payload?.length) return null;
                 const row = payload[0]?.payload || {};
@@ -319,7 +327,7 @@ function WorkExperienceVerticalCard({ title, data, fixedHeight = 300 }) {
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <div className="pt-2 text-sm font-medium text-patras-buccaneer/80">
+      <div className="pt-2 text-sm font-medium text-patras-buccaneer/80 dark:text-[var(--color-text-secondary)]">
         Σύνολο: {total}
       </div>
     </ChartContainer>
@@ -347,10 +355,11 @@ function RelevanceHistogramCard({ title, data }) {
               domain={[0, 45]}
               allowDecimals={false}
               tickCount={10}
-              tick={{ fill: "#7f3b2e", fontSize: 12 }}
+              tick={{ fill: CHART_TICK_COLOR, fontSize: 12 }}
             />
-            <YAxis allowDecimals={false} tick={{ fill: "#7f3b2e", fontSize: 12 }} />
+            <YAxis allowDecimals={false} tick={{ fill: CHART_TICK_COLOR, fontSize: 12 }} />
             <Tooltip
+              cursor={{ fill: CHART_CURSOR_FILL }}
               content={({ active, payload }) => {
                 if (!active || !payload?.length) return null;
                 const row = payload[0]?.payload || {};
@@ -376,7 +385,7 @@ function RelevanceHistogramCard({ title, data }) {
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <div className="pt-2 text-sm font-medium text-patras-buccaneer/80">
+      <div className="pt-2 text-sm font-medium text-patras-buccaneer/80 dark:text-[var(--color-text-secondary)]">
         Σύνολο: {total}
       </div>
     </ChartContainer>
@@ -406,9 +415,9 @@ function DistributionAreaCard({ title, data }) {
               domain={[0, 96]}
               allowDecimals={false}
               tickCount={13}
-              tick={{ fill: "#7f3b2e", fontSize: 12 }}
+              tick={{ fill: CHART_TICK_COLOR, fontSize: 12 }}
             />
-            <YAxis allowDecimals={false} tick={{ fill: "#7f3b2e", fontSize: 12 }} />
+            <YAxis allowDecimals={false} tick={{ fill: CHART_TICK_COLOR, fontSize: 12 }} />
             <Tooltip
               content={({ active, payload }) => {
                 if (!active || !payload?.length) return null;
@@ -441,7 +450,7 @@ function DistributionAreaCard({ title, data }) {
           </AreaChart>
         </ResponsiveContainer>
       </div>
-      <div className="pt-2 text-sm font-medium text-patras-buccaneer/80">
+      <div className="pt-2 text-sm font-medium text-patras-buccaneer/80 dark:text-[var(--color-text-secondary)]">
         Σύνολο: {total}
       </div>
     </ChartContainer>
@@ -474,6 +483,7 @@ function GenderPieCard({ data, totalCount }) {
                 innerRadius={55}
                 outerRadius={95}
                 paddingAngle={2}
+                stroke="none"
               >
                 {data.map((entry, idx) => (
                   <Cell key={entry.name} fill={pieColors[idx % pieColors.length]} />
@@ -500,25 +510,25 @@ function GenderPieCard({ data, totalCount }) {
         </div>
         <div className="space-y-3 self-center">
           {data.map((row, idx) => (
-            <div key={row.name} className="flex items-center justify-between gap-3 rounded-md border border-patras-buccaneer/15 bg-patras-albescentWhite/20 px-3 py-2">
+            <div key={row.name} className="flex items-center justify-between gap-3 rounded-md border border-patras-buccaneer/15 bg-patras-albescentWhite/20 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-surface)] px-3 py-2">
               <div className="flex items-center gap-2">
                 <span
                   className="inline-block h-3 w-3 rounded-full"
                   style={{ backgroundColor: pieColors[idx % pieColors.length] }}
                 />
-                <span className="text-sm text-patras-buccaneer">{row.name}</span>
+                <span className="text-sm text-patras-buccaneer dark:text-[var(--color-text-secondary)]">{row.name}</span>
               </div>
-              <span className="text-sm font-semibold text-patras-buccaneer">{row.valueLabel}</span>
+              <span className="text-sm font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)]">{row.valueLabel}</span>
             </div>
           ))}
         </div>
       </div>
-      <div className="pt-2 text-sm font-medium text-patras-buccaneer/80">Σύνολο: {totalCount}</div>
+      <div className="pt-2 text-sm font-medium text-patras-buccaneer/80 dark:text-[var(--color-text-secondary)]">Σύνολο: {totalCount}</div>
     </ChartContainer>
   );
 }
 
-function SubmissionTimelineCard({ timeline }) {
+function SubmissionTimelineCard({ timeline, isDarkMode }) {
   const granularity = timeline?.granularity || "month";
   const series = Array.isArray(timeline?.series) ? timeline.series : [];
 
@@ -542,17 +552,24 @@ function SubmissionTimelineCard({ timeline }) {
     cumulative: Number(point.cumulative || 0),
   }));
 
+  const timelinePeriodColor = isDarkMode
+    ? TIMELINE_PERIOD_COLOR_DARK
+    : TIMELINE_PERIOD_COLOR_LIGHT;
+  const timelineCumulativeColor = isDarkMode
+    ? TIMELINE_CUMULATIVE_COLOR_DARK
+    : TIMELINE_CUMULATIVE_COLOR_LIGHT;
+
   return (
     <ChartContainer title="Ρυθμός υποβολής αιτήσεων">
-      <div className="mb-2 text-xs text-patras-buccaneer/70">
+      <div className="mb-2 text-xs text-patras-buccaneer/70 dark:text-[var(--color-text-muted)]">
         Ανάλυση {granularityLabelMap[granularity] || "ανά περίοδο"}
       </div>
       <div style={{ width: "100%", height: 320 }}>
         <ResponsiveContainer>
           <LineChart data={chartData} margin={{ top: 8, right: 18, left: 8, bottom: 12 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#eadccf" />
-            <XAxis dataKey="name" tick={{ fill: "#7f3b2e", fontSize: 12 }} />
-            <YAxis allowDecimals={false} tick={{ fill: "#7f3b2e", fontSize: 12 }} />
+            <XAxis dataKey="name" tick={{ fill: CHART_TICK_COLOR, fontSize: 12 }} />
+            <YAxis allowDecimals={false} tick={{ fill: CHART_TICK_COLOR, fontSize: 12 }} />
             <Tooltip
               content={({ active, payload, label }) => {
                 if (!active || !payload?.length) return null;
@@ -580,17 +597,17 @@ function SubmissionTimelineCard({ timeline }) {
             />
             <Legend
               verticalAlign="bottom"
-              wrapperStyle={{ paddingTop: 16 }}
+              wrapperStyle={{ paddingTop: 16, color: CHART_TICK_COLOR }}
               formatter={(value) => {
-                if (value === "applications") return "Υποβολές περιόδου";
-                if (value === "cumulative") return "Συνολικές υποβολές";
-                return value;
+                if (value === "applications") return <span style={{ color: timelinePeriodColor }}>Υποβολές περιόδου</span>;
+                if (value === "cumulative") return <span style={{ color: timelineCumulativeColor }}>Συνολικές υποβολές</span>;
+                return <span style={{ color: CHART_TICK_COLOR }}>{value}</span>;
               }}
             />
             <Line
               type="monotone"
               dataKey="applications"
-              stroke="#7f3b2e"
+              stroke={timelinePeriodColor}
               strokeWidth={2.5}
               dot={{ r: 2.5 }}
               activeDot={{ r: 5 }}
@@ -600,7 +617,8 @@ function SubmissionTimelineCard({ timeline }) {
             <Line
               type="monotone"
               dataKey="cumulative"
-              stroke="#b97f58"
+              stroke={timelineCumulativeColor}
+              legendType="plainline"
               strokeDasharray="6 4"
               strokeWidth={2}
               dot={false}
@@ -619,6 +637,7 @@ function normalizeSelectValue(nextValue) {
 }
 
 export default function Analytics() {
+  const { isDarkMode } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [analytics, setAnalytics] = useState(null);
@@ -827,7 +846,7 @@ export default function Analytics() {
                   positionId: "",
                 })
               }
-              className="inline-flex w-full items-center justify-center rounded-md bg-white dark:bg-[var(--color-bg-card)] px-4 py-2 text-sm font-semibold text-patras-buccaneer border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer"
+              className="inline-flex w-full items-center justify-center rounded-md bg-white dark:bg-[var(--color-bg-card)] px-4 py-2 text-sm font-semibold text-patras-buccaneer dark:text-[var(--color-text-secondary)] border border-patras-buccaneer dark:border-[var(--color-border-accent)] shadow-sm hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-bg-muted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer dark:focus-visible:outline-[var(--color-primary)]"
             >
               Επαναφορά
             </button>
@@ -836,8 +855,8 @@ export default function Analytics() {
       </div>
 
       {loading ? (
-        <div className="rounded-lg border border-patras-capePalliser/50 bg-white dark:bg-[var(--color-bg-card)] p-6 text-sm text-patras-buccaneer shadow-md">
-          <LoadingIndicator size="sm" textClassName="mt-2 text-patras-buccaneer" />
+        <div className="rounded-lg border border-patras-capePalliser/50 bg-white dark:bg-[var(--color-bg-card)] p-6 text-sm text-patras-buccaneer dark:text-[var(--color-text-secondary)] shadow-md">
+          <LoadingIndicator size="sm" textClassName="mt-2 text-patras-buccaneer dark:text-[var(--color-text-secondary)]" />
         </div>
       ) : error ? (
         <div className="rounded-lg border border-red-300 bg-red-50 p-6 text-sm text-red-700 shadow-md">
@@ -903,7 +922,7 @@ export default function Analytics() {
           </div>
 
           <div className="mb-6">
-            <SubmissionTimelineCard timeline={submissionTimeline} />
+            <SubmissionTimelineCard timeline={submissionTimeline} isDarkMode={isDarkMode} />
           </div>
 
           {/*

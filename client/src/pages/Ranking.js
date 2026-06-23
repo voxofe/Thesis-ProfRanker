@@ -858,7 +858,7 @@ export default function Ranking() {
           initialSortBy="totalPoints"
           initialSortDirection="desc"
           headerCellClassName={headerCellClassName}
-          tbodyClassName="divide-y divide-patras-cameo text-[13px] [&_tr]:transition-colors [&_td]:text-patras-buccaneer dark:[&_td]:text-[var(--color-text-primary)]"
+          tbodyClassName="divide-y divide-patras-cameo text-[13px] [&_tr]:transition-none [&_td]:text-patras-buccaneer dark:[&_td]:text-[var(--color-text-primary)]"
           emptyMessage="Δεν βρέθηκαν αποτελέσματα με βάση τα φίλτρα σας."
           renderRow={renderRow}
         />
