@@ -30,6 +30,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import LoadingIndicator from "./components/LoadingIndicator";
 import { EMAIL_VERIFICATION_ENABLED } from "./utils/featureFlags";
 import {
+  ThemeProvider,
   FormDataProvider,
   AuthProvider,
   useAuth,
@@ -44,19 +45,21 @@ import { ToastProvider } from "./contexts/ToastContext";
 
 export default function App() {
   return (
-    <CreatePositionValidationProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <PositionsProvider>
-            <Router>
-              <PreviousLocationProvider>
-                <AppContent />
-              </PreviousLocationProvider>
-            </Router>
-          </PositionsProvider>
-        </ToastProvider>
-      </AuthProvider>
-    </CreatePositionValidationProvider>
+    <ThemeProvider>
+      <CreatePositionValidationProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <PositionsProvider>
+              <Router>
+                <PreviousLocationProvider>
+                  <AppContent />
+                </PreviousLocationProvider>
+              </Router>
+            </PositionsProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </CreatePositionValidationProvider>
+    </ThemeProvider>
   );
 }
 

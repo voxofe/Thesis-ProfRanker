@@ -74,10 +74,10 @@ export default function HomeAdmin() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-700 mb-2">
+        <h1 className="text-2xl font-bold text-gray-700 dark:text-[var(--color-text-primary)] mb-2">
           Καλώς ήρθατε, διαχειριστή
         </h1>
-        <p className="text-gray-600 text-[17px]">
+        <p className="text-gray-600 dark:text-[var(--color-text-secondary)] text-[17px]">
           Έχετε πλήρη πρόσβαση στο σύστημα διαχείρισης αιτήσεων
         </p>
       </div>

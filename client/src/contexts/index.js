@@ -1,4 +1,5 @@
 export * from "./AuthContext";
+export * from "./ThemeContext";
 export * from "./FormDataContext";
 export * from "./ValidationContext";
 export * from "./PositionsContext";

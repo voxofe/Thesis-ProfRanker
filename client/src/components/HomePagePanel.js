@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import Tooltip from "./Tooltip"; // adjust path as needed
 import { Link } from "react-router-dom";
+import { useTheme } from "../contexts";
 
 export default function HomePagePanel({
   title,
@@ -9,19 +10,27 @@ export default function HomePagePanel({
   buttonAction,
   to,
   buttonDisabled = false,
-  colorClass = "bg-patras-albescentWhite/20 border border-patras-albescentWhite",
+  colorClass = "bg-patras-albescentWhite/20 border border-patras-albescentWhite dark:bg-[var(--color-bg-card)] dark:border-[var(--color-border-accent)]",
   children,
   infoPopup,
   showInfoMark = false,
   infoMarkColor = "text-patras-buccaneer",
-  infoPopupColor = "border-patras-buccaneer text-patras-buccaneer",
+  infoPopupColor = "border-patras-buccaneer text-patras-buccaneer dark:border-[var(--color-border)] dark:text-[var(--color-text-secondary)]",
 }) {
+  const { isDarkMode } = useTheme();
   const iconRef = useRef(null);
   const [openTip, setOpenTip] = useState(false);
+  const darkCardStyle = isDarkMode
+    ? {
+        backgroundColor: "var(--color-bg-card)",
+        backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.04))",
+        borderColor: "var(--color-border)",
+      }
+    : undefined;
 
   return (
-    <div className={`${colorClass} rounded-lg p-6 hover:shadow-md transition-shadow flex flex-col justify-between`}>
-      <h3 className="text-lg font-semibold text-patras-buccaneer mb-3 flex items-center">
+    <div className={`${colorClass} rounded-lg p-6 hover:shadow-md transition-shadow flex flex-col justify-between`} style={darkCardStyle}>
+      <h3 className="text-lg font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)] mb-3 flex items-center">
         {title}
         {showInfoMark && infoPopup && !buttonDisabled && (
           <>
@@ -58,7 +67,7 @@ export default function HomePagePanel({
             <Tooltip
               anchorRef={iconRef}
               open={openTip}
-              className={`bg-white border ${infoPopupColor} text-xs px-2 py-1 rounded-lg shadow-lg whitespace-nowrap min-w-max`}
+              className={`bg-white border ${infoPopupColor} text-xs px-2 py-1 rounded-lg shadow-lg whitespace-nowrap min-w-max dark:bg-[var(--color-bg-card)]`}
             >
               {infoPopup}
             </Tooltip>
@@ -66,7 +75,7 @@ export default function HomePagePanel({
         )}
       </h3>
 
-      <p className="text-patras-buccaneer mb-4 flex items-center">{description}</p>
+      <p className="text-patras-buccaneer dark:text-[var(--color-text-secondary)] mb-4 flex items-center">{description}</p>
       {children}
       <div>
         {to && !buttonDisabled ? (
