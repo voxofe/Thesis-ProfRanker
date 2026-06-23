@@ -40,7 +40,7 @@ export default function SubmissionProgress({
           {percentLabel}
         </span>
       </div>
-      <div className="h-3 w-full rounded-full bg-gray-200">
+      <div className="h-3 w-full rounded-full bg-gray-200 dark:bg-[var(--color-bg-muted)]">
         <div
           className="h-3 rounded-full bg-patras-buccaneer transition-all"
           style={{ width: `${Math.max(0, Math.min(100, percentValue))}%` }}

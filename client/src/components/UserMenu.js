@@ -34,7 +34,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white/90 px-2 py-1 shadow-sm hover:bg-patras-albescentWhite/40 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)] dark:hover:bg-[var(--color-bg-muted)]"
+        className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white/90 px-2 py-1 shadow-sm hover:bg-patras-albescentWhite/40 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)] dark:hover:bg-patras-albescentWhite/40"
         aria-haspopup="menu"
         aria-expanded={open}
       >
@@ -78,7 +78,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
 
           <Link
             to="/change-password"
-            className="w-full flex items-center justify-end gap-2 px-4 py-3 text-sm text-gray-700 text-right hover:bg-patras-albescentWhite/40 dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-bg-muted)]"
+            className="w-full flex items-center justify-end gap-2 px-4 py-3 text-sm text-gray-700 text-right hover:bg-patras-albescentWhite/40 dark:text-[var(--color-text-secondary)] dark:hover:bg-patras-albescentWhite/40"
             onClick={() => setOpen(false)}
             role="menuitem"
           >
@@ -92,7 +92,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
               setOpen(false);
               onLogout();
             }}
-            className="w-full flex items-center justify-end gap-2 px-4 py-3 text-sm text-gray-700 text-right hover:bg-patras-albescentWhite/40 dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-bg-muted)]"
+            className="w-full flex items-center justify-end gap-2 px-4 py-3 text-sm text-gray-700 text-right hover:bg-patras-albescentWhite/40 dark:text-[var(--color-text-secondary)] dark:hover:bg-patras-albescentWhite/40"
             role="menuitem"
           >
             <span className="font-medium">Αποσύνδεση</span>

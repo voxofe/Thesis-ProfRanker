@@ -32,8 +32,8 @@ function getStateBadgeClasses(state) {
   if (state === "Ενεργή") return `${base} bg-yellow-100 text-yellow-800 border border-yellow-200`;
   if (state === "Ολοκληρωμένη") return `${base} bg-green-100 text-green-800 border border-green-200`;
   if (state === "Προσεχής") return `${base} bg-blue-100 text-blue-800 border border-blue-200`;
-  if (state === "Ανενεργή") return `${base} bg-gray-100 text-gray-700 border border-gray-200`;
-  return `${base} bg-gray-100 text-gray-700 border border-gray-200`;
+  if (state === "Ανενεργή") return `${base} bg-gray-100 dark:bg-[var(--color-bg-surface)] text-gray-700 dark:text-[var(--color-text-secondary)] border border-gray-200 dark:border-[var(--color-border)]`;
+  return `${base} bg-gray-100 dark:bg-[var(--color-bg-surface)] text-gray-700 dark:text-[var(--color-text-secondary)] border border-gray-200 dark:border-[var(--color-border)]`;
 }
 
 export default function ScientificFieldSingle() {
@@ -208,14 +208,14 @@ export default function ScientificFieldSingle() {
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-y-5 pt-5">
-        <LoadingIndicator size="sm" textClassName="mt-2 text-gray-600" />
+        <LoadingIndicator size="sm" textClassName="mt-2 text-gray-600 dark:text-[var(--color-text-secondary)]" />
       </div>
     );
   }
 
   return (
     <div className="max-w-5xl mx-auto p-0 space-y-6 pb-10">
-      <h1 className="text-2xl text-center border-b pb-2 text-gray-800">
+      <h1 className="text-2xl text-center border-b pb-2 text-gray-800 dark:text-[var(--color-text-primary)]">
         {fieldName ? (
           <>
             Επιστημονικό πεδίο: <span className="text-lg font-semibold">{fieldName}</span>
@@ -240,13 +240,13 @@ export default function ScientificFieldSingle() {
             onClick={handleClosePositionModal}
           >
             <div
-              className="relative z-[9999] w-full max-w-[700px] max-h-[86vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white px-8 pt-8 pb-6 shadow-2xl"
+              className="relative z-[9999] w-full max-w-[700px] max-h-[86vh] overflow-y-auto rounded-2xl border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-card)] px-8 pt-8 pb-6 shadow-2xl"
               onClick={(event) => event.stopPropagation()}
             >
               <button
                 type="button"
                 onClick={handleClosePositionModal}
-                className="absolute right-6 top-5 z-10 text-3xl leading-none text-gray-600 hover:text-gray-900"
+                className="absolute right-6 top-5 z-10 text-3xl leading-none text-gray-600 dark:text-[var(--color-text-secondary)] hover:text-gray-900 dark:text-[var(--color-text-primary)]"
                 aria-label="Κλείσιμο"
                 title="Κλείσιμο"
               >
@@ -285,7 +285,7 @@ export default function ScientificFieldSingle() {
         <div>
           <h2 className="text-xl font-light mb-3">Στοιχεία επιστημονικού πεδίου</h2>
           <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50">
-            <table className="min-w-full bg-white/40">
+            <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
               <thead className="bg-patras-buccaneer">
                 <tr>
                   <th className="px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
@@ -323,7 +323,7 @@ export default function ScientificFieldSingle() {
 
           {courses.length ? (
             <div className="w-full overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50">
-              <table className="min-w-full bg-white/40">
+              <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
                 <thead className="bg-patras-buccaneer">
                   <tr>
                     <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
@@ -407,7 +407,7 @@ export default function ScientificFieldSingle() {
               </table>
             </div>
           ) : (
-            <p className="text-sm text-gray-500">Δεν υπάρχουν διαθέσιμα μαθήματα.</p>
+            <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">Δεν υπάρχουν διαθέσιμα μαθήματα.</p>
           )}
         </div>
 
@@ -427,7 +427,7 @@ export default function ScientificFieldSingle() {
         <div>
           <h2 className="text-xl font-light mb-3">Στοιχεία θέσης</h2>
           <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50">
-            <table className="min-w-full bg-white/40">
+            <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
               <thead className="bg-patras-buccaneer">
                 <tr>
                   <th className="px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">

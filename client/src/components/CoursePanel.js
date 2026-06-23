@@ -54,18 +54,18 @@ export default function CoursePanel({
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">
+      <h2 className="text-lg font-semibold text-gray-700 dark:text-[var(--color-text-secondary)] mb-4 border-b pb-1">
         Μαθήματα
       </h2>
 
       <div className="space-y-3">
         {courses.length === 0 ? ( // Check if there are no courses
           scientificFieldValue === "select" ? ( // Check if scientific field is "select"
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-gray-500 dark:text-[var(--color-text-muted)] py-8">
               <p>Επιλέξτε επιστημονικό πεδίο για να δείτε τα διαθέσιμα μαθήματα.</p>
             </div>
           ) : (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-gray-500 dark:text-[var(--color-text-muted)] py-8">
               <p>Δεν έχετε προσθέσει ακόμη κάποιο μάθημα.</p>
               <p className="text-sm mt-2">
                 Χρησιμοποιήστε το κουμπί παρακάτω για να προσθέσετε ένα.
@@ -213,7 +213,7 @@ export default function CoursePanel({
 
               {/* Description */}
               <div className="mt-4">
-                <label className="block text-sm font-medium pb-2 text-gray-900 mb-1">
+                <label className="block text-sm font-medium pb-2 text-gray-900 dark:text-[var(--color-text-primary)] mb-1">
                   Περιγραφή <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -223,7 +223,7 @@ export default function CoursePanel({
                       el.style.height = `${el.scrollHeight}px`;
                     }
                   }}
-                  className="block w-full rounded-md bg-white text-gray-900 px-3 py-1.5 text-base placeholder:text-gray-400 
+                  className="block w-full rounded-md bg-white dark:bg-[var(--color-bg-card)] text-gray-900 dark:text-[var(--color-text-primary)] px-3 py-1.5 text-base placeholder:text-gray-400 dark:text-[var(--color-text-muted)] 
                   outline outline-1 -outline-offset-1 outline-patras-buccaneer 
                   focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer 
                   focus:ring-0 sm:text-sm/6"

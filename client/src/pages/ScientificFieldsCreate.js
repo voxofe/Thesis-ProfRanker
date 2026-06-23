@@ -413,19 +413,19 @@ export default function ScientificFieldsCreate() {
         percent={progressPercent}
       />
       <header className="text-center pb-2">
-        <h1 className="text-2xl text-center border-b pb-2 text-gray-800">
+        <h1 className="text-2xl text-center border-b pb-2 text-gray-800 dark:text-[var(--color-text-primary)]">
           {isEditMode ? "Ενημέρωση πεδίου" : "Δημιουργία πεδίου"}
         </h1>
       </header>
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-10 bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-patras-albescentWhite-50"
+        className="space-y-10 bg-white dark:bg-[var(--color-bg-card)] backdrop-blur-md p-8 rounded-2xl shadow-lg border border-patras-albescentWhite-50"
         noValidate
       >
         {/* BASIC INFO */}
         <section>
-          <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Βασικές πληροφορίες</h2>
+          <h2 className="text-lg font-semibold text-gray-700 dark:text-[var(--color-text-secondary)] mb-4 border-b pb-1">Βασικές πληροφορίες</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InputField
@@ -498,7 +498,7 @@ export default function ScientificFieldsCreate() {
 
         {showPositionFields && (
           <section>
-            <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-1">Στοιχεία θέσης</h2>
+            <h2 className="text-lg font-semibold text-gray-700 dark:text-[var(--color-text-secondary)] mb-4 border-b pb-1">Στοιχεία θέσης</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>

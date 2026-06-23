@@ -28,7 +28,7 @@ function IssnCell({ issn }) {
             </text>
           </svg>
           {/* Tooltip */}
-          <span className="absolute left-6 top-1 z-10 hidden group-hover:block bg-white border border-red-400 text-red-600 text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap">
+          <span className="absolute left-6 top-1 z-10 hidden group-hover:block bg-white dark:bg-[var(--color-bg-card)] border border-red-400 text-red-600 text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap">
             Το ISSN δεν βρέθηκε 
           </span>
         </span>
@@ -76,7 +76,7 @@ export default function PublicationsDrawer({ publications }) {
     return (
       <span className="relative group inline-flex items-center">
         <span>{truncate(fullAuthors)}</span>
-        <span className="absolute bottom-full left-0 z-10 mb-2 hidden w-max max-w-xs rounded border border-gray-200 bg-white px-2 py-1 text-xs text-gray-700 shadow-lg group-hover:block">
+        <span className="absolute bottom-full left-0 z-10 mb-2 hidden w-max max-w-xs rounded border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-card)] px-2 py-1 text-xs text-gray-700 dark:text-[var(--color-text-secondary)] shadow-lg group-hover:block">
           {fullAuthors}
         </span>
       </span>

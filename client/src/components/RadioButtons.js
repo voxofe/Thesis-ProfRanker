@@ -1,8 +1,8 @@
 import React from "react";
 
 export default function RadioButtons(props) {
-    const radioButtonStyle = "h-4 w-4 rounded-full border-gray-300 text-patras-buccaneer focus:ring-2 focus:ring-patras-buccaneer focus:ring-offset-0";
-    const labelStyle = `block text-sm/6 font-medium ${props.disabled ? "text-gray-400" : "text-gray-900"}`;
+    const radioButtonStyle = "h-4 w-4 rounded-full border-gray-300 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-surface)] text-patras-buccaneer dark:text-[var(--color-primary)] dark:checked:bg-[var(--color-primary)] dark:checked:border-[var(--color-primary)] focus:ring-2 focus:ring-patras-buccaneer focus:ring-offset-0";
+    const labelStyle = `block text-sm/6 font-medium ${props.disabled ? "text-gray-400 dark:text-[var(--color-text-muted)]" : "text-gray-900 dark:text-[var(--color-text-primary)]"}`;
 
     return (
         <div>
@@ -25,7 +25,7 @@ export default function RadioButtons(props) {
                         />
                         <label
                             htmlFor={option.id}
-                            className={`text-sm font-medium ${props.disabled ? "text-gray-400" : "text-gray-800"}`}
+                            className={`text-sm font-medium ${props.disabled ? "text-gray-400 dark:text-[var(--color-text-muted)]" : "text-gray-800 dark:text-[var(--color-text-secondary)]"}`}
                         >
                             {option.label}
                         </label>

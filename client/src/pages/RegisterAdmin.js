@@ -110,14 +110,14 @@ export default function RegisterAdmin() {
   return (
     <div className="flex flex-col justify-start pt-4 sm:px-6 lg:px-8 -mt-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
-        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
+        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)]">
            Εγγραφή διαχειριστή
         </h1>
       </div>
 
       <div className="mt-0 sm:mx-auto sm:w-full sm:max-w-2xl">
         <div
-          className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-200"
+          className="bg-white dark:bg-[var(--color-bg-card)] py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-200 dark:border-[var(--color-border)]"
         >
           <div className="text-[13px] text-red-900 font-medium pb-4 text-center">
             Αυτή η φόρμα δημιουργεί λογαριασμό διαχειριστή με ειδικά δικαιώματα

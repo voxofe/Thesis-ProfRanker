@@ -172,7 +172,7 @@ export default function MyApplications() {
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-y-5 pt-5">
-        <LoadingIndicator size="sm" textClassName="mt-2 text-gray-600" />
+        <LoadingIndicator size="sm" textClassName="mt-2 text-gray-600 dark:text-[var(--color-text-secondary)]" />
       </div>
     );
   }
@@ -180,7 +180,7 @@ export default function MyApplications() {
   return (
     <div>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-6 sm:pt-0 sm:pb-8">
-        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
+        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)]">
           {isAdminViewing ? (
             <>
               Αιτήσεις χρήστη: <span className="text-lg font-semibold">{headerName}</span>
@@ -191,15 +191,15 @@ export default function MyApplications() {
         </h1>
 
         {sortedApplications.length === 0 ? (
-          <div className="bg-white/85 rounded-lg border border-gray-200 shadow-sm p-6 text-center">
-            <p className="text-gray-700 font-semibold">Δεν υπάρχουν καταχωρημένες αιτήσεις.</p>
-            <p className="text-sm text-gray-500 mt-2">
+          <div className="bg-white dark:bg-[var(--color-bg-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] shadow-sm p-6 text-center">
+            <p className="text-gray-700 dark:text-[var(--color-text-secondary)] font-semibold">Δεν υπάρχουν καταχωρημένες αιτήσεις.</p>
+            <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)] mt-2">
               Μόλις υποβάλετε, θα εμφανίζονται εδώ με αναλυτικές πληροφορίες.
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-5">
-            <div className="bg-white/80 border border-gray-200 rounded-lg shadow-sm">
+            <div className="bg-white dark:bg-[var(--color-bg-card)] border border-gray-200 dark:border-[var(--color-border)] rounded-lg shadow-sm">
               <button
                 type="button"
                 onClick={() => setActiveOpen((prev) => !prev)}
@@ -211,7 +211,7 @@ export default function MyApplications() {
               {activeOpen && (
                 <div className="px-4 pb-4 grid grid-cols-1 gap-3">
                   {activeApplications.length === 0 ? (
-                    <div className="text-sm text-gray-500">Δεν υπάρχουν ενεργές αιτήσεις.</div>
+                    <div className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">Δεν υπάρχουν ενεργές αιτήσεις.</div>
                   ) : (
                     activeApplications.map((app) => (
                       <ApplicationCard
@@ -225,7 +225,7 @@ export default function MyApplications() {
               )}
             </div>
 
-            <div className="bg-white/80 border border-gray-200 rounded-lg shadow-sm">
+            <div className="bg-white dark:bg-[var(--color-bg-card)] border border-gray-200 dark:border-[var(--color-border)] rounded-lg shadow-sm">
               <button
                 type="button"
                 onClick={() => setCompletedOpen((prev) => !prev)}
@@ -237,7 +237,7 @@ export default function MyApplications() {
               {completedOpen && (
                 <div className="px-4 pb-4 grid grid-cols-1 gap-3">
                   {completedApplications.length === 0 ? (
-                    <div className="text-sm text-gray-500">Δεν υπάρχουν ολοκληρωμένες αιτήσεις.</div>
+                    <div className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">Δεν υπάρχουν ολοκληρωμένες αιτήσεις.</div>
                   ) : (
                     completedApplications.map((app) => (
                       <ApplicationCard

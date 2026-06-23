@@ -249,7 +249,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
     : "max-w-5xl mx-auto px-6 py-0 space-y-8";
   const formClassName = inModal
     ? "space-y-10 mt-4"
-    : "space-y-10 bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-patras-albescentWhite-50";
+    : "space-y-10 bg-white dark:bg-[var(--color-bg-card)] backdrop-blur-md p-8 rounded-2xl shadow-lg border border-patras-albescentWhite-50";
 
   return (
     <div className={wrapperClassName}>
@@ -388,7 +388,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
             <button
               type="button"
               onClick={onCancel}
-              className="px-6 py-2 border border-gray-300 text-gray-700 text-sm/6 font-medium rounded-lg hover:bg-gray-50"
+              className="px-6 py-2 border border-gray-300 dark:border-[var(--color-border)] text-gray-700 dark:text-[var(--color-text-secondary)] text-sm/6 font-medium rounded-lg hover:bg-gray-50 dark:bg-[var(--color-bg-muted)]"
             >
               Ακύρωση
             </button>

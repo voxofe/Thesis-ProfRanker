@@ -193,8 +193,8 @@ export default function VaultFileActions({
   return (
     <div
       ref={wrapperRef}
-      className={`pr-vault-upload-pill group relative inline-flex items-center rounded-full border border-gray-200 px-3 py-1 text-sm shadow-sm transition-colors duration-150 ${
-        open ? "bg-patras-buccaneer text-white" : "bg-white hover:bg-patras-buccaneer hover:text-white"
+      className={`pr-vault-upload-pill group relative inline-flex items-center rounded-full border border-gray-200 dark:border-[var(--color-border)] px-3 py-1 text-sm shadow-sm transition-colors duration-150 ${
+        open ? "bg-patras-buccaneer text-white dark:bg-[var(--color-primary-hover)]" : "bg-white dark:bg-[var(--color-bg-card)] hover:bg-patras-buccaneer dark:hover:bg-[var(--color-primary-hover)] hover:text-white"
       }`}
       style={{ overflow: "visible" }}
     >
@@ -209,7 +209,7 @@ export default function VaultFileActions({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className={`relative z-10 ${open ? "text-white" : "text-patras-buccaneer group-hover:text-white"}`}
+        className={`relative z-10 ${open ? "text-white" : "text-patras-buccaneer dark:text-[var(--color-text-primary)] group-hover:text-white"}`}
         disabled={isBusy}
         aria-busy={isBusy}
       >
@@ -244,7 +244,7 @@ export default function VaultFileActions({
         createPortal(
           <div
             ref={menuRef}
-            className="absolute z-[9999] w-max overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg"
+            className="absolute z-[9999] w-max overflow-hidden rounded-md border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-card)] shadow-lg"
             style={{
               top: `${menuPosition.top}px`,
               left: `${menuPosition.left}px`,
@@ -256,7 +256,7 @@ export default function VaultFileActions({
                 onView();
                 setOpen(false);
               }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-buccaneer hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-[var(--color-text-primary)] hover:bg-patras-buccaneer dark:hover:bg-[var(--color-primary-hover)] hover:text-white disabled:cursor-not-allowed disabled:text-gray-400 dark:disabled:text-[var(--color-text-muted)]"
               disabled={isBusy}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -271,7 +271,7 @@ export default function VaultFileActions({
                 onDownload();
                 setOpen(false);
               }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-buccaneer hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-[var(--color-text-primary)] hover:bg-patras-buccaneer dark:hover:bg-[var(--color-primary-hover)] hover:text-white disabled:cursor-not-allowed disabled:text-gray-400 dark:disabled:text-[var(--color-text-muted)]"
               disabled={isBusy}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -281,7 +281,7 @@ export default function VaultFileActions({
               </svg>
               {isDownloading ? "Λήψη..." : "Κατεβάστε"}
             </button>
-            {(showReplace || showDelete) && <div className="my-1 border-t border-gray-200" />}
+            {(showReplace || showDelete) && <div className="my-1 border-t border-gray-200 dark:border-[var(--color-border)]" />}
             {showReplace && (
               isApplicationUsed ? (
                 <div className="block w-full">
@@ -289,7 +289,7 @@ export default function VaultFileActions({
                     <button
                       type="button"
                       disabled
-                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-400 dark:text-[var(--color-text-muted)] cursor-not-allowed"
                     >
                       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M16 3h5v5" />
@@ -304,7 +304,7 @@ export default function VaultFileActions({
                 <button
                   type="button"
                   onClick={triggerReplace}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-whiskey hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-[var(--color-text-primary)] hover:bg-patras-whiskey hover:text-white disabled:cursor-not-allowed disabled:text-gray-400 dark:disabled:text-[var(--color-text-muted)]"
                   disabled={isBusy}
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -323,7 +323,7 @@ export default function VaultFileActions({
                     <button
                       type="button"
                       disabled
-                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-400 dark:text-[var(--color-text-muted)] cursor-not-allowed"
                     >
                       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M3 6h18" />
@@ -341,7 +341,7 @@ export default function VaultFileActions({
                     onDelete();
                     setOpen(false);
                   }}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-red-700 hover:text-white disabled:cursor-not-allowed disabled:text-gray-400"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-[var(--color-text-primary)] hover:bg-red-700 hover:text-white disabled:cursor-not-allowed disabled:text-gray-400 dark:disabled:text-[var(--color-text-muted)]"
                   disabled={isBusy}
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

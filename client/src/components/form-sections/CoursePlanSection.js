@@ -149,7 +149,7 @@ export default function CoursePlanSection() {
   if (!selectedPosition) {
     return (
       <section className="space-y-3">
-        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-[var(--color-warning)]/50 dark:bg-[var(--color-warning)]/15 dark:text-[var(--color-warning)]">
+        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-[var(--color-warning)] dark:bg-[var(--color-warning)] dark:text-[var(--color-warning)]">
           Επιλέξτε πρώτα επιστημονικό πεδίο στο προηγούμενο βήμα.
         </p>
       </section>
@@ -159,7 +159,7 @@ export default function CoursePlanSection() {
   if (!courses.length) {
     return (
       <section className="space-y-3">
-        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-[var(--color-warning)]/50 dark:bg-[var(--color-warning)]/15 dark:text-[var(--color-warning)]">
+        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-[var(--color-warning)] dark:bg-[var(--color-warning)] dark:text-[var(--color-warning)]">
           Δεν υπάρχουν μαθήματα για την επιλεγμένη θέση.
         </p>
       </section>
@@ -210,7 +210,7 @@ export default function CoursePlanSection() {
                       isActive
                         ? "border-patras-buccaneer bg-patras-buccaneer text-white dark:border-[var(--color-primary)] dark:bg-[var(--color-primary)] dark:text-[var(--color-text-inverse)]"
                         : isComplete
-                          ? "border-green-300 bg-green-50 text-green-800 hover:border-green-500 dark:border-[var(--color-success)]/40 dark:bg-[var(--color-success)]/15 dark:text-[var(--color-success)] dark:hover:border-[var(--color-success)]"
+                          ? "border-green-300 bg-green-50 text-green-800 hover:border-green-500 dark:border-[var(--color-success)] dark:bg-[var(--color-success)] dark:text-[var(--color-success)] dark:hover:border-[var(--color-success)]"
                           : "border-gray-300 bg-white text-gray-700 hover:border-patras-buccaneer dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)] dark:hover:border-[var(--color-primary)]"
                     }`}
                     title={course.name || `Μάθημα ${index + 1}`}

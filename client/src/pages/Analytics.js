@@ -41,7 +41,7 @@ function StatCard({ title, value, subtitle }) {
 
 function ChartContainer({ title, children }) {
   return (
-    <div className="rounded-lg border border-patras-capePalliser/50 bg-white shadow-md overflow-hidden">
+    <div className="rounded-lg border border-patras-capePalliser/50 bg-white dark:bg-[var(--color-bg-card)] shadow-md overflow-hidden">
       <div className="bg-patras-buccaneer px-4 py-2">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-white">{title}</h2>
       </div>
@@ -57,7 +57,7 @@ function EmptyChartState() {
 function UnifiedTooltip({ title, rows }) {
   if (!rows?.length) return null;
   return (
-    <div className="rounded-md border border-patras-capePalliser/60 bg-white px-4 py-3 text-sm shadow-lg">
+    <div className="rounded-md border border-patras-capePalliser/60 bg-white dark:bg-[var(--color-bg-card)] px-4 py-3 text-sm shadow-lg">
       {title ? <div className="mb-1 font-semibold text-patras-buccaneer">{title}</div> : null}
       <div className="space-y-1">
         {rows.map((row, idx) => (
@@ -752,12 +752,12 @@ export default function Analytics() {
   return (
     <div className="space-y-6">
     <div className="pt-0">
-      <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
+      <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)]">
         Στατιστικά
       </h1>
       </div>
 
-      <div className="mb-6 rounded-lg border border-patras-capePalliser/50 bg-white shadow-md overflow-visible">
+      <div className="mb-6 rounded-lg border border-patras-capePalliser/50 bg-white dark:bg-[var(--color-bg-card)] shadow-md overflow-visible">
 
         <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
           <CustomSelect
@@ -828,7 +828,7 @@ export default function Analytics() {
                   positionId: "",
                 })
               }
-              className="inline-flex w-full items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-patras-buccaneer border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer"
+              className="inline-flex w-full items-center justify-center rounded-md bg-white dark:bg-[var(--color-bg-card)] px-4 py-2 text-sm font-semibold text-patras-buccaneer border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer"
             >
               Επαναφορά
             </button>
@@ -837,7 +837,7 @@ export default function Analytics() {
       </div>
 
       {loading ? (
-        <div className="rounded-lg border border-patras-capePalliser/50 bg-white p-6 text-sm text-patras-buccaneer shadow-md">
+        <div className="rounded-lg border border-patras-capePalliser/50 bg-white dark:bg-[var(--color-bg-card)] p-6 text-sm text-patras-buccaneer shadow-md">
           <LoadingIndicator size="sm" textClassName="mt-2 text-patras-buccaneer" />
         </div>
       ) : error ? (
@@ -908,7 +908,7 @@ export default function Analytics() {
           </div>
 
           {/*
-          <div className="mb-6 rounded-lg border border-patras-capePalliser/50 bg-white shadow-md overflow-hidden">
+          <div className="mb-6 rounded-lg border border-patras-capePalliser/50 bg-white dark:bg-[var(--color-bg-card)] shadow-md overflow-hidden">
             <div className="bg-patras-buccaneer px-4 py-2">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-white">Top τμήματα (ανά πλήθος αιτήσεων)</h2>
             </div>
@@ -917,7 +917,7 @@ export default function Analytics() {
               <p className="text-sm text-patras-buccaneer/70">Δεν υπάρχουν διαθέσιμα δεδομένα.</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full bg-white/40 text-sm">
+                <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)] text-sm">
                   <thead className="bg-patras-buccaneer">
                     <tr>
                       <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-white border-r border-patras-albescentWhite">Τμήμα</th>
@@ -944,7 +944,7 @@ export default function Analytics() {
           */}
 
           {/*
-          <div className="rounded-lg border border-patras-capePalliser/50 bg-white shadow-md overflow-hidden">
+          <div className="rounded-lg border border-patras-capePalliser/50 bg-white dark:bg-[var(--color-bg-card)] shadow-md overflow-hidden">
             <div className="bg-patras-buccaneer px-4 py-2">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-white">Ανά θέση (Top 10)</h2>
             </div>

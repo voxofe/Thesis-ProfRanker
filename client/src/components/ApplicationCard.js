@@ -10,28 +10,28 @@ export default function ApplicationCard({ app, toDDMMYYYYHHMM }) {
   const hasResubmission = Boolean(lastResubmissionDate);
 
   return (
-    <div className="bg-white/95 border border-patras-buccaneer/40 rounded-lg px-4 py-3 shadow-sm transition-[transform,box-shadow] duration-200 hover:shadow-md hover:scale-[1.005] hover:bg-patras-albescentWhite/20">
+    <div className="bg-white dark:bg-[var(--color-bg-card)] border border-patras-buccaneer/40 rounded-lg px-4 py-3 shadow-sm transition-[transform,box-shadow] duration-200 hover:shadow-md hover:scale-[1.005] hover:bg-patras-albescentWhite/20">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="space-y-1">
           <h2 className="text-base font-semibold text-patras-buccaneer">
             {app.scientificField || "—"}
           </h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-[var(--color-text-secondary)]">
             {app.school || "—"} · {app.department || "—"}
           </p>
         </div>
-        <div className="text-xs text-gray-500 space-y-1">
+        <div className="text-xs text-gray-500 dark:text-[var(--color-text-muted)] space-y-1">
           {hasResubmission ? (
             <>
               <div>
                 Ημερομηνία 1ης υποβολής:{" "}
-                <span className="text-sm font-semibold text-gray-700">
+                <span className="text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">
                   {firstSubmissionDate ? toDDMMYYYYHHMM(firstSubmissionDate) : "—"}
                 </span>
               </div>
               <div>
                 Ημερομηνία επανυποβολής:{" "}
-                <span className="text-sm font-semibold text-gray-700">
+                <span className="text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">
                   {toDDMMYYYYHHMM(lastResubmissionDate)}
                 </span>
               </div>
@@ -39,14 +39,14 @@ export default function ApplicationCard({ app, toDDMMYYYYHHMM }) {
           ) : (
             <div>
               Ημερομηνία υποβολής:{" "}
-              <span className="text-sm font-semibold text-gray-700">
+              <span className="text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">
                 {firstSubmissionDate ? toDDMMYYYYHHMM(firstSubmissionDate) : "—"}
               </span>
             </div>
           )}
           <div>
             Ημερομηνία λήξης αιτήσεων:{" "}
-            <span className="text-sm font-semibold text-gray-700">
+            <span className="text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">
               {endDate ? toDDMMYYYYHHMM(endDate, endTime) : "—"}
             </span>
           </div>
@@ -54,7 +54,7 @@ export default function ApplicationCard({ app, toDDMMYYYYHHMM }) {
       </div>
 
       <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="text-sm text-gray-700">
+        <div className="text-sm text-gray-700 dark:text-[var(--color-text-secondary)]">
           Μόρια: <span className="font-semibold">{app.totalPoints ?? "—"}</span>
         </div>
         <Link

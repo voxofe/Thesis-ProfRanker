@@ -41,7 +41,7 @@ export default function PhdAbstractField({
     <div>
       <label
         htmlFor={id}
-        className="block text-sm/6 font-medium text-gray-900"
+        className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]"
       >
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
@@ -54,14 +54,14 @@ export default function PhdAbstractField({
           value={safeValue}
           onChange={(event) => onChange(event.target.value)}
           ref={textareaRef}
-          className={`block w-full rounded-md px-3 py-2 text-sm text-gray-900 outline outline-1 -outline-offset-1 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer focus:ring-offset-0 focus:ring-patras-buccaneer ${
+          className={`block w-full rounded-md px-3 py-2 text-sm text-gray-900 dark:text-[var(--color-text-primary)] outline outline-1 -outline-offset-1 placeholder:text-gray-400 dark:text-[var(--color-text-muted)] focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer focus:ring-offset-0 focus:ring-patras-buccaneer ${
             tooShort ? "outline-red-500 focus:outline-red-500" : ""
           }`}
           placeholder={placeholder}
           readOnly={readOnly}
         />
       </div>
-      <p className="mt-1 text-xs text-gray-500">{wordCount} λέξεις</p>
+      <p className="mt-1 text-xs text-gray-500 dark:text-[var(--color-text-muted)]">{wordCount} λέξεις</p>
       {tooShort && (
         <p className="mt-1 text-xs text-red-600">
           Ελάχιστο {minWords} λέξεις.

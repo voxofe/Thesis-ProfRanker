@@ -309,13 +309,13 @@ export default function UsersView() {
   return (
     <div className="max-w-5xl mx-auto p-0">
       <div className="mb-4">
-        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
+        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)]">
           Λίστα χρηστών
         </h1>
       </div>
 
       <div className="flex items-center justify-center pb-4">
-        <div className="inline-flex rounded-full border border-patras-buccaneer/40 bg-white">
+        <div className="inline-flex rounded-full border border-patras-buccaneer/40 bg-white dark:bg-[var(--color-bg-card)]">
           {Object.entries(TAB_CONFIG).map(([key, tab]) => (
             <button
               key={key}
@@ -369,7 +369,7 @@ export default function UsersView() {
         </div>
         <div className="flex items-center gap-2">
           <div className="relative w-56">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[var(--color-text-muted)]">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fillRule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clipRule="evenodd" />
               </svg>
@@ -379,7 +379,7 @@ export default function UsersView() {
               value={searchText}
               onChange={(event) => setSearchText(event.target.value)}
               placeholder="Αναζήτηση χρηστών..."
-              className="w-full rounded-md border border-patras-capePalliser/50 bg-white/90 py-1.5 pl-9 pr-3 text-sm text-gray-800 shadow-sm focus:border-patras-buccaneer focus:outline-none"
+              className="w-full rounded-md border border-patras-capePalliser/50 bg-white dark:bg-[var(--color-bg-card)] py-1.5 pl-9 pr-3 text-sm text-gray-800 dark:text-[var(--color-text-primary)] shadow-sm focus:border-patras-buccaneer focus:outline-none"
             />
             {searchText && (
               <button
@@ -428,7 +428,7 @@ export default function UsersView() {
         />
         {rowMenu && isApplicantsTab && (
           <div
-            className="absolute z-50 w-max min-w-[14rem] overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg"
+            className="absolute z-50 w-max min-w-[14rem] overflow-hidden rounded-md border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-card)] shadow-lg"
             style={{ top: rowMenu.top, left: rowMenu.left }}
             onClick={(event) => event.stopPropagation()}
           >
@@ -439,7 +439,7 @@ export default function UsersView() {
                 setRowMenu(null);
                 setSelectedRowId(null);
               }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-buccaneer hover:text-white whitespace-nowrap"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-[var(--color-text-secondary)] hover:bg-patras-buccaneer hover:text-white whitespace-nowrap"
             >
               {`Αιτήσεις χρήστη: ${rowMenu.label || ""}`.trim()}
             </button>
@@ -450,7 +450,7 @@ export default function UsersView() {
                 setRowMenu(null);
                 setSelectedRowId(null);
               }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-patras-buccaneer hover:text-white whitespace-nowrap"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-[var(--color-text-secondary)] hover:bg-patras-buccaneer hover:text-white whitespace-nowrap"
             >
               {`Φάκελος χρήστη: ${rowMenu.label || ""}`.trim()}
             </button>

@@ -47,7 +47,7 @@ export default function Stepper({
                   }
                   disabled={!isAccessible}
                   className={`
-                    group relative z-10 flex items-center justify-center w-10 h-10 rounded-full border-2 text-sm font-semibold bg-white transition-all duration-200
+                    group relative z-10 flex items-center justify-center w-10 h-10 rounded-full border-2 text-sm font-semibold bg-white dark:bg-[var(--color-bg-card)] transition-all duration-200
                     ${
                       isCompleted
                         ? "border-patras-buccaneer text-patras-buccaneer hover:bg-patras-buccaneer hover:text-white cursor-pointer"
@@ -55,7 +55,7 @@ export default function Stepper({
                         ? "border-patras-buccaneer text-patras-buccaneer hover:bg-patras-albescentWhite cursor-pointer"
                         : isAccessible
                         ? "border-patras-buccaneer text-patras-buccaneer hover:bg-patras-albescentWhite cursor-pointer"
-                        : "border-gray-300 text-gray-500 cursor-not-allowed"
+                        : "border-gray-300 dark:border-[var(--color-border)] text-gray-500 dark:text-[var(--color-text-muted)] cursor-not-allowed"
                     }
                     ${isAccessible ? "hover:scale-105" : ""}
                   `}
@@ -85,10 +85,10 @@ export default function Stepper({
                       isActive
                         ? "text-patras-buccaneer"
                         : isCompleted
-                        ? "text-gray-700"
+                        ? "text-gray-700 dark:text-[var(--color-text-secondary)]"
                         : isAccessible
                         ? "text-patras-buccaneer"
-                        : "text-gray-500"
+                        : "text-gray-500 dark:text-[var(--color-text-muted)]"
                     }
                   `}
                 >

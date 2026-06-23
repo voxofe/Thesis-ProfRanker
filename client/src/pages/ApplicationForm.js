@@ -711,7 +711,7 @@ export default function Form({ academicYear }) {
 
   return (
     <div className="w-full max-w-6xl mx-auto">
-      <h1 className="text-2xl text-center border-b pb-2 mb-8 text-gray-800">
+      <h1 className="text-2xl text-center border-b pb-2 mb-8 text-gray-800 dark:text-[var(--color-text-primary)]">
         {headerTitle}
       </h1>
       <SubmissionProgress
@@ -747,7 +747,7 @@ export default function Form({ academicYear }) {
       />
 
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 min-h-[450px] flex flex-col">
+      <div className="bg-white dark:bg-[var(--color-bg-card)] rounded-lg shadow-sm border border-gray-200 dark:border-[var(--color-border)] mb-6 min-h-[450px] flex flex-col">
         <div
           ref={contentScrollRef}
           className={`flex-1 ${contentOverflow} p-6 ${loading ? "pointer-events-none opacity-70" : ""}`}
@@ -762,7 +762,7 @@ export default function Form({ academicYear }) {
             type="button"
             onClick={handlePrevious}
             disabled={isFirstStep || loading}
-            className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-patras-buccaneer border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md bg-white dark:bg-[var(--color-bg-card)] px-4 py-2 text-sm font-semibold text-patras-buccaneer border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Προηγούμενο
           </button>
@@ -802,7 +802,7 @@ export default function Form({ academicYear }) {
                 anchorRef={nextButtonRef}
                 open={openNextTip && nextDisabled}
                 placement="top-center"
-                className="bg-white border border-gray-300 text-gray-700 text-xs px-2 py-1 rounded-lg shadow-lg whitespace-nowrap min-w-max"
+                className="bg-white dark:bg-[var(--color-bg-card)] border border-gray-300 dark:border-[var(--color-border)] text-gray-700 dark:text-[var(--color-text-secondary)] text-xs px-2 py-1 rounded-lg shadow-lg whitespace-nowrap min-w-max"
               >
                 Συμπληρώστε όλα τα υποχρεωτικά πεδία για να συνεχίσετε
               </Tooltip>

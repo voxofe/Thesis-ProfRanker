@@ -71,16 +71,16 @@ export default function Login() {
   return (
     <div className="flex flex-col justify-start pt-4 sm:px-6 lg:px-8 -mt-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="text-center text-2xl font-semibold tracking-tight text-gray-600">
+        <h2 className="text-center text-2xl font-semibold tracking-tight text-gray-600 dark:text-[var(--color-text-secondary)]">
           Σύνδεση στην εφαρμογή
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-gray-600 dark:text-[var(--color-text-secondary)]">
           Εισάγετε τα στοιχεία σας για πρόσβαση
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-200">
+        <div className="bg-white dark:bg-[var(--color-bg-card)] py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-200 dark:border-[var(--color-border)]">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {message.text && (
               <div
@@ -137,7 +137,7 @@ export default function Login() {
             <button
               type="button"
               onClick={handleRegisterClick}
-              className="flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-patras-buccaneer border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer"
+              className="flex w-full justify-center rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-2 text-sm font-semibold text-patras-buccaneer dark:text-[var(--color-text-secondary)] border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-bg-muted)] dark:hover:text-[var(--color-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer"
             >
               Δεν έχετε λογαριασμό; Εγγραφείτε
             </button>
@@ -146,10 +146,10 @@ export default function Login() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-gray-300 dark:border-[var(--color-border)]" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-gray-500">
+                <span className="bg-white dark:bg-[var(--color-bg-card)] px-2 text-gray-500 dark:text-[var(--color-text-muted)]">
                   Πρόγραμμα Απόκτησης Διδακτικής Εμπειρίας
                 </span>
               </div>

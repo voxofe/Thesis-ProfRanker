@@ -101,7 +101,7 @@ export default function CustomSelect({
                   <Select.Item
                     key={optn.value}
                     value={optn.value}
-                    className={`cursor-pointer px-3 py-1.5 text-base text-gray-900 hover:bg-patras-buccaneer/90 hover:text-white focus:bg-patras-buccaneer/90 focus:text-white dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-primary)] dark:hover:text-[var(--color-text-inverse)] dark:focus:bg-[var(--color-primary)] dark:focus:text-[var(--color-text-inverse)] dark:data-[state=checked]:bg-[var(--color-primary)] dark:data-[state=checked]:text-[var(--color-text-inverse)] flex items-center justify-between sm:text-sm/6 ${
+                    className={`cursor-pointer px-3 py-1.5 text-base text-gray-900 hover:bg-patras-buccaneer/90 hover:text-white focus:bg-patras-buccaneer/90 focus:text-white dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-primary)] dark:hover:text-[var(--color-text-inverse)] dark:focus:bg-[var(--color-primary)] dark:focus:text-[var(--color-text-inverse)] flex items-center justify-between sm:text-sm/6 ${
                       optn.value === "__new__" ? newFieldStyle : ""
                     }`}
                     title={optn.label}

@@ -5,7 +5,7 @@ export default function ScientificFields() {
   return (
     <div className="max-w-4xl mx-auto p-0">
       <div className="mb-0">
-        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
+        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)]">
             Διαχείριση επιστημονικών πεδίων
         </h1>
       </div>

@@ -69,7 +69,7 @@ const coursePlanRelevanceRanges = [
 const renderThesisRelevanceTooltip = (score) => {
   if (score === null || score === undefined) return null;
   return (
-    <div className="text-xs text-gray-800">
+    <div className="text-xs text-gray-800 dark:text-[var(--color-text-primary)]">
       {thesisRelevanceRanges.map((range) => {
         const isActive = score >= range.min && score <= range.max;
         return (
@@ -85,7 +85,7 @@ const renderThesisRelevanceTooltip = (score) => {
 const renderCoursePlanRelevanceTooltip = (score) => {
   if (score === null || score === undefined) return null;
   return (
-    <div className="text-xs text-gray-800">
+    <div className="text-xs text-gray-800 dark:text-[var(--color-text-primary)]">
       {coursePlanRelevanceRanges.map((range) => {
         const isActive = score >= range.min && score <= range.max;
         return (
@@ -499,14 +499,14 @@ export default function ApplicationScore() {
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-y-5 pt-5">
-        <LoadingIndicator size="sm" textClassName="mt-2 text-gray-600" />
+        <LoadingIndicator size="sm" textClassName="mt-2 text-gray-600 dark:text-[var(--color-text-secondary)]" />
       </div>
     );
   }
 
   return (
     <div className="grid grid-cols-1 gap-y-5 pt-0">
-      <h1 className="text-2xl text-center border-b pb-2 mb-1 text-gray-800">
+      <h1 className="text-2xl text-center border-b pb-2 mb-1 text-gray-800 dark:text-[var(--color-text-primary)]">
         {isAdmin && applicantName ? (
           <>
             Αίτηση & Βαθμολογία: <span className="text-lg font-semibold">{applicantName}
@@ -518,7 +518,7 @@ export default function ApplicationScore() {
         )}
       </h1>
       {canEditApplication && (
-        <div className="mb-6 mx-auto w-full max-w-2xl rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3">
+        <div className="mb-6 mx-auto w-full max-w-2xl rounded-xl border border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-[var(--color-bg-muted)] px-4 py-3">
           <button
             type="button"
             onClick={() => setIsEditDrawerOpen((prev) => !prev)}
@@ -558,7 +558,7 @@ export default function ApplicationScore() {
         </div>
       )}
       <div className="flex items-center justify-center">
-        <div className="inline-flex rounded-full border border-patras-buccaneer/40 bg-white">
+        <div className="inline-flex rounded-full border border-patras-buccaneer/40 bg-white dark:bg-[var(--color-bg-card)]">
           <button
             type="button"
             onClick={() => setActiveTab("application")}
@@ -589,7 +589,7 @@ export default function ApplicationScore() {
         <div>
            <h1 className="text-xl font-light mb-3">Στοιχεία θέσης</h1>
             <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
-              <table className="min-w-full bg-white/25">
+              <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
                 <thead className="bg-patras-buccaneer">
                   <tr>
                     <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
@@ -663,7 +663,7 @@ export default function ApplicationScore() {
             </div>
           <h1 className="text-xl font-light mb-3">Στοιχεία υποψηφίου</h1>
           <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
-            <table className="min-w-full bg-white/25">
+            <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
               <thead className="bg-patras-buccaneer">
                 <tr>
                   <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
@@ -734,7 +734,7 @@ export default function ApplicationScore() {
             <h1 className="text-xl font-light mb-3">Υποβληθέντα δικαιολογητικά</h1>
             <div className="relative overflow-visible shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
               <div className="overflow-x-auto">
-                <table className="min-w-full bg-white/25">
+                <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
                 <thead className="bg-patras-buccaneer">
                   <tr>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
@@ -786,7 +786,7 @@ export default function ApplicationScore() {
                   <div>
                     <div className="mb-3 flex flex-wrap items-center gap-3">
                       <h1 className="text-xl font-light">Αξιολόγηση αίτησης</h1>
-                      <span className="inline-flex items-center gap-1.5 text-xs text-gray-600">
+                      <span className="inline-flex items-center gap-1.5 text-xs text-gray-600 dark:text-[var(--color-text-secondary)]">
                         <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer">
                           <AiIndicatorIcon className="h-3.5 w-3.5" />
                         </span>
@@ -795,7 +795,7 @@ export default function ApplicationScore() {
                     </div>
                     <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50">
                       
-                      <table className="min-w-full bg-white/50">
+                      <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
                         <thead className="bg-patras-buccaneer">
                           <tr>
                             <th className="px-6 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">

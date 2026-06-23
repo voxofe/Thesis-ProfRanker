@@ -135,7 +135,7 @@ function getStatusBadgeClasses(status) {
     "inline-flex items-center justify-center rounded-full px-2 py-1 text-xs font-semibold";
   if (status === "Ενεργή") return `${base} bg-yellow-100 text-yellow-800 border border-yellow-200`;
   if (status === "Ολοκληρωμένη") return `${base} bg-green-100 text-green-800 border border-green-200`;
-  return `${base} bg-gray-100 text-gray-700 border border-gray-200`;
+  return `${base} bg-gray-100 dark:bg-[var(--color-bg-surface)] text-gray-700 dark:text-[var(--color-text-secondary)] border border-gray-200 dark:border-[var(--color-border)]`;
 }
 
 function parseBooleanLike(value) {
@@ -697,7 +697,7 @@ export default function Ranking() {
 
   return (
     <div className="pt-0">
-      <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
+      <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)]">
         Λίστα κατάταξης αιτήσεων
       </h1>
 
@@ -710,7 +710,7 @@ export default function Ranking() {
         options={filterOptions}
         isAdmin={isAdmin}
         title="Φίλτρα αιτήσεων"
-        titleClassName="text-gray-900"
+        titleClassName="text-gray-900 dark:text-[var(--color-text-primary)]"
         showDateRanges
         dateRangeFields={[{ key: "submitDate", label: "Ημερομηνία υποβολής" }]}
         onReset={() => setFilters({
@@ -805,7 +805,7 @@ export default function Ranking() {
             className="shrink-0"
           />
           <div className="relative w-64">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[var(--color-text-muted)]">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fillRule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clipRule="evenodd" />
               </svg>
@@ -815,7 +815,7 @@ export default function Ranking() {
               value={searchText}
               onChange={(event) => setSearchText(event.target.value)}
               placeholder="Αναζήτηση αιτήσεων..."
-              className="w-full rounded-md border border-patras-capePalliser/50 bg-white/90 py-1.5 pl-9 pr-3 text-sm text-gray-800 shadow-sm focus:border-patras-buccaneer focus:outline-none"
+              className="w-full rounded-md border border-patras-capePalliser/50 bg-white dark:bg-[var(--color-bg-card)] py-1.5 pl-9 pr-3 text-sm text-gray-800 dark:text-[var(--color-text-primary)] shadow-sm focus:border-patras-buccaneer focus:outline-none"
             />
             {searchText && (
               <button

@@ -107,7 +107,7 @@ export default function Publication({ index, readOnly = false }) {
   };
 
   return (
-    <div className="pr-publication-card grid sm:flex sm:flex-col gap-x-8 rounded-md border border-patras-buccaneer/10 bg-patras-albescentWhite/30 px-4 pt-6 pb-5 relative">
+    <div className="pr-publication-card grid sm:flex sm:flex-col gap-x-8 rounded-md border border-patras-buccaneer/10 dark:border-[var(--color-border)] bg-patras-albescentWhite/30 dark:bg-[var(--color-bg-surface)] px-4 pt-6 pb-5 relative">
       <div className="pr-publication-number" aria-hidden="true">
         <span>{index + 1}</span>
       </div>
@@ -171,7 +171,7 @@ export default function Publication({ index, readOnly = false }) {
         </div>
       </div>
 
-      <div className="border-t border-patras-buccaneer/20 my-4" />
+      <div className="border-t border-patras-buccaneer/20 dark:border-[var(--color-border-soft)] my-4" />
 
       {isOtherGroup && (
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-8 gap-y-4">
@@ -254,7 +254,7 @@ export default function Publication({ index, readOnly = false }) {
                 readOnly={readOnly}
               />
               {getIssnErrorMessage(publication.issn) && (
-                <span className="text-xs text-red-600 block pb-3">
+                <span className="text-xs text-red-600 dark:text-[var(--color-danger)] block pb-3">
                   {getIssnErrorMessage(publication.issn)}
                 </span>
               )}

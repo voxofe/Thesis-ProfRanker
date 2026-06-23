@@ -200,7 +200,7 @@ export default function Upload(props) {
       />
       <label
         htmlFor={props.icon}
-        className="block text-sm/6 font-medium text-gray-900"
+        className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]"
       >
         {props.label}
         {props.required && <span className="text-red-500 ml-1">*</span>}
@@ -229,7 +229,7 @@ export default function Upload(props) {
             className={`absolute top-2 right-2 h-6 w-6 cursor-pointer 
                             ${
                               hasAnyFile
-                                ? "text-gray-400 hover:text-red-700"
+                                ? "text-gray-400 dark:text-[var(--color-text-muted)] hover:text-red-700"
                                 : "text-gray-300 cursor-not-allowed"
                             }`}
             onClick={() => {
@@ -264,10 +264,10 @@ export default function Upload(props) {
           {/* File Name or Upload Button */}
           {hasAnyFile ? (
             <div className="mt-3 space-y-2">
-              <div className="text-gray-800 text-sm font-medium break-words">
+              <div className="text-gray-800 dark:text-[var(--color-text-primary)] text-sm font-medium break-words">
                 {getDisplayName()}
                 {hasUploadedFile && (
-                  <span className="text-gray-500 font-normal"> ({getDisplaySize()})</span>
+                  <span className="text-gray-500 dark:text-[var(--color-text-muted)] font-normal"> ({getDisplaySize()})</span>
                 )}
               </div>
               {canShowCheckButton && (
@@ -282,12 +282,12 @@ export default function Upload(props) {
               )}
             </div>
           ) : (
-            <div className="flex flex-wrap justify-center text-sm/6 text-gray-600 mt-3">
+            <div className="flex flex-wrap justify-center text-sm/6 text-gray-600 dark:text-[var(--color-text-secondary)] mt-3">
               {!canPickFromVault && (
                 <>
                   <label
                     htmlFor={props.id}
-                    className={`relative cursor-pointer rounded-md bg-white font-semibold text-patras-auChico text-center max-w-full break-words 
+                    className={`relative cursor-pointer rounded-md bg-white dark:bg-[var(--color-bg-card)] font-semibold text-patras-auChico text-center max-w-full break-words 
                                         focus-within:outline-none focus-within:ring-2 focus-within:ring-patras-buccaneer focus-within:ring-offset-2 
                                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer focus-visible:ring-offset-2
                                         hover:text-white hover:bg-patras-buccaneer 
@@ -343,7 +343,7 @@ export default function Upload(props) {
           {!hasAnyFile ? (
             <div>
               <span className="text-sm pl-1 mb-10">ή σύρετε και αφήστε</span>
-              <p className="pt-2 text-xs/5 text-gray-600">
+              <p className="pt-2 text-xs/5 text-gray-600 dark:text-[var(--color-text-secondary)]">
                 {formatAcceptHint()} · Μέγιστο μέγεθος: {Math.round(maxFileBytes / (1024 * 1024))}MB
               </p>
             </div>

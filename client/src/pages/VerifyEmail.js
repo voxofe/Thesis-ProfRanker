@@ -91,13 +91,13 @@ export default function VerifyEmail() {
   return (
     <div className="max-w-3xl mx-auto p-0">
         <div className="pt-0">
-        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800">
+        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)]">
             Επιβεβαίωση ηλεκτρονικής διεύθυνσης
         </h1>
 
 
         {loading ? (
-          <LoadingIndicator text="Φόρτωση..." size="sm" textClassName="mt-2 text-gray-600" />
+          <LoadingIndicator text="Φόρτωση..." size="sm" textClassName="mt-2 text-gray-600 dark:text-[var(--color-text-secondary)]" />
         ) : (
           <>
             <p

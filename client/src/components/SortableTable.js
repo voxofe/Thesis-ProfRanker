@@ -9,7 +9,7 @@ export const formatDateTimeCell = (dateValue, timeValue, fallbackTime = "00:00")
   const renderDateTime = (datePart, timePart) => (
     <span className="inline-flex flex-col leading-tight">
       <span>{datePart}</span>
-      <span className="text-xs text-gray-600">{timePart}</span>
+      <span className="text-xs text-gray-600 dark:text-[var(--color-text-secondary)]">{timePart}</span>
     </span>
   );
 
@@ -71,7 +71,7 @@ export default function SortableTable({
   loadingMessage = "Φόρτωση...",
   emptyMessage = "Δεν υπάρχουν διαθέσιμες εγγραφές.",
   wrapperClassName = "w-full overflow-x-auto overflow-y-visible shadow-md rounded-lg border border-patras-capePalliser/50",
-  tableClassName = "min-w-full table-fixed text-[13px] font-medium bg-white/25 t-5",
+  tableClassName = "min-w-full table-fixed text-[13px] font-medium bg-white/25 dark:bg-[var(--color-bg-card)] t-5",
   theadClassName = "bg-patras-buccaneer",
   tbodyClassName = "divide-y divide-patras-cameo text-[13px]",
   headerCellClassName = "",
@@ -199,7 +199,7 @@ export default function SortableTable({
       {(enableSearch && showSearchBar) && (
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="relative w-full max-w-xs">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[var(--color-text-muted)]">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fillRule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clipRule="evenodd" />
               </svg>
@@ -209,7 +209,7 @@ export default function SortableTable({
               value={resolvedSearchText}
               onChange={(event) => handleSearchTextChange(event.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full rounded-md border border-patras-capePalliser/50 bg-white/90 py-1.5 pl-9 pr-3 text-sm text-gray-800 shadow-sm focus:border-patras-buccaneer focus:outline-none"
+              className="w-full rounded-md border border-patras-capePalliser/50 bg-white/90 dark:bg-[var(--color-bg-card)] py-1.5 pl-9 pr-3 text-sm text-gray-800 dark:text-[var(--color-text-primary)] shadow-sm focus:border-patras-buccaneer focus:outline-none"
             />
             {resolvedSearchText && (
               <button
@@ -228,7 +228,7 @@ export default function SortableTable({
       )}
       <div className={wrapperClassName}>
         {showEntriesCount && !loading && (
-          <div className="flex items-center justify-end border-b border-patras-capePalliser/40 bg-white/70 px-4 py-1 text-[13px] font-medium text-gray-500">
+          <div className="flex items-center justify-end border-b border-patras-capePalliser/40 bg-white/70 dark:bg-[var(--color-bg-card)] px-4 py-1 text-[13px] font-medium text-gray-500 dark:text-[var(--color-text-muted)]">
             {entriesCountLabel}
           </div>
         )}
@@ -250,13 +250,13 @@ export default function SortableTable({
         <tbody className={tbodyClassName}>
           {loading ? (
             <tr>
-              <td colSpan={columns.length} className="text-center text-gray-400 py-8">
-                <LoadingIndicator text={loadingMessage} size="sm" textClassName="mt-2 text-gray-400" />
+              <td colSpan={columns.length} className="text-center text-gray-400 dark:text-[var(--color-text-muted)] py-8">
+                <LoadingIndicator text={loadingMessage} size="sm" textClassName="mt-2 text-gray-400 dark:text-[var(--color-text-muted)]" />
               </td>
             </tr>
           ) : sortedRows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="text-center text-gray-400 py-8">
+              <td colSpan={columns.length} className="text-center text-gray-400 dark:text-[var(--color-text-muted)] py-8">
                 {emptyMessage}
               </td>
             </tr>

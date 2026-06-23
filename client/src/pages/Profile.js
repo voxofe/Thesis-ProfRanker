@@ -624,7 +624,7 @@ export default function Profile() {
         {visiblePending.map((pending) => (
           <div
             key={pending.id}
-            className="pr-vault-upload-pill inline-flex max-w-[260px] items-center gap-2 rounded-full border border-gray-200 px-3 py-1 text-sm text-patras-buccaneer shadow-sm"
+            className="pr-vault-upload-pill inline-flex max-w-[260px] items-center gap-2 rounded-full border border-gray-200 dark:border-[var(--color-border)] px-3 py-1 text-sm text-patras-buccaneer dark:text-[var(--color-text-secondary)] shadow-sm"
           >
             {!pending.uploaded && (
               <span className="pr-vault-upload-base" aria-hidden="true" />
@@ -657,7 +657,7 @@ export default function Profile() {
             <span className="relative z-10 truncate" title={pending.name}>
               {pending.name}
               {!pending.uploaded && (
-                <span className="ml-2 text-xs text-patras-buccaneer/70">
+                <span className="ml-2 text-xs text-patras-buccaneer/70 dark:text-[var(--color-text-muted)]">
                   {Math.min(100, Math.max(0, pending.progress ?? 0))}%
                 </span>
               )}
@@ -710,7 +710,7 @@ export default function Profile() {
         Υπεύθυνη δήλωση σχετικά με τους{" "}
         <button
           type="button"
-          className="text-patras-buccaneer underline hover:text-patras-auChico"
+          className="text-patras-buccaneer underline hover:text-patras-auChico dark:text-[var(--color-text-primary)] dark:hover:text-[var(--color-text-secondary)]"
           onClick={() => setIsRestrictionsModalOpen(true)}
         >
           περιορισμούς της Πράξης
@@ -1258,7 +1258,7 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-y-5 pt-5">
-        <LoadingIndicator size="sm" textClassName="mt-2 text-gray-600" />
+        <LoadingIndicator size="sm" textClassName="mt-2 text-gray-600 dark:text-[var(--color-text-secondary)]" />
       </div>
     );
   }
@@ -1266,7 +1266,7 @@ export default function Profile() {
   return (
     <div className="pr-profile-labels max-w-6xl mx-auto px-6">
       <div>
-        <h1 className="text-2xl text-center border-b pb-2 mb-2 text-gray-800">
+        <h1 className="text-2xl text-center border-b pb-2 mb-2 text-gray-800 dark:text-[var(--color-text-primary)]">
           {isAdminViewingOther ? (
             <>
               Φάκελος χρήστη: <span className="text-lg font-semibold">{`${form.firstName} ${form.lastName}`.trim()}</span>
@@ -1276,14 +1276,14 @@ export default function Profile() {
           )}
         </h1>
       </div>
-        <h2 className="text-lg text-center font-semibold text-patras-buccaneer/100 py-2">
+        <h2 className="text-lg text-center font-semibold text-patras-buccaneer/100 dark:text-[var(--color-text-primary)] py-2">
             {activeSection === "general" && "Γενικά στοιχεία"}
             {activeSection === "additional" && "Πρόσθετα στοιχεία"}
             {activeSection === "vault" && "Αρχεία"}
             {activeSection === "publications" && "Επιστημονικές δημοσιεύσεις"}
         </h2>
       <div className="mt-2 grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-6">
-        <aside className="rounded-xl border border-gray-200/70 bg-white/15 p-4 h-fit lg:sticky lg:top-6">
+        <aside className="rounded-xl border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-surface)] p-4 h-fit lg:sticky lg:top-6">
           <nav className="space-y-2 text-sm">
             <button
               type="button"
@@ -1291,7 +1291,7 @@ export default function Profile() {
               className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
                 activeSection === "general"
                   ? "bg-patras-albescentWhite/80 text-patras-buccaneer border border-patras-buccaneer/20"
-                  : "text-gray-700 hover:bg-white/60"
+                  : "text-gray-700 dark:text-[var(--color-text-secondary)]"
               }`}
             >
               Γενικά στοιχεία
@@ -1303,7 +1303,7 @@ export default function Profile() {
                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
                   activeSection === "additional"
                     ? "bg-patras-albescentWhite/80 text-patras-buccaneer border border-patras-buccaneer/20"
-                    : "text-gray-700 hover:bg-white/60"
+                    : "text-gray-700 dark:text-[var(--color-text-secondary)]"
                 }`}
               >
                 Πρόσθετα στοιχεία
@@ -1316,7 +1316,7 @@ export default function Profile() {
                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
                   activeSection === "publications"
                     ? "bg-patras-albescentWhite/80 text-patras-buccaneer border border-patras-buccaneer/20"
-                    : "text-gray-700 hover:bg-white/60"
+                    : "text-gray-700 dark:text-[var(--color-text-secondary)]"
                 }`}
               >
                 Επιστημονικές δημοσιεύσεις
@@ -1329,7 +1329,7 @@ export default function Profile() {
                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
                   activeSection === "vault"
                     ? "bg-patras-albescentWhite/80 text-patras-buccaneer border border-patras-buccaneer/20"
-                    : "text-gray-700 hover:bg-white/60"
+                    : "text-gray-700 dark:text-[var(--color-text-secondary)]"
                 }`}
               >
                 Αρχεία
@@ -1343,17 +1343,17 @@ export default function Profile() {
         <section>
 
           {!isReadOnly && (
-            <div className="mb-4 rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-600">
+            <div className="mb-4 rounded-md border border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-[var(--color-bg-muted)] px-4 py-2 text-xs text-gray-600 dark:text-[var(--color-text-secondary)]">
               Οι αλλαγές εδώ δεν επηρεάζουν ήδη υποβληθείσες αιτήσεις.
               Για αλλαγές σε ενεργές αιτήσεις, επεξεργαστείτε τις από την αρχική σελίδα.
             </div>
           )}
           {activeSection === "general" && (
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+            <div className="bg-white dark:bg-[var(--color-bg-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] shadow-sm p-6">
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm/6 font-semibold text-gray-900 mb-5">Βασικά</h3>
-                  <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
+                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">Βασικά</h3>
+                  <div className="rounded-lg border border-patras-buccaneer/10 dark:border-[var(--color-border)] bg-patras-albescentWhite/30 dark:bg-[var(--color-bg-surface)] p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <InputField
                         id="email"
@@ -1394,8 +1394,8 @@ export default function Profile() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm/6 font-semibold text-gray-900 mb-5">Τηλέφωνα</h3>
-                  <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
+                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">Τηλέφωνα</h3>
+                  <div className="rounded-lg border border-patras-buccaneer/10 dark:border-[var(--color-border)] bg-patras-albescentWhite/30 dark:bg-[var(--color-bg-surface)] p-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <InputField
                       id="mobileNumber"
@@ -1422,8 +1422,8 @@ export default function Profile() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm/6 font-semibold text-gray-900 mb-5">Διεύθυνση</h3>
-                  <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
+                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">Διεύθυνση</h3>
+                  <div className="rounded-lg border border-patras-buccaneer/10 dark:border-[var(--color-border)] bg-patras-albescentWhite/30 dark:bg-[var(--color-bg-surface)] p-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <InputField
                       id="streetAddress"
@@ -1473,11 +1473,11 @@ export default function Profile() {
           )}
 
           {isProfileApplicant && activeSection === "additional" && (
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+            <div className="bg-white dark:bg-[var(--color-bg-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] shadow-sm p-6">
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm/6 font-semibold text-gray-900 mb-5">Ιδιότητες υποψηφίου</h3>
-                  <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
+                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">Ιδιότητες υποψηφίου</h3>
+                  <div className="rounded-lg border border-patras-buccaneer/10 dark:border-[var(--color-border)] bg-patras-albescentWhite/30 dark:bg-[var(--color-bg-surface)] p-4">
                     <div className="flex flex-col gap-3">
                       <Checkbox
                         id="hasNotParticipatedInPastProgram"
@@ -1522,7 +1522,7 @@ export default function Profile() {
 
                 <div>
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h3 className="text-sm/6 font-semibold text-gray-900 mb-5">
+                    <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">
                       Στοιχεία διδακτορικού
                     </h3>
                     {phdDegrees.length > 1 && (
@@ -1536,7 +1536,7 @@ export default function Profile() {
                         >
                           ‹
                         </button>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-[var(--color-text-muted)]">
                           {activePhdIndex + 1} / {phdDegrees.length}
                         </span>
                         <button
@@ -1552,7 +1552,7 @@ export default function Profile() {
                     )}
                   </div>
                   <div
-                    className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 overflow-x-hidden overflow-y-visible"
+                    className="rounded-lg border border-patras-buccaneer/10 dark:border-[var(--color-border)] bg-patras-albescentWhite/30 dark:bg-[var(--color-bg-surface)] overflow-x-hidden overflow-y-visible"
                   >
                     <div
                       className={`flex ${
@@ -1595,11 +1595,11 @@ export default function Profile() {
                               usePortal
                               readOnly={isReadOnly}
                             />
-                            <p className="-mt-3 text-xs text-gray-500 italic">
+                            <p className="-mt-3 text-xs text-gray-500 dark:text-[var(--color-text-muted)] italic">
                               Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}
                             </p>
                           </div>
-                          <div className="md:col-span-2">
+                          <div className="md:col-span-2 [&_textarea]:bg-white [&_textarea]:dark:bg-[var(--color-bg-card)] [&_textarea]:dark:outline-[var(--color-border-accent)] [&_textarea]:focus:outline-patras-buccaneer [&_textarea]:dark:focus:outline-[var(--color-primary)] [&_textarea]:focus:ring-patras-buccaneer [&_textarea]:dark:focus:ring-[var(--color-primary)]">
                             <PhdAbstractField
                               id="phdAbstract"
                               name="phdAbstract"
@@ -1615,13 +1615,13 @@ export default function Profile() {
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <label
                                 htmlFor="phdKeywords"
-                                className="block text-sm/6 font-medium text-gray-900"
+                                className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]"
                               >
                                 Λέξεις-κλειδιά
                               </label>
                             </div>
                             <div
-                              className="relative mt-2 flex w-full flex-wrap items-center gap-2 rounded-md bg-white px-3 py-3 text-base sm:text-sm/6 outline outline-1 -outline-offset-1 outline-patras-buccaneer focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-patras-buccaneer focus-within:ring-1 focus-within:ring-offset-0 focus-within:ring-patras-buccaneer"
+                              className="relative mt-2 flex w-full flex-wrap items-center gap-2 rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-3 text-base sm:text-sm/6 outline outline-1 -outline-offset-1 outline-patras-buccaneer focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-patras-buccaneer focus-within:ring-1 focus-within:ring-offset-0 focus-within:ring-patras-buccaneer"
                               onClick={(event) => {
                                 if (event.target.closest("button") || event.target.tagName === "INPUT") {
                                   return;
@@ -1632,14 +1632,14 @@ export default function Profile() {
                               {(phdDraft.phdKeywords || []).map((keyword) => (
                                 <span
                                   key={keyword}
-                                  className="inline-flex items-center gap-1 rounded-full bg-patras-goldSand/30 px-3 py-1 text-sm text-gray-800"
+                                  className="inline-flex items-center gap-1 rounded-full bg-patras-goldSand/30 px-3 py-1 text-sm text-gray-800 dark:text-[var(--color-text-primary)]"
                                 >
                                   {keyword}
                                   {!isReadOnly && (
                                     <button
                                       type="button"
                                       onClick={() => removePhdKeyword(keyword)}
-                                      className="text-gray-500 hover:text-gray-800"
+                                      className="text-gray-500 dark:text-[var(--color-text-muted)] hover:text-gray-800 dark:text-[var(--color-text-primary)]"
                                       aria-label={`Αφαίρεση λέξης-κλειδιού ${keyword}`}
                                     >
                                       ×
@@ -1657,14 +1657,14 @@ export default function Profile() {
                                   onKeyDown={handlePhdKeywordKeyDown}
                                   onBlur={commitPhdKeyword}
                                   placeholder=""
-                                  className="flex-none min-w-[4ch] max-w-full border-0 p-0 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:ring-0"
+                                  className="flex-none min-w-[4ch] max-w-full border-0 p-0 text-sm text-gray-900 dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-primary)] placeholder:text-gray-400 dark:text-[var(--color-text-muted)] outline-none focus:ring-0"
                                   style={{ width: `${Math.max(8, phdKeywordInput.length + 1)}ch` }}
                                   ref={phdKeywordInputRef}
                                 />
                               )}
                             </div>
                             <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">
                                 Πληκτρολογήστε και πατήστε Enter ή κόμμα για να προσθέσετε λέξη-κλειδί.
                               </p>
                               {!isReadOnly && (
@@ -1672,7 +1672,7 @@ export default function Profile() {
                                   type="button"
                                   onClick={clearPhdKeywords}
                                   disabled={phdKeywordCount === 0}
-                                  className="inline-flex items-center gap-1 rounded-md border border-patras-buccaneer/30 bg-patras-albescentWhite/30 px-3 py-1 text-sm text-patras-buccaneer hover:bg-patras-albescentWhite disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
+                                  className="inline-flex items-center gap-1 rounded-md border border-patras-buccaneer/30 bg-patras-albescentWhite/30 px-3 py-1 text-sm text-patras-buccaneer hover:bg-patras-albescentWhite disabled:cursor-not-allowed disabled:border-gray-200 dark:border-[var(--color-border)] disabled:bg-gray-100 dark:bg-[var(--color-bg-surface)] dark:hover:bg-[var(--color-bg-muted)] disabled:text-gray-400 dark:text-[var(--color-text-muted)]"
                                   aria-label="Καθαρισμός λέξεων-κλειδιών"
                                   title="Καθαρισμός"
                                 >
@@ -1681,7 +1681,7 @@ export default function Profile() {
                                 </button>
                               )}
                             </div>
-                            <p className="mt-1 text-xs text-gray-500">
+                            <p className="mt-1 text-xs text-gray-500 dark:text-[var(--color-text-muted)]">
                               {phdKeywordCount}/{PHD_KEYWORDS_MAX} λέξεις-κλειδιά
                             </p>
                             {(phdKeywordsTooFew || phdKeywordsTooMany) && (
@@ -1732,14 +1732,14 @@ export default function Profile() {
                                 usePortal
                                 readOnly={isReadOnly}
                               />
-                              <p className="-mt-3 text-xs text-gray-500 italic">
+                              <p className="-mt-3 text-xs text-gray-500 dark:text-[var(--color-text-muted)] italic">
                                 Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}
                               </p>
                             </div>
                             <div className="md:col-span-2">
                               <label
                                 htmlFor="phdAbstract-next"
-                                className="block text-sm/6 font-medium text-gray-900"
+                                className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]"
                               >
                                 Περίληψη διδακτορικής διατριβής
                               </label>
@@ -1750,7 +1750,7 @@ export default function Profile() {
                                   rows={12}
                                   value={phdNextDraft.phdAbstract || ""}
                                   onChange={() => {}}
-                                  className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 outline outline-1 -outline-offset-1 placeholder:text-gray-400"
+                                  className="block w-full rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-2 text-sm text-gray-900 dark:text-[var(--color-text-primary)] outline outline-1 -outline-offset-1 outline-patras-buccaneer dark:outline-[var(--color-border-accent)] placeholder:text-gray-400 dark:placeholder:text-[var(--color-text-muted)] focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer dark:focus:outline-[var(--color-primary)] focus:ring-patras-buccaneer dark:focus:ring-[var(--color-primary)]"
                                   readOnly
                                 />
                               </div>
@@ -1758,15 +1758,15 @@ export default function Profile() {
                             <div className="md:col-span-2">
                               <label
                                 htmlFor="phdKeywords-next"
-                                className="block text-sm/6 font-medium text-gray-900"
+                                className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]"
                               >
                                 Λέξεις-κλειδιά
                               </label>
-                              <div className="relative mt-2 flex w-full flex-wrap items-center gap-2 rounded-md bg-white px-3 py-3 text-base sm:text-sm/6 outline outline-1 -outline-offset-1 outline-patras-buccaneer focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-patras-buccaneer focus-within:ring-1 focus-within:ring-offset-0 focus-within:ring-patras-buccaneer">
+                              <div className="relative mt-2 flex w-full flex-wrap items-center gap-2 rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-3 text-base sm:text-sm/6 outline outline-1 -outline-offset-1 outline-patras-buccaneer focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-patras-buccaneer focus-within:ring-1 focus-within:ring-offset-0 focus-within:ring-patras-buccaneer">
                                 {(phdNextDraft.phdKeywords || []).map((keyword) => (
                                   <span
                                     key={keyword}
-                                    className="inline-flex items-center gap-1 rounded-full bg-patras-goldSand/30 px-3 py-1 text-sm text-gray-800"
+                                    className="inline-flex items-center gap-1 rounded-full bg-patras-goldSand/30 px-3 py-1 text-sm text-gray-800 dark:text-[var(--color-text-primary)]"
                                   >
                                     {keyword}
                                   </span>
@@ -1792,8 +1792,8 @@ export default function Profile() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm/6 font-semibold text-gray-900 mb-5">Εργασιακή εμπειρία</h3>
-                  <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
+                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">Εργασιακή εμπειρία</h3>
+                  <div className="rounded-lg border border-patras-buccaneer/10 dark:border-[var(--color-border)] bg-patras-albescentWhite/30 dark:bg-[var(--color-bg-surface)] p-4">
                     <CustomSelect
                       label="Χρόνια μεταδιδακτορικής εργασιακής εμπειρίας (εξαιρείται η διδακτική εμπειρία)"
                       value={
@@ -1833,9 +1833,9 @@ export default function Profile() {
           )}
 
           {isProfileVaultUser && activeSection === "vault" && (
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+            <div className="bg-white dark:bg-[var(--color-bg-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] shadow-sm p-6">
               {vaultItems.length === 0 ? (
-                <p className="text-gray-500">Δεν υπάρχουν καταχωρημένα δικαιολογητικά.</p>
+                <p className="text-gray-500 dark:text-[var(--color-text-muted)]">Δεν υπάρχουν καταχωρημένα δικαιολογητικά.</p>
               ) : (
                 <div>
                   {(() => {
@@ -1857,11 +1857,11 @@ export default function Profile() {
                     const renderItem = (item) => (
                       <div key={item.key} className="mt-6 first:mt-0">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="text-sm/6 font-semibold text-gray-900 mb-5">
+                          <div className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">
                             {item.label}
                           </div>
                         </div>
-                        <div className="rounded-lg border border-patras-buccaneer/10 bg-patras-albescentWhite/30 p-4">
+                        <div className="rounded-lg border border-patras-buccaneer/10 dark:border-[var(--color-border)] bg-patras-albescentWhite/30 dark:bg-[var(--color-bg-surface)] p-4">
                           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] items-end gap-3">
                             {renderFilePills(item.files, item.docType)}
                             <div className="flex md:justify-end">
@@ -1879,10 +1879,10 @@ export default function Profile() {
                                       handleVaultUpload(item.docType, file);
                                     }}
                                   />
-                                  <span className="inline-flex items-center gap-1 rounded-full border border-patras-buccaneer/40 bg-patras-albescentWhite/60 px-3 py-1 transition-colors duration-150 hover:bg-patras-buccaneer hover:text-white">
+                                  <span className="inline-flex items-center gap-1 rounded-full border border-patras-buccaneer/40 bg-patras-albescentWhite/60 px-3 py-1 transition-colors duration-150 hover:bg-patras-buccaneer hover:text-white dark:bg-patras-buccaneer dark:text-white dark:hover:bg-[var(--color-primary-hover)]">
                                     + Προσθήκη
                                   </span>
-                                  <span className="absolute right-0 top-full mt-2 w-max rounded-md border border-gray-200 bg-white px-3 py-2 text-[11px] text-gray-600 shadow-md opacity-0 translate-y-1 pointer-events-none transition duration-150 group-hover:opacity-100 group-hover:translate-y-0">
+                                  <span className="absolute right-0 top-full mt-2 w-max rounded-md border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-card)] px-3 py-2 text-[11px] text-gray-600 dark:text-[var(--color-text-secondary)] shadow-md opacity-0 translate-y-1 pointer-events-none transition duration-150 group-hover:opacity-100 group-hover:translate-y-0">
                                     {item.docType === "phd" ? "PDF, DOC, DOCX, ODT" : "PDF, DOC, DOCX, ODT"}
                                     <br />
                                     Μέγιστο μέγεθος: {item.docType === "phd" ? "30MB" : "5MB"}
@@ -1908,7 +1908,7 @@ export default function Profile() {
           )}
 
           {isProfileApplicant && activeSection === "publications" && (
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+            <div className="bg-white dark:bg-[var(--color-bg-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] shadow-sm p-6">
               <FormDataContext.Provider value={publicationsContextValue}>
                 <PublicationsSection readOnly={isReadOnly} />
               </FormDataContext.Provider>

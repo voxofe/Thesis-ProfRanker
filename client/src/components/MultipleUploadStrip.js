@@ -139,7 +139,7 @@ export default function MultipleUploadStrip({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm/6 font-medium text-gray-900">
+      <label className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
@@ -148,10 +148,10 @@ export default function MultipleUploadStrip({
         {effectiveFiles.map((file, index) => (
           <div
             key={`${getDisplayName(file)}-${index}`}
-            className="relative h-40 w-40 shrink-0 rounded-lg border-2 border-patras-buccaneer bg-white p-3"
+            className="relative h-40 w-40 shrink-0 rounded-lg border-2 border-patras-buccaneer bg-white dark:bg-[var(--color-bg-card)] p-3"
           >
             <TrashIcon
-              className="absolute right-2 top-2 h-5 w-5 cursor-pointer text-gray-400 hover:text-red-700"
+              className="absolute right-2 top-2 h-5 w-5 cursor-pointer text-gray-400 dark:text-[var(--color-text-muted)] hover:text-red-700"
               onClick={() => {
                 setLocalFiles((prev) =>
                   prev.filter((_, currentIndex) => currentIndex !== index)
@@ -164,17 +164,17 @@ export default function MultipleUploadStrip({
             />
             <div className="flex h-full flex-col items-center justify-center text-center">
               <DocumentTextIcon className="h-10 w-10 text-patras-buccaneer" />
-              <p className="mt-2 line-clamp-3 break-all text-xs text-gray-700">
+              <p className="mt-2 line-clamp-3 break-all text-xs text-gray-700 dark:text-[var(--color-text-secondary)]">
                 {getDisplayName(file)}
                 {file instanceof File && (
-                  <span className="text-gray-500"> ({getDisplaySize(file)})</span>
+                  <span className="text-gray-500 dark:text-[var(--color-text-muted)]"> ({getDisplaySize(file)})</span>
                 )}
               </p>
             </div>
           </div>
         ))}
 
-        <div className="relative h-40 w-40 shrink-0 rounded-lg border border-dashed border-patras-buccaneer/40 bg-white text-patras-buccaneer">
+        <div className="relative h-40 w-40 shrink-0 rounded-lg border border-dashed border-patras-buccaneer/40 bg-white dark:bg-[var(--color-bg-card)] text-patras-buccaneer">
           {!showVaultPicker && (
             <button
               type="button"
@@ -239,7 +239,7 @@ export default function MultipleUploadStrip({
         multiple
         onChange={handleFilePick}
       />
-      <p className="text-xs/5 text-gray-600">
+      <p className="text-xs/5 text-gray-600 dark:text-[var(--color-text-secondary)]">
         PDF, DOC, DOCX, ODT · Μέγιστο μέγεθος: 5MB
       </p>
       {error && <p className="text-sm text-red-600">{error}</p>}

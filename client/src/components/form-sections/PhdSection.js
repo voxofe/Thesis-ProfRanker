@@ -128,7 +128,7 @@ export default function PhdSection() {
         <div className="relative">
           <label
             htmlFor="phd-title"
-            className="block text-sm/6 font-medium text-gray-900"
+            className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]"
           >
             Τίτλος διδακτορικής διατριβής
             <span className="text-red-500 ml-1">*</span>
@@ -156,7 +156,7 @@ export default function PhdSection() {
               placeholder="Εισάγετε τον τίτλο της διδακτορικής διατριβής"
               title={showPhdTitleTooltip ? phdTitleValue : ""}
               ref={phdTitleInputRef}
-              className="block w-full rounded-md px-3 py-1.5 pr-10 text-base text-gray-900 outline outline-1 -outline-offset-1 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer focus:ring-offset-0 focus:ring-patras-buccaneer sm:text-sm/6"
+              className="block w-full rounded-md px-3 py-1.5 pr-10 text-base text-gray-900 dark:text-[var(--color-text-primary)] outline outline-1 -outline-offset-1 placeholder:text-gray-400 dark:text-[var(--color-text-muted)] focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer focus:ring-offset-0 focus:ring-patras-buccaneer sm:text-sm/6"
             />
             {phdTitleQuery && (
               <button
@@ -176,7 +176,7 @@ export default function PhdSection() {
               </button>
             )}
             {phdTitleOpen && filteredPhdTitles.length > 0 && (
-              <div className="absolute z-20 mt-1 w-full rounded-md border border-patras-buccaneer/20 bg-white shadow-lg">
+              <div className="absolute z-20 mt-1 w-full rounded-md border border-patras-buccaneer/20 bg-white dark:bg-[var(--color-bg-card)] shadow-lg">
                 <div className="max-h-56 overflow-auto">
                   {filteredPhdTitles.map((option) => (
                     <button
@@ -188,7 +188,7 @@ export default function PhdSection() {
                         setPhdTitleQuery(option.title || option.label);
                         setPhdTitleOpen(false);
                       }}
-                                  className="flex w-full items-center justify-between px-3 py-2 text-left text-sm text-gray-900 hover:bg-patras-buccaneer hover:text-white"
+                                  className="flex w-full items-center justify-between px-3 py-2 text-left text-sm text-gray-900 dark:text-[var(--color-text-primary)] hover:bg-patras-buccaneer hover:text-white"
                       title={option.label}
                     >
                       <span className="truncate">{option.label}</span>
@@ -210,7 +210,7 @@ export default function PhdSection() {
             required={true}
             popupPlacement="bottom"
           />
-          <p className="-mt-3 text-xs text-gray-500 italic">
+          <p className="-mt-3 text-xs text-gray-500 dark:text-[var(--color-text-muted)] italic">
             Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}
           </p>
         </div>
@@ -248,14 +248,14 @@ export default function PhdSection() {
           <div className="flex flex-wrap items-center justify-between gap-2 ">
             <label
               htmlFor="phd-keywords"
-              className="block text-sm/6 font-medium text-gray-900"
+              className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]"
             >
               Λέξεις-κλειδιά
               <span className="text-red-500 ml-1">*</span>
             </label>
           </div>
           <div
-            className="relative mt-2 flex w-full flex-wrap items-center gap-2 rounded-md bg-white px-3 py-3 text-base sm:text-sm/6 outline outline-1 -outline-offset-1 outline-patras-buccaneer focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-patras-buccaneer focus-within:ring-1 focus-within:ring-offset-0 focus-within:ring-patras-buccaneer"
+            className="relative mt-2 flex w-full flex-wrap items-center gap-2 rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-3 text-base sm:text-sm/6 outline outline-1 -outline-offset-1 outline-patras-buccaneer focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-patras-buccaneer focus-within:ring-1 focus-within:ring-offset-0 focus-within:ring-patras-buccaneer"
             onClick={(event) => {
               if (event.target.closest("button") || event.target.tagName === "INPUT") {
                 return;
@@ -266,13 +266,13 @@ export default function PhdSection() {
             {(formData.phdKeywords || []).map((keyword) => (
               <span
                 key={keyword}
-                className="inline-flex items-center gap-1 rounded-full bg-patras-goldSand/30 px-3 py-1 text-sm text-gray-800"
+                className="inline-flex items-center gap-1 rounded-full bg-patras-goldSand/30 px-3 py-1 text-sm text-gray-800 dark:text-[var(--color-text-primary)]"
               >
                 {keyword}
                 <button
                   type="button"
                   onClick={() => removePhdKeyword(keyword)}
-                  className="text-gray-500 hover:text-gray-800"
+                  className="text-gray-500 dark:text-[var(--color-text-muted)] hover:text-gray-800 dark:text-[var(--color-text-primary)]"
                   aria-label={`Αφαίρεση λέξης-κλειδιού ${keyword}`}
                 >
                   ×
@@ -289,20 +289,20 @@ export default function PhdSection() {
                 onKeyDown={handleKeywordKeyDown}
                 onBlur={commitKeyword}
                 placeholder=""
-                className="flex-1 min-w-[180px] border-0 p-0 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:ring-0"
+                className="flex-1 min-w-[180px] border-0 p-0 text-sm text-gray-900 dark:text-[var(--color-text-primary)] placeholder:text-gray-400 dark:text-[var(--color-text-muted)] outline-none focus:ring-0"
                 ref={keywordInputRef}
               />
             )}
           </div>
           <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">
               Πληκτρολογήστε και πατήστε Enter ή κόμμα για να προσθέσετε λέξη-κλειδί.
             </p>
             <button
               type="button"
               onClick={clearKeywords}
               disabled={keywordCount === 0}
-              className="inline-flex items-center gap-1 rounded-md border border-patras-buccaneer/30 bg-patras-albescentWhite/30 px-3 py-1 text-sm text-patras-buccaneer hover:bg-patras-albescentWhite disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
+              className="inline-flex items-center gap-1 rounded-md border border-patras-buccaneer/30 bg-patras-albescentWhite/30 px-3 py-1 text-sm text-patras-buccaneer hover:bg-patras-albescentWhite disabled:cursor-not-allowed disabled:border-gray-200 dark:border-[var(--color-border)] disabled:bg-gray-100 dark:bg-[var(--color-bg-surface)] dark:hover:bg-[var(--color-bg-muted)] disabled:text-gray-400 dark:text-[var(--color-text-muted)]"
               aria-label="Καθαρισμός λέξεων-κλειδιών"
               title="Καθαρισμός"
             >
@@ -310,7 +310,7 @@ export default function PhdSection() {
               <TrashIcon className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-gray-500 dark:text-[var(--color-text-muted)]">
             {keywordCount}/{PHD_KEYWORDS_MAX} λέξεις-κλειδιά
           </p>
           {(keywordsTooFew || keywordsTooMany) && (
@@ -332,7 +332,7 @@ export default function PhdSection() {
           />
 
           {formData.phdIsFromForeignInstitute && (
-            <div className="mt-4 p-4 bg-white rounded-md border border-blue-200 overflow-y-auto">
+            <div className="mt-4 p-4 bg-white dark:bg-[var(--color-bg-card)] rounded-md border border-blue-200 overflow-y-auto">
               <Upload
                 icon="document-text"
                 label="Έγγραφο αναγνώρισης ΔΟΑΤΑΠ"
