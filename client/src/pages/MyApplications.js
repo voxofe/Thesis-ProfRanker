@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import ApplicationCard from "../components/ApplicationCard";
 import LoadingIndicator from "../components/LoadingIndicator";
+import PageTitle from "../components/PageTitle";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -180,7 +181,7 @@ export default function MyApplications() {
   return (
     <div>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-6 sm:pt-0 sm:pb-8">
-        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)]">
+        <PageTitle className="mb-6">
           {isAdminViewing ? (
             <>
               Αιτήσεις χρήστη: <span className="text-lg font-semibold">{headerName}</span>
@@ -188,7 +189,7 @@ export default function MyApplications() {
           ) : (
             "Οι αιτήσεις μου"
           )}
-        </h1>
+        </PageTitle>
 
         {sortedApplications.length === 0 ? (
           <div className="bg-white dark:bg-[var(--color-bg-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] shadow-sm p-6 text-center">

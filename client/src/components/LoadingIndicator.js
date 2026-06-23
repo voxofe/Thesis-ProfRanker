@@ -10,7 +10,7 @@ export default function LoadingIndicator({
   text = "Φόρτωση...",
   showText = true,
   size = "md",
-  textClassName = "mt-4 text-gray-600",
+  textClassName = "mt-4 text-gray-600 dark:text-[var(--color-text-primary)]",
   className = "",
 }) {
   const sizeClasses = sizeClassMap[size] || sizeClassMap.md;
@@ -18,7 +18,7 @@ export default function LoadingIndicator({
   return (
     <div role="status" aria-live="polite" className={`text-center ${className}`.trim()}>
       <div
-        className={`inline-block animate-spin rounded-full border-patras-buccaneer ${sizeClasses}`}
+        className={`inline-block animate-spin rounded-full border-patras-buccaneer dark:border-[var(--color-text-primary)] ${sizeClasses}`}
         aria-hidden="true"
       ></div>
       {showText && <p className={textClassName}>{text}</p>}

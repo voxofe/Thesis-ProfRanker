@@ -7,6 +7,7 @@ import PhdDetailsModal from "../components/PhdDetailsModal";
 import CoursePlanDetailsModal from "../components/CoursePlanDetailsModal";
 import TooltipGray from "../components/TooltipGray";
 import LoadingIndicator from "../components/LoadingIndicator";
+import PageTitle from "../components/PageTitle";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { usePositions } from "../contexts/PositionsContext";
@@ -506,7 +507,7 @@ export default function ApplicationScore() {
 
   return (
     <div className="grid grid-cols-1 gap-y-5 pt-0">
-      <h1 className="text-2xl text-center border-b pb-2 mb-1 text-gray-800 dark:text-[var(--color-text-primary)]">
+      <PageTitle className="mb-1">
         {isAdmin && applicantName ? (
           <>
             Αίτηση & Βαθμολογία: <span className="text-lg font-semibold">{applicantName}
@@ -516,7 +517,7 @@ export default function ApplicationScore() {
         ) : (
           "Αίτηση & Βαθμολογία"
         )}
-      </h1>
+      </PageTitle>
       {canEditApplication && (
         <div className="mb-6 mx-auto w-full max-w-2xl rounded-xl border border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-[var(--color-bg-muted)] px-4 py-3">
           <button

@@ -156,7 +156,7 @@ export default function PhdSection() {
               placeholder="Εισάγετε τον τίτλο της διδακτορικής διατριβής"
               title={showPhdTitleTooltip ? phdTitleValue : ""}
               ref={phdTitleInputRef}
-              className="block w-full rounded-md px-3 py-1.5 pr-10 text-base text-gray-900 dark:text-[var(--color-text-primary)] outline outline-1 -outline-offset-1 placeholder:text-gray-400 dark:text-[var(--color-text-muted)] focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer focus:ring-offset-0 focus:ring-patras-buccaneer sm:text-sm/6"
+              className="block w-full rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-1.5 pr-10 text-base text-gray-900 dark:text-[var(--color-text-primary)] outline outline-1 -outline-offset-1 outline-patras-buccaneer dark:outline-[var(--color-border-accent)] placeholder:text-gray-400 dark:placeholder:text-[var(--color-text-muted)] focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer dark:focus:outline-[var(--color-primary)] focus:ring-offset-0 focus:ring-patras-buccaneer dark:focus:ring-[var(--color-primary)] sm:text-sm/6"
             />
             {phdTitleQuery && (
               <button
@@ -168,7 +168,7 @@ export default function PhdSection() {
                               setPhdTitleOpen(true);
                   phdTitleInputRef.current?.focus();
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-patras-sanguineBrown hover:text-red-700 w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-patras-sanguineBrown dark:text-[var(--color-text-secondary)] hover:text-red-700 dark:hover:text-[var(--color-text-primary)] w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-[var(--color-bg-muted)]"
                 aria-label="Καθαρισμός τίτλου"
                 title="Καθαρισμός τίτλου"
               >
@@ -176,7 +176,7 @@ export default function PhdSection() {
               </button>
             )}
             {phdTitleOpen && filteredPhdTitles.length > 0 && (
-              <div className="absolute z-20 mt-1 w-full rounded-md border border-patras-buccaneer/20 bg-white dark:bg-[var(--color-bg-card)] shadow-lg">
+              <div className="absolute z-20 mt-1 w-full rounded-md border border-patras-buccaneer/20 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-card)] shadow-lg">
                 <div className="max-h-56 overflow-auto">
                   {filteredPhdTitles.map((option) => (
                     <button
@@ -188,7 +188,7 @@ export default function PhdSection() {
                         setPhdTitleQuery(option.title || option.label);
                         setPhdTitleOpen(false);
                       }}
-                                  className="flex w-full items-center justify-between px-3 py-2 text-left text-sm text-gray-900 dark:text-[var(--color-text-primary)] hover:bg-patras-buccaneer hover:text-white"
+                                  className="flex w-full items-center justify-between px-3 py-2 text-left text-sm text-gray-900 dark:text-[var(--color-text-secondary)] hover:bg-patras-buccaneer hover:text-white dark:hover:bg-[var(--color-primary)] dark:hover:text-[var(--color-text-inverse)]"
                       title={option.label}
                     >
                       <span className="truncate">{option.label}</span>
@@ -235,14 +235,16 @@ export default function PhdSection() {
       </div>
 
       <div className="space-y-4">
-        <PhdAbstractField
-          value={formData.phdAbstract}
-          onChange={handlePhdAbstractChange}
-          minWords={PHD_ABSTRACT_MIN_WORDS}
-          maxWords={PHD_ABSTRACT_MAX_WORDS}
-          placeholder="Γράψτε μια σύντομη περίληψη της διατριβής σας"
-          required
-        />
+        <div className="[&_textarea]:bg-white [&_textarea]:dark:bg-[var(--color-bg-card)] [&_textarea]:dark:outline-[var(--color-border-accent)] [&_textarea]:focus:outline-patras-buccaneer [&_textarea]:dark:focus:outline-[var(--color-primary)] [&_textarea]:focus:ring-patras-buccaneer [&_textarea]:dark:focus:ring-[var(--color-primary)]">
+          <PhdAbstractField
+            value={formData.phdAbstract}
+            onChange={handlePhdAbstractChange}
+            minWords={PHD_ABSTRACT_MIN_WORDS}
+            maxWords={PHD_ABSTRACT_MAX_WORDS}
+            placeholder="Γράψτε μια σύντομη περίληψη της διατριβής σας"
+            required
+          />
+        </div>
 
         <div className="py-3">
           <div className="flex flex-wrap items-center justify-between gap-2 ">
@@ -255,7 +257,7 @@ export default function PhdSection() {
             </label>
           </div>
           <div
-            className="relative mt-2 flex w-full flex-wrap items-center gap-2 rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-3 text-base sm:text-sm/6 outline outline-1 -outline-offset-1 outline-patras-buccaneer focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-patras-buccaneer focus-within:ring-1 focus-within:ring-offset-0 focus-within:ring-patras-buccaneer"
+            className="relative mt-2 flex w-full flex-wrap items-center gap-2 rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-3 text-base sm:text-sm/6 outline outline-1 -outline-offset-1 outline-patras-buccaneer dark:outline-[var(--color-border-accent)] focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-patras-buccaneer dark:focus-within:outline-[var(--color-primary)] focus-within:ring-1 focus-within:ring-offset-0 focus-within:ring-patras-buccaneer dark:focus-within:ring-[var(--color-primary)]"
             onClick={(event) => {
               if (event.target.closest("button") || event.target.tagName === "INPUT") {
                 return;
@@ -272,7 +274,7 @@ export default function PhdSection() {
                 <button
                   type="button"
                   onClick={() => removePhdKeyword(keyword)}
-                  className="text-gray-500 dark:text-[var(--color-text-muted)] hover:text-gray-800 dark:text-[var(--color-text-primary)]"
+                  className="text-gray-500 dark:text-[var(--color-text-muted)] hover:text-red-700 dark:hover:text-[var(--color-danger)]"
                   aria-label={`Αφαίρεση λέξης-κλειδιού ${keyword}`}
                 >
                   ×
@@ -289,7 +291,8 @@ export default function PhdSection() {
                 onKeyDown={handleKeywordKeyDown}
                 onBlur={commitKeyword}
                 placeholder=""
-                className="flex-1 min-w-[180px] border-0 p-0 text-sm text-gray-900 dark:text-[var(--color-text-primary)] placeholder:text-gray-400 dark:text-[var(--color-text-muted)] outline-none focus:ring-0"
+                className="flex-none min-w-[4ch] max-w-full border-0 p-0 text-sm text-gray-900 dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-primary)] placeholder:text-gray-400 dark:placeholder:text-[var(--color-text-muted)] outline-none focus:ring-0"
+                style={{ width: `${Math.max(8, keywordInput.length + 1)}ch` }}
                 ref={keywordInputRef}
               />
             )}

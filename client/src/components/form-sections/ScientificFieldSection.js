@@ -84,7 +84,7 @@ export default function ScientificFieldSection() {
 
       {/* Optional chips summary ... */}
 
-      <div className=" rounded-lg border border-patras-albescentWhite/60 bg-patras-albescentWhite/30 px-4 py-3 text-sm text-patras-buccaneer dark:border-[var(--color-border)] dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-secondary)]">
+      <div className=" rounded-lg border border-patras-goldSand/60 bg-patras-goldSand/20 px-4 py-3 text-sm text-patras-buccaneer dark:border-[var(--color-border-accent)] dark:bg-[var(--color-bg-muted)] dark:text-[var(--color-text-primary)]">
         <div className="flex items-center gap-2">
           <span>Έναρξη αιτήσεων θέσης:</span>
           <span className="font-semibold">

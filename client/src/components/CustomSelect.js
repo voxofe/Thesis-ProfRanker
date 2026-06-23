@@ -31,7 +31,7 @@ export default function CustomSelect({
   const errorStyle = "outline-red-500 focus:outline-red-500";
 
   const newFieldStyle =
-    "font-semibold bg-patras-albescentWhite/50 border border-patras-cameo";
+    "font-semibold bg-patras-albescentWhite/50 border border-patras-cameo text-gray-900 dark:text-gray-900";
 
   const getTriggerStyle = () => {
     if (disabled) return disabledStyle;

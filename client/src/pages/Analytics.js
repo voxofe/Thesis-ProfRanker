@@ -20,6 +20,7 @@ import {
   Legend,
 } from "recharts";
 import LoadingIndicator from "../components/LoadingIndicator";
+import PageTitle from "../components/PageTitle";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -752,9 +753,7 @@ export default function Analytics() {
   return (
     <div className="space-y-6">
     <div className="pt-0">
-      <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)]">
-        Στατιστικά
-      </h1>
+      <PageTitle className="mb-6">Στατιστικά</PageTitle>
       </div>
 
       <div className="mb-6 rounded-lg border border-patras-capePalliser/50 bg-white dark:bg-[var(--color-bg-card)] shadow-md overflow-visible">

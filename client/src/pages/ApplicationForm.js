@@ -14,6 +14,7 @@ import Stepper from "../components/Stepper";
 import Tooltip from "../components/Tooltip";
 import SubmissionProgress from "../components/SubmissionProgress";
 import LoadingIndicator from "../components/LoadingIndicator";
+import PageTitle from "../components/PageTitle";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
@@ -711,9 +712,7 @@ export default function Form({ academicYear }) {
 
   return (
     <div className="w-full max-w-6xl mx-auto">
-      <h1 className="text-2xl text-center border-b pb-2 mb-8 text-gray-800 dark:text-[var(--color-text-primary)]">
-        {headerTitle}
-      </h1>
+      <PageTitle className="mb-8">{headerTitle}</PageTitle>
       <SubmissionProgress
         loading={loading}
         submitLabel={submitLabel}
@@ -762,7 +761,7 @@ export default function Form({ academicYear }) {
             type="button"
             onClick={handlePrevious}
             disabled={isFirstStep || loading}
-            className="rounded-md bg-white dark:bg-[var(--color-bg-card)] px-4 py-2 text-sm font-semibold text-patras-buccaneer border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md bg-white dark:bg-[var(--color-bg-card)] px-4 py-2 text-sm font-semibold text-patras-buccaneer dark:text-white border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-primary)] dark:hover:text-[var(--color-text-inverse)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Προηγούμενο
           </button>

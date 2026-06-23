@@ -5,6 +5,7 @@ import InputField from "../components/InputField";
 import CustomSelect from "../components/CustomSelect";
 import TooltipGray from "../components/TooltipGray";
 import LoadingIndicator from "../components/LoadingIndicator";
+import PageTitle from "../components/PageTitle";
 
 export default function Register() {
   const [firstName, setFirstName] = useState("");
@@ -107,12 +108,7 @@ export default function Register() {
   return (
     <div className="flex flex-col justify-start pt-4 sm:px-6 lg:px-8 -mt-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
-        <h2 className="text-center text-2xl font-semibold tracking-tight text-gray-600 dark:text-[var(--color-text-secondary)]">
-          Εγγραφή στην εφαρμογή
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600 dark:text-[var(--color-text-secondary)]">
-          Συμπληρώστε τα στοιχεία σας για δημιουργία λογαριασμού
-        </p>
+        <PageTitle>Εγγραφή στην εφαρμογή</PageTitle>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
@@ -222,7 +218,14 @@ export default function Register() {
                 disabled={isLoading || !isFormValid}
                 className="flex w-full justify-center rounded-md bg-patras-buccaneer px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? "Εγγραφή..." : "Εγγραφή"}
+                {isLoading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" aria-hidden="true" />
+                    <span>Εγγραφή</span>
+                  </span>
+                ) : (
+                  "Εγγραφή"
+                )}
               </button>
             </div>
           </form>
@@ -231,7 +234,7 @@ export default function Register() {
             <button
               type="button"
               onClick={handleLoginClick}
-              className="flex w-full justify-center rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-2 text-sm font-semibold text-patras-buccaneer dark:text-[var(--color-text-secondary)] border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-bg-muted)] dark:hover:text-[var(--color-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer"
+              className="flex w-full justify-center rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-2 text-sm font-semibold text-patras-buccaneer dark:text-[var(--color-text-secondary)] border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-primary)] dark:hover:text-[var(--color-text-inverse)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer"
             >
               Έχετε ήδη λογαριασμό; Σύνδεση
             </button>

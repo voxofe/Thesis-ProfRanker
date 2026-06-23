@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import SortableTable from "../components/SortableTable";
 import FilterModal from "../components/FilterModal";
 import TooltipGray from "../components/TooltipGray";
+import PageTitle from "../components/PageTitle";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -309,9 +310,7 @@ export default function UsersView() {
   return (
     <div className="max-w-5xl mx-auto p-0">
       <div className="mb-4">
-        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)]">
-          Λίστα χρηστών
-        </h1>
+        <PageTitle className="mb-6">Λίστα χρηστών</PageTitle>
       </div>
 
       <div className="flex items-center justify-center pb-4">

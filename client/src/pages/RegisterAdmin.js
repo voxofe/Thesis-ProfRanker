@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import InputField from "../components/InputField";
 import LoadingIndicator from "../components/LoadingIndicator";
+import PageTitle from "../components/PageTitle";
 
 export default function RegisterAdmin() {
   const [firstName, setFirstName] = useState("");
@@ -110,9 +111,7 @@ export default function RegisterAdmin() {
   return (
     <div className="flex flex-col justify-start pt-4 sm:px-6 lg:px-8 -mt-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
-        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)]">
-           Εγγραφή διαχειριστή
-        </h1>
+          <PageTitle className="mb-6">Εγγραφή διαχειριστή</PageTitle>
       </div>
 
       <div className="mt-0 sm:mx-auto sm:w-full sm:max-w-2xl">

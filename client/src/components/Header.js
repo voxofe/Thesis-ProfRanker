@@ -56,7 +56,7 @@ export default function Header({ academicYear }) {
     : resolveRoleLabel(currentUser?.role, currentUser?.gender);
 
   return (
-    <header className="w-full rounded-xl border border-gray-200 shadow-lg bg-patras-albescentWhite/15 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-surface)]">
+    <header className="w-full rounded-xl border border-gray-200 shadow-lg bg-patras-albescentWhite/15 dark:border-transparent dark:shadow-lg dark:shadow-gray-500/30 dark:bg-[var(--color-bg-surface)]">
       <div className="w-full flex flex-col gap-3 px-6 py-3 md:flex-row md:items-center md:gap-5">
         <Link to="/" className="shrink-0 flex items-center justify-start">
           <img

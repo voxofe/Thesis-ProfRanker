@@ -10,6 +10,7 @@ import { formatDateTimeCell } from "../components/SortableTable";
 import LoadingIndicator from "../components/LoadingIndicator";
 import useBodyScrollLock from "../utils/useBodyScrollLock";
 import PositionCreate from "./PositionCreate";
+import PageTitle from "../components/PageTitle";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -215,7 +216,7 @@ export default function ScientificFieldSingle() {
 
   return (
     <div className="max-w-5xl mx-auto p-0 space-y-6 pb-10">
-      <h1 className="text-2xl text-center border-b pb-2 text-gray-800 dark:text-[var(--color-text-primary)]">
+      <PageTitle>
         {fieldName ? (
           <>
             Επιστημονικό πεδίο: <span className="text-lg font-semibold">{fieldName}</span>
@@ -223,7 +224,7 @@ export default function ScientificFieldSingle() {
         ) : (
           "Επιστημονικό πεδίο"
         )}
-      </h1>
+      </PageTitle>
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

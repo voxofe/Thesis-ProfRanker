@@ -209,12 +209,12 @@ export default function Upload(props) {
         className={`relative mt-2 flex w-full min-w-0 justify-center rounded-lg pr-upload-surface
                     ${
                       hasAnyFile
-                        ? "border-2 border-patras-buccaneer cursor-not-allowed pr-upload-texture-filled"
-                        : "border border-dashed border-patras-buccaneer/25 pr-upload-texture-empty"
+                        ? "border-2 border-patras-buccaneer dark:border-[var(--color-border-accent)] cursor-not-allowed pr-upload-texture-filled"
+                        : "border border-dashed border-patras-buccaneer/25 dark:border-[var(--color-border)] pr-upload-texture-empty"
                     }
                     ${
                       isDragging && !hasAnyFile
-                        ? "border-patras-buccaneer bg-patras-albescentWhite"
+                        ? "border-patras-buccaneer bg-patras-albescentWhite dark:border-[var(--color-primary)] dark:bg-[var(--color-bg-muted)]"
                         : ""
                     }
                     ${props.compact ? "px-2 py-4" : "px-6 py-10"}`}
@@ -229,7 +229,7 @@ export default function Upload(props) {
             className={`absolute top-2 right-2 h-6 w-6 cursor-pointer 
                             ${
                               hasAnyFile
-                                ? "text-gray-400 dark:text-[var(--color-text-muted)] hover:text-red-700"
+                                ? "text-gray-400 dark:text-[var(--color-text-muted)] hover:text-red-700 dark:hover:text-red-500"
                                 : "text-gray-300 cursor-not-allowed"
                             }`}
             onClick={() => {
@@ -248,17 +248,17 @@ export default function Upload(props) {
           {!hasAnyFile ? (
             <DocumentTextIcon
               aria-hidden="true"
-              className="mx-auto h-12 w-12 text-patras-buccaneer"
+              className="mx-auto h-12 w-12 text-patras-buccaneer dark:text-[var(--color-text-secondary)]"
             />
           ) : checkEnabled && !checkSuccess ? (
             <DocumentTextIcon
               aria-hidden="true"
-              className="mx-auto h-12 w-12 text-patras-buccaneer"
+              className="mx-auto h-12 w-12 text-patras-buccaneer dark:text-[var(--color-text-secondary)]"
             />
           ) : (
             <CheckIcon
               aria-hidden="true"
-              className="mx-auto h-12 w-12 text-patras-buccaneer"
+              className="mx-auto h-12 w-12 text-patras-buccaneer dark:text-[var(--color-text-secondary)]"
             />
           )}
           {/* File Name or Upload Button */}
@@ -287,10 +287,10 @@ export default function Upload(props) {
                 <>
                   <label
                     htmlFor={props.id}
-                    className={`relative cursor-pointer rounded-md bg-white dark:bg-[var(--color-bg-card)] font-semibold text-patras-auChico text-center max-w-full break-words 
+                    className={`relative cursor-pointer rounded-md bg-white dark:bg-[var(--color-bg-card)] font-semibold text-patras-auChico dark:text-white text-center max-w-full break-words 
                                         focus-within:outline-none focus-within:ring-2 focus-within:ring-patras-buccaneer focus-within:ring-offset-2 
                                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer focus-visible:ring-offset-2
-                                        hover:text-white hover:bg-patras-buccaneer 
+                                        hover:text-white hover:bg-patras-buccaneer dark:hover:bg-[var(--color-primary-hover)] 
                                         ${
                                           props.disabled
                                             ? "pointer-events-none"
@@ -342,13 +342,13 @@ export default function Upload(props) {
           )}
           {!hasAnyFile ? (
             <div>
-              <span className="text-sm pl-1 mb-10">ή σύρετε και αφήστε</span>
+              <span className="text-sm pl-1 mb-10 dark:text-white">ή σύρετε και αφήστε</span>
               <p className="pt-2 text-xs/5 text-gray-600 dark:text-[var(--color-text-secondary)]">
                 {formatAcceptHint()} · Μέγιστο μέγεθος: {Math.round(maxFileBytes / (1024 * 1024))}MB
               </p>
             </div>
           ) : (
-            <p className="text-sm pt-[14px] mb-[20px] text-patras-buccaneer break-words">
+            <p className="text-sm pt-[14px] mb-[20px] text-patras-buccaneer dark:text-[var(--color-text-primary)] break-words">
               {showCheckMessage && checkPending && "Γίνεται έλεγχος του PDF. Παρακαλώ περιμένετε."}
               {showCheckMessage && checkFailed && (checkError || "Αποτυχία ελέγχου PDF.")}
               {showCheckMessage && !checkPending && !checkFailed && "Πατήστε Έλεγχος PDF για να συνεχίσετε."}

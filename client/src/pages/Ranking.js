@@ -7,6 +7,7 @@ import FilterModal from "../components/FilterModal";
 import Checkbox from "../components/Checkbox";
 import SortableTable, { formatDateTimeCell } from "../components/SortableTable";
 import RefreshButton from "../components/RefreshButton";
+import PageTitle from "../components/PageTitle";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -678,14 +679,14 @@ export default function Ranking() {
           {clickable ? (
             <Link to={getApplicationScoreLink(applicant)} className="block w-full h-full px-6 py-4">
               <div className="flex justify-center">
-                <span className="inline-block min-w-[30px] px-3 py-1 rounded-md text-black font-semibold text-sm shadow-md ">
+                <span className="inline-block min-w-[30px] px-3 py-1 rounded-md text-black dark:text-white font-semibold text-sm shadow-md ">
                   {applicant.totalPoints}
                 </span>
               </div>
             </Link>
           ) : (
             <div className="px-6 py-4">
-              <span className="inline-block min-w-[30px] px-3 py-1 rounded-md text-black font-semibold text-sm shadow-md">
+              <span className="inline-block min-w-[30px] px-3 py-1 rounded-md text-black dark:text-white font-semibold text-sm shadow-md">
                 {applicant.totalPoints}
               </span>
             </div>
@@ -697,9 +698,7 @@ export default function Ranking() {
 
   return (
     <div className="pt-0">
-      <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)]">
-        Λίστα κατάταξης αιτήσεων
-      </h1>
+      <PageTitle className="mb-6">Λίστα κατάταξης αιτήσεων</PageTitle>
 
       {/* Filter Modal */}
       <FilterModal

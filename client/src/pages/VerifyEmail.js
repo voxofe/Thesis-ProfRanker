@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { EMAIL_VERIFICATION_ENABLED } from "../utils/featureFlags";
 import LoadingIndicator from "../components/LoadingIndicator";
+import PageTitle from "../components/PageTitle";
 
 const verificationRequestByToken = new Map();
 
@@ -91,9 +92,7 @@ export default function VerifyEmail() {
   return (
     <div className="max-w-3xl mx-auto p-0">
         <div className="pt-0">
-        <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)]">
-            Επιβεβαίωση ηλεκτρονικής διεύθυνσης
-        </h1>
+        <PageTitle className="mb-6">Επιβεβαίωση ηλεκτρονικής διεύθυνσης</PageTitle>
 
 
         {loading ? (

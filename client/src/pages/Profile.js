@@ -14,6 +14,7 @@ import TermsModal from "../components/TermsModal";
 import PublicationsSection from "../components/form-sections/PublicationsSection";
 import PhdAbstractField from "../components/PhdAbstractField";
 import LoadingIndicator from "../components/LoadingIndicator";
+import PageTitle from "../components/PageTitle";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -1266,7 +1267,7 @@ export default function Profile() {
   return (
     <div className="pr-profile-labels max-w-6xl mx-auto px-6">
       <div>
-        <h1 className="text-2xl text-center border-b pb-2 mb-2 text-gray-800 dark:text-[var(--color-text-primary)]">
+        <PageTitle className="mb-2">
           {isAdminViewingOther ? (
             <>
               Φάκελος χρήστη: <span className="text-lg font-semibold">{`${form.firstName} ${form.lastName}`.trim()}</span>
@@ -1274,7 +1275,7 @@ export default function Profile() {
           ) : (
             "O φακελός μου"
           )}
-        </h1>
+        </PageTitle>
       </div>
         <h2 className="text-lg text-center font-semibold text-patras-buccaneer/100 dark:text-[var(--color-text-primary)] py-2">
             {activeSection === "general" && "Γενικά στοιχεία"}
@@ -1621,7 +1622,7 @@ export default function Profile() {
                               </label>
                             </div>
                             <div
-                              className="relative mt-2 flex w-full flex-wrap items-center gap-2 rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-3 text-base sm:text-sm/6 outline outline-1 -outline-offset-1 outline-patras-buccaneer focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-patras-buccaneer focus-within:ring-1 focus-within:ring-offset-0 focus-within:ring-patras-buccaneer"
+                              className="relative mt-2 flex w-full flex-wrap items-center gap-2 rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-3 text-base sm:text-sm/6 outline outline-1 -outline-offset-1 outline-patras-buccaneer dark:outline-[var(--color-border-accent)] focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-patras-buccaneer dark:focus-within:outline-[var(--color-primary)] focus-within:ring-1 focus-within:ring-offset-0 focus-within:ring-patras-buccaneer dark:focus-within:ring-[var(--color-primary)]"
                               onClick={(event) => {
                                 if (event.target.closest("button") || event.target.tagName === "INPUT") {
                                   return;
@@ -1639,7 +1640,7 @@ export default function Profile() {
                                     <button
                                       type="button"
                                       onClick={() => removePhdKeyword(keyword)}
-                                      className="text-gray-500 dark:text-[var(--color-text-muted)] hover:text-gray-800 dark:text-[var(--color-text-primary)]"
+                                      className="text-gray-500 dark:text-[var(--color-text-muted)] hover:text-red-700 dark:hover:text-[var(--color-danger)]"
                                       aria-label={`Αφαίρεση λέξης-κλειδιού ${keyword}`}
                                     >
                                       ×
@@ -1657,7 +1658,7 @@ export default function Profile() {
                                   onKeyDown={handlePhdKeywordKeyDown}
                                   onBlur={commitPhdKeyword}
                                   placeholder=""
-                                  className="flex-none min-w-[4ch] max-w-full border-0 p-0 text-sm text-gray-900 dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-primary)] placeholder:text-gray-400 dark:text-[var(--color-text-muted)] outline-none focus:ring-0"
+                                  className="flex-none min-w-[4ch] max-w-full border-0 p-0 text-sm text-gray-900 dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-primary)] placeholder:text-gray-400 dark:placeholder:text-[var(--color-text-muted)] outline-none focus:ring-0"
                                   style={{ width: `${Math.max(8, phdKeywordInput.length + 1)}ch` }}
                                   ref={phdKeywordInputRef}
                                 />

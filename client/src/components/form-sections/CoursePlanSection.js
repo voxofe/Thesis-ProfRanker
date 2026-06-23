@@ -210,7 +210,7 @@ export default function CoursePlanSection() {
                       isActive
                         ? "border-patras-buccaneer bg-patras-buccaneer text-white dark:border-[var(--color-primary)] dark:bg-[var(--color-primary)] dark:text-[var(--color-text-inverse)]"
                         : isComplete
-                          ? "border-green-300 bg-green-50 text-green-800 hover:border-green-500 dark:border-[var(--color-success)] dark:bg-[var(--color-success)] dark:text-[var(--color-success)] dark:hover:border-[var(--color-success)]"
+                            ? "border-green-300 text-green-800 hover:border-green-500"
                           : "border-gray-300 bg-white text-gray-700 hover:border-patras-buccaneer dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)] dark:hover:border-[var(--color-primary)]"
                     }`}
                     title={course.name || `Μάθημα ${index + 1}`}

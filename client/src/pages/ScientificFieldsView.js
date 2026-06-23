@@ -4,6 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import FilterModal from "../components/FilterModal";
 import SortableTable, { formatDateTimeCell } from "../components/SortableTable";
+import PageTitle from "../components/PageTitle";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -399,9 +400,7 @@ export default function ScientificFieldsView() {
 
   return (
     <div className="pt-0">
-      <h1 className="text-2xl text-center border-b  pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)]">
-        Επιστημονικά πεδία
-      </h1>
+      <PageTitle className="mb-6">Επιστημονικά πεδία</PageTitle>
       <div className="mb-2 grid grid-cols-[1fr_auto] items-end gap-3 min-h-[36px]">
         <div className="flex flex-wrap items-center gap-2 min-h-[28px] min-w-[12rem] self-end">
           {filterTags.map((tag, idx) => (

@@ -146,7 +146,7 @@ export default function CoursePlanDetailsModal({
           <div className="space-y-2">
             <div className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">
               Μαθήματα πεδίου:{" "}
-              <span className="font-semibold underline text-patras-buccaneer dark:text-[var(--color-text-primary)]">
+              <span className="font-semibold underline text-patras-buccaneer dark:text-[var(--color-primary)]">
                 {scientificField || ""}
               </span>{" "}
               ({normalizedCourses.length} συνολικά)
@@ -205,7 +205,7 @@ export default function CoursePlanDetailsModal({
           <div className="space-y-2">
             <div className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">
               Σχεδιάγραμμα διδασκαλίας για{" "}
-              <span className="font-semibold underline text-patras-buccaneer dark:text-[var(--color-text-primary)]">
+              <span className="font-semibold underline text-patras-buccaneer dark:text-[var(--color-primary)]">
                 {activeCourse?.name || "Χωρίς τίτλο"}
               </span>{" "}
               (Μάθημα {normalizedCourses.findIndex((course) => String(course.id) === String(activeCourse?.id)) + 1}/{normalizedCourses.length})

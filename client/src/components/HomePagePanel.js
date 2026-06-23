@@ -29,7 +29,7 @@ export default function HomePagePanel({
     : undefined;
 
   return (
-    <div className={`${colorClass} rounded-lg p-6 hover:shadow-md transition-shadow flex flex-col justify-between`} style={darkCardStyle}>
+    <div className={`${colorClass} rounded-lg p-6 hover:shadow-md dark:hover:shadow-md dark:hover:shadow-gray-500/30 transition-shadow flex flex-col justify-between`} style={darkCardStyle}>
       <h3 className="text-lg font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)] mb-3 flex items-center">
         {title}
         {showInfoMark && infoPopup && !buttonDisabled && (

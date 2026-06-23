@@ -148,10 +148,10 @@ export default function MultipleUploadStrip({
         {effectiveFiles.map((file, index) => (
           <div
             key={`${getDisplayName(file)}-${index}`}
-            className="relative h-40 w-40 shrink-0 rounded-lg border-2 border-patras-buccaneer bg-white dark:bg-[var(--color-bg-card)] p-3"
+            className="relative h-40 w-40 shrink-0 rounded-lg border-2 border-patras-buccaneer dark:border-[var(--color-border-accent)] bg-white dark:bg-[var(--color-bg-card)] p-3"
           >
             <TrashIcon
-              className="absolute right-2 top-2 h-5 w-5 cursor-pointer text-gray-400 dark:text-[var(--color-text-muted)] hover:text-red-700"
+              className="absolute right-2 top-2 h-5 w-5 cursor-pointer text-gray-400 dark:text-[var(--color-text-muted)] hover:text-red-700 dark:hover:text-red-500"
               onClick={() => {
                 setLocalFiles((prev) =>
                   prev.filter((_, currentIndex) => currentIndex !== index)
@@ -163,7 +163,7 @@ export default function MultipleUploadStrip({
               }}
             />
             <div className="flex h-full flex-col items-center justify-center text-center">
-              <DocumentTextIcon className="h-10 w-10 text-patras-buccaneer" />
+              <DocumentTextIcon className="h-10 w-10 text-patras-buccaneer dark:text-[var(--color-text-secondary)]" />
               <p className="mt-2 line-clamp-3 break-all text-xs text-gray-700 dark:text-[var(--color-text-secondary)]">
                 {getDisplayName(file)}
                 {file instanceof File && (
@@ -174,11 +174,11 @@ export default function MultipleUploadStrip({
           </div>
         ))}
 
-        <div className="relative h-40 w-40 shrink-0 rounded-lg border border-dashed border-patras-buccaneer/40 bg-white dark:bg-[var(--color-bg-card)] text-patras-buccaneer">
+        <div className="relative h-40 w-40 shrink-0 rounded-lg border border-dashed border-patras-buccaneer/40 dark:border-[var(--color-border-accent)] bg-white dark:bg-[var(--color-bg-card)] text-patras-buccaneer dark:text-[var(--color-text-secondary)]">
           {!showVaultPicker && (
             <button
               type="button"
-              className="flex h-full w-full items-center justify-center hover:bg-patras-albescentWhite"
+              className="flex h-full w-full items-center justify-center hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-bg-muted)]"
               onClick={() => {
                 if (selectableOptions.length === 0) {
                   inputRef.current?.click();
@@ -202,7 +202,7 @@ export default function MultipleUploadStrip({
                     value: String(option.id),
                     label: option.name,
                   })),
-                  { value: "__new__", label: "Ανεβάστε νέο αρχείο" },
+                  { value: "__new__", label: "Ανέβασμα νέου αρχείου" },
                 ]}
                 onChange={(value) => {
                   if (value === "__new__") {

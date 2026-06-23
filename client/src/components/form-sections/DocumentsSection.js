@@ -175,7 +175,7 @@ export default function DocumentsSection({ academicYear }) {
                 Υπεύθυνη δήλωση σχετικά με τους{" "}
                 <button
                     type="button"
-                    className="text-patras-buccaneer underline hover:text-patras-auChico"
+                  className="text-patras-buccaneer underline hover:text-patras-auChico dark:text-[var(--color-text-primary)] dark:hover:text-[var(--color-text-secondary)]"
                     onClick={() => setIsRestrictionsModalOpen(true)}
                 >
                     περιορισμούς της Πράξης

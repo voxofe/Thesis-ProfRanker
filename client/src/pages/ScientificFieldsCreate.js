@@ -9,6 +9,7 @@ import SubmissionProgress from "../components/SubmissionProgress";
 import LoadingIndicator from "../components/LoadingIndicator";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import PageTitle from "../components/PageTitle";
 
 const SCHOOLS = [
   "ΘΕΤΙΚΩΝ ΕΠΙΣΤΗΜΩΝ",
@@ -413,9 +414,9 @@ export default function ScientificFieldsCreate() {
         percent={progressPercent}
       />
       <header className="text-center pb-2">
-        <h1 className="text-2xl text-center border-b pb-2 text-gray-800 dark:text-[var(--color-text-primary)]">
+        <PageTitle>
           {isEditMode ? "Ενημέρωση πεδίου" : "Δημιουργία πεδίου"}
-        </h1>
+        </PageTitle>
       </header>
 
       <form

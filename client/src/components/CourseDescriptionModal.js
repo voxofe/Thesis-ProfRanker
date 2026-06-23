@@ -20,7 +20,7 @@ export default function CourseDescriptionModal({ open, onClose, title, descripti
     return (
       <>
         {prefix}{" "}
-        <span className="text-patras-buccaneer">{courseName}</span>
+        <span className="text-patras-buccaneer dark:text-[var(--color-primary)]">{courseName}</span>
       </>
     );
   };

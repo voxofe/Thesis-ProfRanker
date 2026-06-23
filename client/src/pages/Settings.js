@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import InputField from "../components/InputField";
+import PageTitle from "../components/PageTitle";
 import { useToast } from "../contexts/ToastContext";
 import { useAuth } from "../contexts/AuthContext";
 import { EMAIL_VERIFICATION_ENABLED } from "../utils/featureFlags";
@@ -64,9 +65,7 @@ export default function Settings() {
 
   return (
     <div className="max-w-5xl mx-auto p-0">
-      <h1 className="text-2xl text-center border-b pb-2 mb-6 text-gray-800 dark:text-[var(--color-text-primary)] dark:!border-[var(--color-border)]">
-        Αλλαγή κωδικού πρόσβασης
-      </h1>
+      <PageTitle className="mb-6">Αλλαγή κωδικού πρόσβασης</PageTitle>
 
       <div className="max-w-2xl mx-auto">
         <div

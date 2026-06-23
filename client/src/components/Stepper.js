@@ -12,13 +12,13 @@ export default function Stepper({
       <div className="relative">
         {/* Background connector line */}
         <div
-          className="absolute top-5 left-0 right-0 h-0.5 bg-gray-300"
+          className="absolute top-5 left-0 right-0 h-0.5 bg-gray-300 dark:bg-gray-500"
           style={{ left: "2.5rem", right: "2.5rem" }}
         ></div>
 
         {/* Progress connector line */}
         <div
-          className="absolute top-5 left-0 h-0.5 bg-patras-buccaneer transition-all duration-300"
+          className="absolute top-5 left-0 h-0.5 bg-patras-buccaneer dark:bg-patras-albescentWhite transition-all duration-300"
           style={{
             left: "2.5rem",
             width: `calc((${Math.max(0, currentStep - 1)} / ${
@@ -50,19 +50,19 @@ export default function Stepper({
                     group relative z-10 flex items-center justify-center w-10 h-10 rounded-full border-2 text-sm font-semibold bg-white dark:bg-[var(--color-bg-card)] transition-all duration-200
                     ${
                       isCompleted
-                        ? "border-patras-buccaneer text-patras-buccaneer hover:bg-patras-buccaneer hover:text-white cursor-pointer"
+                        ? "border-patras-buccaneer text-patras-buccaneer hover:bg-patras-buccaneer hover:text-white dark:border-patras-albescentWhite dark:text-patras-albescentWhite dark:hover:bg-[var(--color-primary)] dark:hover:text-patras-albescentWhite cursor-pointer"
                         : isActive
-                        ? "border-patras-buccaneer text-patras-buccaneer hover:bg-patras-albescentWhite cursor-pointer"
+                        ? "border-patras-buccaneer text-patras-buccaneer hover:bg-patras-albescentWhite dark:border-patras-albescentWhite dark:text-patras-albescentWhite dark:hover:bg-[var(--color-bg-muted)] dark:hover:text-patras-albescentWhite cursor-pointer"
                         : isAccessible
-                        ? "border-patras-buccaneer text-patras-buccaneer hover:bg-patras-albescentWhite cursor-pointer"
-                        : "border-gray-300 dark:border-[var(--color-border)] text-gray-500 dark:text-[var(--color-text-muted)] cursor-not-allowed"
+                        ? "border-patras-buccaneer text-patras-buccaneer hover:bg-patras-albescentWhite dark:border-patras-albescentWhite dark:text-patras-albescentWhite dark:hover:bg-[var(--color-bg-muted)] dark:hover:text-patras-albescentWhite cursor-pointer"
+                        : "border-gray-300 text-gray-500 dark:border-gray-500 dark:text-gray-500 cursor-not-allowed"
                     }
                     ${isAccessible ? "hover:scale-105" : ""}
                   `}
                 >
                   {isCompleted ? (
                     <svg
-                      className="w-5 h-5 text-patras-buccaneer group-hover:text-white transition-colors duration-200"
+                      className="w-5 h-5 text-patras-buccaneer group-hover:text-white dark:text-patras-albescentWhite dark:group-hover:text-patras-albescentWhite transition-colors duration-200"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -83,12 +83,12 @@ export default function Stepper({
                     mt-2 text-xs font-medium text-center max-w-20
                     ${
                       isActive
-                        ? "text-patras-buccaneer"
+                        ? "text-patras-buccaneer dark:text-patras-albescentWhite"
                         : isCompleted
-                        ? "text-gray-700 dark:text-[var(--color-text-secondary)]"
+                        ? "text-gray-700 dark:text-patras-albescentWhite"
                         : isAccessible
-                        ? "text-patras-buccaneer"
-                        : "text-gray-500 dark:text-[var(--color-text-muted)]"
+                        ? "text-patras-buccaneer dark:text-patras-albescentWhite"
+                        : "text-gray-500 dark:text-gray-500"
                     }
                   `}
                 >
