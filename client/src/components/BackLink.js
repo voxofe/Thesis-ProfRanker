@@ -9,7 +9,7 @@ export default function BackLink({ className = "", to, onClick }) {
       <Link
         to={target}
         onClick={onClick}
-        className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 px-3 py-2 rounded-md hover:bg-gray-50 shadow-sm"
+        className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 px-3 py-2 rounded-md hover:bg-gray-50 shadow-sm dark:text-[var(--color-text-secondary)] dark:bg-[var(--color-bg-card)] dark:border-[var(--color-border)] dark:hover:bg-[var(--color-bg-muted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer dark:focus-visible:outline-[var(--color-primary)]"
         title="Πίσω"
         aria-label="Πίσω"
       >

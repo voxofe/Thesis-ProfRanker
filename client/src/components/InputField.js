@@ -25,11 +25,11 @@ import React, { useState } from "react";
 export default function InputField(props) {
   const [showPassword, setShowPassword] = useState(false);
   const baseStyle =
-    "block w-full rounded-md px-3 py-1.5 text-base outline outline-1 -outline-offset-1 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-offset-0 sm:text-sm/6";
+    "block w-full rounded-md px-3 py-1.5 text-base outline outline-1 -outline-offset-1 placeholder:text-gray-400 dark:placeholder:text-[var(--color-text-muted)] focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-offset-0 sm:text-sm/6";
 
-  const enabledStyle = `${baseStyle} bg-white text-gray-900 outline-patras-buccaneer focus:outline-patras-buccaneer focus:ring-patras-buccaneer`;
+  const enabledStyle = `${baseStyle} bg-white text-gray-900 outline-patras-buccaneer focus:outline-patras-buccaneer focus:ring-patras-buccaneer dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-primary)] dark:outline-[var(--color-border-accent)] dark:focus:outline-[var(--color-primary)] dark:focus:ring-[var(--color-primary)]`;
 
-  const disabledStyle = `${baseStyle} bg-gray-100 text-gray-500 outline-gray-200 cursor-not-allowed opacity-60 select-none`;
+  const disabledStyle = `${baseStyle} bg-gray-100 text-gray-500 outline-gray-200 cursor-not-allowed opacity-60 select-none dark:bg-[var(--color-disabled-bg)] dark:text-[var(--color-disabled-text)] dark:outline-[var(--color-border)]`;
 
   const errorStyle = "outline-red-500 focus:outline-red-500";
 
@@ -47,12 +47,14 @@ export default function InputField(props) {
       <label
         htmlFor={props.id}
         className={`block text-sm/6 font-medium ${
-          props.disabled ? "text-gray-400" : "text-gray-900"
+          props.disabled
+            ? "text-gray-400 dark:text-[var(--color-text-muted)]"
+            : "text-gray-900 dark:text-[var(--color-text-primary)]"
         } ${props.style}`}
       >
         {props.label}
         {props.required && !props.disabled && (
-          <span className="text-red-500 ml-1">*</span>
+          <span className="text-red-500 dark:text-red-400 ml-1">*</span>
         )}
       </label>
       <div className="mt-2 relative">
@@ -97,7 +99,7 @@ export default function InputField(props) {
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-patras-buccaneer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-patras-buccaneer dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer dark:focus-visible:outline-[var(--color-primary)]"
             aria-label={showPassword ? "Απόκρυψη κωδικού" : "Εμφάνιση κωδικού"}
           >
             {showPassword ? (
@@ -138,7 +140,7 @@ export default function InputField(props) {
         )}
       </div>
       {props.error && (
-        <p className="mt-1 text-sm text-red-600">{props.error}</p>
+        <p className="mt-1 text-sm text-red-600 dark:text-[var(--color-danger)]">{props.error}</p>
       )}
     </div>
   );
