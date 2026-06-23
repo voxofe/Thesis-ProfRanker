@@ -32,8 +32,8 @@ export default function PositionSelect({
   // Match InputField styles
   const baseStyle =
     "block w-full rounded-md px-3 py-1.5 text-base outline outline-1 -outline-offset-1 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-offset-0 sm:text-sm/6";
-  const enabledStyle = `${baseStyle} bg-white text-gray-900 outline-patras-buccaneer focus:outline-patras-buccaneer focus:ring-patras-buccaneer`;
-  const disabledStyle = `${baseStyle} bg-gray-100 text-gray-500 outline-gray-200 cursor-not-allowed opacity-60 select-none`;
+  const enabledStyle = `${baseStyle} bg-white text-gray-900 outline-patras-buccaneer focus:outline-patras-buccaneer focus:ring-patras-buccaneer dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-primary)] dark:placeholder:text-[var(--color-text-muted)] dark:outline-[var(--color-border)] dark:focus:outline-[var(--color-primary)] dark:focus:ring-[var(--color-primary)]`;
+  const disabledStyle = `${baseStyle} bg-gray-100 text-gray-500 outline-gray-200 cursor-not-allowed opacity-60 select-none dark:bg-[var(--color-bg-muted)] dark:text-[var(--color-text-muted)] dark:outline-[var(--color-border-soft)]`;
   const errorStyle = "outline-red-500 focus:outline-red-500";
   const getInputStyle = () => {
     if (disabled) return disabledStyle + " pr-12";
@@ -150,7 +150,7 @@ export default function PositionSelect({
         htmlFor="position-combobox"
         className={[
           "block text-sm/6 font-medium",
-          disabled ? "text-gray-400" : "text-gray-900",
+          disabled ? "text-gray-400 dark:text-[var(--color-text-muted)]" : "text-gray-900 dark:text-[var(--color-text-primary)]",
           required ? "after:ml-1 after:text-red-500 after:content-['*']" : "",
           style,
         ].join(" ").trim()}
@@ -202,7 +202,7 @@ export default function PositionSelect({
             onClick={clearSelection}
             title="Καθαρισμός επιλογής"
             aria-label="Καθαρισμός επιλογής"
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-patras-sanguineBrown hover:text-red-700 w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-patras-sanguineBrown hover:text-red-700 w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] dark:hover:bg-[var(--color-bg-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
           >
             <span className="text-2xl leading-none font-bold">&times;</span>
           </button>
@@ -211,40 +211,43 @@ export default function PositionSelect({
         {open && (
           <div
             ref={listRef}
-            className="absolute z-20 mt-1 w-full max-h-64 overflow-auto bg-white border rounded-md shadow"
+            className="absolute z-20 mt-1 w-full max-h-64 overflow-auto bg-white border rounded-md shadow dark:bg-[var(--color-bg-card)] dark:border-[var(--color-border)]"
           >
             {results.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-gray-500">Δεν βρέθηκαν αποτελέσματα</div>
+              <div className="px-3 py-2 text-sm text-gray-500 dark:text-[var(--color-text-muted)]">Δεν βρέθηκαν αποτελέσματα</div>
             ) : (
-              results.map((p, idx) => (
-                <button
-                  key={`${p.id}-${idx}`}
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => commitSelection(p)}
-                  className={`w-full text-left px-3 py-2 text-sm ${idx === highlight ? "bg-patras-albescentWhite/60" : "bg-white"} hover:bg-patras-albescentWhite/60`}
-                  onMouseEnter={() => setHighlight(idx)}
-                  title={p._label}
-                >
-                  {p.__isExtra ? (
-                    <div className="font-semibold text-patras-buccaneer">{p._label}</div>
-                  ) : (
-                    <>
-                      <div className="font-medium text-patras-buccaneer">{p.scientificField}</div>
-                      <div className="text-xs text-gray-600">{p.school} • {p.department}</div>
-                    </>
-                  )}
-                </button>
-              ))
+              results.map((p, idx) => {
+                const isSelected = String(p.id) === String(value);
+                return (
+                  <button
+                    key={`${p.id}-${idx}`}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => commitSelection(p)}
+                    className={`w-full text-left px-3 py-2 text-sm ${idx === highlight ? "bg-patras-albescentWhite/60" : "bg-white"} hover:bg-patras-albescentWhite/60 dark:bg-[var(--color-bg-card)] dark:hover:bg-[var(--color-bg-muted)] ${isSelected ? "dark:bg-[var(--color-primary)]/20" : ""}`}
+                    onMouseEnter={() => setHighlight(idx)}
+                    title={p._label}
+                  >
+                    {p.__isExtra ? (
+                      <div className={`font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)] ${isSelected ? "dark:text-[var(--color-primary)]" : ""}`}>{p._label}</div>
+                    ) : (
+                      <>
+                        <div className={`font-medium text-patras-buccaneer dark:text-[var(--color-text-primary)] ${isSelected ? "dark:text-[var(--color-primary)]" : ""}`}>{p.scientificField}</div>
+                        <div className="text-xs text-gray-600 dark:text-[var(--color-text-secondary)]">{p.school} • {p.department}</div>
+                      </>
+                    )}
+                  </button>
+                );
+              })
             )}
-            <div className="px-3 py-1 text-[11px] text-gray-500 border-t">
+            <div className="px-3 py-1 text-[11px] text-gray-500 border-t dark:text-[var(--color-text-muted)] dark:border-[var(--color-border)]">
               Εμφάνιση {results.length} από {enriched.length}
             </div>
           </div>
         )}
       </div>
 
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-sm text-red-600 dark:text-[var(--color-danger)]">{error}</p>}
     </div>
   );
 }

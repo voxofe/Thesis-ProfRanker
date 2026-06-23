@@ -84,7 +84,7 @@ export default function ScientificFieldSection() {
 
       {/* Optional chips summary ... */}
 
-      <div className=" rounded-lg border border-patras-albescentWhite/60 bg-patras-albescentWhite/30 px-4 py-3 text-sm text-patras-buccaneer">
+      <div className=" rounded-lg border border-patras-albescentWhite/60 bg-patras-albescentWhite/30 px-4 py-3 text-sm text-patras-buccaneer dark:border-[var(--color-border)] dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-secondary)]">
         <div className="flex items-center gap-2">
           <span>Έναρξη αιτήσεων θέσης:</span>
           <span className="font-semibold">
@@ -99,35 +99,35 @@ export default function ScientificFieldSection() {
         </div>
       </div>
 
-      <label className="block text-sm font-medium pt-5 mb-0">
+      <label className="block text-sm font-medium pt-5 mb-0 dark:text-[var(--color-text-primary)]">
         Μαθήματα επιστημονικού πεδίου:{" "}
-        <span className="text-patras-buccaneer">
+        <span className="text-patras-buccaneer dark:text-[var(--color-primary)]">
           {selectedPosition?.scientificField ?? ""}
         </span>
       </label>
 
       <div className="w-full overflow-x-auto">
-        <table className="min-w-full border border-gray-300 rounded-lg bg-white">
+        <table className="min-w-full border border-gray-300 rounded-lg bg-white dark:bg-[var(--color-bg-card)] dark:border-[var(--color-border)]">
           <thead>
-            <tr className="bg-gray-100 text-xs text-gray-700">
-              <th className="px-2 py-2 border">Κωδικός</th>
-              <th className="px-2 py-2 border">Όνομα</th>
-              <th className="px-2 py-2 border">Περιγραφή</th>
-              <th className="px-2 py-2 border">Εξάμηνο</th>
-              <th className="px-2 py-2 border">Διδακτικές μονάδες</th>
-              <th className="px-2 py-2 border">ECTS</th>
-              <th className="px-2 py-2 border">Θεωρία (Ώρες)</th>
-              <th className="px-2 py-2 border">Εργαστήριο (Ώρες)</th>
-              <th className="px-2 py-2 border">Κατηγορία</th>
+            <tr className="bg-gray-100 text-xs text-gray-700 dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-secondary)]">
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Κωδικός</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Όνομα</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Περιγραφή</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Εξάμηνο</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Διδακτικές μονάδες</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">ECTS</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Θεωρία (Ώρες)</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Εργαστήριο (Ώρες)</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Κατηγορία</th>
             </tr>
           </thead>
           <tbody>
             {selectedPosition && selectedPosition.courses?.length > 0 ? (
               selectedPosition.courses.map((course) => (
-                <tr key={course.id} className="text-sm text-gray-800 text-center">
-                  <td className="px-2 py-2 border">{course.code}</td>
-                  <td className="px-2 py-2 border">{course.name}</td>
-                  <td className="px-2 py-2 border">
+                <tr key={course.id} className="text-sm text-gray-800 text-center dark:text-[var(--color-text-secondary)]">
+                  <td className="px-2 py-2 border dark:border-[var(--color-border)]">{course.code}</td>
+                  <td className="px-2 py-2 border dark:border-[var(--color-border)]">{course.name}</td>
+                  <td className="px-2 py-2 border dark:border-[var(--color-border)]">
                     <button
                       type="button"
                       onClick={() =>
@@ -137,22 +137,22 @@ export default function ScientificFieldSection() {
                           description: course.description,
                         })
                       }
-                      className="underline text-patras-buccaneer hover:text-patras-sanguineBrown"
+                      className="underline text-patras-buccaneer hover:text-patras-sanguineBrown dark:text-[var(--color-primary)] dark:hover:text-[var(--color-primary-hover)]"
                     >
                       Περιγραφή
                     </button>
                   </td>
-                  <td className="px-2 py-2 border">{course.semester}</td>
-                  <td className="px-2 py-2 border">{course.teachingUnits}</td>
-                  <td className="px-2 py-2 border">{course.ects}</td>
-                  <td className="px-2 py-2 border">{course.theory_hours}</td>
-                  <td className="px-2 py-2 border">{course.lab_hours}</td>
-                  <td className="px-2 py-2 border">{course.category}</td>
+                  <td className="px-2 py-2 border dark:border-[var(--color-border)]">{course.semester}</td>
+                  <td className="px-2 py-2 border dark:border-[var(--color-border)]">{course.teachingUnits}</td>
+                  <td className="px-2 py-2 border dark:border-[var(--color-border)]">{course.ects}</td>
+                  <td className="px-2 py-2 border dark:border-[var(--color-border)]">{course.theory_hours}</td>
+                  <td className="px-2 py-2 border dark:border-[var(--color-border)]">{course.lab_hours}</td>
+                  <td className="px-2 py-2 border dark:border-[var(--color-border)]">{course.category}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={9} className="text-center text-gray-500 py-6">
+                <td colSpan={9} className="text-center text-gray-500 py-6 dark:text-[var(--color-text-muted)]">
                   Επιλέξτε θέση για να δείτε τα διαθέσιμα μαθήματα
                 </td>
               </tr>

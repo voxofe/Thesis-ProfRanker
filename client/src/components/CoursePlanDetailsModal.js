@@ -47,7 +47,7 @@ function ReadOnlyAutoGrowTextarea({ value, id }) {
       readOnly
       rows={1}
       ref={textareaRef}
-      className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 bg-gray-50 outline outline-1 -outline-offset-1 outline-patras-buccaneer/70 placeholder:text-gray-400 resize-none overflow-hidden"
+      className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 bg-gray-50 outline outline-1 -outline-offset-1 outline-patras-buccaneer/70 placeholder:text-gray-400 resize-none overflow-hidden dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-primary)] dark:outline-[var(--color-border)] dark:placeholder:text-[var(--color-text-muted)]"
     />
   );
 }
@@ -117,23 +117,23 @@ export default function CoursePlanDetailsModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+      className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 dark:bg-[var(--color-bg-overlay)]"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-lg border w-full max-w-6xl relative flex flex-col max-h-[90vh]"
+        className="bg-white rounded-lg shadow-lg border w-full max-w-6xl relative flex flex-col max-h-[90vh] dark:bg-[var(--color-bg-card)] dark:border-[var(--color-border)] dark:shadow-[0_20px_45px_var(--color-shadow-strong)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-4">
+        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-4 dark:border-[var(--color-border-soft)]">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Σχεδιάγραμμα διδασκαλίας</h2>
-            <p className="text-sm text-gray-600">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">Σχεδιάγραμμα διδασκαλίας</h2>
+            <p className="text-sm text-gray-600 dark:text-[var(--color-text-secondary)]">
               {scientificField || "—"} · {normalizedCourses.length} μαθήματα
             </p>
           </div>
           <button
             type="button"
-            className="text-gray-600 hover:text-red-700 text-2xl leading-none"
+            className="text-gray-600 hover:text-red-700 text-2xl leading-none dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
             onClick={onClose}
             title="Κλείσιμο"
             aria-label="Κλείσιμο"
@@ -144,21 +144,21 @@ export default function CoursePlanDetailsModal({
 
         <div className="overflow-y-auto px-6 py-5 flex-1 min-h-0 space-y-5">
           <div className="space-y-2">
-            <div className="block text-sm/6 font-medium text-gray-900">
+            <div className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">
               Μαθήματα πεδίου:{" "}
-              <span className="font-semibold underline text-patras-buccaneer">
+              <span className="font-semibold underline text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                 {scientificField || ""}
               </span>{" "}
               ({normalizedCourses.length} συνολικά)
             </div>
 
-            <div className="rounded-lg border border-patras-buccaneer bg-white p-2 shadow-sm">
+            <div className="rounded-lg border border-patras-buccaneer bg-white p-2 shadow-sm dark:bg-[var(--color-bg-surface)] dark:border-[var(--color-border)]">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => scrollTabsBy(-220)}
                   disabled={!canScrollLeft}
-                  className="h-8 w-8 shrink-0 rounded-full border border-gray-300 text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="h-8 w-8 shrink-0 rounded-full border border-gray-300 text-gray-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[var(--color-border)] dark:text-[var(--color-text-secondary)]"
                   aria-label="Προηγούμενες καρτέλες μαθημάτων"
                 >
                   {"<"}
@@ -175,8 +175,8 @@ export default function CoursePlanDetailsModal({
                           onClick={() => setActiveCourseId(course.id)}
                           className={`inline-flex w-max shrink-0 whitespace-nowrap rounded-md border px-3 py-2 text-sm transition-colors ${
                             isActive
-                              ? "border-patras-buccaneer bg-patras-buccaneer text-white"
-                              : "border-gray-300 bg-white text-gray-700 hover:border-patras-buccaneer"
+                              ? "border-patras-buccaneer bg-patras-buccaneer text-white dark:border-[var(--color-primary)] dark:bg-[var(--color-primary)]"
+                              : "border-gray-300 bg-white text-gray-700 hover:border-patras-buccaneer dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)] dark:hover:border-[var(--color-primary)]"
                           }`}
                           title={course.name || `Μάθημα ${index + 1}`}
                         >
@@ -193,7 +193,7 @@ export default function CoursePlanDetailsModal({
                   type="button"
                   onClick={() => scrollTabsBy(220)}
                   disabled={!canScrollRight}
-                  className="h-8 w-8 shrink-0 rounded-full border border-gray-300 text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="h-8 w-8 shrink-0 rounded-full border border-gray-300 text-gray-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[var(--color-border)] dark:text-[var(--color-text-secondary)]"
                   aria-label="Επόμενες καρτέλες μαθημάτων"
                 >
                   {">"}
@@ -203,9 +203,9 @@ export default function CoursePlanDetailsModal({
           </div>
 
           <div className="space-y-2">
-            <div className="block text-sm/6 font-medium text-gray-900">
+            <div className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">
               Σχεδιάγραμμα διδασκαλίας για{" "}
-              <span className="font-semibold underline text-patras-buccaneer">
+              <span className="font-semibold underline text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                 {activeCourse?.name || "Χωρίς τίτλο"}
               </span>{" "}
               (Μάθημα {normalizedCourses.findIndex((course) => String(course.id) === String(activeCourse?.id)) + 1}/{normalizedCourses.length})
@@ -219,7 +219,7 @@ export default function CoursePlanDetailsModal({
                       const coursePlan = coursePlans?.[String(activeCourse.id)] || {};
                       return (
                         <div key={`${activeCourse.id}-${field.key}`} className="space-y-3 pb-3">
-                          <label className="block text-sm font-medium text-gray-700">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">
                             {field.label}
                           </label>
                           <ReadOnlyAutoGrowTextarea
@@ -238,7 +238,7 @@ export default function CoursePlanDetailsModal({
                 </div>
               </article>
             ) : (
-              <p className="text-sm text-gray-500">Δεν υπάρχουν διαθέσιμα μαθήματα.</p>
+              <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">Δεν υπάρχουν διαθέσιμα μαθήματα.</p>
             )}
           </div>
         </div>

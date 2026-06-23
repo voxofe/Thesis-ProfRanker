@@ -323,7 +323,7 @@ export default function FlowbiteDateField({
   // Custom Flowbite theme
   const theme = {
   root: {
-    base: "relative dark:bg-patras-albescentWhite-70 dark:text-black",
+    base: "relative",
     input: {
       field: {
         base: "relative w-full",
@@ -334,7 +334,8 @@ export default function FlowbiteDateField({
             outline outline-1 -outline-offset-1 outline-patras-buccaneer
             focus:outline focus:outline-2 focus:-outline-offset-2
             focus:outline-patras-buccaneer focus:ring-patras-buccaneer
-            dark:bg-white dark:text-black
+            dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-primary)] dark:placeholder:text-[var(--color-text-muted)]
+            dark:outline-[var(--color-border)] dark:focus:outline-[var(--color-primary)] dark:focus:ring-[var(--color-primary)]
           `,
         },
       },
@@ -345,19 +346,19 @@ export default function FlowbiteDateField({
         base: popupPos,
         inline: "relative top-0 z-auto",
         inner:
-          "inline-block rounded-lg border border-patras-albescentWhite-50 bg-white p-4 shadow-lg dark:bg-patras-albescentWhite-50 dark:text-black"
+          "inline-block rounded-lg border border-patras-albescentWhite-50 bg-white p-4 shadow-lg dark:bg-[var(--color-bg-card)] dark:border-[var(--color-border)] dark:text-[var(--color-text-primary)]"
       },
       header: {
         base: "",
         title:
-          "px-2 py-3 text-center font-semibold text-gray-900 dark:text-white",
+          "px-2 py-3 text-center font-semibold text-gray-900 dark:text-[var(--color-text-primary)]",
         selectors: {
           base: "mb-2 flex justify-between",
           button: {
             base:
               "rounded-lg bg-white px-3 py-2 text-sm font-semibold text-gray-900 " +
               "hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 " +
-              "dark:bg-patras-buccaneer dark:text-white dark:hover:bg-patras-sanguineBrown",
+              "dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-primary)] dark:hover:bg-[var(--color-bg-muted)] dark:focus:ring-[var(--color-primary)]",
             prev: "",
             next: "",
             view: "",
@@ -365,11 +366,11 @@ export default function FlowbiteDateField({
         },
       },
       view: {
-        base: "p-1 dark:bg-patras-white dark:text-black",
+        base: "p-1 dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-primary)]",
         button: {
           base: "flex-1 cursor-pointer rounded-lg border-0 text-center text-sm font-semibold leading-9",
           selected:
-            "bg-patras-buccaneer text-white dark:hover:bg-white",
+            "bg-patras-buccaneer text-white dark:bg-[var(--color-primary)] dark:text-[var(--color-text-inverse)] dark:hover:bg-[var(--color-primary-hover)]",
           disabled: "text-gray-400 opacity-60 cursor-not-allowed",
         },
       },
@@ -383,7 +384,7 @@ export default function FlowbiteDateField({
           clear:
             "border border-patras-buccaneer text-patras-buccaneer bg-transparent " +
             "hover:bg-patras-buccaneer hover:text-white " +
-            "dark:bg-patras-buccaneer/20 dark:text-patras-buccaneer dark:hover:bg-patras-buccaneer/90 dark:hover:text-white",
+            "dark:border-[var(--color-border-accent)] dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-primary)] dark:hover:text-[var(--color-text-inverse)]",
         },
       },
     },
@@ -392,16 +393,16 @@ export default function FlowbiteDateField({
         header: {
           base: "mb-1 grid grid-cols-7",
           title:
-            "h-6 text-center text-sm font-medium leading-6 text-gray-500 dark:text-gray-400",
+            "h-6 text-center text-sm font-medium leading-6 text-gray-500 dark:text-[var(--color-text-secondary)]",
         },
         items: {
           base: "grid w-64 grid-cols-7",
           item: {
             base:
               "block flex-1 cursor-pointer rounded-lg border-0 text-center text-sm font-semibold leading-9 " +
-              "text-gray-900 hover:bg-gray-100 dark:text-black dark:hover:text-white dark:hover:bg-patras-buccaneer/90",
+              "text-gray-900 hover:bg-gray-100 dark:text-[var(--color-text-secondary)] dark:hover:text-[var(--color-text-primary)] dark:hover:bg-[var(--color-bg-muted)]",
             selected:
-              "bg-patras-buccaneer dark:text-white hover:bg-patras-sanguineBrown",
+              "bg-patras-buccaneer text-white dark:bg-[var(--color-primary)] dark:text-[var(--color-text-inverse)] hover:bg-patras-sanguineBrown dark:hover:bg-[var(--color-primary-hover)]",
             disabled: "text-gray-400 opacity-60 cursor-not-allowed",
           },
         },
@@ -412,9 +413,9 @@ export default function FlowbiteDateField({
           item: {
             base:
               "block flex-1 cursor-pointer rounded-lg border-0 text-center text-sm font-semibold leading-9 " +
-              "text-gray-900 hover:bg-gray-100 dark:text-black dark:hover:text-white dark:hover:bg-patras-buccaneer/90",
+              "text-gray-900 hover:bg-gray-100 dark:text-[var(--color-text-secondary)] dark:hover:text-[var(--color-text-primary)] dark:hover:bg-[var(--color-bg-muted)]",
             selected:
-              "bg-patras-buccaneer dark:text-white hover:bg-patras-sanguineBrown",
+              "bg-patras-buccaneer text-white dark:bg-[var(--color-primary)] dark:text-[var(--color-text-inverse)] hover:bg-patras-sanguineBrown dark:hover:bg-[var(--color-primary-hover)]",
             disabled: "text-gray-400 opacity-60 cursor-not-allowed",
           },
         },
@@ -425,9 +426,9 @@ export default function FlowbiteDateField({
           item: {
             base:
               "block flex-1 cursor-pointer rounded-lg border-0 text-center text-sm font-semibold leading-9 " +
-              "text-gray-900 hover:bg-gray-100 dark:text-black dark:hover:text-white dark:hover:bg-patras-buccaneer/90",
+              "text-gray-900 hover:bg-gray-100 dark:text-[var(--color-text-secondary)] dark:hover:text-[var(--color-text-primary)] dark:hover:bg-[var(--color-bg-muted)]",
             selected:
-              "bg-patras-buccaneer dark:text-white hover:bg-patras-sanguineBrown",
+              "bg-patras-buccaneer text-white dark:bg-[var(--color-primary)] dark:text-[var(--color-text-inverse)] hover:bg-patras-sanguineBrown dark:hover:bg-[var(--color-primary-hover)]",
             disabled: "text-gray-400 opacity-60 cursor-not-allowed",
           },
         },
@@ -438,9 +439,9 @@ export default function FlowbiteDateField({
           item: {
             base:
               "block flex-1 cursor-pointer rounded-lg border-0 text-center text-sm font-semibold leading-9 " +
-              "text-gray-900 hover:bg-gray-100 dark:text-black dark:hover:text-white dark:hover:bg-patras-buccaneer/90",
+              "text-gray-900 hover:bg-gray-100 dark:text-[var(--color-text-secondary)] dark:hover:text-[var(--color-text-primary)] dark:hover:bg-[var(--color-bg-muted)]",
             selected:
-              "bg-patras-buccaneer dark:text-white hover:bg-patras-sanguineBrown",
+              "bg-patras-buccaneer text-white dark:bg-[var(--color-primary)] dark:text-[var(--color-text-inverse)] hover:bg-patras-sanguineBrown dark:hover:bg-[var(--color-primary-hover)]",
             disabled: "text-gray-400 opacity-60 cursor-not-allowed",
           },
         },
@@ -470,7 +471,7 @@ export default function FlowbiteDateField({
 
   return (
     <div className="flex flex-col mb-5">
-      <label className="block text-sm font-medium pb-2 text-gray-900 mb-1">
+      <label className="block text-sm font-medium pb-2 text-gray-900 mb-1 dark:text-[var(--color-text-primary)]">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
 
@@ -626,7 +627,7 @@ export default function FlowbiteDateField({
               }}
               title="Καθαρισμός"
               aria-label="Καθαρισμός"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-patras-sanguineBrown hover:text-red-700 w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-patras-sanguineBrown hover:text-red-700 w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] dark:hover:bg-[var(--color-bg-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
               style={{ zIndex: 10 }}
             >
               <span className="text-2xl leading-none font-bold">&times;</span>

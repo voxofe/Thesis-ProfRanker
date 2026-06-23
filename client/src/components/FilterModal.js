@@ -150,28 +150,28 @@ export default function FilterModal({
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 backdrop-blur-sm dark:bg-[var(--color-bg-overlay)]"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-lg border w-full max-w-2xl p-6 relative max-h-[80vh] overflow-y-auto"
+        className="bg-white rounded-lg shadow-lg border w-full max-w-2xl p-6 relative max-h-[80vh] overflow-y-auto dark:bg-[var(--color-bg-card)] dark:border-[var(--color-border)] dark:shadow-[0_20px_45px_var(--color-shadow-strong)]"
         onClick={(event) => event.stopPropagation()}
       >
         <button
-          className="absolute top-3 right-3 text-gray-600 hover:text-red-700 text-3xl leading-none"
+          className="absolute top-3 right-3 text-gray-600 hover:text-red-700 text-3xl leading-none dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
           onClick={onClose}
           title="Κλείσιμο"
         >
           &times;
         </button>
-        <h2 className={`text-lg font-semibold mb-4 border-b border-gray-200 pb-2 ${titleClassName}`.trim()}>
+        <h2 className={`text-lg font-semibold mb-4 border-b border-gray-200 pb-2 dark:border-[var(--color-border-soft)] dark:text-[var(--color-text-primary)] ${titleClassName}`.trim()}>
           {title}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* School */}
           {showSchools && (
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-[var(--color-text-secondary)]">
                 Σχολή
               </label>
               <div className="flex flex-wrap gap-2">
@@ -182,7 +182,7 @@ export default function FilterModal({
                     className={`px-3 py-1 rounded-full border text-xs font-medium ${
                       localFilters.schools.includes(school)
                         ? "bg-patras-buccaneer text-white border-patras-buccaneer"
-                        : "bg-white text-patras-buccaneer border-patras-buccaneer"
+                        : "bg-white text-patras-buccaneer border-patras-buccaneer dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-secondary)] dark:border-[var(--color-border-accent)]"
                     }`}
                     onClick={() => handleMultiSelect("schools", school)}
                   >
@@ -195,7 +195,7 @@ export default function FilterModal({
           {/* Department */}
           {showDepartments && (
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-[var(--color-text-secondary)]">
                 Τμήμα
               </label>
               <div className="flex flex-wrap gap-2">
@@ -206,7 +206,7 @@ export default function FilterModal({
                     className={`px-3 py-1 rounded-full border text-xs font-medium ${
                       localFilters.departments.includes(dep)
                         ? "bg-patras-buccaneer text-white border-patras-buccaneer"
-                        : "bg-white text-patras-buccaneer border-patras-buccaneer"
+                        : "bg-white text-patras-buccaneer border-patras-buccaneer dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-secondary)] dark:border-[var(--color-border-accent)]"
                     }`}
                     onClick={() => handleMultiSelect("departments", dep)}
                   >
@@ -219,7 +219,7 @@ export default function FilterModal({
           {/* Scientific Field */}
           {showScientificFields && (
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-[var(--color-text-secondary)]">
                 Επιστημονικό πεδίο
               </label>
               <div className="flex flex-wrap gap-2">
@@ -230,7 +230,7 @@ export default function FilterModal({
                     className={`px-3 py-1 rounded-full border text-xs font-medium ${
                       localFilters.scientificFields.includes(sf)
                         ? "bg-patras-buccaneer text-white border-patras-buccaneer"
-                        : "bg-white text-patras-buccaneer border-patras-buccaneer"
+                        : "bg-white text-patras-buccaneer border-patras-buccaneer dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-secondary)] dark:border-[var(--color-border-accent)]"
                     }`}
                     onClick={() => handleMultiSelect("scientificFields", sf)}
                   >
@@ -243,7 +243,7 @@ export default function FilterModal({
           {/* Gender */}
           {showGender && (
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-[var(--color-text-secondary)]">
                 Φύλο
               </label>
               <div className="flex flex-wrap gap-2">
@@ -258,7 +258,7 @@ export default function FilterModal({
                       className={`px-3 py-1 rounded-full border text-xs font-medium ${
                         (localFilters.genders || []).includes(value)
                           ? "bg-patras-buccaneer text-white border-patras-buccaneer"
-                          : "bg-white text-patras-buccaneer border-patras-buccaneer"
+                          : "bg-white text-patras-buccaneer border-patras-buccaneer dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-secondary)] dark:border-[var(--color-border-accent)]"
                       }`}
                       onClick={() => handleMultiSelect("genders", value)}
                     >
@@ -272,7 +272,7 @@ export default function FilterModal({
           {/* Status (admin only) */}
           {showStatus && isAdmin && (
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-[var(--color-text-secondary)]">
                 Κατάσταση θέσης
               </label>
               <div className="flex flex-wrap gap-2">
@@ -283,7 +283,7 @@ export default function FilterModal({
                     className={`px-3 py-1 rounded-full border text-xs font-medium ${
                       localFilters.status.includes(status)
                         ? "bg-patras-buccaneer text-white border-patras-buccaneer"
-                        : "bg-white text-patras-buccaneer border-patras-buccaneer"
+                        : "bg-white text-patras-buccaneer border-patras-buccaneer dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-secondary)] dark:border-[var(--color-border-accent)]"
                     }`}
                     onClick={() => handleMultiSelect("status", status)}
                   >
@@ -296,7 +296,7 @@ export default function FilterModal({
           {/* Points Range */}
           {showPoints && (
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-[var(--color-text-secondary)]">
                 {pointsLabel}
               </label>
               <div className="flex gap-2 items-center">
@@ -312,7 +312,7 @@ export default function FilterModal({
                   className="w-24"
                   placeholder="Ελάχιστο"
                 />
-                <span className="mx-2 text-gray-500">-</span>
+                <span className="mx-2 text-gray-500 dark:text-[var(--color-text-muted)]">-</span>
                 <InputField
                   id="pointsMax"
                   name="pointsMax"
@@ -359,14 +359,14 @@ export default function FilterModal({
         <div className="flex justify-end gap-4 mt-6">
           <button
             type="button"
-            className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 text-sm/6font-semibold hover:bg-gray-200"
+            className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 text-sm/6font-semibold hover:bg-gray-200 dark:bg-[var(--color-bg-muted)] dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-bg-surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
             onClick={handleReset}
           >
             Καθαρισμός
           </button>
           <button
             type="button"
-            className="px-4 py-2 rounded-md bg-patras-buccaneer text-white text-sm/6 font-semibold hover:bg-patras-sanguineBrown"
+            className="px-4 py-2 rounded-md bg-patras-buccaneer text-white text-sm/6 font-semibold hover:bg-patras-sanguineBrown focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
             onClick={handleApply}
           >
             Εφαρμογή

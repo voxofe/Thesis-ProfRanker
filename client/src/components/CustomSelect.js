@@ -26,8 +26,8 @@ export default function CustomSelect({
   // Styles
   const baseStyle =
     "block w-full rounded-md px-3 py-1.5 text-base placeholder:text-gray-400 sm:text-sm/6";
-  const enabledStyle = `${baseStyle} bg-white text-gray-900 outline outline-1 outline-patras-buccaneer -outline-offset-1 focus:outline-2 focus:outline-patras-buccaneer focus:-outline-offset-2`;
-  const disabledStyle = `${baseStyle} bg-gray-100 text-gray-500 outline outline-gray-200 cursor-not-allowed opacity-60 select-none`;
+  const enabledStyle = `${baseStyle} bg-white text-gray-900 outline outline-1 outline-patras-buccaneer -outline-offset-1 focus:outline-2 focus:outline-patras-buccaneer focus:-outline-offset-2 dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-primary)] dark:placeholder:text-[var(--color-text-muted)] dark:outline-[var(--color-border)] dark:focus:outline-[var(--color-primary)]`;
+  const disabledStyle = `${baseStyle} bg-gray-100 text-gray-500 outline outline-gray-200 cursor-not-allowed opacity-60 select-none dark:bg-[var(--color-bg-muted)] dark:text-[var(--color-text-muted)] dark:outline-[var(--color-border-soft)]`;
   const errorStyle = "outline-red-500 focus:outline-red-500";
 
   const newFieldStyle =
@@ -44,7 +44,7 @@ export default function CustomSelect({
       {label && (
         <label
           className={`block text-sm/6 font-medium ${
-            disabled ? "text-gray-400" : "text-gray-900"
+            disabled ? "text-gray-400 dark:text-[var(--color-text-muted)]" : "text-gray-900 dark:text-[var(--color-text-primary)]"
           }`}
         >
           {label}
@@ -62,7 +62,7 @@ export default function CustomSelect({
         disabled={isDisabled}
       >
         <Select.Trigger
-          className={`mt-2 ${getTriggerStyle()} flex justify-between items-center w-full text-left ring-0 focus:ring-0 whitespace-nowrap overflow-hidden`}
+          className={`mt-2 ${getTriggerStyle()} flex justify-between items-center w-full text-left ring-0 focus:ring-0 whitespace-nowrap overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]`}
           title={
             safeValue === "select"
               ? placeholder
@@ -83,7 +83,7 @@ export default function CustomSelect({
 
         <Select.Portal>
           <Select.Content
-              className="z-50 w-[--radix-select-trigger-width] min-w-[--radix-select-trigger-width] bg-white border border-patras-buccaneer/20 rounded-md shadow-lg overflow-hidden"
+              className="z-50 w-[--radix-select-trigger-width] min-w-[--radix-select-trigger-width] bg-white border border-patras-buccaneer/20 rounded-md shadow-lg overflow-hidden dark:bg-[var(--color-bg-card)] dark:border-[var(--color-border)]"
               position="popper"
               sideOffset={5}
               align="end"
@@ -94,14 +94,14 @@ export default function CustomSelect({
                 overflowY: "auto",
                 scrollbarGutter: "stable",
               }}
-              className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
+              className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-[var(--color-border)] dark:scrollbar-track-[var(--color-bg-surface)]"
             >
               {selectOptions.length > 0 ? (
                 selectOptions.map((optn) => (
                   <Select.Item
                     key={optn.value}
                     value={optn.value}
-                    className={`cursor-pointer px-3 py-1.5 text-base text-gray-900 hover:bg-patras-buccaneer/90 hover:text-white focus:bg-patras-buccaneer/90 focus:text-white flex items-center justify-between sm:text-sm/6 ${
+                    className={`cursor-pointer px-3 py-1.5 text-base text-gray-900 hover:bg-patras-buccaneer/90 hover:text-white focus:bg-patras-buccaneer/90 focus:text-white dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-primary)] dark:hover:text-[var(--color-text-inverse)] dark:focus:bg-[var(--color-primary)] dark:focus:text-[var(--color-text-inverse)] dark:data-[state=checked]:bg-[var(--color-primary)] dark:data-[state=checked]:text-[var(--color-text-inverse)] flex items-center justify-between sm:text-sm/6 ${
                       optn.value === "__new__" ? newFieldStyle : ""
                     }`}
                     title={optn.label}
@@ -110,7 +110,7 @@ export default function CustomSelect({
                   </Select.Item>
                 ))
               ) : (
-                <div className="px-3 py-1.5 text-gray-400 text-base select-none sm:text-sm/6">
+                <div className="px-3 py-1.5 text-gray-400 text-base select-none sm:text-sm/6 dark:text-[var(--color-text-muted)]">
                   Δεν υπάρχουν επιλογές
                 </div>
               )}
@@ -119,7 +119,7 @@ export default function CustomSelect({
         </Select.Portal>
       </Select.Root>
 
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-sm text-red-600 dark:text-[var(--color-danger)]">{error}</p>}
     </div>
   );
 }

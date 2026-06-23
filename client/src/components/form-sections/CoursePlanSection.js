@@ -34,7 +34,7 @@ function AutoGrowTextarea({ value, onChange, placeholder, id, rows = 12 }) {
       ref={textareaRef}
       rows={rows}
       placeholder={placeholder}
-      className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 outline outline-1 -outline-offset-1 outline-patras-buccaneer/70 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer focus:ring-offset-0 focus:ring-patras-buccaneer"
+      className="block w-full rounded-md px-3 py-2 text-sm text-gray-900 outline outline-1 -outline-offset-1 outline-patras-buccaneer/70 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer focus:ring-offset-0 focus:ring-patras-buccaneer dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-primary)] dark:outline-[var(--color-border)] dark:placeholder:text-[var(--color-text-muted)] dark:focus:outline-[var(--color-primary)] dark:focus:ring-[var(--color-primary)]"
     />
   );
 }
@@ -149,7 +149,7 @@ export default function CoursePlanSection() {
   if (!selectedPosition) {
     return (
       <section className="space-y-3">
-        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-[var(--color-warning)]/50 dark:bg-[var(--color-warning)]/15 dark:text-[var(--color-warning)]">
           Επιλέξτε πρώτα επιστημονικό πεδίο στο προηγούμενο βήμα.
         </p>
       </section>
@@ -159,7 +159,7 @@ export default function CoursePlanSection() {
   if (!courses.length) {
     return (
       <section className="space-y-3">
-        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-[var(--color-warning)]/50 dark:bg-[var(--color-warning)]/15 dark:text-[var(--color-warning)]">
           Δεν υπάρχουν μαθήματα για την επιλεγμένη θέση.
         </p>
       </section>
@@ -170,27 +170,27 @@ export default function CoursePlanSection() {
     <section className="space-y-5">
       <div className="space-y-2">
         <div>
-          <label className="block text-sm/6 font-medium text-gray-900">
+          <label className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">
             Μαθήματα πεδίου:{" "}
-            <span className="font-semibold underline text-patras-buccaneer">
+            <span className="font-semibold underline text-patras-buccaneer dark:text-[var(--color-primary)]">
               {selectedPosition?.scientificField || ""}
             </span>{" "}
             ({courses.length} συνολικά)
             <TooltipGray content="Συμπληρώστε το σχεδιάγραμμα διδασκαλίας για όλα τα μαθήματα του επιστημονικού πεδίου">
-              <span className="ml-2 inline-flex h-5 w-5 cursor-help items-center justify-center rounded-full border border-gray-300 text-xs text-gray-600">
+              <span className="ml-2 inline-flex h-5 w-5 cursor-help items-center justify-center rounded-full border border-gray-300 text-xs text-gray-600 dark:border-[var(--color-border)] dark:text-[var(--color-text-muted)]">
                 i
               </span>
             </TooltipGray>
           </label>
         </div>
 
-        <div className="rounded-lg border border-patras-buccaneer bg-white p-2 shadow-sm">
+        <div className="rounded-lg border border-patras-buccaneer bg-white p-2 shadow-sm dark:bg-[var(--color-bg-card)] dark:border-[var(--color-border)] dark:shadow-[0_12px_30px_var(--color-shadow-soft)]">
           <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => scrollTabsBy(-220)}
             disabled={!canScrollLeft}
-            className="h-8 w-8 shrink-0 rounded-full border border-gray-300 text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="h-8 w-8 shrink-0 rounded-full border border-gray-300 text-gray-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[var(--color-border)] dark:text-[var(--color-text-secondary)]"
             aria-label="Προηγούμενες καρτέλες μαθημάτων"
           >
             {"<"}
@@ -208,10 +208,10 @@ export default function CoursePlanSection() {
                     onClick={() => setActiveCourseId(course.id)}
                     className={`inline-flex w-max shrink-0 whitespace-nowrap rounded-md border px-3 py-2 text-sm transition-colors ${
                       isActive
-                        ? "border-patras-buccaneer bg-patras-buccaneer text-white"
+                        ? "border-patras-buccaneer bg-patras-buccaneer text-white dark:border-[var(--color-primary)] dark:bg-[var(--color-primary)] dark:text-[var(--color-text-inverse)]"
                         : isComplete
-                          ? "border-green-300 bg-green-50 text-green-800 hover:border-green-500"
-                          : "border-gray-300 bg-white text-gray-700 hover:border-patras-buccaneer"
+                          ? "border-green-300 bg-green-50 text-green-800 hover:border-green-500 dark:border-[var(--color-success)]/40 dark:bg-[var(--color-success)]/15 dark:text-[var(--color-success)] dark:hover:border-[var(--color-success)]"
+                          : "border-gray-300 bg-white text-gray-700 hover:border-patras-buccaneer dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)] dark:hover:border-[var(--color-primary)]"
                     }`}
                     title={course.name || `Μάθημα ${index + 1}`}
                   >
@@ -229,7 +229,7 @@ export default function CoursePlanSection() {
             type="button"
             onClick={() => scrollTabsBy(220)}
             disabled={!canScrollRight}
-            className="h-8 w-8 shrink-0 rounded-full border border-gray-300 text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="h-8 w-8 shrink-0 rounded-full border border-gray-300 text-gray-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[var(--color-border)] dark:text-[var(--color-text-secondary)]"
             aria-label="Επόμενες καρτέλες μαθημάτων"
           >
             {">"}
@@ -240,9 +240,9 @@ export default function CoursePlanSection() {
 
       <div className="space-y-2">
         <div>
-          <label className="block text-sm/6 font-medium text-gray-900">
+          <label className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">
             Σχεδιάγραμμα διδασκαλίας για{" "}
-            <span className="font-semibold underline text-patras-buccaneer">
+            <span className="font-semibold underline text-patras-buccaneer dark:text-[var(--color-primary)]">
               {activeCourse?.name || "Χωρίς τίτλο"}
             </span>{" "}
             (Μάθημα {courses.findIndex((course) => String(course.id) === String(activeCourse?.id)) + 1}/{courses.length})
@@ -251,13 +251,13 @@ export default function CoursePlanSection() {
 
         {activeCourse ? (
           <article key={activeCourse.id}>
-            <div className="rounded-md border border-patras-buccaneer p-4 md:p-5">
+            <div className="rounded-md border border-patras-buccaneer p-4 md:p-5 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)]">
               <div className="grid grid-cols-1 gap-4">
                 {COURSE_PLAN_FIELDS.map((field) => {
                   const coursePlan = (formData.coursePlans || {})[String(activeCourse.id)] || {};
                   return (
                     <div key={`${activeCourse.id}-${field.key}`} className="space-y-3 pb-3">
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">
                         {field.label} <span className="text-red-500">*</span>
                       </label>
                       <AutoGrowTextarea
