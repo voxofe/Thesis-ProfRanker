@@ -2,13 +2,14 @@ import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts";
 import logo from "../assets/images/ProfRanker-logo.png";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import UserMenu from "./UserMenu";
 import { Moon, Sun } from "lucide-react";
 
 export default function Header({ academicYear }) {
   const { currentUser, isLoggedIn, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
+  const location = useLocation();
   const [selectedLanguage, setSelectedLanguage] = useState("EL");
 
   const rolesInGreek = {
@@ -54,6 +55,11 @@ export default function Header({ academicYear }) {
         .map((role) => resolveRoleLabel(role, currentUser?.gender))
         .join(", ")
     : resolveRoleLabel(currentUser?.role, currentUser?.gender);
+
+  const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
+  const isPublicLanding = location.pathname === "/";
+  const showAuthButtons = !isLoggedIn && (isAuthPage || isPublicLanding);
+  const showUserSlot = (isLoggedIn && currentUser) || showAuthButtons;
 
   return (
     <header className="w-full rounded-xl border border-gray-200 shadow-lg bg-patras-albescentWhite/15 dark:border-transparent dark:shadow-lg dark:shadow-gray-500/30 dark:bg-[var(--color-bg-surface)]">
@@ -111,15 +117,40 @@ export default function Header({ academicYear }) {
             {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
 
-          {isLoggedIn && currentUser && (
+          {showUserSlot && (
             <>
               <span className="hidden lg:block h-12 border-l border-gray-300 dark:border-[var(--color-border)]" aria-hidden="true" />
-              <UserMenu
-                currentUser={currentUser}
-                initials={initials}
-                roleLabel={roleLabel}
-                onLogout={logout}
-              />
+              {isLoggedIn && currentUser ? (
+                <UserMenu
+                  currentUser={currentUser}
+                  initials={initials}
+                  roleLabel={roleLabel}
+                  onLogout={logout}
+                />
+              ) : (
+                <div className="flex flex-col gap-2 min-w-[110px]">
+                  <Link
+                    to="/login"
+                    className={`inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold border transition-colors ${
+                      location.pathname === "/login"
+                        ? "bg-patras-buccaneer text-white border-patras-buccaneer"
+                        : "bg-white text-patras-buccaneer border-patras-buccaneer hover:bg-patras-albescentWhite dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)] dark:border-[var(--color-border-accent)] dark:hover:bg-[var(--color-bg-muted)]"
+                    }`}
+                  >
+                    Σύνδεση
+                  </Link>
+                  <Link
+                    to="/register"
+                    className={`inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold border transition-colors ${
+                      location.pathname === "/register"
+                        ? "bg-patras-buccaneer text-white border-patras-buccaneer"
+                        : "bg-white text-patras-buccaneer border-patras-buccaneer hover:bg-patras-albescentWhite dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)] dark:border-[var(--color-border-accent)] dark:hover:bg-[var(--color-bg-muted)]"
+                    }`}
+                  >
+                    Εγγραφή
+                  </Link>
+                </div>
+              )}
             </>
           )}
         </div>

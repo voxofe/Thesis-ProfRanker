@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import RegisterAdmin from "./pages/RegisterAdmin";
 import Home from "./pages/Home";
+import Landing from "./pages/Landing";
 import BackLinkController from "./components/BackLinkController";
 import ApplicationForm from "./pages/ApplicationForm";
 import ApplicationScore from "./pages/ApplicationScore";
@@ -271,12 +272,13 @@ function AppContent() {
               </>
             ) : (
               <>
-                {/* Routes for non-logged-in users - only login and register */}
+                {/* Public routes for non-logged-in users */}
+                <Route path="/" element={<Landing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
-                {/* Redirect all other routes to login */}
-                <Route path="*" element={<Navigate to="/login" replace />} />
+                {/* Redirect all other routes to public landing */}
+                <Route path="*" element={<Navigate to="/" replace />} />
               </>
             )}
           </Routes>

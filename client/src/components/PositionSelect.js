@@ -224,7 +224,7 @@ export default function PositionSelect({
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => commitSelection(p)}
-                    className={`w-full text-left px-3 py-2 text-sm ${idx === highlight ? "bg-patras-albescentWhite/60" : "bg-white"} hover:bg-patras-albescentWhite/60 dark:bg-[var(--color-bg-card)] dark:hover:bg-[var(--color-primary-hover)] dark:hover:text-[var(--color-text-inverse)]`}
+                    className={`w-full text-left px-3 py-2 text-sm ${idx === highlight ? "bg-patras-albescentWhite/60" : "bg-white"} hover:bg-patras-albescentWhite/60 dark:bg-[var(--color-bg-card)] dark:hover:bg-[var(--color-bg-muted)] dark:hover:text-[var(--color-text-primary)]`}
                     onMouseEnter={() => setHighlight(idx)}
                     title={p._label}
                   >

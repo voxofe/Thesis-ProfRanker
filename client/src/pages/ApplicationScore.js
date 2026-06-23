@@ -523,7 +523,7 @@ export default function ApplicationScore() {
           <button
             type="button"
             onClick={() => setIsEditDrawerOpen((prev) => !prev)}
-            className="w-full flex items-center justify-between gap-3 text-patras-buccaneer"
+            className="w-full flex items-center justify-between gap-3 text-patras-buccaneer dark:text-[var(--color-text-secondary)]"
           >
             <span className="text-sm text-center flex-1">
               Μπορείτε να επεξεργαστείτε ή να διαγράψετε την αίτηση έως{" "}
@@ -566,7 +566,7 @@ export default function ApplicationScore() {
             className={`px-5 py-2 text-sm font-semibold rounded-full transition-colors ${
               activeTab === "application"
                 ? "bg-patras-buccaneer text-white"
-                : "text-patras-buccaneer hover:bg-patras-albescentWhite"
+                : "text-patras-buccaneer dark:text-[var(--color-text-secondary)] hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-bg-muted)]"
             }`}
           >
             Αίτηση
@@ -577,7 +577,7 @@ export default function ApplicationScore() {
             className={`px-5 py-2 text-sm font-semibold rounded-full transition-colors ${
               activeTab === "score"
                 ? "bg-patras-buccaneer text-white"
-                : "text-patras-buccaneer hover:bg-patras-albescentWhite"
+                : "text-patras-buccaneer dark:text-[var(--color-text-secondary)] hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-bg-muted)]"
             }`}
           >
             Βαθμολογία
@@ -588,7 +588,7 @@ export default function ApplicationScore() {
       {activeTab === "application" ? (
         
         <div>
-           <h1 className="text-xl font-light mb-3">Στοιχεία θέσης</h1>
+           <h1 className="text-xl font-light mb-3 dark:text-[var(--color-text-primary)]">Στοιχεία θέσης</h1>
             <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
               <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
                 <thead className="bg-patras-buccaneer">
@@ -618,22 +618,22 @@ export default function ApplicationScore() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite">
+                    <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle border-r border-patras-albescentWhite">
                       {schoolName}
                     </td>
-                    <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite">
+                    <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle border-r border-patras-albescentWhite">
                       {departmentName}
                     </td>
-                    <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite font-semibold">
+                    <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle border-r border-patras-albescentWhite font-semibold">
                       {applicantData?.scientificField || "—"}
                     </td>
-                    <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                    <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
                       {toDDMMYYYYHHMM(startDate, startTime)}
                     </td>
-                    <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                    <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
                       {toDDMMYYYYHHMM(endDate, endTime)}
                     </td>
-                    <td className="px-6 py-4 text-patras-buccaneer text-sm text-center align-middle border-r border-patras-albescentWhite">
+                    <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle border-r border-patras-albescentWhite">
                       <div className="inline-flex items-center gap-2 whitespace-nowrap">
                         <span>{toDDMMYYYYHHMM(submitDate)}</span>
                         <TooltipGray
@@ -644,7 +644,7 @@ export default function ApplicationScore() {
                           }
                         >
                           <span
-                            className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-patras-buccaneer/50 text-[10px] font-semibold text-patras-buccaneer/80"
+                            className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-patras-buccaneer/50 text-[10px] font-semibold text-patras-buccaneer/80 dark:text-[var(--color-text-muted)]"
                             aria-label="Πληροφορίες ημερομηνίας υποβολής"
                           >
                             i
@@ -662,7 +662,7 @@ export default function ApplicationScore() {
                 </tbody>
               </table>
             </div>
-          <h1 className="text-xl font-light mb-3">Στοιχεία υποψηφίου</h1>
+          <h1 className="text-xl font-light mb-3 dark:text-[var(--color-text-primary)]">Στοιχεία υποψηφίου</h1>
           <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
             <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
               <thead className="bg-patras-buccaneer">
@@ -689,25 +689,25 @@ export default function ApplicationScore() {
               </thead>
               <tbody>
                 <tr>
-                  <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite font-semibold">
+                  <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-center align-middle border-r border-patras-albescentWhite font-semibold">
                     {applicantData?.firstName}
                   </td>
-                  <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite font-semibold">
+                  <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-center align-middle border-r border-patras-albescentWhite font-semibold">
                     {applicantData?.lastName}
                   </td>
-                  <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite">
+                  <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-center align-middle border-r border-patras-albescentWhite">
                     <button
                       type="button"
                       onClick={() => setIsPhdDetailsOpen(true)}
-                      className="underline underline-offset-2 text-patras-buccaneer hover:text-patras-sanguineBrown"
+                      className="underline underline-offset-2 text-patras-buccaneer dark:text-[var(--color-text-secondary)] hover:text-patras-sanguineBrown dark:hover:text-[var(--color-text-primary)]"
                     >
                       {phdTitle}
                     </button>
                   </td>
-                  <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
+                  <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-center align-middle border-r border-patras-albescentWhite whitespace-nowrap">
                     {toDDMMYYYY(applicantData?.phdAcquisitionDate)}
                   </td>
-                  <td className="px-6 py-4 text-patras-buccaneer text-center align-middle">
+                  <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-center align-middle">
                     {applicantData?.workExperience
                       ? `${applicantData?.workExperience} ${
                           applicantData?.workExperience === 1
@@ -716,7 +716,7 @@ export default function ApplicationScore() {
                         }`
                       : "Καμία"}
                   </td>
-                  <td className="px-6 py-4 text-patras-buccaneer text-center align-middle border-l border-patras-albescentWhite whitespace-nowrap">
+                  <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-center align-middle border-l border-patras-albescentWhite whitespace-nowrap">
                     <button
                       type="button"
                       onClick={() => setIsCoursePlanDetailsOpen(true)}
@@ -732,7 +732,7 @@ export default function ApplicationScore() {
 
            
 
-            <h1 className="text-xl font-light mb-3">Υποβληθέντα δικαιολογητικά</h1>
+            <h1 className="text-xl font-light mb-3 dark:text-[var(--color-text-primary)]">Υποβληθέντα δικαιολογητικά</h1>
             <div className="relative overflow-visible shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
@@ -749,10 +749,10 @@ export default function ApplicationScore() {
                 <tbody className="divide-y divide-patras-cameo">
                   {applicationDocuments.map((doc) => (
                     <tr key={doc.key}>
-                      <td className="px-6 py-4 text-patras-buccaneer border-r border-patras-albescentWhite">
+                      <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] border-r border-patras-albescentWhite">
                         {doc.label}
                       </td>
-                      <td className="px-6 py-4 text-patras-buccaneer">
+                      <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                         <div className="flex flex-wrap gap-2">
                           {doc.docs.map((file, index) => {
                             const docKey = file?.id ? `id-${file.id}` : `name-${file?.name || index}`;
@@ -786,7 +786,7 @@ export default function ApplicationScore() {
                 ) : (
                   <div>
                     <div className="mb-3 flex flex-wrap items-center gap-3">
-                      <h1 className="text-xl font-light">Αξιολόγηση αίτησης</h1>
+                      <h1 className="text-xl font-light dark:text-[var(--color-text-primary)]">Αξιολόγηση αίτησης</h1>
                       <span className="inline-flex items-center gap-1.5 text-xs text-gray-600 dark:text-[var(--color-text-secondary)]">
                         <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer">
                           <AiIndicatorIcon className="h-3.5 w-3.5" />
@@ -809,12 +809,12 @@ export default function ApplicationScore() {
                         </thead>
                         <tbody className="divide-y divide-patras-cameo">
                           <tr className="">
-                            <td className="px-6 py-4 text-patras-buccaneer">
+                            <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               Συνάφεια σχεδιαγράμματος διδασκαλίας και καινοτόμων
                               μεθοδολογιών/θεωριών & βιβλιογραφίας με την περιγραφή του
                               συνόλου των μαθημάτων του Επιστημονικού πεδίου
                             </td>
-                            <td className="px-6 py-4 text-center text-patras-buccaneer">
+                            <td className="px-6 py-4 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               <span className="inline-flex items-center justify-center gap-2">
                                 {formatPoints(
                                   applicantData?.coursePlanRelevancePoints,
@@ -838,10 +838,10 @@ export default function ApplicationScore() {
                             </td>
                           </tr>
                           <tr className="">
-                            <td className="px-6 py-4 text-patras-buccaneer">
+                            <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               Δομή, οργάνωση, κατανομή ύλης
                             </td>
-                            <td className="px-6 py-4 text-center text-patras-buccaneer">
+                            <td className="px-6 py-4 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               {formatPoints(
                                 applicantData?.courseMaterialStructurePoints,
                                 POINTS_MAX.courseMaterialStructurePoints
@@ -849,11 +849,11 @@ export default function ApplicationScore() {
                             </td>
                           </tr>
                           <tr className="">
-                            <td className="px-6 py-4 text-patras-buccaneer">
+                            <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               Συνάφεια διδακτορικής διατριβής/δημοσιευμένου έργου με το
                               επιστημονικό πεδίο
                             </td>
-                            <td className="px-6 py-4 text-center text-patras-buccaneer">
+                            <td className="px-6 py-4 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               <span className="inline-flex items-center justify-center gap-2">
                                 {formatPoints(
                                   applicantData?.thesisRelevancePoints,
@@ -877,10 +877,10 @@ export default function ApplicationScore() {
                             </td>
                           </tr>
                           <tr className="">
-                            <td className="px-6 py-4 text-patras-buccaneer">
+                            <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               <PublicationsDrawer publications={applicantData?.publications || []} />
                             </td>
-                            <td className="px-6 py-4 text-center text-patras-buccaneer">
+                            <td className="px-6 py-4 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               {formatPoints(
                                 applicantData?.publicationPoints,
                                 POINTS_MAX.publicationPoints
@@ -888,10 +888,10 @@ export default function ApplicationScore() {
                             </td>
                           </tr>
                           <tr className="">
-                            <td className="px-6 py-4 text-patras-buccaneer">
+                            <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               Μεταδιδακτορική εργασιακή εμπειρία
                             </td>
-                            <td className="px-6 py-4 text-center text-patras-buccaneer">
+                            <td className="px-6 py-4 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               {formatPoints(
                                 applicantData?.workExperiencePoints,
                                 POINTS_MAX.workExperiencePoints
@@ -899,7 +899,7 @@ export default function ApplicationScore() {
                             </td>
                           </tr>
                           <tr className="">
-                            <td className="px-6 py-4 text-patras-buccaneer">
+                            <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               Προσαύξηση κατά 20% επί της συνολικής βαθμολογίας της
                               υποψηφιότητας, εφόσον ο υποψήφιος δεν έχει επιλεγεί σε άλλο
                               πρόγραμμα Απόκτησης Ακαδημαϊκής Διδακτικής Εμπειρίας, στο
@@ -908,7 +908,7 @@ export default function ApplicationScore() {
                               έτος 2018‐2019), καθώς και της ΕΔΒΜ 96 (ακαδ. έτη 2019‐2020
                               και 2020‐2021) του ΕΠ ΑΝΑΔ ΕΔΒΜ 2014‐2020
                             </td>
-                            <td className="px-6 py-4 text-center text-patras-buccaneer">
+                            <td className="px-6 py-4 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               {formatPoints(
                                 applicantData?.notPastProgramPoints,
                                 POINTS_MAX.notPastProgramPoints

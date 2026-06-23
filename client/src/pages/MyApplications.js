@@ -204,7 +204,7 @@ export default function MyApplications() {
               <button
                 type="button"
                 onClick={() => setActiveOpen((prev) => !prev)}
-                className="w-full flex items-center justify-between px-4 py-3 text-patras-buccaneer font-semibold"
+                className="w-full flex items-center justify-between px-4 py-3 text-patras-buccaneer dark:text-[var(--color-text-secondary)] font-semibold"
               >
                 <span>Ενεργές</span>
                 <span className="text-lg">{activeOpen ? "▼" : "\u25B6\uFE0E"}</span>
@@ -230,7 +230,7 @@ export default function MyApplications() {
               <button
                 type="button"
                 onClick={() => setCompletedOpen((prev) => !prev)}
-                className="w-full flex items-center justify-between px-4 py-3 text-patras-buccaneer font-semibold"
+                className="w-full flex items-center justify-between px-4 py-3 text-patras-buccaneer dark:text-[var(--color-text-secondary)] font-semibold"
               >
                 <span>Ολοκληρωμένες</span>
                 <span className="text-lg">{completedOpen ? "▼" : "\u25B6\uFE0E"}</span>

@@ -112,9 +112,9 @@ export default function PublicationsDrawer({ publications }) {
         className="flex items-center justify-between px-0 py-4 cursor-pointer bg-patras-[#fffbf6]"
         onClick={toggleDrawer}
       >
-        <span className="flex items-center text-patras-buccaneer">
+        <span className="flex items-center text-patras-buccaneer dark:text-patras-albescentWhite">
           Επιστημονικές δημοσιεύσεις
-          <span className="text-patras-buccaneer text-lg ml-2">
+          <span className="text-patras-buccaneer dark:text-patras-albescentWhite text-lg ml-2">
             {isOpen ? "▼" : "\u25B6\uFE0E"}
           </span>
         </span>
@@ -122,7 +122,7 @@ export default function PublicationsDrawer({ publications }) {
 
       {/* Drawer Content */}
       {isOpen && (
-        <div className="overflow-x-auto px-0 pb-4">
+        <div className="overflow-x-auto px-0 pb-4 dark:[&_h3]:text-white dark:[&_table]:bg-[var(--color-bg-card)] dark:[&_table]:border-[var(--color-border)] dark:[&_tbody]:divide-[var(--color-border)] dark:[&_td]:text-[var(--color-text-primary)] dark:[&_td]:border-[var(--color-border)] dark:[&_th]:border-[var(--color-border)]">
           <div className="space-y-6">
             {journalRows.length > 0 && (
               <div>

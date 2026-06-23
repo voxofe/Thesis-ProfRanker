@@ -10,10 +10,10 @@ export default function ApplicationCard({ app, toDDMMYYYYHHMM }) {
   const hasResubmission = Boolean(lastResubmissionDate);
 
   return (
-    <div className="bg-white dark:bg-[var(--color-bg-card)] border border-patras-buccaneer/40 rounded-lg px-4 py-3 shadow-sm transition-[transform,box-shadow] duration-200 hover:shadow-md hover:scale-[1.005] hover:bg-patras-albescentWhite/20">
+    <div className="bg-white dark:bg-[var(--color-bg-card)] border border-patras-buccaneer/40 dark:border-[var(--color-border)] rounded-lg px-4 py-3 shadow-sm transition-[transform,box-shadow,background-color,border-color] duration-200 hover:shadow-md hover:scale-[1.005] hover:bg-patras-albescentWhite/20 dark:hover:bg-[var(--color-bg-muted)] dark:hover:border-[var(--color-border-accent)]">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="space-y-1">
-          <h2 className="text-base font-semibold text-patras-buccaneer">
+          <h2 className="text-base font-semibold text-patras-buccaneer dark:text-[var(--color-text-secondary)]">
             {app.scientificField || "—"}
           </h2>
           <p className="text-sm text-gray-600 dark:text-[var(--color-text-secondary)]">
