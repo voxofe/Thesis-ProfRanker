@@ -119,7 +119,7 @@ export default function HomeAdmin() {
         />
         <HomePagePanel
           title="Στατιστικά"
-          description="Δείτε στατιστική ανάλυση αιτήσεων και αιτούντων βάσει διαφόρων κριτηρίων."
+          description="Δείτε στατιστική ανάλυση αιτήσεων και υποψηφίων βάσει διαφόρων κριτηρίων."
           buttonText="Δείτε στατιστικά"
           to="/analytics"
           {...lockedPanelProps}

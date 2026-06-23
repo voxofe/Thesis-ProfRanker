@@ -39,8 +39,8 @@ export default function Login() {
 
     login(email, password)
       .then(() => {
-        // Navigate to home page after successful login
-        navigate("/");
+        // Navigate to the authenticated dashboard after successful login
+        navigate("/home");
       })
       .catch((err) => {
         const status = err?.response?.status;

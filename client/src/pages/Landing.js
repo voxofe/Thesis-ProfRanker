@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, FileCheck2, BarChart3, BrainCircuit, Users } from "lucide-react";
+import { FileCheck2, BarChart3, BrainCircuit, Users } from "lucide-react";
 
 function InsightCard({ icon: Icon, title, description }) {
   return (
@@ -8,9 +8,11 @@ function InsightCard({ icon: Icon, title, description }) {
       <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-patras-albescentWhite text-patras-buccaneer dark:bg-[var(--color-bg-muted)] dark:text-[var(--color-text-primary)]">
         <Icon className="h-5 w-5" />
       </div>
+
       <h3 className="text-base font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)]">
         {title}
       </h3>
+
       <p className="mt-2 text-sm leading-relaxed text-gray-700 dark:text-[var(--color-text-secondary)]">
         {description}
       </p>
@@ -20,35 +22,37 @@ function InsightCard({ icon: Icon, title, description }) {
 
 export default function Landing() {
   return (
-    <section className="relative overflow-hidden pb-10">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -left-16 top-0 h-48 w-48 rounded-full bg-patras-cameo/20 blur-2xl dark:bg-[var(--color-primary)]/20"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-20 top-28 h-64 w-64 rounded-full bg-patras-buccaneer/15 blur-3xl dark:bg-[var(--color-border-accent)]/20"
-      />
-
+    <section className="pb-10">
       <div className="relative mx-auto max-w-6xl px-2 sm:px-4">
-        <div className="rounded-3xl border border-patras-buccaneer/20 bg-gradient-to-br from-patras-albescentWhite/50 via-white/90 to-patras-cameo/20 p-6 shadow-lg dark:border-[var(--color-border)] dark:from-[var(--color-bg-surface)] dark:via-[var(--color-bg-card)] dark:to-[var(--color-bg-muted)] sm:p-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-patras-buccaneer/30 bg-white/80 px-3 py-1 text-xs font-semibold tracking-wide text-patras-buccaneer dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-primary)]">
-            <Sparkles className="h-3.5 w-3.5" />
-            Διπλωματική εργασία • ProfRanker
-          </div>
+        <div className="border-b border-[var(--color-border)] py-4 sm:py-12">
 
           <h2 className="mt-4 text-2xl font-semibold leading-tight text-patras-buccaneer dark:text-[var(--color-text-primary)] sm:text-3xl lg:text-4xl">
-            Από την ανακοίνωση προσκλήσεων στην προτεινόμενη κατάταξη υποψηφίων με τεκμηριωμένη, υβριδική αξιολόγηση
+            ProfRanker: Σύστημα Διαχείρισης και Αξιολόγησης Αιτήσεων για την Απόκτηση
+            Ακαδημαϊκής Διδακτικής Εμπειρίας
           </h2>
 
           <p className="mt-4 max-w-4xl text-sm leading-relaxed text-gray-700 dark:text-[var(--color-text-secondary)] sm:text-base">
-            Η εφαρμογή ProfRanker σχεδιάστηκε για να καλύψει το πιο απαιτητικό κομμάτι της διαδικασίας επιλογής
-            προσωρινών διδασκόντων: την αξιολόγηση. Ενώ η δημοσίευση προσκλήσεων, η υποβολή αιτήσεων και η ανάρτηση
-            αποτελεσμάτων έχουν ήδη ψηφιοποιηθεί, η ποσοτική και ποιοτική αποτίμηση των υποψηφιοτήτων παραμένει
-            χρονοβόρα. Η παρούσα πλατφόρμα ενσωματώνει τεχνικές AI και LLM για να μετατρέψει τα ετερογενή δεδομένα
-            αιτήσεων σε συγκρίσιμες προτάσεις κατάταξης ανά θέση.
+            Η εφαρμογή ProfRanker δημιουργήθηκε για να υποστηρίξει τη διαδικασία αξιολόγησης αιτήσεων 
+            προσωρινών διδασκόντων  μέσω της αυτοματοποιημένης παραγωγής προτεινόμενων 
+            κατατάξεων των υποψηφίων με βάση ποσοτικά αλλά και ποιοτικά χαρακτηριστικά 
+            των αιτήσεών τους. Λειτουργεί τόσο ως ιστότοπος ανακοίνωσης προσκλήσεων, υποβολής αιτήσεων και ανάρτησης 
+            αποτελεσμάτων αλλά και ως μηχανισμός αξιολόγησης και παραγωγής συστάσεων κατάταξης των υποψηφίων ανά θέση.
           </p>
 
+          <p className="mt-3 max-w-4xl text-sm leading-relaxed text-gray-700 dark:text-[var(--color-text-secondary)] sm:text-base">
+            Συγκεκριμένα, αξιοποιώντας εργαλεία AI και LLM, η πλατφόρμα υποστηρίζει αφενός 
+            την αυτοματοποιημένη ανάλυση και  αξιολόγηση δεδομένων κειμένου από τις αιτήσεις 
+            των υποψηφίων, όπως τίτλος, περίληψη και λέξεις κλειδιά για τις διδακτορικές διατριβές
+            και προτεινόμενα σχεδιαγράμματα διδασκαλίας για τα μαθήματα κάθε θέσης, και αφετέρου 
+            τον έλεγχο και την αυτοματοποιημένη βαθμολόγηση του δημοσιευμένου έργου που υποβάλλεται 
+            ως μέρος των αιτήσεων των υποψηφίων με βάση τα κριτήρια που ορίζονται στη σχετική πρόσκληση.
+            Ως αποτελέσματα, η εφαρμογή παράγει συνολικές βαθμολογίες για όλες τις αιτήσεις που έχουν υποβληθεί 
+            βάσει των οποίων χτίζεται και ένας γενικός πίνακας κατάταξης των υποψηφίων ανά θέση/επιστημονικό πεδίο.       
+          </p>
+          <p className="mt-3 max-w-4xl text-sm leading-relaxed text-gray-700 dark:text-[var(--color-text-secondary)] sm:text-base">
+            Ως αποτέλσμα, η εφαρμογή παράγει συνολικές βαθμολογίες για όλες τις αιτήσεις που έχουν υποβληθεί 
+            βάσει των οποίων χτίζεται ένας γενικός πίνακας κατάταξης των αιτήσεων για όλες τις δημοσιευμένες θέσεις/επιστημονικά πεδία.       
+          </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               to="/login"
@@ -56,6 +60,7 @@ export default function Landing() {
             >
               Σύνδεση στην πλατφόρμα
             </Link>
+
             <Link
               to="/register"
               className="inline-flex items-center justify-center rounded-lg border border-patras-buccaneer px-5 py-2.5 text-sm font-semibold text-patras-buccaneer transition-colors hover:bg-patras-albescentWhite dark:border-[var(--color-border-accent)] dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-bg-muted)]"
@@ -68,45 +73,87 @@ export default function Landing() {
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <InsightCard
             icon={FileCheck2}
-            title="Τυποποιημένη υποβολή"
-            description="Συλλογή δομημένων στοιχείων και δικαιολογητικών ανά πρόσκληση, με σαφή κανόνες εγκυρότητας και ίχνη ελέγχου."
+            title="Δημοσίευση Προσκλήσεων"
+            description="Διαχείριση και δημοσιοποίηση προσκλήσεων εκδήλωσης ενδιαφέροντος για θέσεις προσωρινών διδασκόντων."
           />
-          <InsightCard
-            icon={BrainCircuit}
-            title="Ποιοτική ανάλυση με AI"
-            description="Αποτίμηση κειμενικών δεδομένων όπως τίτλος, περίληψη, λέξεις-κλειδιά διδακτορικών και σχεδιαγράμματα διδασκαλίας."
-          />
-          <InsightCard
-            icon={BarChart3}
-            title="Ποσοτική βαθμολόγηση"
-            description="Αυτοματοποιημένη βαθμολόγηση δημοσιευμένου έργου και κριτηρίων πρόσκλησης, με ενιαίο συνολικό σκορ ανά αίτηση."
-          />
+
           <InsightCard
             icon={Users}
-            title="Προτάσεις κατάταξης"
-            description="Παραγωγή προτεινόμενων πινάκων ανά θέση που υποστηρίζουν διοικητικό και επιστημονικό προσωπικό στη λήψη αποφάσεων."
+            title="Υποβολή Αιτήσεων"
+            description="Ηλεκτρονική καταχώρηση στοιχείων υποψηφίων και υποβολή των απαιτούμενων δικαιολογητικών ανά πρόσκληση."
           />
+
+          <InsightCard
+            icon={BrainCircuit}
+            title="Αξιολόγηση Υποψηφίων"
+            description="Ποσοτική βαθμολόγηση και AI-υποβοηθούμενη ποιοτική ανάλυση επιστημονικού έργου, διδακτορικών διατριβών και διδακτικών προτάσεων."
+          />
+
+          <InsightCard
+            icon={BarChart3}
+            title="Παραγωγή Κατατάξεων"
+            description="Δημιουργία προτεινόμενων πινάκων κατάταξης υποψηφίων ανά θέση με βάση τεκμηριωμένα κριτήρια αξιολόγησης."
+          />
+        </div>
+
+        <div className="mt-8 rounded-2xl border border-patras-buccaneer/20 bg-white/90 p-6 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)]">
+          <h3 className="text-lg font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)]">
+            Σκοπός της εφαρμογής
+          </h3>
+
+          <p className="mt-3 text-sm leading-relaxed text-gray-700 dark:text-[var(--color-text-secondary)]">
+            Η εφαρμογή σχεδιάστηκε για να υποστηρίξει το πιο απαιτητικό
+            στάδιο της διαδικασίας επιλογής προσωρινών διδασκόντων: την
+            αξιολόγηση των υποψηφιοτήτων. Ενώ η δημοσίευση προσκλήσεων, η
+            υποβολή αιτήσεων και η ανακοίνωση αποτελεσμάτων πραγματοποιούνται
+            ήδη ηλεκτρονικά, η αξιολόγηση των υποψηφίων παραμένει ιδιαίτερα
+            απαιτητική και χρονοβόρα διαδικασία.
+          </p>
+
+          <p className="mt-3 text-sm leading-relaxed text-gray-700 dark:text-[var(--color-text-secondary)]">
+            Το ProfRanker επιδιώκει να μειώσει τον απαιτούμενο χρόνο
+            επεξεργασίας αιτήσεων, να προσφέρει ενιαίο περιβάλλον διαχείρισης
+            δεδομένων και να υποστηρίξει το διοικητικό και επιστημονικό
+            προσωπικό μέσω εργαλείων αυτοματοποιημένης ανάλυσης και παραγωγής
+            προτεινόμενων κατατάξεων.
+          </p>
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
           <article className="rounded-2xl border border-patras-buccaneer/20 bg-white/90 p-5 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)]">
-            <h3 className="text-base font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)]">Επισκέπτης</h3>
+            <h3 className="text-base font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)]">
+              Υποψήφιοι
+            </h3>
             <p className="mt-2 text-sm text-gray-700 dark:text-[var(--color-text-secondary)]">
-              Πρόσβαση σε δημοσιευμένα αποτελέσματα και συνολική εικόνα των προσκλήσεων και των κατατάξεων.
+              Υποβολή και επεξεργασία αιτήσεων, πρόσβαση στις υποβεβλημένες αιτήσεις τους και τις αντίστοιχες αξιολογήσεις, 
+              πρόσβαση σε προσωπικό φάκελο για τη διαχείριση δικαιολογητικών και άλλων δεδομένων για γρήγορη και εύκολη υποβολή πολλαπλών αιτήσεων.
+            </p>
+          </article>
+          
+          
+          <article className="rounded-2xl border border-patras-buccaneer/20 bg-white/90 p-5 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)]">
+            <h3 className="text-base font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)]">
+              Επισκέπτες
+            </h3>
+
+            <p className="mt-2 text-sm text-gray-700 dark:text-[var(--color-text-secondary)]">
+              Πρόσβαση σε δημοσιευμένα αποτελέσματα μετά το πέρας της ανοιχτής περιόδου αιτήσεων
+              και αναβάθμιση σε ρόλο αιτούντα μετά από υποβολή αίτησης σε μια θέση.
             </p>
           </article>
 
-          <article className="rounded-2xl border border-patras-buccaneer/20 bg-white/90 p-5 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)]">
-            <h3 className="text-base font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)]">Αιτών/Αιτούσα</h3>
-            <p className="mt-2 text-sm text-gray-700 dark:text-[var(--color-text-secondary)]">
-              Διαχείριση ενεργών αιτήσεων, πρόσβαση σε παραγόμενες αξιολογήσεις, προσωπικό προφίλ και φάκελος δικαιολογητικών.
-            </p>
-          </article>
+
 
           <article className="rounded-2xl border border-patras-buccaneer/20 bg-white/90 p-5 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)]">
-            <h3 className="text-base font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)]">Διαχειριστής</h3>
+            <h3 className="text-base font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)]">
+              Διαχειριστές
+            </h3>
+
             <p className="mt-2 text-sm text-gray-700 dark:text-[var(--color-text-secondary)]">
-              Εποπτεία όλων των δεδομένων, διαχείριση προσκλήσεων και πρόσβαση σε δείκτες χρήσης και λειτουργίας της εφαρμογής.
+              Πλήρης εποπτεία δεδομένων εφαρμογής, χρηστών, θέσεων, αξιολογήσεων, λίστας κατάταξης.
+              Δυνατότητα καταχώρησης και δημοσίευσης προσκλήσεων, και πρόσβαση σε στατιστικά στοιχεία 
+              για τη γενική χρήση και λειτουργία της
+              εφαρμογής.
             </p>
           </article>
         </div>

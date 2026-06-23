@@ -56,9 +56,7 @@ export default function Header({ academicYear }) {
         .join(", ")
     : resolveRoleLabel(currentUser?.role, currentUser?.gender);
 
-  const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
-  const isPublicLanding = location.pathname === "/";
-  const showAuthButtons = !isLoggedIn && (isAuthPage || isPublicLanding);
+  const showAuthButtons = !isLoggedIn;
   const showUserSlot = (isLoggedIn && currentUser) || showAuthButtons;
 
   return (
@@ -81,7 +79,7 @@ export default function Header({ academicYear }) {
           </p>
         </div>
 
-        <div className="flex items-center justify-start gap-4 md:justify-end md:gap-5">
+        <div className="flex items-center justify-start gap-5 md:justify-end">
           <div className="inline-flex rounded-md border border-gray-300 overflow-hidden bg-white dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)]">
             <button
               type="button"
@@ -121,38 +119,45 @@ export default function Header({ academicYear }) {
 
           {showUserSlot && (
             <>
-              <span className="hidden lg:block ml-1 md:ml-2 h-12 border-l border-gray-300 dark:border-[var(--color-border)]" aria-hidden="true" />
-              {isLoggedIn && currentUser ? (
-                <UserMenu
-                  currentUser={currentUser}
-                  initials={initials}
-                  roleLabel={roleLabel}
-                  onLogout={logout}
-                />
-              ) : (
-                <div className="flex flex-col gap-2 min-w-[110px]">
-                  <Link
-                    to="/login"
-                    className={`inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold border transition-colors ${
-                      location.pathname === "/login"
-                        ? "bg-patras-buccaneer text-white border-patras-buccaneer"
-                        : "bg-white text-patras-buccaneer border-patras-buccaneer hover:bg-patras-albescentWhite dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)] dark:border-[var(--color-border-accent)] dark:hover:bg-[var(--color-bg-muted)]"
-                    }`}
-                  >
-                    Σύνδεση
-                  </Link>
-                  <Link
-                    to="/register"
-                    className={`inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold border transition-colors ${
-                      location.pathname === "/register"
-                        ? "bg-patras-buccaneer text-white border-patras-buccaneer"
-                        : "bg-white text-patras-buccaneer border-patras-buccaneer hover:bg-patras-albescentWhite dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)] dark:border-[var(--color-border-accent)] dark:hover:bg-[var(--color-bg-muted)]"
-                    }`}
-                  >
-                    Εγγραφή
-                  </Link>
-                </div>
-              )}
+              <span
+                className="hidden lg:block h-12 border-l border-gray-300 dark:border-[var(--color-border)]"
+                aria-hidden="true"
+              />
+
+              <div className="flex min-w-[96px] justify-center">
+                {isLoggedIn && currentUser ? (
+                  <UserMenu
+                    currentUser={currentUser}
+                    initials={initials}
+                    roleLabel={roleLabel}
+                    onLogout={logout}
+                  />
+                ) : (
+                  <div className="flex flex-col gap-2 w-[96px]">
+                    <Link
+                      to="/login"
+                      className={`inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold border transition-colors ${
+                        location.pathname === "/login"
+                          ? "bg-patras-buccaneer text-white border-patras-buccaneer"
+                          : "bg-white text-patras-buccaneer border-patras-buccaneer hover:bg-patras-albescentWhite dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)] dark:border-[var(--color-border-accent)] dark:hover:bg-[var(--color-bg-muted)]"
+                      }`}
+                    >
+                      Σύνδεση
+                    </Link>
+
+                    <Link
+                      to="/register"
+                      className={`inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold border transition-colors ${
+                        location.pathname === "/register"
+                          ? "bg-patras-buccaneer text-white border-patras-buccaneer"
+                          : "bg-white text-patras-buccaneer border-patras-buccaneer hover:bg-patras-albescentWhite dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)] dark:border-[var(--color-border-accent)] dark:hover:bg-[var(--color-bg-muted)]"
+                      }`}
+                    >
+                      Εγγραφή
+                    </Link>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>
