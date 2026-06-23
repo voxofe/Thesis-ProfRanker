@@ -16,15 +16,15 @@ export default function CollapsibleNotice({
   children,
   isOpen,
   onToggle,
-  headlineClassName = "text-sm text-center text-patras-buccaneer",
-  containerClassName = "mb-6 mx-auto w-full rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3",
+  headlineClassName = "text-sm text-center text-patras-buccaneer dark:text-[var(--color-text-secondary)]",
+  containerClassName = "mb-6 mx-auto w-full rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)]",
 }) {
   return (
     <div className={containerClassName}>
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center justify-between gap-3 text-patras-buccaneer"
+        className="w-full flex items-center justify-between gap-3 text-patras-buccaneer dark:text-[var(--color-text-secondary)]"
       >
         <span className={`${headlineClassName} whitespace-pre-wrap`}>{mainText}</span>
         <span className="text-lg shrink-0">{isOpen ? "▼" : "\u25B6\uFE0E"}</span>

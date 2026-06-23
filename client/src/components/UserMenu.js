@@ -34,13 +34,13 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white/90 px-2 py-1 shadow-sm hover:bg-patras-albescentWhite/40"
+        className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white/90 px-2 py-1 shadow-sm hover:bg-patras-albescentWhite/40 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)] dark:hover:bg-[var(--color-bg-muted)]"
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        <span className="px-1 text-lg font-bold text-patras-buccaneer">{initials}</span>
+        <span className="px-1 text-lg font-bold text-patras-buccaneer dark:text-[var(--color-text-primary)]">{initials}</span>
         <svg
-          className={`w-4 h-4 text-patras-buccaneer transition-transform ${open ? "rotate-180" : ""}`}
+          className={`w-4 h-4 text-patras-buccaneer dark:text-[var(--color-text-secondary)] transition-transform ${open ? "rotate-180" : ""}`}
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"
@@ -55,44 +55,44 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
 
       {open && (
         <div
-          className="absolute right-0 top-full mt-3 w-max min-w-[11rem] max-w-64 rounded-xl border border-gray-300 bg-white shadow-xl z-50 overflow-hidden"
+          className="absolute right-0 top-full mt-3 w-max min-w-[11rem] max-w-64 rounded-xl border border-gray-300 bg-white shadow-xl z-50 overflow-hidden dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)]"
           role="menu"
         >
-          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/90 text-right">
+          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/90 text-right dark:border-[var(--color-border)] dark:bg-[var(--color-bg-muted)]">
             <div className="group relative">
               <div
                 ref={fullNameRef}
-                className="text-sm font-semibold text-patras-buccaneer truncate"
+                className="text-sm font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)] truncate"
                 title={showNameTooltip ? (fullName || "Χρήστης") : undefined}
               >
                 {fullName || "Χρήστης"}
               </div>
               {showNameTooltip && (
-                <div className="pointer-events-none absolute right-0 top-full z-10 mt-1 hidden max-w-64 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs text-gray-700 shadow-md group-hover:block">
+                <div className="pointer-events-none absolute right-0 top-full z-10 mt-1 hidden max-w-64 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs text-gray-700 shadow-md group-hover:block dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)]">
                   {fullName || "Χρήστης"}
                 </div>
               )}
             </div>
-            <div className="text-xs text-gray-500 mt-0.5">{roleLabel}</div>
+            <div className="text-xs text-gray-500 mt-0.5 dark:text-[var(--color-text-muted)]">{roleLabel}</div>
           </div>
 
           <Link
             to="/change-password"
-            className="w-full flex items-center justify-end gap-2 px-4 py-3 text-sm text-gray-700 text-right hover:bg-patras-albescentWhite/40"
+            className="w-full flex items-center justify-end gap-2 px-4 py-3 text-sm text-gray-700 text-right hover:bg-patras-albescentWhite/40 dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-bg-muted)]"
             onClick={() => setOpen(false)}
             role="menuitem"
           >
-            <KeyRound className="w-4 h-4 text-patras-buccaneer" aria-hidden="true" />
+            <KeyRound className="w-4 h-4 text-patras-buccaneer dark:text-[var(--color-text-secondary)]" aria-hidden="true" />
             <span className="font-medium">Αλλαγή κωδικού</span>
           </Link>
-          <div className="border-t" />
+          <div className="border-t dark:border-[var(--color-border)]" />
           <button
             type="button"
             onClick={() => {
               setOpen(false);
               onLogout();
             }}
-            className="w-full flex items-center justify-end gap-2 px-4 py-3 text-sm text-gray-700 text-right hover:bg-patras-albescentWhite/40"
+            className="w-full flex items-center justify-end gap-2 px-4 py-3 text-sm text-gray-700 text-right hover:bg-patras-albescentWhite/40 dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-bg-muted)]"
             role="menuitem"
           >
             <span className="font-medium">Αποσύνδεση</span>
@@ -102,7 +102,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
               fill="none"
               viewBox="0 0 32 32"
               stroke="currentColor"
-              className="text-patras-buccaneer"
+              className="text-patras-buccaneer dark:text-[var(--color-text-secondary)]"
             >
               <path d="m25.853 13.146-2-2a.5.5 0 0 0-.708.708L24.293 13H15.5a.5.5 0 0 0 0 1h8.793l-1.147 1.146a.5.5 0 0 0 .708.708l2-2a.5.5 0 0 0-.001-.708z" />
               <path d="M20 15v6h-6v1h6.5a.5.5 0 0 0 .5-.5V15z" />
