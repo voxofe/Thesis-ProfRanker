@@ -81,7 +81,7 @@ export default function Header({ academicYear }) {
           </p>
         </div>
 
-        <div className="flex items-center justify-start gap-3 md:justify-end">
+        <div className="flex items-center justify-start gap-4 md:justify-end md:gap-5">
           <div className="inline-flex rounded-md border border-gray-300 overflow-hidden bg-white dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)]">
             <button
               type="button"
@@ -107,19 +107,21 @@ export default function Header({ academicYear }) {
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 text-patras-buccaneer hover:bg-patras-albescentWhite/40 dark:border-[var(--color-border)] dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-bg-muted)]"
-            aria-label={isDarkMode ? "Αλλάξτε σε φωτεινή λειτουργία" : "Αλλάξτε σε σκοτεινή λειτουργία"}
-            title={isDarkMode ? "Αλλάξτε σε φωτεινή λειτουργία" : "Αλλάξτε σε σκοτεινή λειτουργία"}
-          >
-            {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
+          <div className="ml-1 md:ml-2">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 text-patras-buccaneer hover:bg-patras-albescentWhite/40 dark:border-[var(--color-border)] dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-bg-muted)]"
+              aria-label={isDarkMode ? "Αλλάξτε σε φωτεινή λειτουργία" : "Αλλάξτε σε σκοτεινή λειτουργία"}
+              title={isDarkMode ? "Αλλάξτε σε φωτεινή λειτουργία" : "Αλλάξτε σε σκοτεινή λειτουργία"}
+            >
+              {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+          </div>
 
           {showUserSlot && (
             <>
-              <span className="hidden lg:block h-12 border-l border-gray-300 dark:border-[var(--color-border)]" aria-hidden="true" />
+              <span className="hidden lg:block ml-1 md:ml-2 h-12 border-l border-gray-300 dark:border-[var(--color-border)]" aria-hidden="true" />
               {isLoggedIn && currentUser ? (
                 <UserMenu
                   currentUser={currentUser}

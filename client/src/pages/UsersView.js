@@ -281,7 +281,7 @@ export default function UsersView() {
         isApplicantsTab || isGuestsTab ? "cursor-pointer" : "cursor-default"
       } ${
         isApplicantsTab && selectedRowId === row.id
-          ? "bg-patras-albescentWhite/70"
+          ? "bg-patras-albescentWhite/50 hover:bg-patras-albescentWhite/50"
           : isApplicantsTab || isGuestsTab
             ? "hover:bg-patras-albescentWhite/50"
             : ""
@@ -439,7 +439,7 @@ export default function UsersView() {
                 setRowMenu(null);
                 setSelectedRowId(null);
               }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-[var(--color-text-secondary)] hover:bg-patras-buccaneer hover:text-white whitespace-nowrap"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-[var(--color-text-primary)] hover:bg-patras-buccaneer hover:text-white whitespace-nowrap"
             >
               {`Αιτήσεις χρήστη: ${rowMenu.label || ""}`.trim()}
             </button>
@@ -450,7 +450,7 @@ export default function UsersView() {
                 setRowMenu(null);
                 setSelectedRowId(null);
               }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-[var(--color-text-secondary)] hover:bg-patras-buccaneer hover:text-white whitespace-nowrap"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-[var(--color-text-primary)] hover:bg-patras-buccaneer hover:text-white whitespace-nowrap"
             >
               {`Φάκελος χρήστη: ${rowMenu.label || ""}`.trim()}
             </button>
