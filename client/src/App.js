@@ -12,7 +12,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import RegisterAdmin from "./pages/RegisterAdmin";
 import Home from "./pages/Home";
-import Landing from "./pages/Landing";
+// import Landing from "./pages/Landing";
 import BackLinkController from "./components/BackLinkController";
 import ApplicationForm from "./pages/ApplicationForm";
 import ApplicationScore from "./pages/ApplicationScore";
@@ -194,7 +194,7 @@ function AppContent() {
               <>
                 {/* Routes for logged-in users */}
                 <Route path="/home" element={<Home />} />
-                <Route path="/" element={<Landing />} />
+                <Route path="/" element={<Navigate to="/home" replace />} />
 
                 <Route path="/ranking" element={<Ranking />} />
                 <Route path="/score/total" element={<Navigate to="/ranking" replace />} />
@@ -273,12 +273,12 @@ function AppContent() {
             ) : (
               <>
                 {/* Public routes for non-logged-in users */}
-                <Route path="/" element={<Landing />} />
+                <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
-                {/* Redirect all other routes to landing */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                {/* Redirect all other routes to login */}
+                <Route path="*" element={<Navigate to="/login" replace />} />
               </>
             )}
           </Routes>
