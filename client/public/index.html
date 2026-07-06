@@ -16,10 +16,19 @@
         min-height: 100%;
       }
 
-      #userwayAccessibilityIcon,
-      [id*="userwayAccessibilityIcon"] {
+      .uwy[class*="userway_p"],
+      .userway_buttons_wrapper {
         top: 35px !important;
         right: 30px !important;
+        bottom: auto !important;
+        left: auto !important;
+        transform: none !important;
+      }
+
+      #userwayAccessibilityIcon,
+      [id*="userwayAccessibilityIcon"] {
+        top: 0 !important;
+        right: 0 !important;
         bottom: auto !important;
         left: auto !important;
         transform: scale(0.82) !important;
