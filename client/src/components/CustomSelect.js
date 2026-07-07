@@ -1,6 +1,7 @@
 import React from "react";
 import * as Select from "@radix-ui/react-select";
 import { ChevronDown } from "lucide-react";
+import { useLanguage } from "../contexts";
 
 export default function CustomSelect({
   label,
@@ -10,13 +11,15 @@ export default function CustomSelect({
   disabled = false,
   readOnly = false,
   required = false,
-  placeholder = "Επιλέξτε...",
+  placeholder,
   error,
 }) {
+  const { t } = useLanguage();
+  const resolvedPlaceholder = placeholder ?? t("common.select");
   const isDisabled = disabled || readOnly;
   //  Only show placeholder if not disabled
   const selectOptions = !isDisabled
-    ? [{ value: "select", label: placeholder }, ...options]
+    ? [{ value: "select", label: resolvedPlaceholder }, ...options]
     : [...options];
 
   // Prevent empty / undefined / null values from breaking Radix
@@ -65,15 +68,15 @@ export default function CustomSelect({
           className={`mt-2 ${getTriggerStyle()} flex justify-between items-center w-full text-left ring-0 focus:ring-0 whitespace-nowrap overflow-hidden outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)] dark:focus-visible:ring-offset-0`}
           title={
             safeValue === "select"
-              ? placeholder
-              : options.find((optn) => optn.value === safeValue)?.label || placeholder
+              ? resolvedPlaceholder
+              : options.find((optn) => optn.value === safeValue)?.label || resolvedPlaceholder
           }
         >
           <Select.Value asChild>
             <span className="flex-1 min-w-0 overflow-hidden whitespace-nowrap truncate pr-2">
               {safeValue === "select"
-                ? placeholder // 👈 Always show placeholder text visually
-                : options.find((optn) => optn.value === safeValue)?.label || placeholder}
+                ? resolvedPlaceholder // 👈 Always show placeholder text visually
+                : options.find((optn) => optn.value === safeValue)?.label || resolvedPlaceholder}
             </span>
           </Select.Value>
           <Select.Icon>
@@ -111,7 +114,7 @@ export default function CustomSelect({
                 ))
               ) : (
                 <div className="px-3 py-1.5 text-gray-400 text-base select-none sm:text-sm/6 dark:text-[var(--color-text-muted)]">
-                  Δεν υπάρχουν επιλογές
+                  {t("common.noOptions")}
                 </div>
               )}
             </Select.Viewport>

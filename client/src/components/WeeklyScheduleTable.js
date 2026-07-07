@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from "react";
+import { useLanguage } from "../contexts";
 
 export const COURSE_SCHEDULE_WEEK_FIELDS = Array.from({ length: 13 }, (_, index) => {
   const week = index + 1;
   return {
     key: `courseScheduleWeek${week}`,
-    label: `Προγραμματισμός μαθημάτων - Διδακτέα ύλη (Εβδομάδα ${week})`,
-    placeholder: `Συμπληρώστε τι θα διδαχθεί την εβδομάδα ${week}...`,
+    week,
   };
 });
 
@@ -55,10 +55,11 @@ function ReadOnlyTextarea({ value, id }) {
 }
 
 function TableShell({ children }) {
+  const { t } = useLanguage();
   return (
     <div className="space-y-3 pb-3">
       <label className="block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">
-        Προγραμματισμός μαθημάτων - Διδακτέα ύλη{" "}
+        {t("courses.scheduleLabel")}{" "}
         <span className="text-red-500">*</span>
       </label>
       <div className="overflow-hidden rounded-md outline outline-1 -outline-offset-1 outline-gray-300 dark:outline-[var(--color-border)]">
@@ -66,10 +67,10 @@ function TableShell({ children }) {
           <thead>
             <tr>
               <th className="w-24 border-b border-r border-gray-300 bg-gray-50 px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-gray-800 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-secondary)]">
-                ΕΒΔΟΜΑΔΑ
+                {t("courses.weekColumn")}
               </th>
               <th className="border-b border-gray-300 bg-gray-50 px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-gray-800 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-secondary)]">
-                ΥΛΗ ΕΒΔΟΜΑΔΑΣ
+                {t("courses.weekContentColumn")}
               </th>
             </tr>
           </thead>
@@ -82,6 +83,7 @@ function TableShell({ children }) {
 
 export function WeeklyScheduleTable({ courseId, coursePlans, onFieldChange }) {
   const coursePlan = coursePlans[String(courseId)] || {};
+  const { t } = useLanguage();
   return (
     <TableShell>
       {COURSE_SCHEDULE_WEEK_FIELDS.map((field, index) => (
@@ -94,7 +96,7 @@ export function WeeklyScheduleTable({ courseId, coursePlans, onFieldChange }) {
               id={`course-plan-${courseId}-${field.key}`}
               value={coursePlan[field.key] || ""}
               onChange={(nextValue) => onFieldChange(courseId, field.key, nextValue)}
-              placeholder={field.placeholder}
+              placeholder={t("courses.weekPlaceholder", { week: field.week })}
             />
           </td>
         </tr>

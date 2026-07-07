@@ -5,8 +5,10 @@ import {
   CheckIcon,
 } from "@heroicons/react/24/solid";
 import CustomSelect from "./CustomSelect";
+import { useLanguage } from "../contexts";
 
 export default function Upload(props) {
+  const { t } = useLanguage();
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef(null);
@@ -131,13 +133,13 @@ export default function Upload(props) {
   };
 
   const getAcceptErrorMessage = () => {
-    if (!props.accept) return "Μη αποδεκτός τύπος αρχείου.";
-    return `Επιτρέπονται μόνο: ${props.accept.replace(/\s+/g, "")}`;
+    if (!props.accept) return t("upload.invalidType");
+    return t("upload.allowedOnly", { types: props.accept.replace(/\s+/g, "") });
   };
 
   const getSizeErrorMessage = () => {
     const maxMb = Math.round(maxFileBytes / (1024 * 1024));
-    return `Μέγιστο μέγεθος αρχείου: ${maxMb}MB.`;
+    return t("upload.maxSizeError", { mb: maxMb });
   };
 
   const validateFile = (file) => {
@@ -277,7 +279,7 @@ export default function Upload(props) {
                   disabled={props.checkLoading || checkPending}
                   className="rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {props.checkLoading || checkPending ? "Έλεγχος..." : "Έλεγχος PDF"}
+                  {props.checkLoading || checkPending ? t("upload.checking") : t("upload.checkPdf")}
                 </button>
               )}
             </div>
@@ -298,7 +300,7 @@ export default function Upload(props) {
                                         }`}
                   >
                     <span className="m-2 block">
-                      {`Αναρτήστε ${contentLabel} εδώ`}
+                      {t("upload.dropHere", { content: contentLabel })}
                     </span>
                   </label>
                 </>
@@ -306,15 +308,14 @@ export default function Upload(props) {
               {canPickFromVault && (
                 <div className="mt-2 w-full">
                   <CustomSelect
-                    label="Επιλέξτε από τα ήδη αναρτημένα αρχεία σας"
+                    label={t("upload.pickExisting")}
                     value={selectedExistingId || "select"}
-                    placeholder="Επιλέξτε..."
                     options={[
                       ...selectableOptions.map((option) => ({
                         value: String(option.id),
                         label: option.name,
                       })),
-                      { value: "__new__", label: "Ανέβασμα νέου αρχείου" },
+                      { value: "__new__", label: t("upload.uploadNew") },
                     ]}
                     disabled={props.disabled}
                     onChange={(value) => {
@@ -342,32 +343,32 @@ export default function Upload(props) {
           )}
           {!hasAnyFile ? (
             <div>
-              <span className="text-sm pl-1 mb-10 dark:text-white">ή σύρετε και αφήστε</span>
+              <span className="text-sm pl-1 mb-10 dark:text-white">{t("upload.dragDrop")}</span>
               <p className="pt-2 text-xs/5 text-gray-600 dark:text-[var(--color-text-secondary)]">
-                {formatAcceptHint()} · Μέγιστο μέγεθος: {Math.round(maxFileBytes / (1024 * 1024))}MB
+                {formatAcceptHint()} · {t("upload.maxSizeHint", { mb: Math.round(maxFileBytes / (1024 * 1024)) })}
               </p>
             </div>
           ) : (
             <p className="text-sm pt-[14px] mb-[20px] text-patras-buccaneer dark:text-[var(--color-text-primary)] break-words">
-              {showCheckMessage && checkPending && "Γίνεται έλεγχος του PDF. Παρακαλώ περιμένετε."}
-              {showCheckMessage && checkFailed && (checkError || "Αποτυχία ελέγχου PDF.")}
-              {showCheckMessage && !checkPending && !checkFailed && "Πατήστε Έλεγχος PDF για να συνεχίσετε."}
+              {showCheckMessage && checkPending && t("upload.pdfChecking")}
+              {showCheckMessage && checkFailed && (checkError || t("upload.pdfFailed"))}
+              {showCheckMessage && !checkPending && !checkFailed && t("upload.pdfPrompt")}
               {checkEnabled && checkSuccess &&
                 (hasExistingFile
-                  ? `Το αρχείο "${getDisplayName()}" είναι ήδη αναρτημένο`
+                  ? t("upload.alreadyUploaded", { name: getDisplayName() })
                   : props.id === "milatary-obligations-upload"
-                  ? "Η υπεύθυνη δήλωση"
+                  ? t("upload.declaration")
                   : contentStatus.charAt(0).toUpperCase() +
                     contentStatus.slice(1))}{" "}
-              {checkEnabled && checkSuccess && hasUploadedFile && "επιλέχθηκε επιτυχώς"}
+              {checkEnabled && checkSuccess && hasUploadedFile && t("upload.selectedSuccess")}
               {!checkEnabled &&
                 (hasExistingFile
-                  ? `Το αρχείο "${getDisplayName()}" είναι ήδη αναρτημένο`
+                  ? t("upload.alreadyUploaded", { name: getDisplayName() })
                   : props.id === "milatary-obligations-upload"
-                  ? "Η υπεύθυνη δήλωση"
+                  ? t("upload.declaration")
                   : contentStatus.charAt(0).toUpperCase() +
                     contentStatus.slice(1))}{" "}
-              {!checkEnabled && hasUploadedFile && "επιλέχθηκε επιτυχώς"}
+              {!checkEnabled && hasUploadedFile && t("upload.selectedSuccess")}
             </p>
           )}
         </div>

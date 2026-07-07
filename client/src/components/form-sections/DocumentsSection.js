@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useFormData } from "../../contexts/FormDataContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { useLanguage } from "../../contexts";
 import Upload from "../Upload";
 import Checkbox from "../Checkbox";
 import TermsModal from "../TermsModal";
@@ -14,6 +15,7 @@ export default function DocumentsSection({ academicYear }) {
     handleFileDelete,
   } = useFormData();
   const { currentUser } = useAuth();
+  const { t } = useLanguage();
   const [isRestrictionsModalOpen, setIsRestrictionsModalOpen] = useState(false);
 
   const requiresMilitaryDoc = currentUser?.gender === "male";
@@ -24,7 +26,7 @@ export default function DocumentsSection({ academicYear }) {
       <div className="bg-patras-goldSand/20 p-3 rounded-lg">
         <div className="space-y-4">
           <Checkbox
-            label="Είμαι δημόσιος υπάλληλος"
+            label={t("documents.publicEmployee")}
             id="is-public-employee"
             name="is-public-employee"
             checked={formData.isPublicEmployee}
@@ -35,9 +37,9 @@ export default function DocumentsSection({ academicYear }) {
             <div className="mt-4 p-4 bg-white dark:bg-[var(--color-bg-card)] rounded-md border border-blue-200 overflow-y-auto">
               <Upload
                 icon="document-text"
-                label="Πρωτοκολλημένη αίτηση για έκδοση σχετικής άδειας από το αρμόδιο όργανο για δημοσίους υπαλλήλους"
-                contentLabel="την πρωτοκολλημένη αίτηση"
-                contentStatus="η αίτηση"
+                label={t("documents.publicEmployeeDoc")}
+                contentLabel={t("documents.applicationContentLabel")}
+                contentStatus={t("documents.applicationContentStatus")}
                 id="public-employee-permission-upload"
                 name="public-employee-permission-upload"
                 accept=".pdf,.doc,.docx,.odt"
@@ -62,7 +64,7 @@ export default function DocumentsSection({ academicYear }) {
       <div className="bg-patras-goldSand/20 p-3 rounded-lg">
         <div className="space-y-4">
           <Checkbox
-            label="Είμαι πολίτης κράτους – μέλους της Ευρωπαϊκής Ένωσης (εκτός Ελλάδας)"
+            label={t("documents.euCitizen")}
             id="eu-citizen-non-greek"
             name="eu-citizen-non-greek"
             checked={formData.isEuCitizenNonGreek}
@@ -73,9 +75,9 @@ export default function DocumentsSection({ academicYear }) {
             <div className="mt-4 p-4 bg-white dark:bg-[var(--color-bg-card)] rounded-md border border-blue-200 overflow-y-auto">
               <Upload
                 icon="document-text"
-                label="Πιστοποιητικό ελληνομάθειας Δ΄ επιπέδου από το Κέντρο Ελληνικής Γλώσσας"
-                contentLabel="το πιστοποιητικό"
-                contentStatus="το πιστοποιητικό"
+                label={t("documents.greekLanguageCert")}
+                contentLabel={t("documents.certContentLabel")}
+                contentStatus={t("documents.certContentStatus")}
                 id="eu-citizen-greek-language-certificate-upload"
                 name="eu-citizen-greek-language-certificate-upload"
                 accept=".pdf,.doc,.docx,.odt"
@@ -110,7 +112,7 @@ export default function DocumentsSection({ academicYear }) {
       <div className="bg-patras-goldSand/20 p-3 rounded-lg">
         <div className="space-y-4">
           <Checkbox
-            label="Δεν έχω επιλεγεί σε άλλο πρόγραμμα Απόκτησης Ακαδημαϊκής Διδακτικής Εμπειρίας, στο πλαίσιο των προηγούμενων προσκλήσεων ΕΔΒΜ 20 (ακαδ. έτος 2016‐2017), ΕΔΒΜ 45 (ακαδ. έτος 2017‐2018), ΕΔΒΜ 82 (ακαδ. έτος 2018‐2019), καθώς και της ΕΔΒΜ 96 (ακαδ. έτη 2019‐2020 και 2020‐2021) του ΕΠ ΑΝΑΔ ΕΔΒΜ 2014‐2020."
+            label={t("documents.notParticipated")}
             id="not-participated"
             name="not-participated"
             checked={formData.hasNotParticipatedInPastProgram}
@@ -123,9 +125,9 @@ export default function DocumentsSection({ academicYear }) {
             <div className="mt-4 p-4 bg-white dark:bg-[var(--color-bg-card)] rounded-md border border-blue-200 overflow-y-auto">
               <Upload
                 icon="document-text"
-                label="Υπεύθυνη δήλωση μη προηγούμενης συμμετοχής"
-                contentLabel="την υπεύθυνη δήλωση"
-                contentStatus="η υπεύθυνη δήλωση"
+                label={t("documents.notParticipatedDoc")}
+                contentLabel={t("documents.declarationContentLabel")}
+                contentStatus={t("documents.declarationContentStatus")}
                 id="not-participated-declaration-upload"
                 name="not-participated-declaration-upload"
                 accept=".pdf,.doc,.docx,.odt"
@@ -150,9 +152,9 @@ export default function DocumentsSection({ academicYear }) {
         {requiresMilitaryDoc && (
         <Upload
             icon="document-text"
-            label={`Υπεύθυνη δήλωση εκπλήρωσης στρατιωτικών υποχρεώσεων ή νόμιμης απαλλαγής από αυτές ή αναβολής για το ακαδημαϊκό έτος ${academicYear}`}
-            contentLabel="την υπεύθυνη δήλωση"
-            contentStatus="η υπεύθυνη δήλωση"
+            label={t("documents.militaryDoc", { year: academicYear })}
+            contentLabel={t("documents.declarationContentLabel")}
+            contentStatus={t("documents.declarationContentStatus")}
             id="military-obligations-upload"
             name="military-obligations-upload"
             accept=".pdf,.doc,.docx,.odt"
@@ -172,18 +174,18 @@ export default function DocumentsSection({ academicYear }) {
             icon="document-text"
             label={
                 <>
-                Υπεύθυνη δήλωση σχετικά με τους{" "}
+                {t("documents.restrictionsPrefix")}
                 <button
                     type="button"
                   className="text-patras-buccaneer underline hover:text-patras-auChico dark:text-[var(--color-text-primary)] dark:hover:text-[var(--color-text-secondary)]"
                     onClick={() => setIsRestrictionsModalOpen(true)}
                 >
-                    περιορισμούς της Πράξης
+                    {t("documents.restrictionsLink")}
                 </button>
                 </>
             }
-            contentLabel="την υπεύθυνη δήλωση"
-            contentStatus="η υπεύθυνη δήλωση"
+            contentLabel={t("documents.declarationContentLabel")}
+            contentStatus={t("documents.declarationContentStatus")}
             id="responsible-declaration-upload"
             name="responsible-declaration-upload"
             accept=".pdf,.doc,.docx,.odt"

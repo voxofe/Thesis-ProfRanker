@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import InputField from "../InputField";
 import { useFormData } from "../../contexts/FormDataContext";
+import { useLanguage } from "../../contexts";
 import Upload from "../Upload";
 import Checkbox from "../Checkbox";
 import FlowbiteDateField from "../FlowbiteDateField";
@@ -29,6 +30,7 @@ export default function PhdSection() {
     handlePhdDegreeSelect,
     phdDegrees,
   } = useFormData();
+  const { t } = useLanguage();
   const today = new Date().toISOString().split("T")[0];
   const todayDisplay = today.split("-").reverse().join("-");
   const [keywordInput, setKeywordInput] = useState("");
@@ -87,7 +89,7 @@ export default function PhdSection() {
     return phdDegrees.map((degree, index) => {
       const title = (degree.title || "").trim();
       const date = degree.acquiredAt ? formatDate(degree.acquiredAt) : "";
-      const fallbackLabel = `Διδακτορικό ${index + 1}${date ? ` (${date})` : ""}`;
+      const fallbackLabel = `${t("phdSection.degreeFallback", { n: index + 1 })}${date ? ` (${date})` : ""}`;
       return {
         id: degree.id,
         title,
@@ -130,7 +132,7 @@ export default function PhdSection() {
             htmlFor="phd-title"
             className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]"
           >
-            Τίτλος διδακτορικής διατριβής
+            {t("phdSection.titleLabel")}
             <span className="text-red-500 ml-1">*</span>
           </label>
           <div className="mt-2 relative">
@@ -153,7 +155,7 @@ export default function PhdSection() {
               onBlur={() => {
                 setTimeout(() => setPhdTitleOpen(false), 150);
               }}
-              placeholder="Εισάγετε τον τίτλο της διδακτορικής διατριβής"
+              placeholder={t("phdSection.titlePlaceholder")}
               title={showPhdTitleTooltip ? phdTitleValue : ""}
               ref={phdTitleInputRef}
               className="block w-full rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-1.5 pr-10 text-base text-gray-900 dark:text-[var(--color-text-primary)] outline outline-1 -outline-offset-1 outline-patras-buccaneer dark:outline-[var(--color-border-accent)] placeholder:text-gray-400 dark:placeholder:text-[var(--color-text-muted)] focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-patras-buccaneer dark:focus:outline-[var(--color-primary)] focus:ring-offset-0 focus:ring-patras-buccaneer dark:focus:ring-[var(--color-primary)] sm:text-sm/6"
@@ -169,8 +171,8 @@ export default function PhdSection() {
                   phdTitleInputRef.current?.focus();
                 }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-patras-sanguineBrown dark:text-[var(--color-text-secondary)] hover:text-red-700 dark:hover:text-[var(--color-text-primary)] w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-[var(--color-bg-muted)]"
-                aria-label="Καθαρισμός τίτλου"
-                title="Καθαρισμός τίτλου"
+                aria-label={t("phdSection.clearTitle")}
+                title={t("phdSection.clearTitle")}
               >
                 <span className="text-2xl leading-none font-bold">×</span>
               </button>
@@ -202,7 +204,7 @@ export default function PhdSection() {
 
         <div>
           <FlowbiteDateField
-            label="Ημερομηνία λήψης διδακτορικού τίτλου"
+            label={t("phdSection.dateLabel")}
             value={formData.phdAcquisitionDate}
             onChange={(value) => handlePhdDateChange(value)}
             minDate="2011-01-01"
@@ -211,7 +213,7 @@ export default function PhdSection() {
             popupPlacement="bottom"
           />
           <p className="-mt-3 text-xs text-gray-500 dark:text-[var(--color-text-muted)] italic">
-            Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}
+            {t("phdSection.dateRange", { today: todayDisplay })}
           </p>
         </div>
       </div>
@@ -219,8 +221,8 @@ export default function PhdSection() {
       <div className="space-y-4">
         <Upload
           icon="document-text"
-          label="Διδακτορικό δίπλωμα (φωτοαντίγραφο ή σκαναρισμένο αντίγραφο)"
-          content="το διδακτορικό σας"
+          label={t("phdSection.diplomaLabel")}
+          content={t("phdSection.diplomaContent")}
           id="phd-upload"
           name="phd-upload"
           accept=".pdf,.doc,.docx,.odt"
@@ -241,7 +243,7 @@ export default function PhdSection() {
             onChange={handlePhdAbstractChange}
             minWords={PHD_ABSTRACT_MIN_WORDS}
             maxWords={PHD_ABSTRACT_MAX_WORDS}
-            placeholder="Γράψτε μια σύντομη περίληψη της διατριβής σας"
+            placeholder={t("phdSection.abstractPlaceholder")}
             required
           />
         </div>
@@ -252,7 +254,7 @@ export default function PhdSection() {
               htmlFor="phd-keywords"
               className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]"
             >
-              Λέξεις-κλειδιά
+              {t("phd.keywords")}
               <span className="text-red-500 ml-1">*</span>
             </label>
           </div>
@@ -275,7 +277,7 @@ export default function PhdSection() {
                   type="button"
                   onClick={() => removePhdKeyword(keyword)}
                   className="text-gray-500 dark:text-[var(--color-text-muted)] hover:text-red-700 dark:hover:text-[var(--color-danger)]"
-                  aria-label={`Αφαίρεση λέξης-κλειδιού ${keyword}`}
+                  aria-label={t("phdSection.removeKeyword", { keyword })}
                 >
                   ×
                 </button>
@@ -299,26 +301,26 @@ export default function PhdSection() {
           </div>
           <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">
-              Πληκτρολογήστε και πατήστε Enter ή κόμμα για να προσθέσετε λέξη-κλειδί.
+              {t("phdSection.keywordHint")}
             </p>
             <button
               type="button"
               onClick={clearKeywords}
               disabled={keywordCount === 0}
               className="inline-flex items-center gap-1 rounded-md border border-patras-buccaneer/30 bg-patras-albescentWhite/30 px-3 py-1 text-sm text-patras-buccaneer hover:bg-patras-albescentWhite disabled:cursor-not-allowed disabled:border-gray-200 dark:border-[var(--color-border)] disabled:bg-gray-100 dark:bg-[var(--color-bg-surface)] dark:hover:bg-[var(--color-bg-muted)] disabled:text-gray-400 dark:text-[var(--color-text-muted)]"
-              aria-label="Καθαρισμός λέξεων-κλειδιών"
-              title="Καθαρισμός"
+              aria-label={t("phdSection.clearKeywords")}
+              title={t("common.clear")}
             >
-              <span>Καθαρισμός</span>
+              <span>{t("common.clear")}</span>
               <TrashIcon className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
           <p className="mt-1 text-xs text-gray-500 dark:text-[var(--color-text-muted)]">
-            {keywordCount}/{PHD_KEYWORDS_MAX} λέξεις-κλειδιά
+            {t("phdSection.keywordCount", { count: keywordCount, max: PHD_KEYWORDS_MAX })}
           </p>
           {(keywordsTooFew || keywordsTooMany) && (
             <p className="mt-1 text-xs text-red-600">
-              Επιτρέπονται {PHD_KEYWORDS_MIN} έως {PHD_KEYWORDS_MAX} λέξεις-κλειδιά.
+              {t("phdSection.keywordRange", { min: PHD_KEYWORDS_MIN, max: PHD_KEYWORDS_MAX })}
             </p>
           )}
         </div>
@@ -327,7 +329,7 @@ export default function PhdSection() {
       <div className="bg-patras-goldSand/20 p-3 rounded-lg">
         <div className="space-y-4">
           <Checkbox
-            label="Κατοχή τίτλου από ίδρυμα του εξωτερικού (αναγνωρισμένο από τον ΔΟΑΤΑΠ)"
+            label={t("phdSection.foreignInstitute")}
             id="foreign-institute"
             name="foreign-institute"
             checked={formData.phdIsFromForeignInstitute}
@@ -338,8 +340,8 @@ export default function PhdSection() {
             <div className="mt-4 p-4 bg-white dark:bg-[var(--color-bg-card)] rounded-md border border-blue-200 overflow-y-auto">
               <Upload
                 icon="document-text"
-                label="Έγγραφο αναγνώρισης ΔΟΑΤΑΠ"
-                content="το έγγραφο αναγνώρισης από τον ΔΟΑΤΑΠ"
+                label={t("phdSection.doatapLabel")}
+                content={t("phdSection.doatapContent")}
                 id="doatap-upload"
                 name="doatap-upload"
                 accept=".pdf,.doc,.docx,.odt"

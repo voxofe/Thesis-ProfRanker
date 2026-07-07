@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLanguage } from "../contexts";
 
 /**
  * InputField component for rendering input fields or dropdowns.
@@ -23,6 +24,7 @@ import React, { useState } from "react";
  * @returns {JSX.Element} The rendered input field or dropdown.
  */
 export default function InputField(props) {
+  const { t } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
   const baseStyle =
     "block w-full rounded-md px-3 py-1.5 text-base outline outline-1 -outline-offset-1 placeholder:text-gray-400 dark:placeholder:text-[var(--color-text-muted)] focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-offset-0 sm:text-sm/6";
@@ -68,7 +70,7 @@ export default function InputField(props) {
             title={props.inputTitle}
             className={getInputStyle()}
           >
-            <option value="">Επιλέξτε...</option>
+            <option value="">{t("common.select")}</option>
             {props.optns.map((optn, index) => (
               <option key={index} value={optn.value}>
                 {optn.label}
@@ -100,7 +102,7 @@ export default function InputField(props) {
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
             className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-patras-buccaneer dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer dark:focus-visible:outline-[var(--color-primary)]"
-            aria-label={showPassword ? "Απόκρυψη κωδικού" : "Εμφάνιση κωδικού"}
+            aria-label={showPassword ? t("common.hidePassword") : t("common.showPassword")}
           >
             {showPassword ? (
               <svg

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLanguage } from "../contexts";
 
 const normalize = (s) =>
   (s ?? "")
@@ -11,8 +12,8 @@ export default function PositionSelect({
   positions = [],
   value,
   onChange,
-  label = "Θέση",
-  placeholder = "Αναζήτηστε με σχολή, τμήμα ή επιστημονικό πεδίο...",
+  label,
+  placeholder,
   maxResults = 50,
   disabled = false,
   required = false,
@@ -22,6 +23,9 @@ export default function PositionSelect({
   selectedLabelFormatter,
   clearButtonClearsQueryOnly = false,
 }) {
+  const { t } = useLanguage();
+  const resolvedLabel = label ?? t("positionSelect.label");
+  const resolvedPlaceholder = placeholder ?? t("positionSelect.placeholder");
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [highlight, setHighlight] = useState(0);
@@ -155,7 +159,7 @@ export default function PositionSelect({
           style,
         ].join(" ").trim()}
       >
-        {label}
+        {resolvedLabel}
       </label>
 
       <div className="mt-2 relative">
@@ -191,7 +195,7 @@ export default function PositionSelect({
             }
           }}
           onKeyDown={onKeyDown}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           className={getInputStyle()}
         />
 
@@ -200,8 +204,8 @@ export default function PositionSelect({
             type="button"
             onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
             onClick={clearSelection}
-            title="Καθαρισμός επιλογής"
-            aria-label="Καθαρισμός επιλογής"
+            title={t("positionSelect.clearSelection")}
+            aria-label={t("positionSelect.clearSelection")}
             className="absolute right-2 top-1/2 -translate-y-1/2 text-patras-sanguineBrown hover:text-red-700 w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] dark:hover:bg-[var(--color-bg-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
           >
             <span className="text-2xl leading-none font-bold">&times;</span>
@@ -214,7 +218,7 @@ export default function PositionSelect({
             className="absolute z-20 mt-1 w-full max-h-64 overflow-auto bg-white border rounded-md shadow dark:bg-[var(--color-bg-card)] dark:border-[var(--color-border)]"
           >
             {results.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-gray-500 dark:text-[var(--color-text-muted)]">Δεν βρέθηκαν αποτελέσματα</div>
+              <div className="px-3 py-2 text-sm text-gray-500 dark:text-[var(--color-text-muted)]">{t("positionSelect.noResults")}</div>
             ) : (
               results.map((p, idx) => {
                 const isSelected = String(p.id) === String(value);
@@ -241,7 +245,7 @@ export default function PositionSelect({
               })
             )}
             <div className="px-3 py-1 text-[11px] text-gray-500 border-t dark:text-[var(--color-text-muted)] dark:border-[var(--color-border)]">
-              Εμφάνιση {results.length} από {enriched.length}
+              {t("positionSelect.showing", { shown: results.length, total: enriched.length })}
             </div>
           </div>
         )}

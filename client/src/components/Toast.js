@@ -1,4 +1,5 @@
 import React from "react";
+import { useLanguage } from "../contexts";
 
 const typeStyles = {
   success: "border-green-300 bg-green-50 text-green-800",
@@ -8,6 +9,7 @@ const typeStyles = {
 };
 
 export default function Toast({ toasts, onClose }) {
+  const { t } = useLanguage();
   if (!toasts || toasts.length === 0) return null;
 
   return (
@@ -30,7 +32,7 @@ export default function Toast({ toasts, onClose }) {
             type="button"
             onClick={() => onClose(toast.id)}
             className="inline-flex h-7 w-7 items-center justify-center rounded-full text-current/70 hover:bg-black/5 hover:text-current"
-            aria-label="Κλείσιμο ειδοποίησης"
+            aria-label={t("toast.close")}
           >
             <svg
               className="h-4 w-4"

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useFormData } from "../../contexts/FormDataContext";
 import { usePositions } from "../../contexts/PositionsContext";
+import { useLanguage } from "../../contexts";
 import TooltipGray from "../TooltipGray";
 import CourseDescriptionModal from "../CourseDescriptionModal";
 import PositionSelect from "../PositionSelect";
@@ -8,6 +9,7 @@ import PositionSelect from "../PositionSelect";
 export default function ScientificFieldSection() {
   const { formData, handleChange, formMode, appliedPositionIds } = useFormData();
   const { positions, loading } = usePositions();
+  const { t } = useLanguage();
   const [descriptionModal, setDescriptionModal] = useState({
     open: false,
     title: "",
@@ -69,11 +71,11 @@ export default function ScientificFieldSection() {
           onChange={(posId) => handleChange("positionId", posId)}
           label={
             formMode === "edit" ? (
-              <TooltipGray content="Το επιστημονικό πεδίο δεν αλλάζει κατά την επανυποβολή.">
-                <span className="underline cursor-help">Θέση ( Σχολή - Τμήμα - Επιστημονικό πεδίο )</span>
+              <TooltipGray content={t("courses.positionLabelTooltip")}>
+                <span className="underline cursor-help">{t("courses.positionLabel")}</span>
               </TooltipGray>
             ) : (
-              "Θέση ( Σχολή - Τμήμα - Επιστημονικό πεδίο )"
+              t("courses.positionLabel")
             )
           }
           disabled={loading || activePositions.length === 0 || formMode === "edit"}
@@ -86,13 +88,13 @@ export default function ScientificFieldSection() {
 
       <div className=" rounded-lg border border-patras-goldSand/60 bg-patras-goldSand/20 px-4 py-3 text-sm text-patras-buccaneer dark:border-[var(--color-border-accent)] dark:bg-[var(--color-bg-muted)] dark:text-[var(--color-text-primary)]">
         <div className="flex items-center gap-2">
-          <span>Έναρξη αιτήσεων θέσης:</span>
+          <span>{t("courses.applicationsStart")}</span>
           <span className="font-semibold">
             {formatDateTime(selectedPosition?.startDate, selectedPosition?.startTime)}
           </span>
         </div>
         <div className="flex items-center gap-2 mt-1">
-          <span>Λήξη αιτήσεων θέσης:</span>
+          <span>{t("courses.applicationsEnd")}</span>
           <span className="font-semibold">
             {formatDateTime(selectedPosition?.endDate, selectedPosition?.endTime)}
           </span>
@@ -100,7 +102,7 @@ export default function ScientificFieldSection() {
       </div>
 
       <label className="block text-sm font-medium pt-5 mb-0 dark:text-[var(--color-text-primary)]">
-        Μαθήματα επιστημονικού πεδίου:{" "}
+        {t("courses.fieldCoursesHeading")}{" "}
         <span className="text-patras-buccaneer dark:text-[var(--color-primary)]">
           {selectedPosition?.scientificField ?? ""}
         </span>
@@ -110,15 +112,15 @@ export default function ScientificFieldSection() {
         <table className="min-w-full border border-gray-300 rounded-lg bg-white dark:bg-[var(--color-bg-card)] dark:border-[var(--color-border)]">
           <thead>
             <tr className="bg-gray-100 text-xs text-gray-700 dark:bg-[var(--color-bg-surface)] dark:text-[var(--color-text-secondary)]">
-              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Κωδικός</th>
-              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Όνομα</th>
-              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Περιγραφή</th>
-              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Εξάμηνο</th>
-              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Διδακτικές μονάδες</th>
-              <th className="px-2 py-2 border dark:border-[var(--color-border)]">ECTS</th>
-              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Θεωρία (Ώρες)</th>
-              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Εργαστήριο (Ώρες)</th>
-              <th className="px-2 py-2 border dark:border-[var(--color-border)]">Κατηγορία</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">{t("courses.code")}</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">{t("courses.name")}</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">{t("courses.description")}</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">{t("courses.semester")}</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">{t("courses.teachingUnits")}</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">{t("courses.ects")}</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">{t("courses.theoryHours")}</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">{t("courses.labHours")}</th>
+              <th className="px-2 py-2 border dark:border-[var(--color-border)]">{t("courses.category")}</th>
             </tr>
           </thead>
           <tbody>
@@ -133,13 +135,13 @@ export default function ScientificFieldSection() {
                       onClick={() =>
                         setDescriptionModal({
                           open: true,
-                          title: course.name ? `Περιγραφή μαθήματος: ${course.name}` : "Περιγραφή μαθήματος",
+                          title: course.name ? t("courses.descriptionTitleNamed", { name: course.name }) : t("courses.descriptionTitle"),
                           description: course.description,
                         })
                       }
                       className="underline text-patras-buccaneer hover:text-patras-sanguineBrown dark:text-[var(--color-primary)] dark:hover:text-[var(--color-primary-hover)]"
                     >
-                      Περιγραφή
+                      {t("courses.description")}
                     </button>
                   </td>
                   <td className="px-2 py-2 border dark:border-[var(--color-border)]">{course.semester}</td>
@@ -153,7 +155,7 @@ export default function ScientificFieldSection() {
             ) : (
               <tr>
                 <td colSpan={9} className="text-center text-gray-500 py-6 dark:text-[var(--color-text-muted)]">
-                  Επιλέξτε θέση για να δείτε τα διαθέσιμα μαθήματα
+                  {t("courses.selectPositionToView")}
                 </td>
               </tr>
             )}

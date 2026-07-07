@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import LoadingIndicator from "./LoadingIndicator";
+import { useLanguage } from "../contexts";
 
 export const formatDateTimeCell = (dateValue, timeValue, fallbackTime = "00:00") => {
   if (!dateValue) return "—";
@@ -62,14 +63,14 @@ export default function SortableTable({
   initialSortDirection = "asc",
   enableSearch = true,
   searchableColumns,
-  searchPlaceholder = "Αναζήτηση...",
+  searchPlaceholder,
   searchDebounceMs = 300,
   searchText: controlledSearchText,
   onSearchTextChange,
   showSearchBar = true,
   loading = false,
-  loadingMessage = "Φόρτωση...",
-  emptyMessage = "Δεν υπάρχουν διαθέσιμες εγγραφές.",
+  loadingMessage,
+  emptyMessage,
   wrapperClassName = "w-full overflow-x-auto overflow-y-visible shadow-md rounded-lg border border-patras-capePalliser/50",
   tableClassName = "min-w-full table-fixed text-[13px] font-medium text-patras-buccaneer dark:text-[var(--color-text-primary)] bg-white/25 dark:bg-[var(--color-bg-card)] t-5",
   theadClassName = "bg-patras-buccaneer",
@@ -78,6 +79,10 @@ export default function SortableTable({
   showEntriesCount = true,
   formatEntriesCount,
 }) {
+  const { t } = useLanguage();
+  const resolvedSearchPlaceholder = searchPlaceholder ?? t("table.searchPlaceholder");
+  const resolvedLoadingMessage = loadingMessage ?? t("common.loading");
+  const resolvedEmptyMessage = emptyMessage ?? t("table.empty");
   const [sortBy, setSortBy] = useState(initialSortBy || columns[0]?.key);
   const [sortDirection, setSortDirection] = useState(initialSortDirection);
   const [searchText, setSearchText] = useState("");
@@ -192,7 +197,7 @@ export default function SortableTable({
   const entriesCountLabel =
     typeof formatEntriesCount === "function"
       ? formatEntriesCount({ visibleRows, totalRows })
-      : `Εμφάνιση: ${visibleRows} από ${totalRows}`;
+      : t("table.entries", { visible: visibleRows, total: totalRows });
 
   return (
     <div className="w-full">
@@ -208,7 +213,7 @@ export default function SortableTable({
               type="text"
               value={resolvedSearchText}
               onChange={(event) => handleSearchTextChange(event.target.value)}
-              placeholder={searchPlaceholder}
+              placeholder={resolvedSearchPlaceholder}
               className="w-full rounded-md border border-patras-capePalliser/50 bg-white/90 dark:bg-[var(--color-bg-card)] py-1.5 pl-9 pr-3 text-sm text-gray-800 dark:text-[var(--color-text-primary)] shadow-sm focus:border-patras-buccaneer focus:outline-none"
             />
             {resolvedSearchText && (
@@ -216,7 +221,7 @@ export default function SortableTable({
                 type="button"
                 onClick={() => handleSearchTextChange("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500/5 text-red-700 hover:bg-red-500/10 hover:text-red-800"
-                aria-label="Καθαρισμός αναζήτησης"
+                aria-label={t("table.clearSearch")}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 0 010-1.414z" clipRule="evenodd" />
@@ -251,13 +256,13 @@ export default function SortableTable({
           {loading ? (
             <tr>
               <td colSpan={columns.length} className="text-center text-gray-400 dark:text-[var(--color-text-muted)] py-8">
-                <LoadingIndicator text={loadingMessage} size="sm" textClassName="mt-2 text-gray-400 dark:text-[var(--color-text-muted)]" />
+                <LoadingIndicator text={resolvedLoadingMessage} size="sm" textClassName="mt-2 text-gray-400 dark:text-[var(--color-text-muted)]" />
               </td>
             </tr>
           ) : sortedRows.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className="text-center text-gray-400 dark:text-[var(--color-text-muted)] py-8">
-                {emptyMessage}
+                {resolvedEmptyMessage}
               </td>
             </tr>
           ) : (

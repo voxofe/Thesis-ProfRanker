@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import Tooltip from "./Tooltip"; // adjust path as needed
 import { Link } from "react-router-dom";
-import { useTheme } from "../contexts";
+import { useTheme, useLanguage } from "../contexts";
 
 export default function HomePagePanel({
   title,
@@ -18,6 +18,7 @@ export default function HomePagePanel({
   infoPopupColor = "border-patras-buccaneer text-patras-buccaneer dark:border-[var(--color-border)] dark:text-[var(--color-text-secondary)]",
 }) {
   const { isDarkMode } = useTheme();
+  const { t } = useLanguage();
   const iconRef = useRef(null);
   const [openTip, setOpenTip] = useState(false);
   const darkCardStyle = isDarkMode
@@ -37,7 +38,7 @@ export default function HomePagePanel({
             <button
               ref={iconRef}
               type="button"
-              aria-label="Πληροφορίες"
+              aria-label={t("common.info")}
               onMouseEnter={() => setOpenTip(true)}
               onMouseLeave={() => setOpenTip(false)}
               onFocus={() => setOpenTip(true)}

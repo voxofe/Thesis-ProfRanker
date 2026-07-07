@@ -1,19 +1,21 @@
 import React, { useState } from "react";
 import { useFormData } from "../../contexts/FormDataContext";
+import { useLanguage } from "../../contexts";
 import InputField from "../InputField";
 
 export default function PersonalInfoSection() {
   const { formData, handleChange } = useFormData();
+  const { t } = useLanguage();
   const [errors, setErrors] = useState({});
 
   const normalizePhone = (value) => (value || "").replace(/[\s()-]/g, "");
 
   const validateField = (key, value) => {
     if (key === "phoneNumber") {
-      if (!value.trim()) return "Το κινητό είναι υποχρεωτικό.";
+      if (!value.trim()) return t("personalInfo.mobileRequired");
       const mobile = normalizePhone(value);
       if (!/^69\d{8}$/.test(mobile)) {
-        return "Ο αριθμός κινητού πρέπει να έχει 10 ψηφία και να ξεκινά από 69.";
+        return t("personalInfo.mobileInvalid");
       }
       return "";
     }
@@ -21,13 +23,13 @@ export default function PersonalInfoSection() {
       if (!value.trim()) return "";
       const landline = normalizePhone(value);
       if (!/^2\d{9}$/.test(landline)) {
-        return "Ο αριθμός σταθερού πρέπει να έχει 10 ψηφία και να ξεκινά από 2.";
+        return t("personalInfo.landlineInvalid");
       }
       return "";
     }
     if (key === "postalCode") {
-      if (!value.trim()) return "Ο Τ.Κ. είναι υποχρεωτικός.";
-      if (!/^\d{5}$/.test(value.trim())) return "Ο Τ.Κ. πρέπει να έχει 5 ψηφία.";
+      if (!value.trim()) return t("personalInfo.postalRequired");
+      if (!/^\d{5}$/.test(value.trim())) return t("personalInfo.postalInvalid");
       return "";
     }
     return "";
@@ -49,7 +51,7 @@ export default function PersonalInfoSection() {
       <div className="sm:col-span-1">
         <InputField
           disabled
-          label="Όνομα"
+          label={t("register.firstName")}
           id="first-name"
           name="first-name"
           type="text"
@@ -63,7 +65,7 @@ export default function PersonalInfoSection() {
       <div className="sm:col-span-1">
         <InputField
           disabled
-          label="Επώνυμο"
+          label={t("register.lastName")}
           id="last-name"
           name="last-name"
           type="text"
@@ -77,7 +79,7 @@ export default function PersonalInfoSection() {
       <div className="sm:col-span-1">
         <InputField
           disabled
-          label="Email"
+          label={t("common.email")}
           id="email"
           name="email"
           type="email"
@@ -89,7 +91,7 @@ export default function PersonalInfoSection() {
       </div>
       <div className="sm:col-span-1">
         <InputField
-          label="Οδός και αριθμός"
+          label={t("personalInfo.streetAddress")}
           id="street-address"
           name="street-address"
           type="text"
@@ -101,7 +103,7 @@ export default function PersonalInfoSection() {
 
       <div className="sm:col-span-1">
         <InputField
-          label="Πόλη"
+          label={t("personalInfo.city")}
           id="city"
           name="city"
           type="text"
@@ -113,7 +115,7 @@ export default function PersonalInfoSection() {
 
       <div className="sm:col-span-1">
         <InputField
-          label="Ταχυδρομικός κώδικας"
+          label={t("personalInfo.postalCode")}
           id="postal-code"
           name="postal-code"
           type="text"
@@ -127,7 +129,7 @@ export default function PersonalInfoSection() {
 
       <div className="sm:col-span-1">
         <InputField
-          label="Κινητό τηλέφωνο"
+          label={t("personalInfo.mobile")}
           id="phone-number"
           name="phone-number"
           type="text"
@@ -141,7 +143,7 @@ export default function PersonalInfoSection() {
 
       <div className="sm:col-span-1">
         <InputField
-          label="Σταθερό τηλέφωνο"
+          label={t("personalInfo.landline")}
           id="landline-number"
           name="landline-number"
           type="text"

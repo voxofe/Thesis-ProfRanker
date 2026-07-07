@@ -1,32 +1,33 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import useBodyScrollLock from "../utils/useBodyScrollLock";
-import { ReadOnlyWeeklyScheduleTable, COURSE_SCHEDULE_WEEK_FIELDS } from "./WeeklyScheduleTable";
+import { useLanguage } from "../contexts";
+import { ReadOnlyWeeklyScheduleTable } from "./WeeklyScheduleTable";
 
 const COURSE_PLAN_FIELDS = [
   {
     key: "generalDescription",
-    label: "Γενική περιγραφή μαθήματος",
+    labelKey: "courses.planGeneralDescription",
   },
   {
     key: "learningObjectives",
-    label: "Μαθησιακοί στόχοι",
+    labelKey: "courses.planLearningObjectives",
   },
   {
     key: "deliveryMethods",
-    label: "Τρόπος παράδοσης & διδακτικές μέθοδοι",
+    labelKey: "courses.planDeliveryMethods",
   },
   {
     key: "bibliographyMaterial",
-    label: "Βιβλιογραφία - Εκπαιδευτικό υλικό",
+    labelKey: "courses.planBibliography",
   },
   {
     key: "learningOutcomes",
-    label: "Μαθησιακά αποτελέσματα",
+    labelKey: "courses.planLearningOutcomes",
   },
   {
     key: "assessmentMethodsCriteria",
-    label: "Μέθοδοι και κριτήρια αξιολόγησης",
+    labelKey: "courses.planAssessment",
   },
 ];
 
@@ -61,6 +62,7 @@ export default function CoursePlanDetailsModal({
 }) {
   useBodyScrollLock(open);
 
+  const { t } = useLanguage();
   const [activeCourseId, setActiveCourseId] = useState(null);
   const tabsViewportRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -126,17 +128,17 @@ export default function CoursePlanDetailsModal({
       >
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-4 dark:border-[var(--color-border-soft)]">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">Σχεδιάγραμμα διδασκαλίας</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t("courses.scheduleTitle")}</h2>
             <p className="text-sm text-gray-600 dark:text-[var(--color-text-secondary)]">
-              {scientificField || "—"} · {normalizedCourses.length} μαθήματα
+              {t("courses.coursesSummary", { field: scientificField || "—", count: normalizedCourses.length })}
             </p>
           </div>
           <button
             type="button"
             className="text-gray-600 hover:text-red-700 text-2xl leading-none dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
             onClick={onClose}
-            title="Κλείσιμο"
-            aria-label="Κλείσιμο"
+            title={t("common.close")}
+            aria-label={t("common.close")}
           >
             &times;
           </button>
@@ -145,11 +147,11 @@ export default function CoursePlanDetailsModal({
         <div className="overflow-y-auto px-6 py-5 flex-1 min-h-0 space-y-5">
           <div className="space-y-2">
             <div className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">
-              Μαθήματα πεδίου:{" "}
+              {t("courses.fieldCourses")}{" "}
               <span className="font-semibold underline text-patras-buccaneer dark:text-[var(--color-primary)]">
                 {scientificField || ""}
               </span>{" "}
-              ({normalizedCourses.length} συνολικά)
+              {t("courses.totalCount", { count: normalizedCourses.length })}
             </div>
 
             <div className="rounded-lg border border-patras-buccaneer bg-white p-2 shadow-sm dark:bg-[var(--color-bg-surface)] dark:border-[var(--color-border)]">
@@ -159,7 +161,7 @@ export default function CoursePlanDetailsModal({
                   onClick={() => scrollTabsBy(-220)}
                   disabled={!canScrollLeft}
                   className="h-8 w-8 shrink-0 rounded-full border border-gray-300 text-gray-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[var(--color-border)] dark:text-[var(--color-text-secondary)]"
-                  aria-label="Προηγούμενες καρτέλες μαθημάτων"
+                  aria-label={t("courses.prevTabs")}
                 >
                   {"<"}
                 </button>
@@ -178,10 +180,10 @@ export default function CoursePlanDetailsModal({
                               ? "border-patras-buccaneer bg-patras-buccaneer text-white dark:border-[var(--color-primary)] dark:bg-[var(--color-primary)]"
                               : "border-gray-300 bg-white text-gray-700 hover:border-patras-buccaneer dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)] dark:hover:border-[var(--color-primary)]"
                           }`}
-                          title={course.name || `Μάθημα ${index + 1}`}
+                          title={course.name || t("courses.courseFallback", { n: index + 1 })}
                         >
                           <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                            {course.name || `Μάθημα ${index + 1}`}
+                            {course.name || t("courses.courseFallback", { n: index + 1 })}
                           </span>
                         </button>
                       );
@@ -194,7 +196,7 @@ export default function CoursePlanDetailsModal({
                   onClick={() => scrollTabsBy(220)}
                   disabled={!canScrollRight}
                   className="h-8 w-8 shrink-0 rounded-full border border-gray-300 text-gray-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[var(--color-border)] dark:text-[var(--color-text-secondary)]"
-                  aria-label="Επόμενες καρτέλες μαθημάτων"
+                  aria-label={t("courses.nextTabs")}
                 >
                   {">"}
                 </button>
@@ -204,11 +206,11 @@ export default function CoursePlanDetailsModal({
 
           <div className="space-y-2">
             <div className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">
-              Σχεδιάγραμμα διδασκαλίας για{" "}
+              {t("courses.scheduleFor")}{" "}
               <span className="font-semibold underline text-patras-buccaneer dark:text-[var(--color-primary)]">
-                {activeCourse?.name || "Χωρίς τίτλο"}
+                {activeCourse?.name || t("courses.untitled")}
               </span>{" "}
-              (Μάθημα {normalizedCourses.findIndex((course) => String(course.id) === String(activeCourse?.id)) + 1}/{normalizedCourses.length})
+              {t("courses.courseCounter", { current: normalizedCourses.findIndex((course) => String(course.id) === String(activeCourse?.id)) + 1, total: normalizedCourses.length })}
             </div>
 
             {activeCourse ? (
@@ -220,7 +222,7 @@ export default function CoursePlanDetailsModal({
                       return (
                         <div key={`${activeCourse.id}-${field.key}`} className="space-y-3 pb-3">
                           <label className="block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">
-                            {field.label}
+                            {t(field.labelKey)}
                           </label>
                           <ReadOnlyAutoGrowTextarea
                             id={`course-plan-view-${activeCourse.id}-${field.key}`}
@@ -238,7 +240,7 @@ export default function CoursePlanDetailsModal({
                 </div>
               </article>
             ) : (
-              <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">Δεν υπάρχουν διαθέσιμα μαθήματα.</p>
+              <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">{t("courses.noCoursesAvailable")}</p>
             )}
           </div>
         </div>

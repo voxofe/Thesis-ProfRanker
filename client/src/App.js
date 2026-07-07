@@ -32,6 +32,7 @@ import LoadingIndicator from "./components/LoadingIndicator";
 import { EMAIL_VERIFICATION_ENABLED } from "./utils/featureFlags";
 import {
   ThemeProvider,
+  LanguageProvider,
   FormDataProvider,
   AuthProvider,
   useAuth,
@@ -47,6 +48,7 @@ import { ToastProvider } from "./contexts/ToastContext";
 export default function App() {
   return (
     <ThemeProvider>
+      <LanguageProvider>
       <CreatePositionValidationProvider>
         <AuthProvider>
           <ToastProvider>
@@ -60,6 +62,7 @@ export default function App() {
           </ToastProvider>
         </AuthProvider>
       </CreatePositionValidationProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 }

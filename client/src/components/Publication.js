@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { useFormData } from "../contexts/FormDataContext";
+import { useLanguage } from "../contexts";
 import InputField from "./InputField";
 import CustomSelect from "./CustomSelect";
 import RadioButtons from "./RadioButtons";
@@ -12,6 +13,7 @@ export default function Publication({ index, readOnly = false }) {
   });
 
   const { formData, handleChange } = useFormData();
+  const { t } = useLanguage();
   const publication = useMemo(
     () => formData.publications[index] || {},
     [formData.publications, index]
@@ -101,7 +103,7 @@ export default function Publication({ index, readOnly = false }) {
 
   const getIssnErrorMessage = (issn) => {
     if (issn && issn.toLowerCase().includes("wrong")) {
-      return "Το ISSN που εισάγατε δεν είναι έγκυρο ή δεν βρέθηκε στη βάση δεδομένων.";
+      return t("publication.issnInvalid");
     }
     return "";
   };
@@ -114,7 +116,7 @@ export default function Publication({ index, readOnly = false }) {
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-8 gap-y-4 mt-4">
         <div className="col-span-1">
           <CustomSelect
-            label="Είδος"
+            label={t("publication.type")}
             value={mainTypeValue}
             onChange={(value) => {
               if (value === "other") {
@@ -126,20 +128,20 @@ export default function Publication({ index, readOnly = false }) {
             readOnly={readOnly}
             options={[
               {
-                label: "Δημοσίευση σε επιστημονικό περιοδικό",
+                label: t("publication.typeJournal"),
                 value: "journal",
               },
               {
-                label: "Δημοσίευση σε πρακτικά διεθνών συνεδρίων",
+                label: t("publication.typeConference"),
                 value: "conference_proceedings",
               },
-              { label: "Άλλες δημοσιεύσεις", value: "other" },
+              { label: t("publication.typeOther"), value: "other" },
             ]}
           />
         </div>
         <div className="col-span-1">
           <CustomSelect
-            label="Έτος"
+            label={t("publication.year")}
             value={publication.year || ""}
             onChange={(value) => updatePublicationField("year", value)}
             readOnly={readOnly}
@@ -148,7 +150,7 @@ export default function Publication({ index, readOnly = false }) {
         </div>
         <div className="col-span-2">
           <InputField
-            label={isOtherGroup ? "Τίτλος εργασίας" : "Τίτλος δημοσίευσης"}
+            label={isOtherGroup ? t("publication.workTitle") : t("publication.publicationTitle")}
             id={`publication-title-${index}`}
             name={`publication-title-${index}`}
             type="text"
@@ -160,7 +162,7 @@ export default function Publication({ index, readOnly = false }) {
 
         <div className="col-span-4">
           <InputField
-            label="Συγγραφείς"
+            label={t("publication.authors")}
             id={`publication-authors-${index}`}
             name={`publication-authors-${index}`}
             type="text"
@@ -177,27 +179,27 @@ export default function Publication({ index, readOnly = false }) {
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-8 gap-y-4">
           <div className="col-span-2">
             <RadioButtons
-              label="Κατηγορία"
+              label={t("publication.category")}
               name={`publication-category-${index}`}
               value={publication.type || "other"}
               onChange={(value) => updatePublicationField("type", value)}
               readOnly={readOnly}
               radioButtons={[
-                { id: `other-book-${index}`, label: "Βιβλίο", value: "book" },
-                { id: `other-monograph-${index}`, label: "Μονογραφία", value: "monograph" },
+                { id: `other-book-${index}`, label: t("publication.book"), value: "book" },
+                { id: `other-monograph-${index}`, label: t("publication.monograph"), value: "monograph" },
                 {
                   id: `other-conf-${index}`,
-                  label: "Ανακοίνωση σε συνέδριο",
+                  label: t("publication.conferencePresentation"),
                   value: "conference_presentation",
                 },
-                { id: `other-other-${index}`, label: "Άλλο", value: "other" },
+                { id: `other-other-${index}`, label: t("publication.other"), value: "other" },
               ]}
             />
           </div>
           <div className="col-span-2 sm:col-start-3 sm:col-span-2 sm:pl-10">
             {isConferencePresentationType && (
               <InputField
-                label="Τίτλος συνεδρίου"
+                label={t("publication.conferenceTitle")}
                 id={`journal/conference-${index}`}
                 name={`journal/conference-${index}`}
                 type="text"
@@ -208,7 +210,7 @@ export default function Publication({ index, readOnly = false }) {
             )}
             {(isBookType || isMonographType) && (
               <InputField
-                label="Εκδοτικός οίκος"
+                label={t("publication.publisher")}
                 id={`publisher-${index}`}
                 name={`publisher-${index}`}
                 type="text"
@@ -227,8 +229,8 @@ export default function Publication({ index, readOnly = false }) {
             <InputField
               label={
                 isConferenceProceedingsType
-                  ? "Τίτλος συνεδρίου"
-                  : "Τίτλος περιοδικού"
+                  ? t("publication.conferenceTitle")
+                  : t("publication.journalTitle")
               }
               id={`journal/conference-${index}`}
               name={`journal/conference-${index}`}
@@ -245,7 +247,7 @@ export default function Publication({ index, readOnly = false }) {
           {isJournalType && (
             <div>
               <InputField
-                label="ISSN περιοδικού"
+                label={t("publication.issn")}
                 id={`issn-${index}`}
                 name={`issn-${index}`}
                 type="text"
@@ -263,7 +265,7 @@ export default function Publication({ index, readOnly = false }) {
 
           {isConferenceProceedingsType && (
             <InputField
-              label="Εκδοτικός οίκος"
+              label={t("publication.publisher")}
               id={`publisher-${index}`}
               name={`publisher-${index}`}
               type="text"
@@ -282,14 +284,14 @@ export default function Publication({ index, readOnly = false }) {
             type="button"
             className="rounded-md bg-patras-cameo px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
           >
-            Καθαρισμός
+            {t("common.clear")}
           </button>
           <button
             onClick={handleDelete}
             type="button"
             className="rounded-md bg-patras-sanguineBrown px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
           >
-            Διαγραφή
+            {t("common.delete")}
           </button>
         </div>
       )}
