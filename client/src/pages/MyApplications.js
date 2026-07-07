@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../contexts";
 import ApplicationCard from "../components/ApplicationCard";
 import LoadingIndicator from "../components/LoadingIndicator";
 import PageTitle from "../components/PageTitle";
@@ -17,6 +18,7 @@ const API_BASE_URL = (
 export default function MyApplications() {
   const { userId } = useParams();
   const { currentUser } = useAuth();
+  const { t } = useLanguage();
   const [applications, setApplications] = useState([]);
   const [headerName, setHeaderName] = useState("");
   const [loading, setLoading] = useState(true);
@@ -152,7 +154,7 @@ export default function MyApplications() {
 
   const handleDelete = async (applicationId) => {
     if (!applicationId || deletingId) return;
-    const confirmed = window.confirm("Θέλετε σίγουρα να διαγράψετε αυτή την αίτηση;");
+    const confirmed = window.confirm(t("myApplications.confirmDelete"));
     if (!confirmed) return;
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -184,18 +186,18 @@ export default function MyApplications() {
         <PageTitle className="mb-6">
           {isAdminViewing ? (
             <>
-              Αιτήσεις χρήστη: <span className="text-lg font-semibold">{headerName}</span>
+              {t("myApplications.userApplications")} <span className="text-lg font-semibold">{headerName}</span>
             </>
           ) : (
-            "Οι αιτήσεις μου"
+            t("myApplications.title")
           )}
         </PageTitle>
 
         {sortedApplications.length === 0 ? (
           <div className="bg-white dark:bg-[var(--color-bg-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] shadow-sm p-6 text-center">
-            <p className="text-gray-700 dark:text-[var(--color-text-secondary)] font-semibold">Δεν υπάρχουν καταχωρημένες αιτήσεις.</p>
+            <p className="text-gray-700 dark:text-[var(--color-text-secondary)] font-semibold">{t("myApplications.none")}</p>
             <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)] mt-2">
-              Μόλις υποβάλετε, θα εμφανίζονται εδώ με αναλυτικές πληροφορίες.
+              {t("myApplications.noneHint")}
             </p>
           </div>
         ) : (
@@ -206,13 +208,13 @@ export default function MyApplications() {
                 onClick={() => setActiveOpen((prev) => !prev)}
                 className="w-full flex items-center justify-between px-4 py-3 text-patras-buccaneer dark:text-[var(--color-text-secondary)] font-semibold"
               >
-                <span>Ενεργές</span>
+                <span>{t("myApplications.active")}</span>
                 <span className="text-lg">{activeOpen ? "▼" : "\u25B6\uFE0E"}</span>
               </button>
               {activeOpen && (
                 <div className="px-4 pb-4 grid grid-cols-1 gap-3">
                   {activeApplications.length === 0 ? (
-                    <div className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">Δεν υπάρχουν ενεργές αιτήσεις.</div>
+                    <div className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">{t("myApplications.noActive")}</div>
                   ) : (
                     activeApplications.map((app) => (
                       <ApplicationCard
@@ -232,13 +234,13 @@ export default function MyApplications() {
                 onClick={() => setCompletedOpen((prev) => !prev)}
                 className="w-full flex items-center justify-between px-4 py-3 text-patras-buccaneer dark:text-[var(--color-text-secondary)] font-semibold"
               >
-                <span>Ολοκληρωμένες</span>
+                <span>{t("myApplications.completed")}</span>
                 <span className="text-lg">{completedOpen ? "▼" : "\u25B6\uFE0E"}</span>
               </button>
               {completedOpen && (
                 <div className="px-4 pb-4 grid grid-cols-1 gap-3">
                   {completedApplications.length === 0 ? (
-                    <div className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">Δεν υπάρχουν ολοκληρωμένες αιτήσεις.</div>
+                    <div className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">{t("myApplications.noCompleted")}</div>
                   ) : (
                     completedApplications.map((app) => (
                       <ApplicationCard

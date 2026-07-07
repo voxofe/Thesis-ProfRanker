@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../contexts";
 import { EMAIL_VERIFICATION_ENABLED } from "../utils/featureFlags";
 import LoadingIndicator from "../components/LoadingIndicator";
 import PageTitle from "../components/PageTitle";
@@ -15,6 +16,7 @@ const API_BASE_URL = (
 
 export default function VerifyEmail() {
   const { refreshUser, isLoggedIn } = useAuth();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
@@ -27,9 +29,9 @@ export default function VerifyEmail() {
   const primaryAction = useMemo(
     () =>
       isLoggedIn
-        ? { to: "/home", label: "Μετάβαση στην αρχική" }
-        : { to: "/login", label: "Σύνδεση" },
-    [isLoggedIn]
+        ? { to: "/home", label: t("verifyEmail.goHome") }
+        : { to: "/login", label: t("verifyEmail.login") },
+    [isLoggedIn, t]
   );
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export default function VerifyEmail() {
       if (!EMAIL_VERIFICATION_ENABLED) {
         if (!cancelled) {
           setStatus("success");
-          setMessage("Η επιβεβαίωση email είναι απενεργοποιημένη.");
+          setMessage(t("verifyEmail.disabled"));
           setLoading(false);
         }
         return;
@@ -48,7 +50,7 @@ export default function VerifyEmail() {
       if (!token) {
         if (!cancelled) {
           setStatus("error");
-          setMessage("Λείπει το token επιβεβαίωσης.");
+          setMessage(t("verifyEmail.missingToken"));
           setLoading(false);
         }
         return;
@@ -66,7 +68,7 @@ export default function VerifyEmail() {
         const response = await request;
         if (cancelled) return;
         setStatus("success");
-        setMessage(response?.data?.message || "Η επιβεβαίωση email ολοκληρώθηκε επιτυχώς.");
+        setMessage(response?.data?.message || t("verifyEmail.success"));
         if (isLoggedIn) {
           await refreshUser();
         }
@@ -75,7 +77,7 @@ export default function VerifyEmail() {
         setStatus("error");
         setMessage(
           error?.response?.data?.error ||
-            "Αποτυχία επιβεβαίωσης email. Παρακαλώ ζητήστε νέο link επιβεβαίωσης."
+            t("verifyEmail.failure")
         );
       } finally {
         if (!cancelled) setLoading(false);
@@ -92,11 +94,11 @@ export default function VerifyEmail() {
   return (
     <div className="max-w-3xl mx-auto p-0">
         <div className="pt-0">
-        <PageTitle className="mb-6">Επιβεβαίωση ηλεκτρονικής διεύθυνσης</PageTitle>
+        <PageTitle className="mb-6">{t("verifyEmail.pageTitle")}</PageTitle>
 
 
         {loading ? (
-          <LoadingIndicator text="Φόρτωση..." size="sm" textClassName="mt-2 text-gray-600 dark:text-[var(--color-text-secondary)]" />
+          <LoadingIndicator text={t("common.loading")} size="sm" textClassName="mt-2 text-gray-600 dark:text-[var(--color-text-secondary)]" />
         ) : (
           <>
             <p

@@ -1,13 +1,15 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import useBodyScrollLock from "../utils/useBodyScrollLock";
+import { useLanguage } from "../contexts";
 
 export default function CourseDescriptionModal({ open, onClose, title, description }) {
   useBodyScrollLock(open);
+  const { t } = useLanguage();
 
   const renderTitle = () => {
-    const baseTitle = title || "Περιγραφή μαθήματος";
-    const prefix = "Περιγραφή μαθήματος:";
+    const baseTitle = title || t("courses.descriptionTitle");
+    const prefix = t("courses.descriptionPrefix");
     if (!baseTitle.startsWith(prefix)) {
       return baseTitle;
     }
@@ -45,14 +47,14 @@ export default function CourseDescriptionModal({ open, onClose, title, descripti
             type="button"
             className="text-gray-600 hover:text-red-700 text-2xl leading-none dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
             onClick={onClose}
-            title="Κλείσιμο"
-            aria-label="Κλείσιμο"
+            title={t("common.close")}
+            aria-label={t("common.close")}
           >
             &times;
           </button>
         </div>
         <div className="text-sm text-gray-700 whitespace-pre-wrap overflow-y-auto px-6 py-4 flex-1 min-h-0 dark:text-[var(--color-text-secondary)]">
-          {description || "Δεν υπάρχει διαθέσιμη περιγραφή."}
+          {description || t("courses.noDescription")}
         </div>
       </div>
     </div>,

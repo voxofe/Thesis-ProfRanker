@@ -11,6 +11,7 @@ import LoadingIndicator from "../components/LoadingIndicator";
 import useBodyScrollLock from "../utils/useBodyScrollLock";
 import PositionCreate from "./PositionCreate";
 import PageTitle from "../components/PageTitle";
+import { useLanguage } from "../contexts";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -20,25 +21,19 @@ const API_BASE_URL = (
   ""
 );
 
-const stateLabels = {
-  pending: "Προσεχής",
-  active: "Ενεργή",
-  completed: "Ολοκληρωμένη",
-  unpublished: "Ανενεργή",
-};
-
-function getStateBadgeClasses(state) {
+function getStateBadgeClasses(stateCode) {
   const base =
     "inline-flex items-center justify-center rounded-full px-2 py-1 text-xs font-semibold";
-  if (state === "Ενεργή") return `${base} bg-yellow-100 text-yellow-800 border border-yellow-200`;
-  if (state === "Ολοκληρωμένη") return `${base} bg-green-100 text-green-800 border border-green-200`;
-  if (state === "Προσεχής") return `${base} bg-blue-100 text-blue-800 border border-blue-200`;
-  if (state === "Ανενεργή") return `${base} bg-gray-100 dark:bg-[var(--color-bg-surface)] text-gray-700 dark:text-[var(--color-text-secondary)] border border-gray-200 dark:border-[var(--color-border)]`;
+  if (stateCode === "active") return `${base} bg-yellow-100 text-yellow-800 border border-yellow-200`;
+  if (stateCode === "completed") return `${base} bg-green-100 text-green-800 border border-green-200`;
+  if (stateCode === "pending") return `${base} bg-blue-100 text-blue-800 border border-blue-200`;
+  if (stateCode === "unpublished") return `${base} bg-gray-100 dark:bg-[var(--color-bg-surface)] text-gray-700 dark:text-[var(--color-text-secondary)] border border-gray-200 dark:border-[var(--color-border)]`;
   return `${base} bg-gray-100 dark:bg-[var(--color-bg-surface)] text-gray-700 dark:text-[var(--color-text-secondary)] border border-gray-200 dark:border-[var(--color-border)]`;
 }
 
 export default function ScientificFieldSingle() {
   const { currentUser } = useAuth();
+  const { t } = useLanguage();
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -75,7 +70,7 @@ export default function ScientificFieldSingle() {
       .then((res) => setFieldData(res.data || null))
       .catch((err) => {
         console.error("Error fetching scientific field:", err);
-        setError("Αποτυχία φόρτωσης δεδομένων.");
+        setError(t("scientificFieldSingle.loadError"));
       })
       .finally(() => setLoading(false));
   }, [id, currentUser]);
@@ -98,21 +93,18 @@ export default function ScientificFieldSingle() {
     ? `/ranking?scientificField=${encodeURIComponent(fieldName)}`
     : "/ranking";
   const stateCode = fieldData?.state || "";
-  const stateLabel = stateLabels[stateCode] || "—";
+  const stateLabel = stateCode ? t(`positionState.${stateCode}`) : "—";
   const isPositionInactive = stateCode === "unpublished";
   const isPositionLocked = stateCode === "active" || stateCode === "completed";
   const positionButtonLabel = isPositionInactive
-    ? "Άνοιγμα θέσης"
-    : "Κλείσιμο θέσης";
+    ? t("scientificFieldSingle.openPosition")
+    : t("scientificFieldSingle.closePosition");
   const positionButtonDisabled = !fieldData || isPositionLocked;
-  const positionDisabledTooltip =
-    "Δεν μπορείτε να κλείσετε θέση που έχει ανοίξει στους υποψήφιους.";
+  const positionDisabledTooltip = t("scientificFieldSingle.positionDisabledTooltip");
   const deleteButtonDisabled = !fieldData || deleting || isPositionLocked;
-  const deleteDisabledTooltip =
-    "Δεν μπορείτε να διαγράψετε θέση που έχει ανοίξει στους υποψηφίους.";
+  const deleteDisabledTooltip = t("scientificFieldSingle.deleteDisabledTooltip");
   const editButtonDisabled = !fieldData || isPositionLocked;
-  const editDisabledTooltip =
-    "Δεν μπορείτε να επεξεργαστείτε θέση που έχει ανοίξει στους υποψήφιους.";
+  const editDisabledTooltip = t("scientificFieldSingle.editDisabledTooltip");
 
   const courses = useMemo(() => {
     if (!Array.isArray(fieldData?.courses)) return [];
@@ -137,7 +129,7 @@ export default function ScientificFieldSingle() {
     }
 
     const confirmed = window.confirm(
-      "Θέλετε σίγουρα να κλείσετε τη θέση; Η ενέργεια θα διαγράψει τη θέση."
+      t("scientificFieldSingle.confirmClose")
     );
     if (!confirmed) return;
 
@@ -149,12 +141,12 @@ export default function ScientificFieldSingle() {
         { headers: { Authorization: `Bearer ${token}` } });
       showToast({
         type: "success",
-        message: "Η θέση έκλεισε με επιτυχία.",
+        message: t("scientificFieldSingle.positionClosed"),
       });
       await refreshField();
     } catch (err) {
       console.error("Error closing position:", err);
-      const message = err?.response?.data?.error || "Αποτυχία κλεισίματος θέσης.";
+      const message = err?.response?.data?.error || t("scientificFieldSingle.positionCloseFailed");
       setError(message);
     }
   };
@@ -166,7 +158,7 @@ export default function ScientificFieldSingle() {
   const handleDeleteClick = async () => {
     if (!id || deleting) return;
     const confirmed = window.confirm(
-      "Θέλετε σίγουρα να διαγράψετε το επιστημονικό πεδίο; Η ενέργεια είναι οριστική."
+      t("scientificFieldSingle.confirmDelete")
     );
     if (!confirmed) return;
     const token = localStorage.getItem("token");
@@ -178,12 +170,12 @@ export default function ScientificFieldSingle() {
       });
       showToast({
         type: "success",
-        message: "Το επιστημονικό πεδίο διαγράφηκε με επιτυχία.",
+        message: t("scientificFieldSingle.fieldDeleted"),
       });
       navigate("/scientific-fields/view");
     } catch (err) {
       console.error("Error deleting scientific field:", err);
-      setError("Αποτυχία διαγραφής επιστημονικού πεδίου.");
+      setError(t("scientificFieldSingle.fieldDeleteFailed"));
     } finally {
       setDeleting(false);
     }
@@ -219,10 +211,10 @@ export default function ScientificFieldSingle() {
       <PageTitle>
         {fieldName ? (
           <>
-            Επιστημονικό πεδίο: <span className="text-lg font-semibold">{fieldName}</span>
+            {t("scientificFieldSingle.pageTitlePrefix")} <span className="text-lg font-semibold">{fieldName}</span>
           </>
         ) : (
-          "Επιστημονικό πεδίο"
+          t("scientificFieldSingle.pageTitle")
         )}
       </PageTitle>
 
@@ -248,8 +240,8 @@ export default function ScientificFieldSingle() {
                 type="button"
                 onClick={handleClosePositionModal}
                 className="absolute right-6 top-5 z-10 text-3xl leading-none text-gray-600 hover:text-gray-900 dark:text-[var(--color-text-primary)]"
-                aria-label="Κλείσιμο"
-                title="Κλείσιμο"
+                aria-label={t("common.close")}
+                title={t("common.close")}
               >
                 &times;
               </button>
@@ -284,19 +276,19 @@ export default function ScientificFieldSingle() {
         )}
       <div className="grid grid-cols-1 gap-6">
         <div>
-          <h2 className="text-xl font-light mb-3 text-gray-900 dark:text-[var(--color-text-primary)]">Στοιχεία επιστημονικού πεδίου</h2>
+          <h2 className="text-xl font-light mb-3 text-gray-900 dark:text-[var(--color-text-primary)]">{t("scientificFieldSingle.fieldInfoHeading")}</h2>
           <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 dark:border-[var(--color-border)]">
             <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
               <thead className="bg-patras-buccaneer">
                 <tr>
                   <th className="px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                    Όνομα
+                    {t("scientificFieldSingle.colName")}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                    Σχολή
+                    {t("scientificFieldSingle.colSchool")}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider">
-                    Τμήμα
+                    {t("scientificFieldSingle.colDepartment")}
                   </th>
                 </tr>
               </thead>
@@ -319,7 +311,7 @@ export default function ScientificFieldSingle() {
 
         <div>
           <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="text-xl font-light text-gray-900 dark:text-[var(--color-text-primary)]">Μαθήματα</h2>
+            <h2 className="text-xl font-light text-gray-900 dark:text-[var(--color-text-primary)]">{t("scientificFieldSingle.coursesHeading")}</h2>
           </div>
 
           {courses.length ? (
@@ -328,31 +320,31 @@ export default function ScientificFieldSingle() {
                 <thead className="bg-patras-buccaneer">
                   <tr>
                     <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                      Κωδικός
+                      {t("scientificFieldSingle.colCode")}
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                      Όνομα
+                      {t("scientificFieldSingle.colCourseName")}
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                      Περιγραφή
+                      {t("scientificFieldSingle.colDescription")}
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                      Εξάμηνο
+                      {t("scientificFieldSingle.colSemester")}
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                      Μονάδες
+                      {t("scientificFieldSingle.colUnits")}
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
                       ECTS
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                      Θεωρία
+                      {t("scientificFieldSingle.colTheory")}
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                      Εργαστήριο
+                      {t("scientificFieldSingle.colLab")}
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider">
-                      Κατηγορία
+                      {t("scientificFieldSingle.colCategory")}
                     </th>
                   </tr>
                 </thead>
@@ -372,13 +364,13 @@ export default function ScientificFieldSingle() {
                             onClick={() =>
                               setDescriptionModal({
                                 open: true,
-                                title: course.name ? `Περιγραφή μαθήματος: ${course.name}` : "Περιγραφή μαθήματος",
+                                title: course.name ? t("scientificFieldSingle.descriptionModalTitle", { name: course.name }) : t("scientificFieldSingle.descriptionModalTitleNoName"),
                                 description: course.description,
                               })
                             }
                             className="underline text-patras-buccaneer hover:text-patras-sanguineBrown dark:text-[var(--color-text-secondary)] dark:hover:text-[var(--color-primary)]"
                           >
-                            Περιγραφή
+                            {t("scientificFieldSingle.descriptionLink")}
                           </button>
                         ) : (
                           "—"
@@ -408,7 +400,7 @@ export default function ScientificFieldSingle() {
               </table>
             </div>
           ) : (
-            <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">Δεν υπάρχουν διαθέσιμα μαθήματα.</p>
+            <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">{t("scientificFieldSingle.noCourses")}</p>
           )}
         </div>
 
@@ -426,22 +418,22 @@ export default function ScientificFieldSingle() {
         />
 
         <div>
-          <h2 className="text-xl font-light mb-3 text-gray-900 dark:text-[var(--color-text-primary)]">Στοιχεία θέσης</h2>
+          <h2 className="text-xl font-light mb-3 text-gray-900 dark:text-[var(--color-text-primary)]">{t("scientificFieldSingle.positionInfoHeading")}</h2>
           <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 dark:border-[var(--color-border)]">
             <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
               <thead className="bg-patras-buccaneer">
                 <tr>
                   <th className="px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                    Έναρξη
+                    {t("scientificFieldSingle.colStart")}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                    Λήξη
+                    {t("scientificFieldSingle.colEnd")}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                    Κατάσταση
+                    {t("scientificFieldSingle.colStatus")}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider">
-                    Αιτήσεις
+                    {t("scientificFieldSingle.colApplications")}
                   </th>
                 </tr>
               </thead>
@@ -454,15 +446,15 @@ export default function ScientificFieldSingle() {
                     {formatDateTimeCell(fieldData?.positionEndDate, fieldData?.positionEndTime, "23:59")}
                   </td>
                   <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle border-r border-patras-albescentWhite dark:border-[var(--color-border)]">
-                    <span className={getStateBadgeClasses(stateLabel)}>{stateLabel}</span>
+                    <span className={getStateBadgeClasses(stateCode)}>{stateLabel}</span>
                   </td>
                   <td className="p-0 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-sm text-center align-middle">
                     {fieldData?.applications !== undefined && fieldData?.applications !== null ? (
                       <Link
                         to={rankingLink}
                         className="group flex h-full w-full flex-col items-center justify-center py-4 font-semibold text-patras-buccaneer dark:text-[var(--color-text-secondary)] transition hover:bg-patras-buccaneer/10 hover:text-patras-sanguineBrown dark:hover:bg-[var(--color-bg-muted)] dark:hover:text-[var(--color-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer"
-                        title={fieldName ? `Δείτε αιτήσεις για ${fieldName}` : "Δείτε αιτήσεις"}
-                        aria-label={fieldName ? `Δείτε αιτήσεις για ${fieldName}` : "Δείτε αιτήσεις"}
+                        title={fieldName ? t("scientificFieldSingle.viewApplicationsFor", { name: fieldName }) : t("scientificFieldSingle.viewApplications")}
+                        aria-label={fieldName ? t("scientificFieldSingle.viewApplicationsFor", { name: fieldName }) : t("scientificFieldSingle.viewApplications")}
                       >
                         <span className="text-base">{fieldData.applications}</span>
                       </Link>
@@ -505,7 +497,7 @@ export default function ScientificFieldSingle() {
                     disabled={editButtonDisabled}
                     className="inline-flex items-center justify-center rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-patras-sanguineBrown disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Επεξεργασία
+                    {t("scientificFieldSingle.edit")}
                   </button>
                 </TooltipGray>
               ) : (
@@ -515,7 +507,7 @@ export default function ScientificFieldSingle() {
                   disabled={editButtonDisabled}
                   className="inline-flex items-center justify-center rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-patras-sanguineBrown disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Επεξεργασία
+                  {t("scientificFieldSingle.edit")}
                 </button>
               )}
               {isPositionLocked ? (
@@ -526,7 +518,7 @@ export default function ScientificFieldSingle() {
                     disabled={deleteButtonDisabled}
                     className="inline-flex items-center justify-center rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Διαγραφή
+                    {t("common.delete")}
                   </button>
                 </TooltipGray>
               ) : (
@@ -536,7 +528,7 @@ export default function ScientificFieldSingle() {
                   disabled={deleteButtonDisabled}
                   className="inline-flex items-center justify-center rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Διαγραφή
+                  {t("common.delete")}
                 </button>
               )}
             </div>

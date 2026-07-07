@@ -5,6 +5,7 @@ import InputField from "../components/InputField";
 import PageTitle from "../components/PageTitle";
 import { useToast } from "../contexts/ToastContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../contexts";
 import { EMAIL_VERIFICATION_ENABLED } from "../utils/featureFlags";
 
 const API_BASE_URL = (
@@ -14,6 +15,7 @@ const API_BASE_URL = (
 export default function Settings() {
   const { showToast } = useToast();
   const { logout, currentUser } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -29,7 +31,7 @@ export default function Settings() {
 
   const checkPasswordMatch = () => {
     if (newPassword && confirmPassword && newPassword !== confirmPassword) {
-      setConfirmPasswordError("Οι κωδικοί πρόσβασης δεν ταιριάζουν.");
+      setConfirmPasswordError(t("settings.passwordMismatch"));
     } else {
       setConfirmPasswordError("");
     }
@@ -48,7 +50,7 @@ export default function Settings() {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         data: { currentPassword, newPassword },
       });
-      showToast({ message: "Ο κωδικός πρόσβασης άλλαξε επιτυχώς. Παρακαλώ συνδεθείτε ξανά.", type: "success" });
+      showToast({ message: t("settings.changeSuccess"), type: "success" });
       setTimeout(() => {
         logout();
         navigate("/login");
@@ -56,7 +58,7 @@ export default function Settings() {
     } catch (error) {
       const message =
         error?.response?.data?.error ||
-        "Σφάλμα κατά την αλλαγή κωδικού. Παρακαλώ προσπαθήστε ξανά.";
+        t("settings.changeError");
       showToast({ message, type: "error" });
     } finally {
       setIsLoading(false);
@@ -65,7 +67,7 @@ export default function Settings() {
 
   return (
     <div className="max-w-5xl mx-auto p-0">
-      <PageTitle className="mb-6">Αλλαγή κωδικού πρόσβασης</PageTitle>
+      <PageTitle className="mb-6">{t("settings.pageTitle")}</PageTitle>
 
       <div className="max-w-2xl mx-auto">
         <div
@@ -75,7 +77,7 @@ export default function Settings() {
         >
           {isUnverified && (
             <div className="mb-4 rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)]">
-              Η αλλαγή κωδικού είναι διαθέσιμη μόνο μετά την επιβεβαίωση του email σας.
+              {t("settings.unverifiedNotice")}
             </div>
           )}
 
@@ -83,7 +85,7 @@ export default function Settings() {
             <div className="space-y-1 -mb-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
                 <InputField
-                  label="Τρέχων κωδικός πρόσβασης"
+                  label={t("settings.currentPassword")}
                   id="currentPassword"
                   name="currentPassword"
                   type="password"
@@ -98,7 +100,7 @@ export default function Settings() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
                 <InputField
-                  label="Νέος κωδικός πρόσβασης"
+                  label={t("settings.newPassword")}
                   id="newPassword"
                   name="newPassword"
                   type="password"
@@ -110,7 +112,7 @@ export default function Settings() {
                 />
 
                 <InputField
-                  label="Επιβεβαίωση νέου κωδικού"
+                  label={t("settings.confirmPassword")}
                   id="confirmPassword"
                   name="confirmPassword"
                   type="password"
@@ -134,7 +136,7 @@ export default function Settings() {
               disabled={isUnverified || isLoading || !isFormValid}
               className="flex w-full justify-center rounded-md bg-patras-buccaneer px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer dark:bg-[var(--color-primary)] dark:hover:bg-[var(--color-primary-hover)] dark:text-[var(--color-primary-contrast)] dark:focus-visible:outline-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Αποθήκευση..." : "Αλλαγή κωδικού"}
+              {isLoading ? t("settings.saving") : t("settings.changeButton")}
             </button>
           </form>
         </div>

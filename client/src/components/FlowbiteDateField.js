@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 import { Datepicker } from "flowbite-react";
+import { useLanguage } from "../contexts";
 import PropTypes from "prop-types";
 
 // --- ISO <-> Date helpers ---
@@ -194,6 +195,7 @@ export default function FlowbiteDateField({
   readOnly = false,
   ...props
 }) {
+  const { language, t } = useLanguage();
   const { className: inputClassNameProp, ...inputProps } = props;
   const wrapperRef = useRef(null);
   const inputRef = useRef(null);
@@ -570,10 +572,10 @@ export default function FlowbiteDateField({
               minDate={min}
               maxDate={max}
               weekStart={1}
-              language="el"
+              language={language}
               showTodayButton={false}
               showClearButton={false}
-              labelTodayButton="Σήμερα"
+              labelTodayButton={t("common.today")}
               theme={inlineTheme}
             />
           </div>
@@ -602,10 +604,10 @@ export default function FlowbiteDateField({
                 minDate={min}
                 maxDate={max}
                 weekStart={1}
-                language="el"
+                language={language}
                 showTodayButton={false}
                 showClearButton={false}
-                labelTodayButton="Σήμερα"
+                labelTodayButton={t("common.today")}
                 theme={inlineTheme}
               />
             </div>,
@@ -625,8 +627,8 @@ export default function FlowbiteDateField({
                 setIsOpen(true);
                 inputRef.current?.focus();
               }}
-              title="Καθαρισμός"
-              aria-label="Καθαρισμός"
+              title={t("common.clear")}
+              aria-label={t("common.clear")}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-patras-sanguineBrown hover:text-red-700 w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] dark:hover:bg-[var(--color-bg-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
               style={{ zIndex: 10 }}
             >

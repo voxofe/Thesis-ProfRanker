@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useAuth, usePositions, useCreatePositionValidation } from "../contexts";
+import { useAuth, usePositions, useCreatePositionValidation, useLanguage } from "../contexts";
 import InputField from "../components/InputField";
 import CoursePanel from "../components/CoursePanel";
 import FlowbiteDateField from "../components/FlowbiteDateField";
@@ -23,6 +23,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
   const navigate = useNavigate();
   const { refreshPositions } = usePositions();
   const { updateValidity, isValid, validationErrors } = useCreatePositionValidation();
+  const { t } = useLanguage();
 
   const prefillPosition = prefillPositionProp || location.state?.prefillPosition || null;
 
@@ -182,7 +183,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
     if (Object.keys(errors).length > 0) return;
 
     const confirmMessage =
-      "Από την ημερομηνία/ώρα έναρξης της θέσης και μετά δεν θα μπορείτε να την διαγράψετε ή να την επεξεργαστείτε. Θέλετε να συνεχίσετε;";
+      t("positionCreate.confirm");
     if (!window.confirm(confirmMessage)) return;
 
     setSubmitting(true);
@@ -207,7 +208,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
 
       showToast({
         type: "success",
-        message: "Η θέση άνοιξε με επιτυχία!"
+        message: t("positionCreate.success")
       });
       setSubmitting(false);
       if (inModal && typeof onSuccess === "function") {
@@ -224,7 +225,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
         }, 1500);
       }, 500);
     } catch (error) {
-      const message = error?.response?.data?.error || "Αποτυχία δημιουργίας θέσης. Παρακαλώ δοκιμάστε ξανά.";
+      const message = error?.response?.data?.error || t("positionCreate.failed");
       showToast({ type: "error", message });
       setSubmitting(false);
     }
@@ -256,7 +257,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
       {submitting && !inModal && (
         <div className="flex justify-center items-center">
           <LoadingIndicator size="sm" showText={false} />
-          <span className="ml-2 text-patras-buccaneer">Υποβολή αίτησης...</span>
+          <span className="ml-2 text-patras-buccaneer">{t("positionCreate.submitting")}</span>
         </div>
       )}
       <form
@@ -272,8 +273,8 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
               positions={scientificFieldOptions}
               value={formData.scientificFieldId}
               onChange={handleScientificFieldSelect}
-              label="Επιστημονικό πεδίο"
-              placeholder="Αναζήτηστε με σχολή, τμήμα ή επιστημονικό πεδίο..."
+              label={t("positionCreate.scientificFieldLabel")}
+              placeholder={t("positionCreate.scientificFieldPlaceholder")}
               maxResults={50}
               error={showError("scientificFieldId") ? validationErrors.scientificFieldId : ""}
               disabled={inModal}
@@ -283,7 +284,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             <InputField
-              label="Σχολή"
+              label={t("positionCreate.school")}
               value={selectedScientificField?.school || ""}
               onChange={() => {}}
               disabled
@@ -291,7 +292,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
             />
 
             <InputField
-              label="Τμήμα"
+              label={t("positionCreate.department")}
               value={selectedScientificField?.department || ""}
               onChange={() => {}}
               disabled
@@ -305,7 +306,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <FlowbiteDateField
-                label="Ημερομηνία έναρξης"
+                label={t("positionCreate.startDate")}
                 value={formData.startDate}
                 onChange={(val) => {
                   markTouched("startDate");
@@ -329,7 +330,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
             </div>
             <div>
               <FlowbiteDateField
-                label="Ημερομηνία λήξης"
+                label={t("positionCreate.endDate")}
                 value={formData.endDate}
                 onChange={(val) => {
                   markTouched("endDate");
@@ -354,7 +355,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
             <InputField
-              label="Ώρα έναρξης"
+              label={t("positionCreate.startTime")}
               type="time"
               value={formData.startTime}
               onChange={(val) => {
@@ -365,7 +366,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
               required
             />
             <InputField
-              label="Ώρα λήξης"
+              label={t("positionCreate.endTime")}
               type="time"
               value={formData.endTime}
               onChange={(val) => {
@@ -390,7 +391,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
               onClick={onCancel}
               className="px-6 py-2 border border-gray-300 dark:border-[var(--color-border)] text-gray-700 dark:text-[var(--color-text-secondary)] text-sm/6 font-medium rounded-lg hover:bg-gray-50 dark:bg-[var(--color-bg-muted)]"
             >
-              Ακύρωση
+              {t("positionCreate.cancel")}
             </button>
           )}
           <button
@@ -399,7 +400,7 @@ export default function CreatePosition({ prefillPosition: prefillPositionProp = 
             aria-disabled={submitDisabled}
             className="px-6 py-2 bg-patras-buccaneer text-white text-sm/6 font-medium rounded-lg hover:bg-patras-sanguineBrown transition disabled:opacity-60"
           >
-            {submitting ? "Άνοιγμα..." : "Άνοιγμα θέσης"}
+            {submitting ? t("positionCreate.opening") : t("positionCreate.openPosition")}
           </button>
         </div>
       </form>

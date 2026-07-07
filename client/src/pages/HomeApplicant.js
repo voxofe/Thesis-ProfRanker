@@ -5,6 +5,7 @@ import CollapsibleNotice from "../components/CollapsibleNotice";
 import { useAuth } from "../contexts/AuthContext";
 import { usePositions } from "../contexts/PositionsContext";
 import { useToast } from "../contexts/ToastContext";
+import { useLanguage } from "../contexts";
 import { EMAIL_VERIFICATION_ENABLED } from "../utils/featureFlags";
 
 const API_BASE_URL = (
@@ -15,6 +16,7 @@ const API_BASE_URL = (
 export default function HomeApplicant() {
   const { currentUser } = useAuth();
   const { showToast } = useToast();
+  const { t } = useLanguage();
   const { positions = [], loading } = usePositions();
   const [submissionInProgress, setSubmissionInProgress] = useState(false);
   const [sendingVerificationEmail, setSendingVerificationEmail] = useState(false);
@@ -100,7 +102,7 @@ export default function HomeApplicant() {
         type: "success",
         message:
           response?.data?.message ||
-          "Το email επιβεβαίωσης στάλθηκε επιτυχώς.",
+          t("homeAdmin.verificationSent"),
       });
       const retryAfter = Number(response?.data?.retryAfterSeconds || 0);
       if (Number.isFinite(retryAfter) && retryAfter > 0) {
@@ -109,7 +111,7 @@ export default function HomeApplicant() {
     } catch (error) {
       const message =
         error?.response?.data?.error ||
-        "Αποτυχία αποστολής email επιβεβαίωσης.";
+        t("homeAdmin.verificationFailed");
       showToast({ type: "error", message });
       const retryAfter = Number(error?.response?.data?.retryAfterSeconds || 0);
       if (Number.isFinite(retryAfter) && retryAfter > 0) {
@@ -122,8 +124,7 @@ export default function HomeApplicant() {
 
   const verificationNotice = isUnverified ? (
     <CollapsibleNotice
-      mainText={`Σας έχουμε ήδη στείλει email επιβεβαίωσης στη διεύθυνση που δηλώσατε κατά την εγγραφή.
-Ελέγξτε τα εισερχόμενα και τον φάκελο ανεπιθύμητης αλληλογραφίας (spam). Αν δεν το λάβατε, ζητήστε νέα αποστολή.`}
+      mainText={t("homeAdmin.verificationNotice")}
       isOpen={isVerificationNoticeOpen}
       onToggle={() => setIsVerificationNoticeOpen((prev) => !prev)}
     >
@@ -134,10 +135,10 @@ export default function HomeApplicant() {
         className="inline-flex shrink-0 items-center justify-center rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-patras-sanguineBrown disabled:cursor-not-allowed disabled:opacity-60"
       >
         {sendingVerificationEmail
-          ? "Αποστολή..."
+          ? t("homeAdmin.sending")
           : verificationCooldownSeconds > 0
-            ? `Επανάληψη αποστολής σε ${verificationCooldownSeconds}s`
-            : "Νέα αποστολή email επιβεβαίωσης"}
+            ? t("homeAdmin.resendIn", { seconds: verificationCooldownSeconds })
+            : t("homeAdmin.resend")}
       </button>
     </CollapsibleNotice>
   ) : null;
@@ -146,30 +147,30 @@ export default function HomeApplicant() {
   const applicationDescription = useMemo(() => {
     if (isUnverified) {
       if (userRole === "guest") {
-        return "Συμπληρώστε και υποβάλετε την αίτησή σας για το πρόγραμμα.";
+        return t("homeApplicant.submitPrompt");
       }
       if (userRole === "applicant") {
-        return "Μπορείτε να υποβάλετε νέα αίτηση για οποιαδήποτε ενεργή θέση.";
+        return t("homeApplicant.newApplicationPrompt");
       }
     }
 
     if (submissionInProgress) {
-      return "Η υποβολή βρίσκεται σε εξέλιξη. Παρακαλώ περιμένετε να ολοκληρωθεί.";
+      return t("homeApplicant.submissionInProgress");
     }
     if (userRole === "guest") {
       return applicationDisabled
-        ? "Δεν υπάρχουν διαθέσιμες ανοιχτές θέσεις για αίτηση αυτή τη στιγμή."
-        : "Συμπληρώστε και υποβάλετε την αίτησή σας για το πρόγραμμα.";
+        ? t("homeApplicant.noOpenPositions")
+        : t("homeApplicant.submitPrompt");
     }
     if (userRole === "applicant") {
       return applicationDisabled
         ? noNewPositionsForApplicant
-          ? "Έχετε ήδη υποβάλει αίτηση σε όλες τις διαθέσιμες θέσεις."
-          : "Δεν υπάρχουν διαθέσιμες ανοιχτές θέσεις για αίτηση αυτή τη στιγμή."
-        : "Μπορείτε να υποβάλετε νέα αίτηση για οποιαδήποτε ενεργή θέση.";
+          ? t("homeApplicant.appliedAll")
+          : t("homeApplicant.noOpenPositions")
+        : t("homeApplicant.newApplicationPrompt");
     }
     return "";
-  }, [isUnverified, submissionInProgress, userRole, applicationDisabled, noNewPositionsForApplicant]);
+  }, [isUnverified, submissionInProgress, userRole, applicationDisabled, noNewPositionsForApplicant, t]);
 
   // Info popups
   const applicationInfoPopup =
@@ -241,18 +242,18 @@ export default function HomeApplicant() {
       <div className="max-w-4xl mx-auto p-6">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-700 dark:text-[var(--color-text-primary)] mb-2">
-            Καλώς ήρθατε στο Πρόγραμμα Απόκτησης Διδακτικής Εμπειρίας
+            {t("homeApplicant.welcome")}
           </h1>
           <p className="text-gray-600 dark:text-[var(--color-text-secondary)] text-[17px]">
-            Το πρόγραμμα απευθύνεται σε νέους επιστήμονες, κατόχους διδακτορικού τίτλου, που επιθυμούν να αποκτήσουν διδακτική-ακαδημαϊκή εμπειρία.
+            {t("homeApplicant.subtitle")}
           </p>
         </div>
         {verificationNotice}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <HomePagePanel
-            title="Υποβολή νέας αίτησης"
+            title={t("homeApplicant.submitNewTitle")}
             description={applicationDescription}
-            buttonText="Δημιουργία αίτησης"
+            buttonText={t("homeApplicant.createApplication")}
             // Disable for applicants when no active positions
             buttonAction={applicationDisabled ? undefined : undefined}
             to={applicationDisabled || isPanelLocked ? undefined : "/form?mode=new"}
@@ -267,9 +268,9 @@ export default function HomeApplicant() {
           />
 
           <HomePagePanel
-            title="Ο φάκελός μου"
-            description="Δείτε ή ενημερώστε τα στοιχεία σας, τα αρχεία και τις δημοσιεύσεις σας."
-            buttonText="Προβολή φακέλου"
+            title={t("homeApplicant.myFolderTitle")}
+            description={t("homeApplicant.myFolderDesc")}
+            buttonText={t("homeApplicant.viewFolder")}
             to={isPanelLocked ? undefined : "/profile"}
             buttonDisabled={isPanelLocked}
             colorClass={
@@ -280,9 +281,9 @@ export default function HomeApplicant() {
           />
 
           <HomePagePanel
-            title="Οι αιτήσεις μου"
-            description="Δείτε τις αιτήσεις σας και τις βαθμολογίες τους ή επεξεργαστείτε τις ενεργές αιτήσεις."
-            buttonText="Προβολή αιτήσεων"
+            title={t("homeApplicant.myApplicationsTitle")}
+            description={t("homeApplicant.myApplicationsDesc")}
+            buttonText={t("homeApplicant.viewApplications")}
             to={isPanelLocked ? undefined : "/my-applications"}
             buttonDisabled={isPanelLocked}
             colorClass={
@@ -293,9 +294,9 @@ export default function HomeApplicant() {
           />
 
           <HomePagePanel
-            title="Γενική κατάταξη"
-            description="Δείτε τη γενική κατάταξη όλων των αιτήσεων σε όλα τα επιστημονικά πεδία."
-            buttonText="Δείτε κατάταξη"
+            title={t("homeAdmin.rankingTitle")}
+            description={t("homeAdmin.rankingDesc")}
+            buttonText={t("homeAdmin.rankingButton")}
             to={isPanelLocked ? undefined : "/ranking"}
             buttonDisabled={isPanelLocked}
             colorClass={
@@ -314,18 +315,18 @@ export default function HomeApplicant() {
       <div className="max-w-4xl mx-auto p-6">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-700 dark:text-[var(--color-text-primary)] mb-2">
-            Καλώς ήρθατε στο Πρόγραμμα Απόκτησης Διδακτικής Εμπειρίας
+            {t("homeApplicant.welcome")}
           </h1>
           <p className="text-gray-600 dark:text-[var(--color-text-secondary)] text-[17px]">
-            Το πρόγραμμα απευθύνεται σε νέους επιστήμονες, κατόχους διδακτορικού τίτλου, που επιθυμούν να αποκτήσουν διδακτική-ακαδημαϊκή εμπειρία.
+            {t("homeApplicant.subtitle")}
           </p>
         </div>
         {verificationNotice}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <HomePagePanel
-            title="Υποβολή αίτησης"
+            title={t("homeApplicant.submitTitle")}
             description={applicationDescription}
-            buttonText="Δημιουργία αίτησης"
+            buttonText={t("homeApplicant.createApplication")}
             // Disable for guests when no active positions
             buttonAction={applicationDisabled ? undefined : undefined}
             to={applicationDisabled || isPanelLocked ? undefined : "/form?mode=new"}
@@ -340,9 +341,9 @@ export default function HomeApplicant() {
           />
 
           <HomePagePanel
-            title="Ο φάκελός μου"
-            description="Δείτε ή ενημερώστε τα στοιχεία σας, τα αρχεία και τις δημοσιεύσεις σας."
-            buttonText="Προβολή φακέλου"
+            title={t("homeApplicant.myFolderTitle")}
+            description={t("homeApplicant.myFolderDesc")}
+            buttonText={t("homeApplicant.viewFolder")}
             to={isPanelLocked ? undefined : "/profile"}
             buttonDisabled={isPanelLocked}
             colorClass={
@@ -353,9 +354,9 @@ export default function HomeApplicant() {
           />
 
           <HomePagePanel
-            title="Οι αιτήσεις μου"
-            description="Δείτε τις αιτήσεις σας και τις βαθμολογίες τους ή επεξεργαστείτε τις ενεργές αιτήσεις."
-            buttonText="Προβολή αιτήσεων"
+            title={t("homeApplicant.myApplicationsTitle")}
+            description={t("homeApplicant.myApplicationsDesc")}
+            buttonText={t("homeApplicant.viewApplications")}
             buttonDisabled={true || isPanelLocked}
             colorClass="bg-gray-100 border border-gray-300 opacity-70 cursor-not-allowed"
             // showInfoMark={true}
@@ -363,9 +364,9 @@ export default function HomeApplicant() {
           />
 
           <HomePagePanel
-            title="Γενική κατάταξη"
-            description="Δείτε τη γενική κατάταξη όλων των αιτήσεων σε όλα τα επιστημονικά πεδία."
-            buttonText="Δείτε κατάταξη"
+            title={t("homeAdmin.rankingTitle")}
+            description={t("homeAdmin.rankingDesc")}
+            buttonText={t("homeAdmin.rankingButton")}
             to={isPanelLocked ? undefined : "/ranking"}
             buttonDisabled={isPanelLocked}
             colorClass={

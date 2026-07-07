@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
+import { useLanguage } from "../contexts";
 import InputField from "../components/InputField";
 import LoadingIndicator from "../components/LoadingIndicator";
 import PageTitle from "../components/PageTitle";
@@ -20,6 +21,7 @@ export default function RegisterAdmin() {
 
   const { registerAdmin } = useAuth();
   const { showToast } = useToast();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const emailRegex =
@@ -45,7 +47,7 @@ export default function RegisterAdmin() {
       .then(() => {
         showToast({
           type: "success",
-          message: "Ο διαχειριστής δημιουργήθηκε με επιτυχία.",
+          message: t("registerAdmin.successMessage"),
         });
         setTimeout(() => {
           setRedirectLoading(true);
@@ -57,22 +59,18 @@ export default function RegisterAdmin() {
       .catch((err) => {
         const status = err?.response?.status;
         const serverError = (err?.response?.data?.error || "").toLowerCase();
-        let text = "Προέκυψε απρόβλεπτο σφάλμα κατά την εγγραφή διαχειριστή. Παρακαλώ δοκιμάστε ξανά.";
+        let text = t("registerAdmin.genericError");
 
         if (!err?.response) {
-          text =
-            "Δεν ήταν δυνατή η επικοινωνία με τον διακομιστή. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.";
+          text = t("common.serverUnreachable");
         } else if (status === 400 && serverError.includes("email already registered")) {
-          text =
-            "Υπάρχει ήδη λογαριασμός με αυτό το email. Χρησιμοποιήστε άλλο email.";
+          text = t("registerAdmin.emailExists");
         } else if (status === 401 || serverError.includes("authorization token missing") || serverError.includes("invalid or expired token")) {
-          text =
-            "Η συνεδρία σας έληξε ή δεν είναι έγκυρη. Συνδεθείτε ξανά και δοκιμάστε ξανά.";
+          text = t("registerAdmin.sessionExpired");
         } else if (status === 403 || serverError.includes("only admins can register a new admin")) {
-          text = "Δεν έχετε δικαίωμα δημιουργίας νέου διαχειριστή.";
+          text = t("registerAdmin.noPermission");
         } else if (status >= 500) {
-          text =
-            "Η εγγραφή διαχειριστή δεν ολοκληρώθηκε λόγω τεχνικού προβλήματος. Παρακαλώ δοκιμάστε ξανά σε λίγο.";
+          text = t("registerAdmin.techError");
         }
 
         setError(text);
@@ -82,7 +80,7 @@ export default function RegisterAdmin() {
 
   const checkPasswordMatch = () => {
     if (password && confirmPassword && password !== confirmPassword) {
-      setConfirmPasswordError("Οι κωδικοί πρόσβασης δεν ταιριάζουν.");
+      setConfirmPasswordError(t("register.passwordsNoMatch"));
     } else {
       setConfirmPasswordError("");
     }
@@ -90,7 +88,7 @@ export default function RegisterAdmin() {
 
   const checkEmailValidity = () => {
     if (!isEmailValid) {
-      setEmailError("Παρακαλώ εισάγετε έγκυρο email.");
+      setEmailError(t("register.invalidEmail"));
     } else {
       setEmailError("");
     }
@@ -111,7 +109,7 @@ export default function RegisterAdmin() {
   return (
     <div className="flex flex-col justify-start pt-4 sm:px-6 lg:px-8 -mt-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
-          <PageTitle className="mb-6">Εγγραφή διαχειριστή</PageTitle>
+          <PageTitle className="mb-6">{t("registerAdmin.pageTitle")}</PageTitle>
       </div>
 
       <div className="mt-0 sm:mx-auto sm:w-full sm:max-w-2xl">
@@ -119,7 +117,7 @@ export default function RegisterAdmin() {
           className="bg-white dark:bg-[var(--color-bg-card)] py-8 px-4 shadow-lg dark:shadow-lg dark:shadow-gray-500/30 sm:rounded-lg sm:px-10 border border-gray-200 dark:border-transparent"
         >
           <div className="text-[13px] text-red-900 dark:text-red-400 font-medium pb-4 text-center">
-            Αυτή η φόρμα δημιουργεί λογαριασμό διαχειριστή με ειδικά δικαιώματα
+            {t("registerAdmin.formNotice")}
           </div>
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
@@ -130,7 +128,7 @@ export default function RegisterAdmin() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 -mb-4">
               <InputField
-                label="Όνομα"
+                label={t("register.firstName")}
                 id="firstName"
                 name="firstName"
                 type="text"
@@ -140,7 +138,7 @@ export default function RegisterAdmin() {
               />
 
               <InputField
-                label="Επώνυμο"
+                label={t("register.lastName")}
                 id="lastName"
                 name="lastName"
                 type="text"
@@ -151,7 +149,7 @@ export default function RegisterAdmin() {
             </div>
 
             <InputField
-              label="Email"
+              label={t("common.email")}
               id="email"
               name="email"
               type="email"
@@ -163,7 +161,7 @@ export default function RegisterAdmin() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 -mb-4 gap-x-4">
               <InputField
-                label="Κωδικός πρόσβασης"
+                label={t("common.password")}
                 id="password"
                 name="password"
                 type="password"
@@ -174,7 +172,7 @@ export default function RegisterAdmin() {
               />
 
               <InputField
-                label="Επιβεβαίωση κωδικού πρόσβασης"
+                label={t("register.confirmPassword")}
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
@@ -197,7 +195,7 @@ export default function RegisterAdmin() {
                 disabled={isLoading || !isFormValid}
                 className="flex w-full justify-center rounded-md bg-patras-buccaneer px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? "Εγγραφή διαχειριστή..." : "Εγγραφή διαχειριστή"}
+                {isLoading ? t("registerAdmin.submitting") : t("registerAdmin.submit")}
               </button>
             </div>
           </form>

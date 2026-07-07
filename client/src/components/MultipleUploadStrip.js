@@ -5,6 +5,7 @@ import {
   DocumentTextIcon,
 } from "@heroicons/react/24/solid";
 import CustomSelect from "./CustomSelect";
+import { useLanguage } from "../contexts";
 
 const getDisplayName = (fileItem) => {
   if (fileItem instanceof File) return fileItem.name;
@@ -42,6 +43,7 @@ export default function MultipleUploadStrip({
   required = false,
   label,
 }) {
+  const { t } = useLanguage();
   const inputRef = useRef(null);
   const [localFiles, setLocalFiles] = useState([]);
   const [error, setError] = useState("");
@@ -102,11 +104,11 @@ export default function MultipleUploadStrip({
   };
 
   const getAcceptErrorMessage = () => {
-    if (!accept) return "Μη αποδεκτός τύπος αρχείου.";
-    return `Επιτρέπονται μόνο: ${accept.replace(/\s+/g, "")}`;
+    if (!accept) return t("upload.invalidType");
+    return t("upload.allowedOnly", { types: accept.replace(/\s+/g, "") });
   };
 
-  const getSizeErrorMessage = () => "Μέγιστο μέγεθος αρχείου: 5MB.";
+  const getSizeErrorMessage = () => t("upload.maxSizeError", { mb: 5 });
 
   const handleFilePick = (event) => {
     const incoming = Array.from(event.target.files || []);
@@ -194,15 +196,15 @@ export default function MultipleUploadStrip({
           {showVaultPicker && selectableOptions.length > 0 && (
             <div className="p-3">
               <CustomSelect
-                label="Επιλέξτε από τα ήδη αναρτημένα αρχεία σας"
+                label={t("upload.pickExisting")}
                 value="select"
-                placeholder="Επιλέξτε..."
+                placeholder={t("common.select")}
                 options={[
                   ...selectableOptions.map((option) => ({
                     value: String(option.id),
                     label: option.name,
                   })),
-                  { value: "__new__", label: "Ανέβασμα νέου αρχείου" },
+                  { value: "__new__", label: t("upload.uploadNew") },
                 ]}
                 onChange={(value) => {
                   if (value === "__new__") {
@@ -240,7 +242,7 @@ export default function MultipleUploadStrip({
         onChange={handleFilePick}
       />
       <p className="text-xs/5 text-gray-600 dark:text-[var(--color-text-secondary)]">
-        PDF, DOC, DOCX, ODT · Μέγιστο μέγεθος: 5MB
+        {t("upload.formatsHint", { mb: 5 })}
       </p>
       {error && <p className="text-sm text-red-600">{error}</p>}
     </div>

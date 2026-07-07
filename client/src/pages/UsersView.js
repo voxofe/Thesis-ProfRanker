@@ -5,6 +5,7 @@ import SortableTable from "../components/SortableTable";
 import FilterModal from "../components/FilterModal";
 import TooltipGray from "../components/TooltipGray";
 import PageTitle from "../components/PageTitle";
+import { useLanguage } from "../contexts";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -14,56 +15,42 @@ const API_BASE_URL = (
   ""
 );
 
-const guestRankingVisitsLabel = (
-  <span className="inline-flex items-center justify-center gap-1 align-middle normal-case text-[10px] leading-tight">
-    <span className="normal-case">Επισκέψεις</span>
-    <TooltipGray content="Σύνολο επισκέψεων του χρήστη στη γενική κατάταξη αιτήσεων.">
-      <span
-        className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer text-[9px] font-semibold normal-case cursor-help"
-        aria-label="Πληροφορίες για τις επισκέψεις κατάταξης"
-      >
-        i
-      </span>
-    </TooltipGray>
-  </span>
-);
-
 const TAB_CONFIG = {
   applicants: {
-    label: "Αιτούντες",
+    labelKey: "usersView.tabApplicants",
     role: "applicant",
     columns: [
-      { key: "firstName", label: "Όνομα" },
-      { key: "lastName", label: "Επώνυμο" },
-      { key: "email", label: "Email" },
-      { key: "mobileNumber", label: "Κινητό" },
-      { key: "landlineNumber", label: "Σταθερό" },
-      { key: "applicationsCount", label: "Αιτήσεις" },
+      { key: "firstName", labelKey: "usersView.colFirstName" },
+      { key: "lastName", labelKey: "usersView.colLastName" },
+      { key: "email", labelKey: "common.email" },
+      { key: "mobileNumber", labelKey: "usersView.colMobile" },
+      { key: "landlineNumber", labelKey: "usersView.colLandline" },
+      { key: "applicationsCount", labelKey: "usersView.colApplications" },
     ],
     searchableColumns: ["firstName", "lastName", "email", "mobileNumber", "landlineNumber"],
     countKey: "applicationsCount",
-    countLabel: "Αριθμός αιτήσεων",
+    countLabelKey: "usersView.countApplications",
   },
   guests: {
-    label: "Επισκέπτες",
+    labelKey: "usersView.tabGuests",
     role: "guest",
     columns: [
-      { key: "firstName", label: "Όνομα" },
-      { key: "lastName", label: "Επώνυμο" },
-      { key: "email", label: "Email" },
-      { key: "rankingVisits", label: guestRankingVisitsLabel },
+      { key: "firstName", labelKey: "usersView.colFirstName" },
+      { key: "lastName", labelKey: "usersView.colLastName" },
+      { key: "email", labelKey: "common.email" },
+      { key: "rankingVisits", isRankingVisits: true },
     ],
     searchableColumns: ["firstName", "lastName", "email"],
     countKey: "rankingVisits",
-    countLabel: "Επισκέψεις",
+    countLabelKey: "usersView.visits",
   },
   admins: {
-    label: "Διαχειριστές",
+    labelKey: "usersView.tabAdmins",
     role: "admin",
     columns: [
-      { key: "firstName", label: "Όνομα" },
-      { key: "lastName", label: "Επώνυμο" },
-      { key: "email", label: "Email" },
+      { key: "firstName", labelKey: "usersView.colFirstName" },
+      { key: "lastName", labelKey: "usersView.colLastName" },
+      { key: "email", labelKey: "common.email" },
     ],
     searchableColumns: ["firstName", "lastName", "email"],
   },
@@ -72,6 +59,7 @@ const TAB_CONFIG = {
 const emptyFilters = { genders: [], pointsMin: "", pointsMax: "" };
 
 export default function UsersView() {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("applicants");
   const [loading, setLoading] = useState(false);
   const [rowsByTab, setRowsByTab] = useState({
@@ -92,7 +80,35 @@ export default function UsersView() {
   const isApplicantsTab = activeTab === "applicants";
   const isGuestsTab = activeTab === "guests";
 
-  const tabConfig = TAB_CONFIG[activeTab];
+  const guestVisitsLabel = useMemo(
+    () => (
+      <span className="inline-flex items-center justify-center gap-1 align-middle normal-case text-[10px] leading-tight">
+        <span className="normal-case">{t("usersView.visits")}</span>
+        <TooltipGray content={t("usersView.visitsTooltip")}>
+          <span
+            className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer text-[9px] font-semibold normal-case cursor-help"
+            aria-label={t("usersView.visitsAria")}
+          >
+            i
+          </span>
+        </TooltipGray>
+      </span>
+    ),
+    [t]
+  );
+
+  const tabConfig = useMemo(() => {
+    const cfg = TAB_CONFIG[activeTab];
+    return {
+      ...cfg,
+      label: t(cfg.labelKey),
+      countLabel: cfg.countLabelKey ? t(cfg.countLabelKey) : undefined,
+      columns: cfg.columns.map((col) => ({
+        ...col,
+        label: col.isRankingVisits ? guestVisitsLabel : t(col.labelKey),
+      })),
+    };
+  }, [activeTab, t, guestVisitsLabel]);
 
   const fetchUsers = useCallback(async (roleKey) => {
     const role = TAB_CONFIG[roleKey]?.role;
@@ -157,8 +173,8 @@ export default function UsersView() {
     if (activeTab === "admins") return [];
     const tags = [];
     filters.genders.forEach((g) => {
-      const label = g === "male" ? "Άνδρας" : g === "female" ? "Γυναίκα" : g;
-      tags.push({ key: "genders", value: g, label: `Φύλο: ${label}` });
+      const label = g === "male" ? t("register.genderMale") : g === "female" ? t("register.genderFemale") : g;
+      tags.push({ key: "genders", value: g, label: t("usersView.genderTag", { label }) });
     });
     if (filters.pointsMin) {
       tags.push({
@@ -175,7 +191,7 @@ export default function UsersView() {
       });
     }
     return tags;
-  }, [filters, tabConfig.countLabel, activeTab]);
+  }, [filters, tabConfig.countLabel, activeTab, t]);
 
   const removeTag = (tag) => {
     setFiltersByTab((prev) => {
@@ -246,8 +262,8 @@ export default function UsersView() {
   }, []);
 
   const formatGender = (value) => {
-    if (value === "male") return "Άνδρας";
-    if (value === "female") return "Γυναίκα";
+    if (value === "male") return t("register.genderMale");
+    if (value === "female") return t("register.genderFemale");
     return "—";
   };
 
@@ -310,7 +326,7 @@ export default function UsersView() {
   return (
     <div className="max-w-5xl mx-auto p-0">
       <div className="mb-4">
-        <PageTitle className="mb-6">Λίστα χρηστών</PageTitle>
+        <PageTitle className="mb-6">{t("usersView.pageTitle")}</PageTitle>
       </div>
 
       <div className="flex items-center justify-center pb-4">
@@ -326,7 +342,7 @@ export default function UsersView() {
                   : "text-patras-buccaneer dark:text-[var(--color-text-secondary)] hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-bg-muted)]"
               }`}
             >
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           ))}
         </div>
@@ -343,7 +359,7 @@ export default function UsersView() {
               <button
                 className="ml-2 text-patras-sanguineBrown hover:text-red-700 dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] text-xs font-bold"
                 onClick={() => removeTag(tag)}
-                title="Αφαίρεση φίλτρου"
+                title={t("usersView.removeFilter")}
               >
                 &times;
               </button>
@@ -362,7 +378,7 @@ export default function UsersView() {
                 <path d="M10 11v6" />
                 <path d="M14 11v6" />
               </svg>
-              Καθαρισμός όλων
+              {t("usersView.clearAll")}
             </button>
           )}
         </div>
@@ -377,7 +393,7 @@ export default function UsersView() {
               type="text"
               value={searchText}
               onChange={(event) => setSearchText(event.target.value)}
-              placeholder="Αναζήτηση χρηστών..."
+              placeholder={t("usersView.searchPlaceholder")}
               className="w-full rounded-md border border-patras-capePalliser/50 bg-white dark:bg-[var(--color-bg-card)] py-1.5 pl-9 pr-3 text-sm text-gray-800 dark:text-[var(--color-text-primary)] shadow-sm focus:border-patras-buccaneer focus:outline-none"
             />
             {searchText && (
@@ -385,7 +401,7 @@ export default function UsersView() {
                 type="button"
                 onClick={() => setSearchText("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500/5 text-red-700 hover:bg-red-500/10 hover:text-red-800"
-                aria-label="Καθαρισμός αναζήτησης"
+                aria-label={t("usersView.clearSearch")}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -395,14 +411,14 @@ export default function UsersView() {
           </div>
           {activeTab !== "admins" && (
             <button
-              aria-label="Άνοιγμα φίλτρων"
+              aria-label={t("usersView.openFilters")}
               className="flex items-center gap-2 px-3 py-1 rounded-full bg-patras-buccaneer text-white font-medium text-sm shadow-sm hover:bg-patras-sanguineBrown transition border border-patras-buccaneer"
               onClick={() => setFilterOpen(true)}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414A2 2 0 0013 14.414V19a1 1 0 01-1.447.894l-4-2A1 1 0 017 17v-2.586a2 2 0 00-.586-1.414L3 6.707A1 1 0 013 6V4z"/>
               </svg>
-              Φίλτρα
+              {t("usersView.filters")}
             </button>
           )}
         </div>
@@ -423,7 +439,7 @@ export default function UsersView() {
           initialSortDirection="asc"
           headerCellClassName={headerCellClassName}
           loading={loading}
-          emptyMessage="Δεν βρέθηκαν αποτελέσματα με βάση τα φίλτρα σας."
+          emptyMessage={t("usersView.emptyMessage")}
           renderRow={renderRow}
         />
         {rowMenu && isApplicantsTab && (
@@ -441,7 +457,7 @@ export default function UsersView() {
               }}
               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-[var(--color-text-primary)] hover:bg-patras-buccaneer hover:text-white whitespace-nowrap"
             >
-              {`Αιτήσεις χρήστη: ${rowMenu.label || ""}`.trim()}
+              {t("usersView.userApplications", { label: (rowMenu.label || "").trim() })}
             </button>
             <button
               type="button"
@@ -452,7 +468,7 @@ export default function UsersView() {
               }}
               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-[var(--color-text-primary)] hover:bg-patras-buccaneer hover:text-white whitespace-nowrap"
             >
-              {`Φάκελος χρήστη: ${rowMenu.label || ""}`.trim()}
+              {t("usersView.userFolder", { label: (rowMenu.label || "").trim() })}
             </button>
           </div>
         )}
@@ -462,7 +478,7 @@ export default function UsersView() {
         <FilterModal
           open={filterOpen}
           onClose={() => setFilterOpen(false)}
-          title={`Φίλτρα - ${tabConfig.label}`}
+          title={t("usersView.filterModalTitle", { label: tabConfig.label })}
           filters={filters}
           setFilters={(next) =>
             setFiltersByTab((prev) => ({
@@ -472,8 +488,8 @@ export default function UsersView() {
           }
           options={{
             genders: [
-              { value: "male", label: "Άνδρας" },
-              { value: "female", label: "Γυναίκα" },
+              { value: "male", label: t("register.genderMale") },
+              { value: "female", label: t("register.genderFemale") },
             ],
           }}
           pointsLabel={tabConfig.countLabel}
