@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useMemo, useCallback } from "react";
+import { useLanguage } from "./LanguageContext";
 
 const CreatePositionValidationContext = createContext();
 
@@ -8,23 +9,24 @@ export const useCreatePositionValidation = () =>
 export const CreatePositionValidationProvider = ({ children }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [isValid, setIsValid] = useState(false);
+  const { t } = useLanguage();
 
   // PURE calculator — stable identity
   const computeErrors = useCallback((formData, mode) => {
     const errors = {};
 
     if (mode === "position") {
-      if (!formData.scientificFieldId) errors.scientificFieldId = "Απαιτείται επιλογή επιστημονικού πεδίου.";
-      if (!formData.startDate) errors.startDate = "Η ημερομηνία έναρξης είναι υποχρεωτική.";
-      if (!formData.endDate) errors.endDate = "Η ημερομηνία λήξης είναι υποχρεωτική.";
-      if (!formData.startTime) errors.startTime = "Η ώρα έναρξης είναι υποχρεωτική.";
-      if (!formData.endTime) errors.endTime = "Η ώρα λήξης είναι υποχρεωτική.";
+      if (!formData.scientificFieldId) errors.scientificFieldId = t("positionValidation.scientificFieldIdRequired");
+      if (!formData.startDate) errors.startDate = t("positionValidation.startDateRequired");
+      if (!formData.endDate) errors.endDate = t("positionValidation.endDateRequired");
+      if (!formData.startTime) errors.startTime = t("positionValidation.startTimeRequired");
+      if (!formData.endTime) errors.endTime = t("positionValidation.endTimeRequired");
 
       if (formData.startDate && formData.startTime) {
         const start = new Date(`${formData.startDate}T${formData.startTime}`);
         const now = new Date();
         if (!isNaN(start) && start < now) {
-          errors.startDate = "Η ημερομηνία/ώρα έναρξης πρέπει να είναι μελλοντική.";
+          errors.startDate = t("positionValidation.startFuture");
         }
       }
 
@@ -32,18 +34,18 @@ export const CreatePositionValidationProvider = ({ children }) => {
         const start = new Date(`${formData.startDate}T${formData.startTime}`);
         const end = new Date(`${formData.endDate}T${formData.endTime}`);
         if (!isNaN(start) && !isNaN(end) && end <= start) {
-          errors.endDate = "Η ημερομηνία/ώρα λήξης πρέπει να είναι μετά την ημερομηνία/ώρα έναρξης.";
-          errors.dateTimeRange = "Η λήξη πρέπει να είναι αυστηρά μετά την έναρξη (ημερομηνία και ώρα).";
+          errors.endDate = t("positionValidation.endAfterStart");
+          errors.dateTimeRange = t("positionValidation.dateTimeRange");
         }
       }
     }
 
     if (mode === "scientificField") {
       if (!formData.scientificField || formData.scientificField.trim() === "") {
-        errors.scientificField = "Το επιστημονικό πεδίο είναι υποχρεωτικό.";
+        errors.scientificField = t("positionValidation.scientificFieldRequired");
       }
-      if (!formData.school || formData.school === "select") errors.school = "Η σχολή είναι υποχρεωτική.";
-      if (!formData.department || formData.department === "select") errors.department = "Το τμήμα είναι υποχρεωτικό.";
+      if (!formData.school || formData.school === "select") errors.school = t("positionValidation.schoolRequired");
+      if (!formData.department || formData.department === "select") errors.department = t("positionValidation.departmentRequired");
 
       const hasPositionFields =
         formData.startDate ||
@@ -52,16 +54,16 @@ export const CreatePositionValidationProvider = ({ children }) => {
         formData.endTime;
 
       if (hasPositionFields) {
-        if (!formData.startDate) errors.startDate = "Η ημερομηνία έναρξης είναι υποχρεωτική.";
-        if (!formData.endDate) errors.endDate = "Η ημερομηνία λήξης είναι υποχρεωτική.";
-        if (!formData.startTime) errors.startTime = "Η ώρα έναρξης είναι υποχρεωτική.";
-        if (!formData.endTime) errors.endTime = "Η ώρα λήξης είναι υποχρεωτική.";
+        if (!formData.startDate) errors.startDate = t("positionValidation.startDateRequired");
+        if (!formData.endDate) errors.endDate = t("positionValidation.endDateRequired");
+        if (!formData.startTime) errors.startTime = t("positionValidation.startTimeRequired");
+        if (!formData.endTime) errors.endTime = t("positionValidation.endTimeRequired");
 
         if (formData.startDate && formData.startTime) {
           const start = new Date(`${formData.startDate}T${formData.startTime}`);
           const now = new Date();
           if (!isNaN(start) && start < now) {
-            errors.startDate = "Η ημερομηνία/ώρα έναρξης πρέπει να είναι μελλοντική.";
+            errors.startDate = t("positionValidation.startFuture");
           }
         }
 
@@ -69,14 +71,14 @@ export const CreatePositionValidationProvider = ({ children }) => {
           const start = new Date(`${formData.startDate}T${formData.startTime}`);
           const end = new Date(`${formData.endDate}T${formData.endTime}`);
           if (!isNaN(start) && !isNaN(end) && end <= start) {
-            errors.endDate = "Η ημερομηνία/ώρα λήξης πρέπει να είναι μετά την ημερομηνία/ώρα έναρξης.";
-            errors.dateTimeRange = "Η λήξη πρέπει να είναι αυστηρά μετά την έναρξη (ημερομηνία και ώρα).";
+            errors.endDate = t("positionValidation.endAfterStart");
+            errors.dateTimeRange = t("positionValidation.dateTimeRange");
           }
         }
       }
 
       if (!Array.isArray(formData.courses) || formData.courses.length === 0) {
-        errors.courses = "Πρέπει να προσθέσετε τουλάχιστον ένα μάθημα.";
+        errors.courses = t("positionValidation.coursesRequired");
       } else {
         formData.courses.forEach((course, i) => {
           const numOrNull = (value) => {
@@ -105,7 +107,7 @@ export const CreatePositionValidationProvider = ({ children }) => {
           };
 
           const missing = required.filter((requiredField) => isMissing(requiredField));
-          if (missing.length) errors[`course${i}`] = `Το μάθημα #${i + 1} έχει κενά υποχρεωτικά πεδία.`;
+          if (missing.length) errors[`course${i}`] = t("positionValidation.courseMissingFields", { index: i + 1 });
 
           const description = String(course.description || "");
           const descriptionCount = description.replace(/\s/g, "").length;
@@ -115,39 +117,39 @@ export const CreatePositionValidationProvider = ({ children }) => {
             (wordCount > 0 && wordCount < 20)
           ) {
             errors[`course${i}_description`] =
-              "Η περιγραφή πρέπει να έχει τουλάχιστον 120 χαρακτήρες χωρίς κενά και 20 λέξεις.";
+              t("positionValidation.courseDescription");
           }
 
           const ects = numOrNull(course.ects);
           if (ects !== null && ects <= 0) {
-            errors[`course${i}_ects`] = "Τα ECTS πρέπει να είναι μεγαλύτερα από 0.";
+            errors[`course${i}_ects`] = t("positionValidation.courseEcts");
           }
 
           const teachingUnits = numOrNull(course.teaching_units);
           if (teachingUnits !== null && teachingUnits <= 0) {
-            errors[`course${i}_teaching_units`] = "Οι διδακτικές μονάδες πρέπει να είναι μεγαλύτερες από 0.";
+            errors[`course${i}_teaching_units`] = t("positionValidation.courseTeachingUnits");
           }
 
           const theoryHours = numOrNull(course.theory_hours);
           const labHours = numOrNull(course.lab_hours);
 
           if (theoryHours !== null && theoryHours < 0) {
-            errors[`course${i}_theory_hours`] = "Οι ώρες θεωρίας δεν μπορούν να είναι αρνητικές.";
+            errors[`course${i}_theory_hours`] = t("positionValidation.courseTheoryHours");
           }
 
           if (labHours !== null && labHours < 0) {
-            errors[`course${i}_lab_hours`] = "Οι ώρες εργαστηρίου δεν μπορούν να είναι αρνητικές.";
+            errors[`course${i}_lab_hours`] = t("positionValidation.courseLabHours");
           }
 
           if (theoryHours !== null && labHours !== null && theoryHours === 0 && labHours === 0) {
-            errors[`course${i}_hours`] = "Οι ώρες θεωρίας και εργαστηρίου δεν μπορούν να είναι ταυτόχρονα 0.";
+            errors[`course${i}_hours`] = t("positionValidation.courseHours");
           }
         });
       }
     }
 
     return errors;
-  }, []);
+  }, [t]);
 
   // Stateful updater — stable identity
   const updateValidity = useCallback(

@@ -14,7 +14,7 @@ export default function Toast({ toasts, onClose }) {
 
   return (
     <div
-      className="fixed top-6 right-6 z-50 space-y-3"
+      className="fixed left-1/2 top-6 z-50 flex -translate-x-1/2 flex-col items-center space-y-3"
       role="status"
       aria-live="polite"
     >

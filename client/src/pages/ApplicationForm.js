@@ -39,7 +39,7 @@ export default function Form({ academicYear }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [maxStepReached, setMaxStepReached] = useState(1);
   const { showToast } = useToast();
-  const { refreshUser } = useAuth();
+  const { refreshUser, currentUser } = useAuth();
   const { positions = [], refreshPositions } = usePositions();
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
@@ -708,7 +708,9 @@ export default function Form({ academicYear }) {
   }
 
   const headerTitle =
-    formMode === "edit"
+    currentUser?.role === "guest"
+      ? t("applicationForm.headerGuest")
+      : formMode === "edit"
       ? t("applicationForm.headerEdit")
       : t("applicationForm.headerNew");
 
