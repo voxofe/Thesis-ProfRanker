@@ -1,7 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../contexts";
 
 export default function ApplicationCard({ app, toDDMMYYYYHHMM }) {
+  const { t } = useLanguage();
   const endDate = app.positionEndDate || app.endDate || app.applicationEndDate || "";
   const endTime = app.positionEndTime || app.endTime || "";
   const firstSubmissionDate =
@@ -24,13 +26,13 @@ export default function ApplicationCard({ app, toDDMMYYYYHHMM }) {
           {hasResubmission ? (
             <>
               <div>
-                Ημερομηνία 1ης υποβολής:{" "}
+                {t("applicationCard.firstSubmission")}{" "}
                 <span className="text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">
                   {firstSubmissionDate ? toDDMMYYYYHHMM(firstSubmissionDate) : "—"}
                 </span>
               </div>
               <div>
-                Ημερομηνία επανυποβολής:{" "}
+                {t("applicationCard.resubmission")}{" "}
                 <span className="text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">
                   {toDDMMYYYYHHMM(lastResubmissionDate)}
                 </span>
@@ -38,14 +40,14 @@ export default function ApplicationCard({ app, toDDMMYYYYHHMM }) {
             </>
           ) : (
             <div>
-              Ημερομηνία υποβολής:{" "}
+              {t("applicationCard.submission")}{" "}
               <span className="text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">
                 {firstSubmissionDate ? toDDMMYYYYHHMM(firstSubmissionDate) : "—"}
               </span>
             </div>
           )}
           <div>
-            Ημερομηνία λήξης αιτήσεων:{" "}
+            {t("applicationCard.deadline")}{" "}
             <span className="text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">
               {endDate ? toDDMMYYYYHHMM(endDate, endTime) : "—"}
             </span>
@@ -55,13 +57,13 @@ export default function ApplicationCard({ app, toDDMMYYYYHHMM }) {
 
       <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="text-sm text-gray-700 dark:text-[var(--color-text-secondary)]">
-          Μόρια: <span className="font-semibold">{app.totalPoints ?? "—"}</span>
+          {t("applicationCard.points")} <span className="font-semibold">{app.totalPoints ?? "—"}</span>
         </div>
         <Link
           to={`/application-score/${app.id}`}
           className="inline-flex items-center justify-center bg-patras-buccaneer text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors"
         >
-          Προβολή αίτησης
+          {t("applicationCard.view")}
         </Link>
       </div>
     </div>

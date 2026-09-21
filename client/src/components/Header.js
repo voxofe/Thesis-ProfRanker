@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { useTheme } from "../contexts";
+import { useTheme, useLanguage } from "../contexts";
 import logo from "../assets/images/ProfRanker-logo.png";
 import { Link, useLocation } from "react-router-dom";
 import UserMenu from "./UserMenu";
@@ -9,18 +9,18 @@ import { Moon, Sun } from "lucide-react";
 export default function Header({ academicYear }) {
   const { currentUser, isLoggedIn, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
-  const [selectedLanguage, setSelectedLanguage] = useState("EL");
 
   const rolesInGreek = {
-    admin: "Διαχειριστής",
+    admin: t("header.roleAdmin"),
     applicant: {
-      male: "Υποψήφιος",
-      female: "Υποψήφια",
+      male: t("header.roleApplicantMale"),
+      female: t("header.roleApplicantFemale"),
     },
     guest: {
-      male: "Επισκέπτης",
-      female: "Επισκέπτρια",
+      male: t("header.roleGuestMale"),
+      female: t("header.roleGuestFemale"),
     },
   };
 
@@ -72,10 +72,10 @@ export default function Header({ academicYear }) {
 
         <div className="flex-1 flex flex-col items-start justify-center text-left md:px-2">
           <h1 className="text-xl lg:text-xl font-semibold text-gray-700 dark:text-[var(--color-text-primary)]">
-            ΑΙΤΗΣΗ ΥΠΟΨΗΦΙΟΤΗΤΑΣ ΔΙΔΑΣΚΟΝΤΩΝ ΠΑΝΕΠΙΣΤΗΜΙΟΥ ΠΑΤΡΩΝ {academicYear}
+            {t("header.title", { year: academicYear })}
           </h1>
           <p className="mt-1 text-base lg:text-[15px] text-gray-600 dark:text-[var(--color-text-secondary)]">
-            Πρόσκληση απόκτησης διδακτικής-ακαδημαϊκής εμπειρίας για νέους επιστήμονες, κατόχους διδακτορικού
+            {t("header.subtitle")}
           </p>
         </div>
 
@@ -83,9 +83,9 @@ export default function Header({ academicYear }) {
           <div className="inline-flex rounded-md border border-gray-300 overflow-hidden bg-white dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)]">
             <button
               type="button"
-              onClick={() => setSelectedLanguage("EN")}
+              onClick={() => setLanguage("en")}
               className={`px-3 py-1.5 text-xs font-semibold tracking-wide ${
-                selectedLanguage === "EN"
+                language === "en"
                   ? "bg-patras-buccaneer text-white dark:bg-[var(--color-primary)] dark:text-[var(--color-primary-contrast)]"
                   : "text-gray-600 hover:bg-gray-50 dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-bg-muted)]"
               }`}
@@ -94,9 +94,9 @@ export default function Header({ academicYear }) {
             </button>
             <button
               type="button"
-              onClick={() => setSelectedLanguage("EL")}
+              onClick={() => setLanguage("el")}
               className={`px-3 py-1.5 text-xs font-semibold tracking-wide ${
-                selectedLanguage === "EL"
+                language === "el"
                   ? "bg-patras-buccaneer text-white dark:bg-[var(--color-primary)] dark:text-[var(--color-primary-contrast)]"
                   : "text-gray-600 hover:bg-gray-50 dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-bg-muted)]"
               }`}
@@ -110,8 +110,8 @@ export default function Header({ academicYear }) {
               type="button"
               onClick={toggleTheme}
               className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 text-patras-buccaneer hover:bg-patras-albescentWhite/40 dark:border-[var(--color-border)] dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-bg-muted)]"
-              aria-label={isDarkMode ? "Αλλάξτε σε φωτεινή λειτουργία" : "Αλλάξτε σε σκοτεινή λειτουργία"}
-              title={isDarkMode ? "Αλλάξτε σε φωτεινή λειτουργία" : "Αλλάξτε σε σκοτεινή λειτουργία"}
+              aria-label={isDarkMode ? t("header.switchToLight") : t("header.switchToDark")}
+              title={isDarkMode ? t("header.switchToLight") : t("header.switchToDark")}
             >
               {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
@@ -142,7 +142,7 @@ export default function Header({ academicYear }) {
                           : "bg-white text-patras-buccaneer border-patras-buccaneer hover:bg-patras-albescentWhite dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)] dark:border-[var(--color-border-accent)] dark:hover:bg-[var(--color-bg-muted)]"
                       }`}
                     >
-                      Σύνδεση
+                      {t("header.login")}
                     </Link>
 
                     <Link
@@ -153,7 +153,7 @@ export default function Header({ academicYear }) {
                           : "bg-white text-patras-buccaneer border-patras-buccaneer hover:bg-patras-albescentWhite dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)] dark:border-[var(--color-border-accent)] dark:hover:bg-[var(--color-bg-muted)]"
                       }`}
                     >
-                      Εγγραφή
+                      {t("header.register")}
                     </Link>
                   </div>
                 )}

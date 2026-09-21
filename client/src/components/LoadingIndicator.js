@@ -1,4 +1,5 @@
 import React from "react";
+import { useLanguage } from "../contexts";
 
 const sizeClassMap = {
   sm: "h-5 w-5 border-b-2",
@@ -7,12 +8,14 @@ const sizeClassMap = {
 };
 
 export default function LoadingIndicator({
-  text = "Φόρτωση...",
+  text,
   showText = true,
   size = "md",
   textClassName = "mt-4 text-gray-600 dark:text-[var(--color-text-primary)]",
   className = "",
 }) {
+  const { t } = useLanguage();
+  const resolvedText = text ?? t("common.loading");
   const sizeClasses = sizeClassMap[size] || sizeClassMap.md;
 
   return (
@@ -21,8 +24,8 @@ export default function LoadingIndicator({
         className={`inline-block animate-spin rounded-full border-patras-buccaneer dark:border-[var(--color-text-primary)] ${sizeClasses}`}
         aria-hidden="true"
       ></div>
-      {showText && <p className={textClassName}>{text}</p>}
-      <span className="sr-only">{text}</span>
+      {showText && <p className={textClassName}>{resolvedText}</p>}
+      <span className="sr-only">{resolvedText}</span>
     </div>
   );
 }

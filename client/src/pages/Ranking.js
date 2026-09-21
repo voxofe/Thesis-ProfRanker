@@ -8,6 +8,7 @@ import Checkbox from "../components/Checkbox";
 import SortableTable, { formatDateTimeCell } from "../components/SortableTable";
 import RefreshButton from "../components/RefreshButton";
 import PageTitle from "../components/PageTitle";
+import { useLanguage } from "../contexts";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -17,19 +18,19 @@ const API_BASE_URL = (
   ""
 );
 
-const columns = [
-  { key: "applicationId", label: "Αριθμός Αίτησης" },
-  { key: "firstName", label: "Όνομα" },
-  { key: "lastName", label: "Επώνυμο" },
-  { key: "school", label: "Σχολή" },
-  { key: "department", label: "Τμήμα" },
-  { key: "scientificField", label: "Επιστημονικό πεδίο" },
-  { key: "submitDate", label: "Ημερομηνία Υποβολής" },
-  { key: "status", label: "Κατάσταση αιτήσεων" },
-  { key: "totalPoints", label: "Βαθμολόγηση (σε μόρια)" },
+const columnKeys = [
+  { key: "applicationId", labelKey: "ranking.colApplicationId" },
+  { key: "firstName", labelKey: "ranking.colFirstName" },
+  { key: "lastName", labelKey: "ranking.colLastName" },
+  { key: "school", labelKey: "ranking.colSchool" },
+  { key: "department", labelKey: "ranking.colDepartment" },
+  { key: "scientificField", labelKey: "ranking.colScientificField" },
+  { key: "submitDate", labelKey: "ranking.colSubmitDate" },
+  { key: "status", labelKey: "ranking.colStatus" },
+  { key: "totalPoints", labelKey: "ranking.colTotalPoints" },
 ];
 
-const statusLabels = ["Ενεργή", "Ολοκληρωμένη"];
+const statusCodes = ["active", "completed"];
 
 function parseDDMMYYYY(dateStr, timeStr, fallbackTime = "00:00") {
   if (!dateStr) return null;
@@ -128,14 +129,14 @@ function resolveSubmitDateRaw(applicant) {
 function getApplicationStatus(endDateStr, endTimeStr) {
   const end = parseDDMMYYYY(endDateStr, endTimeStr, "23:59");
   if (!end) return "—";
-  return end >= new Date() ? "Ενεργή" : "Ολοκληρωμένη";
+  return end >= new Date() ? "active" : "completed";
 }
 
 function getStatusBadgeClasses(status) {
   const base =
     "inline-flex items-center justify-center rounded-full px-2 py-1 text-xs font-semibold";
-  if (status === "Ενεργή") return `${base} bg-yellow-100 text-yellow-800 border border-yellow-200`;
-  if (status === "Ολοκληρωμένη") return `${base} bg-green-100 text-green-800 border border-green-200`;
+  if (status === "active") return `${base} bg-yellow-100 text-yellow-800 border border-yellow-200`;
+  if (status === "completed") return `${base} bg-green-100 text-green-800 border border-green-200`;
   return `${base} bg-gray-100 dark:bg-[var(--color-bg-surface)] text-gray-700 dark:text-[var(--color-text-secondary)] border border-gray-200 dark:border-[var(--color-border)]`;
 }
 
@@ -177,13 +178,14 @@ function isCompletedForAppliedFilter(app) {
 
   if (endDate) {
     const derivedStatus = getApplicationStatus(endDate, endTime);
-    return derivedStatus === "Ολοκληρωμένη";
+    return derivedStatus === "completed";
   }
 
   return false;
 }
 
 export default function Ranking() {
+  const { t } = useLanguage();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -301,9 +303,9 @@ export default function Ranking() {
       schools,
       departments,
       scientificFields,
-      statuses: statusLabels,
+      statuses: statusCodes.map((c) => t(`positionState.${c}`)),
     };
-  }, [users]);
+  }, [users, t]);
 
   // Sync filters to URL
   useEffect(() => {
@@ -342,8 +344,8 @@ export default function Ranking() {
   // Filter users client-side
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
-      // Role-based filter: only Ολοκληρωμένη for non-admins
-      if (!isAdmin && getApplicationStatus(u.positionEndDate, u.positionEndTime) !== "Ολοκληρωμένη") return false;
+      // Role-based filter: only completed for non-admins
+      if (!isAdmin && getApplicationStatus(u.positionEndDate, u.positionEndTime) !== "completed") return false;
       // School/Department/Scientific Field (OR across categories)
       const hasOrFilters =
         filters.schools.length ||
@@ -356,7 +358,7 @@ export default function Ranking() {
         if (!(schoolMatch || departmentMatch || scientificFieldMatch)) return false;
       }
       // Status (admin only)
-      if (isAdmin && filters.status.length && !filters.status.includes(getApplicationStatus(u.positionEndDate, u.positionEndTime))) return false;
+      if (isAdmin && filters.status.length && !filters.status.includes(t(`positionState.${getApplicationStatus(u.positionEndDate, u.positionEndTime)}`))) return false;
       // Points range
       if (filters.pointsMin && Number(u.totalPoints) < Number(filters.pointsMin)) return false;
       if (filters.pointsMax && Number(u.totalPoints) > Number(filters.pointsMax)) return false;
@@ -376,14 +378,23 @@ export default function Ranking() {
       }
       return true;
     });
-  }, [users, filters, isAdmin]);
+  }, [users, filters, isAdmin, t]);
 
   const searchableUsers = useMemo(
-    () => filteredUsers.map((user) => ({
-      ...user,
-      status: getApplicationStatus(user.positionEndDate, user.positionEndTime),
-    })),
-    [filteredUsers]
+    () => filteredUsers.map((user) => {
+      const statusKey = getApplicationStatus(user.positionEndDate, user.positionEndTime);
+      return {
+        ...user,
+        statusKey,
+        status: statusKey === "—" ? "—" : t(`positionState.${statusKey}`),
+      };
+    }),
+    [filteredUsers, t]
+  );
+
+  const columns = useMemo(
+    () => columnKeys.map((c) => ({ key: c.key, label: t(c.labelKey) })),
+    [t]
   );
 
   const getSortedUsers = (rows, sortBy, sortDirection) => {
@@ -441,8 +452,8 @@ export default function Ranking() {
     if (sortBy === "status") {
       const rank = (u) => {
         const s = getApplicationStatus(u.positionEndDate, u.positionEndTime);
-        if (s === "Ενεργή") return 2;
-        if (s === "Ολοκληρωμένη") return 1;
+        if (s === "active") return 2;
+        if (s === "completed") return 1;
         return 0;
       };
       return [...rows].sort((a, b) => {
@@ -501,19 +512,19 @@ export default function Ranking() {
   // Filter tags
   const filterTags = useMemo(() => {
     const tags = [];
-    filters.schools.forEach(s => tags.push({ key: "schools", value: s, label: `Σχολή: ${s}` }));
-    filters.departments.forEach(d => tags.push({ key: "departments", value: d, label: `Τμήμα: ${d}` }));
-    filters.scientificFields.forEach(sf => tags.push({ key: "scientificFields", value: sf, label: `Επιστημονικό πεδίο: ${sf}` }));
-    if (isAdmin) filters.status.forEach(st => tags.push({ key: "status", value: st, label: `Κατάσταση: ${st}` }));
-    if (filters.pointsMin) tags.push({ key: "pointsMin", value: filters.pointsMin, label: `Μόρια ≥ ${filters.pointsMin}` });
-    if (filters.pointsMax) tags.push({ key: "pointsMax", value: filters.pointsMax, label: `Μόρια ≤ ${filters.pointsMax}` });
+    filters.schools.forEach(s => tags.push({ key: "schools", value: s, label: t("ranking.tagSchool", { value: s }) }));
+    filters.departments.forEach(d => tags.push({ key: "departments", value: d, label: t("ranking.tagDepartment", { value: d }) }));
+    filters.scientificFields.forEach(sf => tags.push({ key: "scientificFields", value: sf, label: t("ranking.tagScientificField", { value: sf }) }));
+    if (isAdmin) filters.status.forEach(st => tags.push({ key: "status", value: st, label: t("ranking.tagStatus", { value: st }) }));
+    if (filters.pointsMin) tags.push({ key: "pointsMin", value: filters.pointsMin, label: t("ranking.tagPointsMin", { value: filters.pointsMin }) });
+    if (filters.pointsMax) tags.push({ key: "pointsMax", value: filters.pointsMax, label: t("ranking.tagPointsMax", { value: filters.pointsMax }) });
     const submitRange = filters.dateRanges?.submitDate;
     if (submitRange?.from) {
       tags.push({
         key: "dateRange",
         rangeKey: "submitDate",
         bound: "from",
-        label: `Ημερομηνία υποβολής από ${formatIsoDateLabel(submitRange.from)}`,
+        label: t("ranking.tagSubmitFrom", { date: formatIsoDateLabel(submitRange.from) }),
       });
     }
     if (submitRange?.to) {
@@ -521,11 +532,11 @@ export default function Ranking() {
         key: "dateRange",
         rangeKey: "submitDate",
         bound: "to",
-        label: `Ημερομηνία υποβολής έως ${formatIsoDateLabel(submitRange.to)}`,
+        label: t("ranking.tagSubmitTo", { date: formatIsoDateLabel(submitRange.to) }),
       });
     }
     return tags;
-  }, [filters, isAdmin]);
+  }, [filters, isAdmin, t]);
 
   const [searchText, setSearchText] = useState("");
   const removeTag = (tag) => {
@@ -666,8 +677,9 @@ export default function Ranking() {
         </td>
         <td className="text-center text-patras-buccaneer text-[13px] whitespace-normal break-words w-28">
           {(() => {
-            const status = getApplicationStatus(applicant.positionEndDate, applicant.positionEndTime);
-            const content = <span className={getStatusBadgeClasses(status)}>{status}</span>;
+            const statusKey = getApplicationStatus(applicant.positionEndDate, applicant.positionEndTime);
+            const statusLabel = statusKey === "—" ? "—" : t(`positionState.${statusKey}`);
+            const content = <span className={getStatusBadgeClasses(statusKey)}>{statusLabel}</span>;
             return clickable ? (
               <Link to={getApplicationScoreLink(applicant)} className="block w-full h-full px-6 py-4">
                 {content}
@@ -700,7 +712,7 @@ export default function Ranking() {
 
   return (
     <div className="pt-0">
-      <PageTitle className="mb-6">Λίστα κατάταξης αιτήσεων</PageTitle>
+      <PageTitle className="mb-6">{t("ranking.pageTitle")}</PageTitle>
 
       {/* Filter Modal */}
       <FilterModal
@@ -710,10 +722,10 @@ export default function Ranking() {
         setFilters={setFilters}
         options={filterOptions}
         isAdmin={isAdmin}
-        title="Φίλτρα αιτήσεων"
+        title={t("ranking.filterModalTitle")}
         titleClassName="text-gray-900 dark:text-[var(--color-text-primary)]"
         showDateRanges
-        dateRangeFields={[{ key: "submitDate", label: "Ημερομηνία υποβολής" }]}
+        dateRangeFields={[{ key: "submitDate", label: t("ranking.submitDateLabel") }]}
         onReset={() => setFilters({
           schools: [],
           departments: [],
@@ -763,7 +775,7 @@ export default function Ranking() {
                     });
                   }
                 }}
-                label="Εμφάνιση αιτήσεων για τις θέσεις που έχω επιλέξει (μόνο ολοκληρωμένες)"
+                label={t("ranking.showMyPositions")}
               />
             </div>
           )}
@@ -776,7 +788,7 @@ export default function Ranking() {
               <button
                 className="ml-2 text-patras-sanguineBrown hover:text-red-700 dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] text-xs font-bold"
                 onClick={() => removeTag(tag)}
-                title="Αφαίρεση φίλτρου"
+                title={t("ranking.removeFilter")}
               >
                 &times;
               </button>
@@ -795,7 +807,7 @@ export default function Ranking() {
                 <path d="M10 11v6" />
                 <path d="M14 11v6" />
               </svg>
-              Καθαρισμός όλων
+              {t("ranking.clearAll")}
             </button>
           )}
         </div>
@@ -815,7 +827,7 @@ export default function Ranking() {
               type="text"
               value={searchText}
               onChange={(event) => setSearchText(event.target.value)}
-              placeholder="Αναζήτηση αιτήσεων..."
+              placeholder={t("ranking.searchPlaceholder")}
               className="w-full rounded-md border border-patras-capePalliser/50 bg-white dark:bg-[var(--color-bg-card)] py-1.5 pl-9 pr-3 text-sm text-gray-800 dark:text-[var(--color-text-primary)] shadow-sm focus:border-patras-buccaneer focus:outline-none"
             />
             {searchText && (
@@ -823,7 +835,7 @@ export default function Ranking() {
                 type="button"
                 onClick={() => setSearchText("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500/5 text-red-700 hover:bg-red-500/10 hover:text-red-800"
-                aria-label="Καθαρισμός αναζήτησης"
+                aria-label={t("ranking.clearSearch")}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -832,14 +844,14 @@ export default function Ranking() {
             )}
           </div>
           <button
-            aria-label="Άνοιγμα φίλτρων"
+            aria-label={t("ranking.openFilters")}
             className="flex items-center gap-2 px-3 py-1 rounded-full bg-patras-buccaneer text-white font-medium text-sm shadow-sm hover:bg-patras-sanguineBrown transition border border-patras-buccaneer"
             onClick={() => setFilterOpen(true)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414A2 2 0 0013 14.414V19a1 1 0 01-1.447.894l-4-2A1 1 0 017 17v-2.586a2 2 0 00-.586-1.414L3 6.707A1 1 0 013 6V4z"/>
             </svg>
-            Φίλτρα
+            {t("ranking.filters")}
           </button>
         </div>
       </div>
@@ -859,7 +871,7 @@ export default function Ranking() {
           initialSortDirection="desc"
           headerCellClassName={headerCellClassName}
           tbodyClassName="divide-y divide-patras-cameo text-[13px] [&_tr]:transition-none [&_td]:text-patras-buccaneer dark:[&_td]:text-[var(--color-text-primary)]"
-          emptyMessage="Δεν βρέθηκαν αποτελέσματα με βάση τα φίλτρα σας."
+          emptyMessage={t("ranking.empty")}
           renderRow={renderRow}
         />
     </div>

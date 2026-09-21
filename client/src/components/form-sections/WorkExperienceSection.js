@@ -1,5 +1,6 @@
 import React from "react";
 import { useFormData } from "../../contexts/FormDataContext";
+import { useLanguage } from "../../contexts";
 import CustomSelect from "../CustomSelect";
 import MultipleUploadStrip from "../MultipleUploadStrip";
 
@@ -11,6 +12,7 @@ export default function WorkExperienceSection() {
     addEmploymentCertificate,
     removeEmploymentCertificate,
   } = useFormData();
+  const { t } = useLanguage();
 
   const workExperienceOptions = Array.from({ length: 11 }, (_, index) => ({
     value: String(index),
@@ -20,7 +22,7 @@ export default function WorkExperienceSection() {
   return (
     <div className="space-y-6">
       <CustomSelect
-        label="Χρόνια μεταδιδακτορικής εργασιακής εμπειρίας (εξαιρείται η διδακτική εμπειρία)"
+        label={t("sections.workExperience.years")}
         value={
           formData.workExperience === ""
             ? ""
@@ -38,7 +40,7 @@ export default function WorkExperienceSection() {
       />
 
       <MultipleUploadStrip
-        label="Βεβαιώσεις προϋπηρεσίας από τον Φορέα / Συμβάσεις ως τεκμήρια μεταδιδακτορικής εργασιακής εμπειρίας (εξαιρείται η διδακτική εμπειρία)"
+        label={t("sections.workExperience.certificates")}
         files={formData.employmentCertificates}
         accept=".pdf,.doc,.docx,.odt"
         onAddFile={addEmploymentCertificate}

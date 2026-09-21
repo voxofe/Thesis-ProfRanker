@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import InputField from "./InputField";
 import FlowbiteDateField from "./FlowbiteDateField";
+import { useLanguage } from "../contexts";
 import useBodyScrollLock from "../utils/useBodyScrollLock";
 
 const EMPTY_DATE_FIELDS = [];
@@ -13,7 +14,7 @@ export default function FilterModal({
   options,
   isAdmin,
   onReset,
-  pointsLabel = "Εύρος μορίων",
+  pointsLabel,
   showStatus = true,
   showPoints = true,
   showSchools = true,
@@ -22,10 +23,13 @@ export default function FilterModal({
   showGender = false,
   showDateRanges = false,
   dateRangeFields = EMPTY_DATE_FIELDS,
-  title = "Φίλτρα",
+  title,
   titleClassName = "text-gray-900",
 }) {
   useBodyScrollLock(open);
+  const { t } = useLanguage();
+  const resolvedPointsLabel = pointsLabel ?? t("filter.pointsLabel");
+  const resolvedTitle = title ?? t("filter.title");
 
   // Local state for multi-selects
   const [localFilters, setLocalFilters] = useState(filters);
@@ -160,19 +164,19 @@ export default function FilterModal({
         <button
           className="absolute top-3 right-3 text-gray-600 hover:text-red-700 text-3xl leading-none dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
           onClick={onClose}
-          title="Κλείσιμο"
+          title={t("common.close")}
         >
           &times;
         </button>
         <h2 className={`text-lg font-semibold mb-4 border-b border-gray-200 pb-2 dark:border-[var(--color-border-soft)] dark:text-[var(--color-text-primary)] ${titleClassName}`.trim()}>
-          {title}
+          {resolvedTitle}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* School */}
           {showSchools && (
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-[var(--color-text-secondary)]">
-                Σχολή
+                {t("filter.school")}
               </label>
               <div className="flex flex-wrap gap-2">
                 {(options?.schools || []).map((school) => (
@@ -196,7 +200,7 @@ export default function FilterModal({
           {showDepartments && (
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-[var(--color-text-secondary)]">
-                Τμήμα
+                {t("filter.department")}
               </label>
               <div className="flex flex-wrap gap-2">
                 {(options?.departments || []).map((dep) => (
@@ -220,7 +224,7 @@ export default function FilterModal({
           {showScientificFields && (
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-[var(--color-text-secondary)]">
-                Επιστημονικό πεδίο
+                {t("filter.scientificField")}
               </label>
               <div className="flex flex-wrap gap-2">
                 {(options?.scientificFields || []).map((sf) => (
@@ -244,7 +248,7 @@ export default function FilterModal({
           {showGender && (
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-[var(--color-text-secondary)]">
-                Φύλο
+                {t("filter.gender")}
               </label>
               <div className="flex flex-wrap gap-2">
                 {(options?.genders || []).map((genderOption) => {
@@ -273,7 +277,7 @@ export default function FilterModal({
           {showStatus && isAdmin && (
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-[var(--color-text-secondary)]">
-                Κατάσταση θέσης
+                {t("filter.positionStatus")}
               </label>
               <div className="flex flex-wrap gap-2">
                 {options.statuses.map((status) => (
@@ -297,7 +301,7 @@ export default function FilterModal({
           {showPoints && (
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-[var(--color-text-secondary)]">
-                {pointsLabel}
+                {resolvedPointsLabel}
               </label>
               <div className="flex gap-2 items-center">
                 <InputField
@@ -310,7 +314,7 @@ export default function FilterModal({
                   onChange={(v) => handleInput("pointsMin", v)}
                   onBlur={() => handleInput("pointsMin", localFilters.pointsMin)}
                   className="w-24"
-                  placeholder="Ελάχιστο"
+                  placeholder={t("filter.min")}
                 />
                 <span className="mx-2 text-gray-500 dark:text-[var(--color-text-muted)]">-</span>
                 <InputField
@@ -323,7 +327,7 @@ export default function FilterModal({
                   onChange={(v) => handleInput("pointsMax", v)}
                   onBlur={() => handleInput("pointsMax", localFilters.pointsMax)}
                   className="w-24"
-                  placeholder="Μέγιστο"
+                  placeholder={t("filter.max")}
                 />
               </div>
             </div>
@@ -337,13 +341,13 @@ export default function FilterModal({
                     <div key={field.key}>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <FlowbiteDateField
-                          label={`${field.label} από`}
+                          label={t("filter.dateFrom", { label: field.label })}
                           value={range.from}
                           onChange={(value) => handleDateRangeChange(field.key, "from", value)}
                           placeholder="DD-MM-YYYY"
                         />
                         <FlowbiteDateField
-                          label={`${field.label} έως`}
+                          label={t("filter.dateTo", { label: field.label })}
                           value={range.to}
                           onChange={(value) => handleDateRangeChange(field.key, "to", value)}
                           placeholder="DD-MM-YYYY"
@@ -362,14 +366,14 @@ export default function FilterModal({
             className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 text-sm/6font-semibold hover:bg-gray-200 dark:bg-[var(--color-bg-muted)] dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-bg-surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
             onClick={handleReset}
           >
-            Καθαρισμός
+            {t("common.clear")}
           </button>
           <button
             type="button"
             className="px-4 py-2 rounded-md bg-patras-buccaneer text-white text-sm/6 font-semibold hover:bg-patras-sanguineBrown focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
             onClick={handleApply}
           >
-            Εφαρμογή
+            {t("filter.apply")}
           </button>
         </div>
       </div>

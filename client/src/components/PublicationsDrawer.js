@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from "react";
+import { useLanguage } from "../contexts";
 
 function IssnCell({ issn }) {
+  const { t } = useLanguage();
   const hasWrong = issn && issn.toLowerCase().includes("wrong");
   const cleanIssn = hasWrong ? issn.replace(/\(wrong\)/gi, "").trim() : issn;
 
@@ -29,7 +31,7 @@ function IssnCell({ issn }) {
           </svg>
           {/* Tooltip */}
           <span className="absolute left-6 top-1 z-10 hidden group-hover:block bg-white dark:bg-[var(--color-bg-card)] border border-red-400 text-red-600 text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap">
-            Το ISSN δεν βρέθηκε 
+            {t("publicationsDrawer.issnNotFound")}
           </span>
         </span>
       )}
@@ -39,6 +41,7 @@ function IssnCell({ issn }) {
 
 export default function PublicationsDrawer({ publications }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useLanguage();
 
   const getPublicationPoints = (quartile) => {
     const q = String(quartile || "").trim().toUpperCase();
@@ -113,7 +116,7 @@ export default function PublicationsDrawer({ publications }) {
         onClick={toggleDrawer}
       >
         <span className="flex items-center text-patras-buccaneer dark:text-patras-albescentWhite">
-          Επιστημονικές δημοσιεύσεις
+          {t("publicationsDrawer.header")}
           <span className="text-patras-buccaneer dark:text-patras-albescentWhite text-lg ml-2">
             {isOpen ? "▼" : "\u25B6\uFE0E"}
           </span>
@@ -127,31 +130,31 @@ export default function PublicationsDrawer({ publications }) {
             {journalRows.length > 0 && (
               <div>
                 <h3 className="mb-3 text-sm font-semibold text-patras-buccaneer">
-                  Δημοσιεύσεις σε επιστημονικά περιοδικά
+                  {t("publicationsDrawer.journalsHeading")}
                 </h3>
                 <table className="min-w-full bg-[#fffbf6] border border-patras-cameo rounded-lg shadow-md">
                   <thead className="bg-patras-buccaneer">
                     <tr>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Συγγραφείς
+                        {t("publicationsDrawer.authors")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Έτος
+                        {t("publicationsDrawer.year")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Τίτλος
+                        {t("publicationsDrawer.title")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Τίτλος περιοδικού
+                        {t("publicationsDrawer.journalTitle")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        ISSN
+                        {t("publicationsDrawer.issn")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Quartile
+                        {t("publicationsDrawer.quartile")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider">
-                        Μόρια
+                        {t("publicationsDrawer.points")}
                       </th>
                     </tr>
                   </thead>
@@ -189,28 +192,28 @@ export default function PublicationsDrawer({ publications }) {
             {conferenceRows.length > 0 && (
               <div>
                 <h3 className="mb-3 text-sm font-semibold text-patras-buccaneer">
-                  Δημοσιεύσεις σε πρακτικά διεθνών συνεδρίων
+                  {t("publicationsDrawer.conferenceHeading")}
                 </h3>
                 <table className="min-w-full bg-[#fffbf6] border border-patras-cameo rounded-lg shadow-md">
                   <thead className="bg-patras-buccaneer">
                     <tr>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Συγγραφείς
+                        {t("publicationsDrawer.authors")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Έτος
+                        {t("publicationsDrawer.year")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Τίτλος
+                        {t("publicationsDrawer.title")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Τίτλος συνεδρίου
+                        {t("publicationsDrawer.conferenceTitle")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Εκδότης
+                        {t("publicationsDrawer.publisher")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider">
-                        Μόρια
+                        {t("publicationsDrawer.points")}
                       </th>
                     </tr>
                   </thead>
@@ -245,25 +248,25 @@ export default function PublicationsDrawer({ publications }) {
             {bookRows.length > 0 && (
               <div>
                 <h3 className="mb-3 text-sm font-semibold text-patras-buccaneer">
-                  Βιβλία/μονογραφίες
+                  {t("publicationsDrawer.booksHeading")}
                 </h3>
                 <table className="min-w-full bg-[#fffbf6] border border-patras-cameo rounded-lg shadow-md">
                   <thead className="bg-patras-buccaneer">
                     <tr>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Συγγραφείς
+                        {t("publicationsDrawer.authors")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Έτος
+                        {t("publicationsDrawer.year")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Τίτλος
+                        {t("publicationsDrawer.title")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Εκδότης
+                        {t("publicationsDrawer.publisher")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider">
-                        Μόρια
+                        {t("publicationsDrawer.points")}
                       </th>
                     </tr>
                   </thead>
@@ -295,25 +298,25 @@ export default function PublicationsDrawer({ publications }) {
             {conferenceAnnouncementRows.length > 0 && (
               <div>
                 <h3 className="mb-3 text-sm font-semibold text-patras-buccaneer">
-                  Ανακοίνωση σε συνέδριο
+                  {t("publicationsDrawer.conferencePresentationHeading")}
                 </h3>
                 <table className="min-w-full bg-[#fffbf6] border border-patras-cameo rounded-lg shadow-md">
                   <thead className="bg-patras-buccaneer">
                     <tr>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Συγγραφείς
+                        {t("publicationsDrawer.authors")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Έτος
+                        {t("publicationsDrawer.year")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Τίτλος
+                        {t("publicationsDrawer.title")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Τίτλος συνεδρίου
+                        {t("publicationsDrawer.conferenceTitle")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider">
-                        Μόρια
+                        {t("publicationsDrawer.points")}
                       </th>
                     </tr>
                   </thead>
@@ -345,22 +348,22 @@ export default function PublicationsDrawer({ publications }) {
             {otherRows.length > 0 && (
               <div>
                 <h3 className="mb-3 text-sm font-semibold text-patras-buccaneer">
-                  Άλλες δημοσιεύσεις
+                  {t("publicationsDrawer.otherHeading")}
                 </h3>
                 <table className="min-w-full bg-[#fffbf6] border border-patras-cameo rounded-lg shadow-md">
                   <thead className="bg-patras-buccaneer">
                     <tr>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Συγγραφείς
+                        {t("publicationsDrawer.authors")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Έτος
+                        {t("publicationsDrawer.year")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                        Τίτλος
+                        {t("publicationsDrawer.title")}
                       </th>
                       <th className="px-4 py-2 text-center text-[15px] font-semibold text-white uppercase tracking-wider">
-                        Μόρια
+                        {t("publicationsDrawer.points")}
                       </th>
                     </tr>
                   </thead>

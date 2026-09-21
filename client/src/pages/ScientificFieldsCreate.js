@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useAuth, useCreatePositionValidation } from "../contexts";
+import { useAuth, useCreatePositionValidation, useLanguage } from "../contexts";
 import { useToast } from "../contexts/ToastContext";
 import InputField from "../components/InputField";
 import CustomSelect from "../components/CustomSelect";
@@ -55,6 +55,7 @@ const API_BASE_URL = (
 
 export default function ScientificFieldsCreate() {
   const { currentUser, isLoading } = useAuth();
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const { updateValidity, isValid, validationErrors } = useCreatePositionValidation();
@@ -146,8 +147,8 @@ export default function ScientificFieldsCreate() {
   const showCourseError = submitted || touched.courses;
   const showDateTimeError = submitted || touched.startTime || touched.endTime;
   const progressLabel = isEditMode
-    ? `Ενημέρωση πεδίου ${formData.scientificField || ""}`
-    : `Δημιουργία πεδίου ${formData.scientificField || ""}`;
+    ? t("scientificFieldsCreate.progressUpdate", { name: formData.scientificField || "" })
+    : t("scientificFieldsCreate.progressCreate", { name: formData.scientificField || "" });
 
   useEffect(() => {
     progressPercentRef.current = progressPercent;
@@ -349,7 +350,7 @@ export default function ScientificFieldsCreate() {
           } catch (positionError) {
             const message =
               positionError?.response?.data?.error ||
-              "Αποτυχία ενημέρωσης ημερομηνιών θέσης.";
+              t("scientificFieldsCreate.positionDatesFailed");
             showToast({ type: "error", message });
           }
         }
@@ -360,8 +361,8 @@ export default function ScientificFieldsCreate() {
       showToast({
         type: "success",
         message: isEditMode
-          ? "Το επιστημονικό πεδίο ενημερώθηκε με επιτυχία!"
-          : "Το επιστημονικό πεδίο δημιουργήθηκε με επιτυχία!",
+          ? t("scientificFieldsCreate.fieldUpdated")
+          : t("scientificFieldsCreate.fieldCreated"),
       });
 
       if (isEditMode) {
@@ -383,7 +384,7 @@ export default function ScientificFieldsCreate() {
         }, 1500);
       }, 500);
     } catch (error) {
-      const message = error?.response?.data?.error || "Αποτυχία δημιουργίας πεδίου. Παρακαλώ δοκιμάστε ξανά.";
+      const message = error?.response?.data?.error || t("scientificFieldsCreate.createFailed");
       showToast({ type: "error", message });
       setSubmitting(false);
       setProgressPercent(0);
@@ -415,7 +416,7 @@ export default function ScientificFieldsCreate() {
       />
       <header className="text-center pb-2">
         <PageTitle>
-          {isEditMode ? "Ενημέρωση πεδίου" : "Δημιουργία πεδίου"}
+          {isEditMode ? t("scientificFieldsCreate.titleUpdate") : t("scientificFieldsCreate.titleCreate")}
         </PageTitle>
       </header>
 
@@ -426,11 +427,11 @@ export default function ScientificFieldsCreate() {
       >
         {/* BASIC INFO */}
         <section>
-          <h2 className="text-lg font-semibold text-gray-700 dark:text-[var(--color-text-secondary)] mb-4 border-b pb-1">Βασικές πληροφορίες</h2>
+          <h2 className="text-lg font-semibold text-gray-700 dark:text-[var(--color-text-secondary)] mb-4 border-b pb-1">{t("scientificFieldsCreate.basicInfo")}</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InputField
-              label="Όνομα επιστημονικού πεδίου"
+              label={t("scientificFieldsCreate.fieldNameLabel")}
               value={formData.scientificField}
               onChange={(val) => {
                 markTouched("scientificField");
@@ -446,7 +447,7 @@ export default function ScientificFieldsCreate() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-3">
             <CustomSelect
-              label="Σχολή"
+              label={t("scientificFieldsCreate.schoolLabel")}
               value={formData.school}
               onChange={(val) => {
                 markTouched("school");
@@ -459,7 +460,7 @@ export default function ScientificFieldsCreate() {
             />
 
             <CustomSelect
-              label="Τμήμα"
+              label={t("scientificFieldsCreate.departmentLabel")}
               value={formData.department}
               onChange={(val) =>
                 {
@@ -501,12 +502,12 @@ export default function ScientificFieldsCreate() {
 
         {showPositionFields && (
           <section>
-            <h2 className="text-lg font-semibold text-gray-700 dark:text-[var(--color-text-secondary)] mb-4 border-b pb-1">Στοιχεία θέσης</h2>
+            <h2 className="text-lg font-semibold text-gray-700 dark:text-[var(--color-text-secondary)] mb-4 border-b pb-1">{t("scientificFieldsCreate.positionInfo")}</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <FlowbiteDateField
-                  label="Ημερομηνία έναρξης"
+                  label={t("scientificFieldsCreate.startDateLabel")}
                   value={formData.startDate}
                   onChange={(val) => {
                     markTouched("startDate");
@@ -537,7 +538,7 @@ export default function ScientificFieldsCreate() {
               </div>
               <div>
                 <FlowbiteDateField
-                  label="Ημερομηνία λήξης"
+                  label={t("scientificFieldsCreate.endDateLabel")}
                   value={formData.endDate}
                   onChange={(val) => {
                     markTouched("endDate");
@@ -569,7 +570,7 @@ export default function ScientificFieldsCreate() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
               <InputField
-                label="Ώρα έναρξης"
+                label={t("scientificFieldsCreate.startTimeLabel")}
                 type="time"
                 value={formData.startTime}
                 onChange={(val) => {
@@ -586,7 +587,7 @@ export default function ScientificFieldsCreate() {
                 )}
               />
               <InputField
-                label="Ώρα λήξης"
+                label={t("scientificFieldsCreate.endTimeLabel")}
                 type="time"
                 value={formData.endTime}
                 onChange={(val) => {
@@ -620,11 +621,11 @@ export default function ScientificFieldsCreate() {
           >
             {submitting
               ? isEditMode
-                ? "Ενημέρωση..."
-                : "Δημιουργία..."
+                ? t("scientificFieldsCreate.submittingUpdate")
+                : t("scientificFieldsCreate.submittingCreate")
               : isEditMode
-                ? "Ενημέρωση πεδίου"
-                : "Δημιουργία πεδίου"}
+                ? t("scientificFieldsCreate.titleUpdate")
+                : t("scientificFieldsCreate.titleCreate")}
           </button>
         </div>
       </form>

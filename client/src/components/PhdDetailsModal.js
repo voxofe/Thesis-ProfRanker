@@ -1,9 +1,11 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import useBodyScrollLock from "../utils/useBodyScrollLock";
+import { useLanguage } from "../contexts";
 
 export default function PhdDetailsModal({ open, onClose, title, abstract, keywords }) {
   useBodyScrollLock(open);
+  const { t } = useLanguage();
 
   if (!open) return null;
   if (typeof document === "undefined") return null;
@@ -25,27 +27,27 @@ export default function PhdDetailsModal({ open, onClose, title, abstract, keywor
       >
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-4 dark:border-[var(--color-border-soft)]">
           <div>
-            <h2 className="text-base/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">Διδακτορική διατριβή:</h2>
+            <h2 className="text-base/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t("phd.title")}</h2>
             <p className="text-base text-gray-600 dark:text-[var(--color-text-secondary)]">{safeTitle || "—"}</p>
           </div>
           <button
             type="button"
             className="text-gray-600 hover:text-red-700 text-2xl leading-none dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-patras-buccaneer dark:focus-visible:ring-[var(--color-primary)]"
             onClick={onClose}
-            title="Κλείσιμο"
+            title={t("common.close")}
           >
             &times;
           </button>
         </div>
         <div className="text-sm text-gray-700 space-y-6 overflow-y-auto px-6 py-4 flex-1 min-h-0 dark:text-[var(--color-text-secondary)]">
           <div>
-            <h3 className="text-sm font-semibold text-gray-800 mb-2 dark:text-[var(--color-text-primary)]">Περίληψη</h3>
+            <h3 className="text-sm font-semibold text-gray-800 mb-2 dark:text-[var(--color-text-primary)]">{t("phd.abstract")}</h3>
             <p className="whitespace-pre-wrap text-gray-700 dark:text-[var(--color-text-secondary)]">
               {safeAbstract || "—"}
             </p>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-gray-800 mb-2 dark:text-[var(--color-text-primary)]">Λέξεις-κλειδιά</h3>
+            <h3 className="text-sm font-semibold text-gray-800 mb-2 dark:text-[var(--color-text-primary)]">{t("phd.keywords")}</h3>
             {safeKeywords.length ? (
               <div className="flex flex-wrap gap-2">
                 {safeKeywords.map((keyword) => (

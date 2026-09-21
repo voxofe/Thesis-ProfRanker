@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import TooltipGray from "./TooltipGray";
+import { useLanguage } from "../contexts";
 
 export default function VaultFileActions({
   file,
@@ -13,6 +14,7 @@ export default function VaultFileActions({
   showReplace = true,
   showDelete = true,
 }) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [localProgress, setLocalProgress] = useState(0);
   const [replaceFileName, setReplaceFileName] = useState("");
@@ -263,7 +265,7 @@ export default function VaultFileActions({
                 <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
                 <circle cx="12" cy="12" r="3" />
               </svg>
-              {isViewing ? "Ανοίγει..." : "Δείτε"}
+              {isViewing ? t("vaultFile.opening") : t("vaultFile.view")}
             </button>
             <button
               type="button"
@@ -279,13 +281,13 @@ export default function VaultFileActions({
                 <path d="M7 10l5 5 5-5" />
                 <path d="M12 15V3" />
               </svg>
-              {isDownloading ? "Λήψη..." : "Κατεβάστε"}
+              {isDownloading ? t("vaultFile.downloading") : t("vaultFile.download")}
             </button>
             {(showReplace || showDelete) && <div className="my-1 border-t border-gray-200 dark:border-[var(--color-border)]" />}
             {showReplace && (
               isApplicationUsed ? (
                 <div className="block w-full">
-                  <TooltipGray content="Το αρχείο χρησιμοποιείται σε υποβληθείσα αίτηση.">
+                  <TooltipGray content={t("vaultFile.usedInApplication")}>
                     <button
                       type="button"
                       disabled
@@ -296,7 +298,7 @@ export default function VaultFileActions({
                         <path d="M21 8l-6-6" />
                         <path d="M20 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
                       </svg>
-                      Αντικατάσταση
+                      {t("vaultFile.replace")}
                     </button>
                   </TooltipGray>
                 </div>
@@ -312,14 +314,14 @@ export default function VaultFileActions({
                     <path d="M21 8l-6-6" />
                     <path d="M20 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
                   </svg>
-                  Αντικατάσταση
+                  {t("vaultFile.replace")}
                 </button>
               )
             )}
             {showDelete && (
               isApplicationUsed ? (
                 <div className="block w-full">
-                  <TooltipGray content="Το αρχείο χρησιμοποιείται σε υποβληθείσα αίτηση.">
+                  <TooltipGray content={t("vaultFile.usedInApplication")}>
                     <button
                       type="button"
                       disabled
@@ -330,7 +332,7 @@ export default function VaultFileActions({
                         <path d="M8 6V4h8v2" />
                         <path d="M6 6l1 14h10l1-14" />
                       </svg>
-                      Διαγραφή
+                      {t("vaultFile.delete")}
                     </button>
                   </TooltipGray>
                 </div>
@@ -349,7 +351,7 @@ export default function VaultFileActions({
                     <path d="M8 6V4h8v2" />
                     <path d="M6 6l1 14h10l1-14" />
                   </svg>
-                  Διαγραφή
+                  {t("vaultFile.delete")}
                 </button>
               )
             )}

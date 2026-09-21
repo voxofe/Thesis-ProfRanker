@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { FormDataContext } from "../contexts/FormDataContext";
+import { useLanguage } from "../contexts";
 import InputField from "../components/InputField";
 import Checkbox from "../components/Checkbox";
 import FlowbiteDateField from "../components/FlowbiteDateField";
@@ -33,6 +34,7 @@ export default function Profile() {
   const { userId } = useParams();
   const { currentUser, refreshUser } = useAuth();
   const { showToast } = useToast();
+  const { t } = useLanguage();
   const [profile, setProfile] = useState(null);
   const [activeSection, setActiveSection] = useState("general");
   const [activePhdIndex, setActivePhdIndex] = useState(0);
@@ -222,18 +224,18 @@ export default function Profile() {
       return "";
     }
     if (key === "firstName") {
-      if (!value.trim()) return "Το όνομα είναι υποχρεωτικό.";
+      if (!value.trim()) return t("profile.firstNameRequired");
       return "";
     }
     if (key === "lastName") {
-      if (!value.trim()) return "Το επώνυμο είναι υποχρεωτικό.";
+      if (!value.trim()) return t("profile.lastNameRequired");
       return "";
     }
     if (key === "mobileNumber") {
       if (!value.trim()) return "";
       const mobile = normalizePhone(value);
       if (!/^69\d{8}$/.test(mobile)) {
-        return "Ο αριθμός κινητού πρέπει να έχει 10 ψηφία και να ξεκινά από 69.";
+        return t("profile.mobileInvalid");
       }
       return "";
     }
@@ -241,13 +243,13 @@ export default function Profile() {
       if (!value.trim()) return "";
       const landline = normalizePhone(value);
       if (!/^2\d{9}$/.test(landline)) {
-        return "Ο αριθμός σταθερού πρέπει να έχει 10 ψηφία και να ξεκινά από 2.";
+        return t("profile.landlineInvalid");
       }
       return "";
     }
     if (key === "postalCode") {
       if (!value.trim()) return "";
-      if (!/^\d{5}$/.test(value.trim())) return "Ο Τ.Κ. πρέπει να έχει 5 ψηφία.";
+      if (!/^\d{5}$/.test(value.trim())) return t("profile.postalInvalid");
       return "";
     }
     return "";
@@ -372,10 +374,10 @@ export default function Profile() {
 
     if (canEditIdentity) {
       if (!form.firstName.trim()) {
-        errors.firstName = "Το όνομα είναι υποχρεωτικό.";
+        errors.firstName = t("profile.firstNameRequired");
       }
       if (!form.lastName.trim()) {
-        errors.lastName = "Το επώνυμο είναι υποχρεωτικό.";
+        errors.lastName = t("profile.lastNameRequired");
       }
     }
 
@@ -383,7 +385,7 @@ export default function Profile() {
       const mobile = normalizePhone(form.mobileNumber);
       if (!/^69\d{8}$/.test(mobile)) {
         errors.mobileNumber =
-          "Ο αριθμός κινητού πρέπει να έχει 10 ψηφία και να ξεκινά από 69.";
+          t("profile.mobileInvalid");
       }
     }
 
@@ -391,13 +393,13 @@ export default function Profile() {
       const landline = normalizePhone(form.landlineNumber);
       if (!/^2\d{9}$/.test(landline)) {
         errors.landlineNumber =
-          "Ο αριθμός σταθερού πρέπει να έχει 10 ψηφία και να ξεκινά από 2.";
+          t("profile.landlineInvalid");
       }
     }
 
     if (form.postalCode?.trim()) {
       if (!/^\d{5}$/.test(form.postalCode.trim())) {
-        errors.postalCode = "Ο Τ.Κ. πρέπει να έχει 5 ψηφία.";
+        errors.postalCode = t("profile.postalInvalid");
       }
     }
 
@@ -406,7 +408,7 @@ export default function Profile() {
 
   const handleSaveProfile = async () => {
     if (isAdminViewingOther) {
-      showToast({ type: "error", message: "Μόνο ανάγνωση για προφίλ άλλου χρήστη." });
+      showToast({ type: "error", message: t("profile.readOnlyOther") });
       return;
     }
     const errors = validateProfileForm();
@@ -414,7 +416,7 @@ export default function Profile() {
       setFormErrors(errors);
       showToast({
         type: "error",
-        message: "Ελέγξτε τα πεδία στα Γενικά στοιχεία.",
+        message: t("profile.checkGeneralFields"),
       });
       return;
     }
@@ -449,13 +451,13 @@ export default function Profile() {
             ? ""
             : String(defaults.workExperience),
       });
-      showToast({ type: "success", message: "Οι αλλαγές αποθηκεύτηκαν." });
+      showToast({ type: "success", message: t("profile.changesSaved") });
       refreshUser();
     } catch (error) {
       console.error("Error saving profile:", error);
       showToast({
         type: "error",
-        message: error?.response?.data?.error || "Αποτυχία αποθήκευσης.",
+        message: error?.response?.data?.error || t("profile.saveFailed"),
       });
     } finally {
       setSaving(false);
@@ -464,7 +466,7 @@ export default function Profile() {
 
   const handleSaveAdditional = async () => {
     if (isAdminViewingOther) {
-      showToast({ type: "error", message: "Μόνο ανάγνωση για προφίλ άλλου χρήστη." });
+      showToast({ type: "error", message: t("profile.readOnlyOther") });
       return;
     }
     const activeDegree = phdDegrees[activePhdIndex] || null;
@@ -475,34 +477,34 @@ export default function Profile() {
     const wordCount = abstractValue.split(/\s+/).filter(Boolean).length;
     if (activeDegree) {
       if (!abstractValue) {
-        showToast({ type: "error", message: "Η περίληψη είναι υποχρεωτική." });
+        showToast({ type: "error", message: t("profile.abstractRequired") });
         return;
       }
       if (wordCount < PHD_ABSTRACT_MIN_WORDS) {
         showToast({
           type: "error",
-          message: `Η περίληψη πρέπει να έχει τουλάχιστον ${PHD_ABSTRACT_MIN_WORDS} λέξεις.`,
+          message: t("profile.abstractMinWords", { min: PHD_ABSTRACT_MIN_WORDS }),
         });
         return;
       }
       if (wordCount > PHD_ABSTRACT_MAX_WORDS) {
         showToast({
           type: "error",
-          message: `Η περίληψη δεν μπορεί να ξεπερνά τις ${PHD_ABSTRACT_MAX_WORDS} λέξεις.`,
+          message: t("profile.abstractMaxWords", { max: PHD_ABSTRACT_MAX_WORDS }),
         });
         return;
       }
       if (keywordsValue.length < PHD_KEYWORDS_MIN) {
         showToast({
           type: "error",
-          message: `Οι λέξεις-κλειδιά πρέπει να είναι τουλάχιστον ${PHD_KEYWORDS_MIN}.`,
+          message: t("profile.keywordsMin", { min: PHD_KEYWORDS_MIN }),
         });
         return;
       }
       if (keywordsValue.length > PHD_KEYWORDS_MAX) {
         showToast({
           type: "error",
-          message: `Οι λέξεις-κλειδιά δεν μπορούν να είναι πάνω από ${PHD_KEYWORDS_MAX}.`,
+          message: t("profile.keywordsMax", { max: PHD_KEYWORDS_MAX }),
         });
         return;
       }
@@ -561,12 +563,12 @@ export default function Profile() {
           phdIsFromForeignInstitute: false,
         });
       }
-      showToast({ type: "success", message: "Οι αλλαγές αποθηκεύτηκαν." });
+      showToast({ type: "success", message: t("profile.changesSaved") });
     } catch (error) {
       console.error("Error saving additional profile data:", error);
       showToast({
         type: "error",
-        message: error?.response?.data?.error || "Αποτυχία αποθήκευσης.",
+        message: error?.response?.data?.error || t("profile.saveFailed"),
       });
     } finally {
       setSavingAdditional(false);
@@ -575,7 +577,7 @@ export default function Profile() {
 
   const handleSavePublications = async () => {
     if (isAdminViewingOther) {
-      showToast({ type: "error", message: "Μόνο ανάγνωση για προφίλ άλλου χρήστη." });
+      showToast({ type: "error", message: t("profile.readOnlyOther") });
       return;
     }
     setSavingPublications(true);
@@ -597,12 +599,12 @@ export default function Profile() {
           ? response.data.profilePublications
           : []
       );
-      showToast({ type: "success", message: "Οι αλλαγές αποθηκεύτηκαν." });
+      showToast({ type: "success", message: t("profile.changesSaved") });
     } catch (error) {
       console.error("Error saving publications:", error);
       showToast({
         type: "error",
-        message: error?.response?.data?.error || "Αποτυχία αποθήκευσης.",
+        message: error?.response?.data?.error || t("profile.saveFailed"),
       });
     } finally {
       setSavingPublications(false);
@@ -708,54 +710,54 @@ export default function Profile() {
 
     const restrictionsLabel = (
       <>
-        Υπεύθυνη δήλωση σχετικά με τους{" "}
+        {t("profile.restrictionsPre")}
         <button
           type="button"
           className="text-patras-buccaneer underline hover:text-patras-auChico dark:text-[var(--color-text-primary)] dark:hover:text-[var(--color-text-secondary)]"
           onClick={() => setIsRestrictionsModalOpen(true)}
         >
-          περιορισμούς της Πράξης
+          {t("profile.restrictionsLink")}
         </button>
       </>
     );
 
-    addSection("cv", "Βιογραφικό σημείωμα", "cv", vault.cv);
+    addSection("cv", t("profile.sectionCv"), "cv", vault.cv);
     addSection(
       "bio-supporting",
-      "Έγγραφα που τεκμηριώνουν τα διαλαμβανόμενα στο βιογραφικό",
+      t("profile.sectionBioSupporting"),
       "bio_supporting",
       vault.bio_supporting
     );
-    addSection("phd", "Διδακτορικό δίπλωμα", "phd", vault.phd);
-    addSection("doatap", "Έγγραφο αναγνώρισης από ΔΟΑΤΑΠ", "doatap", vault.doatap);
+    addSection("phd", t("profile.sectionPhd"), "phd", vault.phd);
+    addSection("doatap", t("profile.sectionDoatap"), "doatap", vault.doatap);
     addSection(
       "employment-certs",
-      "Βεβαιώσεις προϋπηρεσίας από τον Φορέα",
+      t("profile.sectionEmploymentCerts"),
       "employment_certificate",
       vault.employment_certificate
     );
     addSection(
       "public-employee-permission",
-      "Πρωτοκολλημένη αίτηση για έκδοση σχετικής άδειας από το αρμόδιο όργανο για δημοσίους υπαλλήλους",
+      t("profile.sectionPublicEmployeePermission"),
       "public_employee_permission",
       vault.public_employee_permission
     );
     addSection(
       "eu-citizen",
-      "Πιστοποιητικό ελληνομάθειας Δ΄ επιπέδου από το Κέντρο Ελληνικής Γλώσσας",
+      t("profile.sectionEuCitizen"),
       "eu_citizen_greek_language_certificate",
       vault.eu_citizen_greek_language_certificate
     );
     addSection(
       "not-participated",
-      "Υπεύθυνη δήλωση μη συμμετοχής σε άλλο πρόγραμμα Απόκτησης Ακαδημαϊκής Διδακτικής Εμπειρίας",
+      t("profile.sectionNotParticipated"),
       "not_participated_declaration",
       vault.not_participated_declaration
     );
     if (requiresMilitaryDoc) {
       addSection(
         "military",
-        "Υπεύθυνη δήλωση εκπλήρωσης στρατιωτικών υποχρεώσεων / νόμιμης απαλλαγής / αναβολής",
+        t("profile.sectionMilitary"),
         "military",
         vault.military
       );
@@ -766,10 +768,10 @@ export default function Profile() {
       "responsible_declaration",
       vault.responsible_declaration
     );
-    addSection("other", "Άλλα", "other", vault.other);
+    addSection("other", t("profile.sectionOther"), "other", vault.other);
 
     return items;
-  }, [profile, requiresMilitaryDoc]);
+  }, [profile, requiresMilitaryDoc, t]);
 
   const handleVaultUpload = async (docType, selectedFile) => {
     if (isReadOnly) return;
@@ -780,7 +782,7 @@ export default function Profile() {
       showToast({
         type: "error",
         message:
-          "Επιτρέπονται μόνο αρχεία PDF, DOC, DOCX, ODT.",
+          t("profile.filesAllowed"),
       });
       return;
     }
@@ -789,7 +791,7 @@ export default function Profile() {
       const maxMb = Math.round(maxBytes / (1024 * 1024));
       showToast({
         type: "error",
-        message: `Το αρχείο πρέπει να είναι έως ${maxMb}MB.`,
+        message: t("profile.fileMaxSize", { maxMb }),
       });
       return;
     }
@@ -871,7 +873,7 @@ export default function Profile() {
           ...list,
           {
             id: pendingId,
-            name: selectedFile.name || "Αρχείο",
+            name: selectedFile.name || t("profile.fileFallback"),
             uploaded: false,
             progress: 0,
           },
@@ -949,14 +951,14 @@ export default function Profile() {
           return next;
         });
       }
-      showToast({ type: "success", message: "Το αρχείο προστέθηκε." });
+      showToast({ type: "success", message: t("profile.fileAdded") });
       refreshProfileData();
     } catch (error) {
       stopUploadTicker();
       console.error("Error uploading document:", error);
       showToast({
         type: "error",
-        message: error?.response?.data?.error || "Αποτυχία προσθήκης αρχείου.",
+        message: error?.response?.data?.error || t("profile.fileAddFailed"),
       });
     } finally {
       stopUploadTicker();
@@ -1024,7 +1026,7 @@ export default function Profile() {
     if (!ext || !allowed.includes(ext)) {
       showToast({
         type: "error",
-        message: "Επιτρέπονται μόνο αρχεία PDF, DOC, DOCX, ODT.",
+        message: t("profile.filesAllowed"),
       });
       return;
     }
@@ -1033,7 +1035,7 @@ export default function Profile() {
       const maxMb = Math.round(maxBytes / (1024 * 1024));
       showToast({
         type: "error",
-        message: `Το αρχείο πρέπει να είναι έως ${maxMb}MB.`,
+        message: t("profile.fileMaxSize", { maxMb }),
       });
       return;
     }
@@ -1093,14 +1095,14 @@ export default function Profile() {
         }
       );
       setVaultActionProgress((prev) => ({ ...prev, [file.id]: 100 }));
-      showToast({ type: "success", message: "Το αρχείο αντικαταστάθηκε." });
+      showToast({ type: "success", message: t("profile.fileReplaced") });
       await refreshProfileData();
     } catch (error) {
       console.error("Error replacing document:", error);
       showToast({
         type: "error",
         message:
-          error?.response?.data?.error || "Αποτυχία αντικατάστασης αρχείου.",
+          error?.response?.data?.error || t("profile.fileReplaceFailed"),
       });
     } finally {
       setVaultActionState((prev) => {
@@ -1130,14 +1132,14 @@ export default function Profile() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setVaultActionProgress((prev) => ({ ...prev, [file.id]: 100 }));
-      showToast({ type: "success", message: "Το αρχείο διαγράφηκε." });
+      showToast({ type: "success", message: t("profile.fileDeleted") });
       await refreshProfileData();
     } catch (error) {
       console.error("Error deleting document:", error);
       showToast({
         type: "error",
         message:
-          error?.response?.data?.error || "Αποτυχία διαγραφής αρχείου.",
+          error?.response?.data?.error || t("profile.fileDeleteFailed"),
       });
       setVaultActionState((prev) => {
         if (!(file.id in prev)) return prev;
@@ -1208,7 +1210,7 @@ export default function Profile() {
       setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000 * 60);
     } catch (error) {
       console.error("Error opening document:", error);
-      showToast({ type: "error", message: "Αποτυχία ανοίγματος αρχείου." });
+      showToast({ type: "error", message: t("profile.fileOpenFailed") });
     } finally {
       if (file?.id) {
         setVaultActionState((prev) => {
@@ -1243,7 +1245,7 @@ export default function Profile() {
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error("Error downloading document:", error);
-      showToast({ type: "error", message: "Αποτυχία λήψης αρχείου." });
+      showToast({ type: "error", message: t("profile.fileDownloadFailed") });
     } finally {
       if (file?.id) {
         setVaultActionState((prev) => {
@@ -1270,18 +1272,18 @@ export default function Profile() {
         <PageTitle className="mb-2">
           {isAdminViewingOther ? (
             <>
-              Φάκελος χρήστη: <span className="text-lg font-semibold">{`${form.firstName} ${form.lastName}`.trim()}</span>
+              {t("profile.userFolder")} <span className="text-lg font-semibold">{`${form.firstName} ${form.lastName}`.trim()}</span>
             </>
           ) : (
-            "O φακελός μου"
+            t("profile.myFolder")
           )}
         </PageTitle>
       </div>
         <h2 className="text-lg text-center font-semibold text-patras-buccaneer/100 dark:text-[var(--color-text-primary)] py-2">
-            {activeSection === "general" && "Γενικά στοιχεία"}
-            {activeSection === "additional" && "Πρόσθετα στοιχεία"}
-            {activeSection === "vault" && "Αρχεία"}
-            {activeSection === "publications" && "Επιστημονικές δημοσιεύσεις"}
+            {activeSection === "general" && t("profile.tabGeneral")}
+            {activeSection === "additional" && t("profile.tabAdditional")}
+            {activeSection === "vault" && t("profile.tabVault")}
+            {activeSection === "publications" && t("profile.tabPublications")}
         </h2>
       <div className="mt-2 grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-6">
         <aside className="rounded-xl border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-surface)] p-4 h-fit lg:sticky lg:top-6">
@@ -1295,7 +1297,7 @@ export default function Profile() {
                   : "text-gray-700 dark:text-[var(--color-text-secondary)]"
               }`}
             >
-              Γενικά στοιχεία
+              {t("profile.tabGeneral")}
             </button>
             {isProfileApplicant && (
               <button
@@ -1307,7 +1309,7 @@ export default function Profile() {
                     : "text-gray-700 dark:text-[var(--color-text-secondary)]"
                 }`}
               >
-                Πρόσθετα στοιχεία
+                {t("profile.tabAdditional")}
               </button>
             )}
             {isProfileApplicant && (
@@ -1320,7 +1322,7 @@ export default function Profile() {
                     : "text-gray-700 dark:text-[var(--color-text-secondary)]"
                 }`}
               >
-                Επιστημονικές δημοσιεύσεις
+                {t("profile.tabPublications")}
               </button>
             )}
             {isProfileVaultUser && (
@@ -1333,7 +1335,7 @@ export default function Profile() {
                     : "text-gray-700 dark:text-[var(--color-text-secondary)]"
                 }`}
               >
-                Αρχεία
+                {t("profile.tabVault")}
               </button>
 
             )}
@@ -1345,21 +1347,20 @@ export default function Profile() {
 
           {!isReadOnly && (
             <div className="mb-4 rounded-md border border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-[var(--color-bg-muted)] px-4 py-2 text-xs text-gray-600 dark:text-[var(--color-text-secondary)]">
-              Οι αλλαγές εδώ δεν επηρεάζουν ήδη υποβληθείσες αιτήσεις.
-              Για αλλαγές σε ενεργές αιτήσεις, επεξεργαστείτε τις από την αρχική σελίδα.
+              {t("profile.notAffectSubmitted")}
             </div>
           )}
           {activeSection === "general" && (
             <div className="bg-white dark:bg-[var(--color-bg-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] shadow-sm p-6">
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">Βασικά</h3>
+                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">{t("profile.basicHeading")}</h3>
                   <div className="rounded-lg border border-patras-buccaneer/10 dark:border-[var(--color-border)] bg-patras-albescentWhite/30 dark:bg-[var(--color-bg-surface)] p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <InputField
                         id="email"
                         name="email"
-                        label="Email"
+                        label={t("common.email")}
                         type="email"
                         value={form.email}
                         onChange={(value) => handleFieldChange("email", value)}
@@ -1371,7 +1372,7 @@ export default function Profile() {
                       <InputField
                         id="firstName"
                         name="firstName"
-                        label="Όνομα"
+                        label={t("register.firstName")}
                         type="text"
                         value={form.firstName}
                         onChange={(value) => handleFieldChange("firstName", value)}
@@ -1382,7 +1383,7 @@ export default function Profile() {
                       <InputField
                         id="lastName"
                         name="lastName"
-                        label="Επώνυμο"
+                        label={t("register.lastName")}
                         type="text"
                         value={form.lastName}
                         onChange={(value) => handleFieldChange("lastName", value)}
@@ -1395,13 +1396,13 @@ export default function Profile() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">Τηλέφωνα</h3>
+                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">{t("profile.phonesHeading")}</h3>
                   <div className="rounded-lg border border-patras-buccaneer/10 dark:border-[var(--color-border)] bg-patras-albescentWhite/30 dark:bg-[var(--color-bg-surface)] p-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <InputField
                       id="mobileNumber"
                       name="mobileNumber"
-                      label="Κινητό τηλέφωνο"
+                      label={t("profile.mobileLabel")}
                       type="text"
                       value={form.mobileNumber}
                       onChange={(value) => handleFieldChange("mobileNumber", value)}
@@ -1411,7 +1412,7 @@ export default function Profile() {
                     <InputField
                       id="landlineNumber"
                       name="landlineNumber"
-                      label="Σταθερό τηλέφωνο"
+                      label={t("profile.landlineLabel")}
                       type="text"
                       value={form.landlineNumber}
                       onChange={(value) => handleFieldChange("landlineNumber", value)}
@@ -1423,13 +1424,13 @@ export default function Profile() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">Διεύθυνση</h3>
+                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">{t("profile.addressHeading")}</h3>
                   <div className="rounded-lg border border-patras-buccaneer/10 dark:border-[var(--color-border)] bg-patras-albescentWhite/30 dark:bg-[var(--color-bg-surface)] p-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <InputField
                       id="streetAddress"
                       name="streetAddress"
-                      label="Οδός και αριθμός"
+                      label={t("profile.streetLabel")}
                       type="text"
                       value={form.streetAddress}
                       onChange={(value) => handleFieldChange("streetAddress", value)}
@@ -1438,7 +1439,7 @@ export default function Profile() {
                     <InputField
                       id="city"
                       name="city"
-                      label="Πόλη"
+                      label={t("profile.cityLabel")}
                       type="text"
                       value={form.city}
                       onChange={(value) => handleFieldChange("city", value)}
@@ -1447,7 +1448,7 @@ export default function Profile() {
                     <InputField
                       id="postalCode"
                       name="postalCode"
-                      label="Τ.Κ."
+                      label={t("profile.postalLabel")}
                       type="text"
                       value={form.postalCode}
                       onChange={(value) => handleFieldChange("postalCode", value)}
@@ -1466,7 +1467,7 @@ export default function Profile() {
                   disabled={saving}
                   className="inline-flex items-center justify-center bg-patras-buccaneer text-sm text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors disabled:opacity-60"
                 >
-                  {saving ? "Αποθήκευση..." : "Αποθήκευση αλλαγών"}
+                  {saving ? t("profile.saving") : t("profile.saveChanges")}
                 </button>
               </div>
             )}
@@ -1477,13 +1478,13 @@ export default function Profile() {
             <div className="bg-white dark:bg-[var(--color-bg-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] shadow-sm p-6">
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">Ιδιότητες υποψηφίου</h3>
+                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">{t("profile.applicantProperties")}</h3>
                   <div className="rounded-lg border border-patras-buccaneer/10 dark:border-[var(--color-border)] bg-patras-albescentWhite/30 dark:bg-[var(--color-bg-surface)] p-4">
                     <div className="flex flex-col gap-3">
                       <Checkbox
                         id="hasNotParticipatedInPastProgram"
                         name="hasNotParticipatedInPastProgram"
-                        label="Μη συμμετοχή σε προηγούμενο Πρόγραμμα Απόκτησης Ακαδημαϊκής Διδακτικής Εμπειρίας"
+                        label={t("profile.checkboxNotParticipated")}
                         description=""
                         checked={additionalForm.hasNotParticipatedInPastProgram}
                         onChange={(value) =>
@@ -1497,7 +1498,7 @@ export default function Profile() {
                       <Checkbox
                         id="isPublicEmployee"
                         name="isPublicEmployee"
-                        label="Δημόσιος υπάλληλος"
+                        label={t("profile.checkboxPublicEmployee")}
                         description=""
                         checked={additionalForm.isPublicEmployee}
                         onChange={(value) =>
@@ -1508,7 +1509,7 @@ export default function Profile() {
                       <Checkbox
                         id="isEuCitizenNonGreek"
                         name="isEuCitizenNonGreek"
-                        label="Πολίτης Ε.Ε. (εκτός Ελλάδας)"
+                        label={t("profile.checkboxEuCitizen")}
                         description=""
                         checked={additionalForm.isEuCitizenNonGreek}
                         onChange={(value) =>
@@ -1524,7 +1525,7 @@ export default function Profile() {
                 <div>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">
-                      Στοιχεία διδακτορικού
+                      {t("profile.phdDetails")}
                     </h3>
                     {phdDegrees.length > 1 && (
                       <div className="flex items-center gap-2">
@@ -1533,7 +1534,7 @@ export default function Profile() {
                           onClick={handlePrevPhd}
                           disabled={activePhdIndex === 0}
                           className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-patras-buccaneer/40 text-patras-buccaneer hover:bg-patras-albescentWhite disabled:cursor-not-allowed disabled:opacity-40"
-                          aria-label="Προηγούμενο διδακτορικό"
+                          aria-label={t("profile.prevPhdAria")}
                         >
                           ‹
                         </button>
@@ -1545,7 +1546,7 @@ export default function Profile() {
                           onClick={handleNextPhd}
                           disabled={activePhdIndex >= phdDegrees.length - 1}
                           className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-patras-buccaneer/40 text-patras-buccaneer hover:bg-patras-albescentWhite disabled:cursor-not-allowed disabled:opacity-40"
-                          aria-label="Επόμενο διδακτορικό"
+                          aria-label={t("profile.nextPhdAria")}
                         >
                           ›
                         </button>
@@ -1573,7 +1574,7 @@ export default function Profile() {
                           <InputField
                             id="phdTitle"
                             name="phdTitle"
-                            label="Τίτλος διδακτορικής διατριβής"
+                            label={t("profile.phdTitleLabel")}
                             type="text"
                             value={phdDraft.phdTitle}
                             onChange={(value) => updatePhdDraft("phdTitle", value)}
@@ -1586,7 +1587,7 @@ export default function Profile() {
                           />
                           <div>
                             <FlowbiteDateField
-                              label="Ημερομηνία λήψης"
+                              label={t("profile.acquisitionDateLabel")}
                               value={phdDraft.phdAcquisitionDate}
                               onChange={(value) =>
                                 updatePhdDraft("phdAcquisitionDate", value)
@@ -1597,7 +1598,7 @@ export default function Profile() {
                               readOnly={isReadOnly}
                             />
                             <p className="-mt-3 text-xs text-gray-500 dark:text-[var(--color-text-muted)] italic">
-                              Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}
+                              {t("profile.allowedRange", { date: todayDisplay })}
                             </p>
                           </div>
                           <div className="md:col-span-2 [&_textarea]:bg-white [&_textarea]:dark:bg-[var(--color-bg-card)] [&_textarea]:dark:outline-[var(--color-border-accent)] [&_textarea]:focus:outline-patras-buccaneer [&_textarea]:dark:focus:outline-[var(--color-primary)] [&_textarea]:focus:ring-patras-buccaneer [&_textarea]:dark:focus:ring-[var(--color-primary)]">
@@ -1608,7 +1609,7 @@ export default function Profile() {
                               onChange={(value) => updatePhdDraft("phdAbstract", value)}
                               minWords={PHD_ABSTRACT_MIN_WORDS}
                               maxWords={PHD_ABSTRACT_MAX_WORDS}
-                              placeholder="Γράψτε μια σύντομη περίληψη της διατριβής"
+                              placeholder={t("profile.abstractPlaceholder")}
                               readOnly={isReadOnly}
                             />
                           </div>
@@ -1618,7 +1619,7 @@ export default function Profile() {
                                 htmlFor="phdKeywords"
                                 className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]"
                               >
-                                Λέξεις-κλειδιά
+                                {t("profile.keywordsLabel")}
                               </label>
                             </div>
                             <div
@@ -1641,7 +1642,7 @@ export default function Profile() {
                                       type="button"
                                       onClick={() => removePhdKeyword(keyword)}
                                       className="text-gray-500 dark:text-[var(--color-text-muted)] hover:text-red-700 dark:hover:text-[var(--color-danger)]"
-                                      aria-label={`Αφαίρεση λέξης-κλειδιού ${keyword}`}
+                                      aria-label={t("profile.removeKeyword", { keyword })}
                                     >
                                       ×
                                     </button>
@@ -1666,7 +1667,7 @@ export default function Profile() {
                             </div>
                             <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                               <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">
-                                Πληκτρολογήστε και πατήστε Enter ή κόμμα για να προσθέσετε λέξη-κλειδί.
+                                {t("profile.keywordsHint")}
                               </p>
                               {!isReadOnly && (
                                 <button
@@ -1674,20 +1675,20 @@ export default function Profile() {
                                   onClick={clearPhdKeywords}
                                   disabled={phdKeywordCount === 0}
                                   className="inline-flex items-center gap-1 rounded-md border border-patras-buccaneer/30 bg-patras-albescentWhite/30 px-3 py-1 text-sm text-patras-buccaneer hover:bg-patras-albescentWhite disabled:cursor-not-allowed disabled:border-gray-200 dark:border-[var(--color-border)] disabled:bg-gray-100 dark:bg-[var(--color-bg-surface)] dark:hover:bg-[var(--color-bg-muted)] disabled:text-gray-400 dark:text-[var(--color-text-muted)]"
-                                  aria-label="Καθαρισμός λέξεων-κλειδιών"
-                                  title="Καθαρισμός"
+                                  aria-label={t("profile.clearKeywordsAria")}
+                                  title={t("common.clear")}
                                 >
-                                  <span>Καθαρισμός</span>
+                                  <span>{t("common.clear")}</span>
                                   <TrashIcon className="h-4 w-4" aria-hidden="true" />
                                 </button>
                               )}
                             </div>
                             <p className="mt-1 text-xs text-gray-500 dark:text-[var(--color-text-muted)]">
-                              {phdKeywordCount}/{PHD_KEYWORDS_MAX} λέξεις-κλειδιά
+                              {t("profile.keywordsCounter", { count: phdKeywordCount, max: PHD_KEYWORDS_MAX })}
                             </p>
                             {(phdKeywordsTooFew || phdKeywordsTooMany) && (
                               <p className="mt-1 text-xs text-red-600">
-                                Επιτρέπονται {PHD_KEYWORDS_MIN} έως {PHD_KEYWORDS_MAX} λέξεις-κλειδιά.
+                                {t("profile.keywordsRange", { min: PHD_KEYWORDS_MIN, max: PHD_KEYWORDS_MAX })}
                               </p>
                             )}
                           </div>
@@ -1695,7 +1696,7 @@ export default function Profile() {
                             <Checkbox
                               id="phdIsFromForeignInstitute"
                               name="phdIsFromForeignInstitute"
-                              label="Τίτλος από ίδρυμα εξωτερικού"
+                              label={t("profile.phdForeignInstitute")}
                               description=""
                               checked={phdDraft.phdIsFromForeignInstitute}
                               onChange={(value) =>
@@ -1712,7 +1713,7 @@ export default function Profile() {
                             <InputField
                               id="phdTitle-next"
                               name="phdTitle-next"
-                              label="Τίτλος διδακτορικής διατριβής"
+                              label={t("profile.phdTitleLabel")}
                               type="text"
                               value={phdNextDraft.phdTitle}
                               onChange={() => {}}
@@ -1725,7 +1726,7 @@ export default function Profile() {
                             />
                             <div>
                               <FlowbiteDateField
-                                label="Ημερομηνία λήψης"
+                                label={t("profile.acquisitionDateLabel")}
                                 value={phdNextDraft.phdAcquisitionDate}
                                 onChange={() => {}}
                                 minDate="2011-01-01"
@@ -1734,7 +1735,7 @@ export default function Profile() {
                                 readOnly={isReadOnly}
                               />
                               <p className="-mt-3 text-xs text-gray-500 dark:text-[var(--color-text-muted)] italic">
-                                Επιτρεπτό εύρος: 01-01-2011 έως {todayDisplay}
+                                {t("profile.allowedRange", { date: todayDisplay })}
                               </p>
                             </div>
                             <div className="md:col-span-2">
@@ -1742,7 +1743,7 @@ export default function Profile() {
                                 htmlFor="phdAbstract-next"
                                 className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]"
                               >
-                                Περίληψη διδακτορικής διατριβής
+                                {t("profile.abstractLabel")}
                               </label>
                               <div className="mt-2">
                                 <textarea
@@ -1761,7 +1762,7 @@ export default function Profile() {
                                 htmlFor="phdKeywords-next"
                                 className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]"
                               >
-                                Λέξεις-κλειδιά
+                                {t("profile.keywordsLabel")}
                               </label>
                               <div className="relative mt-2 flex w-full flex-wrap items-center gap-2 rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-3 text-base sm:text-sm/6 outline outline-1 -outline-offset-1 outline-patras-buccaneer focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-patras-buccaneer focus-within:ring-1 focus-within:ring-offset-0 focus-within:ring-patras-buccaneer">
                                 {(phdNextDraft.phdKeywords || []).map((keyword) => (
@@ -1778,7 +1779,7 @@ export default function Profile() {
                               <Checkbox
                                 id="phdIsFromForeignInstitute-next"
                                 name="phdIsFromForeignInstitute-next"
-                                label="Τίτλος από ίδρυμα εξωτερικού"
+                                label={t("profile.phdForeignInstitute")}
                                 description=""
                                 checked={phdNextDraft.phdIsFromForeignInstitute}
                                 onChange={() => {}}
@@ -1793,10 +1794,10 @@ export default function Profile() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">Εργασιακή εμπειρία</h3>
+                  <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)] mb-5">{t("profile.workExperienceHeading")}</h3>
                   <div className="rounded-lg border border-patras-buccaneer/10 dark:border-[var(--color-border)] bg-patras-albescentWhite/30 dark:bg-[var(--color-bg-surface)] p-4">
                     <CustomSelect
-                      label="Χρόνια μεταδιδακτορικής εργασιακής εμπειρίας (εξαιρείται η διδακτική εμπειρία)"
+                      label={t("profile.workExperienceLabel")}
                       value={
                         additionalForm.workExperience === ""
                           ? ""
@@ -1826,7 +1827,7 @@ export default function Profile() {
                     disabled={savingAdditional}
                     className="inline-flex items-center justify-center bg-patras-buccaneer text-sm text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors disabled:opacity-60"
                   >
-                    {savingAdditional ? "Αποθήκευση..." : "Αποθήκευση αλλαγών"}
+                    {savingAdditional ? t("profile.saving") : t("profile.saveChanges")}
                   </button>
                 </div>
               )}
@@ -1836,7 +1837,7 @@ export default function Profile() {
           {isProfileVaultUser && activeSection === "vault" && (
             <div className="bg-white dark:bg-[var(--color-bg-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] shadow-sm p-6">
               {vaultItems.length === 0 ? (
-                <p className="text-gray-500 dark:text-[var(--color-text-muted)]">Δεν υπάρχουν καταχωρημένα δικαιολογητικά.</p>
+                <p className="text-gray-500 dark:text-[var(--color-text-muted)]">{t("profile.noDocuments")}</p>
               ) : (
                 <div>
                   {(() => {
@@ -1881,12 +1882,12 @@ export default function Profile() {
                                     }}
                                   />
                                   <span className="inline-flex items-center gap-1 rounded-full border border-patras-buccaneer/40 bg-patras-albescentWhite/60 px-3 py-1 transition-colors duration-150 hover:bg-patras-buccaneer hover:text-white dark:bg-patras-buccaneer dark:text-white dark:hover:bg-[var(--color-primary-hover)]">
-                                    + Προσθήκη
+                                    {t("profile.addFile")}
                                   </span>
                                   <span className="absolute right-0 top-full mt-2 w-max rounded-md border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-card)] px-3 py-2 text-[11px] text-gray-600 dark:text-[var(--color-text-secondary)] shadow-md opacity-0 translate-y-1 pointer-events-none transition duration-150 group-hover:opacity-100 group-hover:translate-y-0">
                                     {item.docType === "phd" ? "PDF, DOC, DOCX, ODT" : "PDF, DOC, DOCX, ODT"}
                                     <br />
-                                    Μέγιστο μέγεθος: {item.docType === "phd" ? "30MB" : "5MB"}
+                                    {t("profile.maxSizePrefix")} {item.docType === "phd" ? "30MB" : "5MB"}
                                   </span>
                                 </label>
                               )}
@@ -1921,7 +1922,7 @@ export default function Profile() {
                     disabled={savingPublications}
                     className="inline-flex items-center justify-center bg-patras-buccaneer text-sm text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors disabled:opacity-60"
                   >
-                    {savingPublications ? "Αποθήκευση..." : "Αποθήκευση αλλαγών"}
+                    {savingPublications ? t("profile.saving") : t("profile.saveChanges")}
                   </button>
                 </div>
               )}

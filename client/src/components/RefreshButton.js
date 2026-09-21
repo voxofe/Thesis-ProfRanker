@@ -1,14 +1,17 @@
 import React from "react";
 import { RefreshCw } from "lucide-react";
 import LoadingIndicator from "./LoadingIndicator";
+import { useLanguage } from "../contexts";
 
 export default function RefreshButton({
   onClick,
   loading = false,
   disabled = false,
-  label = "Ανανέωση",
+  label,
   className = "",
 }) {
+  const { t } = useLanguage();
+  const resolvedLabel = label ?? t("common.refresh");
   const isDisabled = disabled || loading;
 
   return (
@@ -17,8 +20,8 @@ export default function RefreshButton({
       onClick={onClick}
       disabled={isDisabled}
       aria-disabled={isDisabled}
-      aria-label={label}
-      title={label}
+      aria-label={resolvedLabel}
+      title={resolvedLabel}
       className={`flex items-center gap-2 px-3 py-1 rounded-full bg-patras-buccaneer text-white font-medium text-sm shadow-sm hover:bg-patras-sanguineBrown transition border border-patras-buccaneer disabled:opacity-60 ${className}`}
     >
       {loading ? (
@@ -26,7 +29,7 @@ export default function RefreshButton({
       ) : (
         <RefreshCw className="w-4 h-4" />
       )}
-      <span>{label}</span>
+      <span>{resolvedLabel}</span>
     </button>
   );
 }

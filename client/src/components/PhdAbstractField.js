@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useLanguage } from "../contexts";
 
 export default function PhdAbstractField({
   value,
@@ -6,12 +7,14 @@ export default function PhdAbstractField({
   readOnly = false,
   minWords = 0,
   maxWords = Infinity,
-  label = "Περίληψη διδακτορικής διατριβής",
+  label,
   placeholder = "",
   required = false,
   id = "phd-abstract",
   name = "phd-abstract",
 }) {
+  const { t } = useLanguage();
+  const resolvedLabel = label ?? t("phd.abstractLabel");
   const textareaRef = useRef(null);
   const [minHeight, setMinHeight] = useState(0);
   const safeValue = value || "";
@@ -43,7 +46,7 @@ export default function PhdAbstractField({
         htmlFor={id}
         className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]"
       >
-        {label}
+        {resolvedLabel}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
       <div className="mt-2">
@@ -61,15 +64,15 @@ export default function PhdAbstractField({
           readOnly={readOnly}
         />
       </div>
-      <p className="mt-1 text-xs text-gray-500 dark:text-[var(--color-text-muted)]">{wordCount} λέξεις</p>
+      <p className="mt-1 text-xs text-gray-500 dark:text-[var(--color-text-muted)]">{wordCount} {t("phd.words")}</p>
       {tooShort && (
         <p className="mt-1 text-xs text-red-600">
-          Ελάχιστο {minWords} λέξεις.
+          {t("phd.minWords", { min: minWords })}
         </p>
       )}
       {tooLong && (
         <p className="mt-1 text-xs text-red-600">
-          Μέγιστο {maxWords} λέξεις.
+          {t("phd.maxWords", { max: maxWords })}
         </p>
       )}
     </div>

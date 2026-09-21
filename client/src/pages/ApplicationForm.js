@@ -19,6 +19,7 @@ import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { usePositions } from "../contexts/PositionsContext";
+import { useLanguage } from "../contexts";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -38,8 +39,9 @@ export default function Form({ academicYear }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [maxStepReached, setMaxStepReached] = useState(1);
   const { showToast } = useToast();
-  const { refreshUser } = useAuth();
+  const { refreshUser, currentUser } = useAuth();
   const { positions = [], refreshPositions } = usePositions();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(null);
   const [serverProgress, setServerProgress] = useState(null);
@@ -101,7 +103,7 @@ export default function Form({ academicYear }) {
           applyDraftData(response.data.draft);
           showToast({
             type: "success",
-            message: "Φορτώθηκε αποθηκευμένο πρόχειρο για τη θέση.",
+            message: t("applicationForm.draftLoaded"),
           });
           return;
         }
@@ -112,7 +114,7 @@ export default function Form({ academicYear }) {
         if (isCancelled) return;
         showToast({
           type: "error",
-          message: error?.response?.data?.error || "Αποτυχία φόρτωσης προχείρου.",
+          message: error?.response?.data?.error || t("applicationForm.draftLoadFailed"),
         });
       }
     };
@@ -167,43 +169,43 @@ export default function Form({ academicYear }) {
   const steps = [
     {
       id: 1,
-      title: "Γενικά στοιχεία",
-      description: "Βασικές πληροφορίες",
+      title: t("applicationForm.step1Title"),
+      description: t("applicationForm.step1Desc"),
       component: PersonalInfoSection,
     },
     {
       id: 2,
-      title: "Επιστημονικό πεδίο",
+      title: t("applicationForm.step2Title"),
       component: ScientificFieldSection,
     },
     {
       id: 3,
-      title: "Σχεδιάγραμμα διδασκαλίας",
+      title: t("applicationForm.step3Title"),
       component: CoursePlanSection,
     },
     {
       id: 4,
-      title: "Βιογραφικό",
+      title: t("applicationForm.step4Title"),
       component: BioSection,
     },
     {
       id: 5,
-      title: "Διδακτορικό",
+      title: t("applicationForm.step5Title"),
       component: PhdSection,
     },
     {
       id: 6,
-      title: "Επιστημονικές δημοσιεύσεις",
+      title: t("applicationForm.step6Title"),
       component: PublicationsSection,
     },
     {
       id: 7,
-      title: "Εργασιακή εμπειρία",
+      title: t("applicationForm.step7Title"),
       component: WorkExperienceSection,
     },
     {
       id: 8,
-      title: "Υπεύθυνες δηλώσεις",
+      title: t("applicationForm.step8Title"),
       component: DocumentsSection,
     },
   ];
@@ -212,7 +214,7 @@ export default function Form({ academicYear }) {
   const isLastStep = currentStep === steps.length;
   const isFirstStep = currentStep === 1;
   const nextDisabled = !canProceedFromStep(currentStep);
-  const submitLabel = formMode === "edit" ? "Επανυποβολή αίτησης" : "Υποβολή αίτησης";
+  const submitLabel = formMode === "edit" ? t("applicationForm.submitResubmit") : t("applicationForm.submitNew");
 
   const selectedPosition = useMemo(
     () => positions.find((pos) => String(pos.id) === String(formData.positionId)) || null,
@@ -299,7 +301,7 @@ export default function Form({ academicYear }) {
         const sfName = selectedPosition?.scientificField || "";
         if (formMode === "edit") {
           window.alert(
-            "Η περίοδος αιτήσεων για αυτή τη θέση έχει ολοκληρωθεί. Θα επιστρέψετε στη σελίδα της αίτησης."
+            t("applicationForm.periodEndedEditAlert")
           );
           if (applicationId) {
             window.location.replace(`/application-score/${applicationId}`);
@@ -310,7 +312,7 @@ export default function Form({ academicYear }) {
         }
 
         window.alert(
-          `Η περίοδος αίτησεων για το επιστημονικό πεδίο ${sfName} έληξε.`
+          t("applicationForm.periodExpiredAlert", { field: sfName })
         );
         refreshPositions();
         handleChange("positionId", "");
@@ -433,7 +435,7 @@ export default function Form({ academicYear }) {
   useEffect(() => {
     stopServerProgressDrift();
     const label = serverProgress?.label || "";
-    if (!loading || !serverProgress || label === "Σε αναμονή" || serverProgress.done || serverProgress.error) {
+    if (!loading || !serverProgress || label === t("applicationForm.waiting") || serverProgress.done || serverProgress.error) {
       return () => {
         stopServerProgressDrift();
       };
@@ -478,7 +480,7 @@ export default function Form({ academicYear }) {
       const sfName = selectedPosition?.scientificField || "";
       if (formMode === "edit") {
         window.alert(
-          "Η περίοδος αιτήσεων για αυτή τη θέση έχει ολοκληρωθεί. Θα επιστρέψετε στη σελίδα της αίτησης."
+          t("applicationForm.periodEndedEditAlert")
         );
         if (applicationId) {
           window.location.replace(`/application-score/${applicationId}`);
@@ -489,7 +491,7 @@ export default function Form({ academicYear }) {
       }
 
       window.alert(
-        `Η περίοδος αίτησεων για το επιστημονικό πεδίο ${sfName} έληξε.`
+        t("applicationForm.periodExpiredAlert", { field: sfName })
       );
       refreshPositions();
       handleChange("positionId", "");
@@ -512,7 +514,7 @@ export default function Form({ academicYear }) {
     submissionIdRef.current = submissionId;
     lastProgressSnapshotRef.current = null;
     lastServerPercentAtRef.current = Date.now();
-    setServerProgress({ percent: 0, label: "Σε αναμονή", done: false });
+    setServerProgress({ percent: 0, label: t("applicationForm.waiting"), done: false });
     setServerDisplayPercent(0);
     setCombinedPercent(0);
     wasUploadingRef.current = false;
@@ -660,8 +662,8 @@ export default function Form({ academicYear }) {
         type: "success",
         message:
           formMode === "edit"
-            ? "Η αίτηση επανυποβλήθηκε επιτυχώς!"
-            : "Η αίτηση υποβλήθηκε επιτυχώς!",
+            ? t("applicationForm.successResubmit")
+            : t("applicationForm.successNew"),
       });
 
       refreshUser();
@@ -675,7 +677,7 @@ export default function Form({ academicYear }) {
       console.error("Error submitting form:", error);
       showToast({
         type: "error",
-        message: "Αποτυχία υποβολής αίτησης. Παρακαλώ δοκιμάστε ξανά.",
+        message: t("applicationForm.submitFailed"),
       });
     } finally {
       setLoading(false);
@@ -706,9 +708,11 @@ export default function Form({ academicYear }) {
   }
 
   const headerTitle =
-    formMode === "edit"
-      ? "Επεξεργασία αίτησης υποψηφιότητας"
-      : "Νέα αίτηση υποψηφιότητας";
+    currentUser?.role === "guest"
+      ? t("applicationForm.headerGuest")
+      : formMode === "edit"
+      ? t("applicationForm.headerEdit")
+      : t("applicationForm.headerNew");
 
   return (
     <div className="w-full max-w-6xl mx-auto">
@@ -718,22 +722,26 @@ export default function Form({ academicYear }) {
         submitLabel={submitLabel}
         statusText={
           typeof uploadProgress === "number" && uploadProgress < 100
-            ? "Ανέβασμα αρχείων"
-            : serverProgress?.label || "Σε αναμονή"
+            ? t("applicationForm.uploadingFiles")
+            : serverProgress?.label || t("applicationForm.waiting")
         }
         percent={combinedPercent}
       />
       {showCountdown && (
         <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          <span>Η θέση </span>
+          <span>{t("applicationForm.countdownPrefix")}</span>
           <span className="font-semibold">
             "{selectedPosition?.scientificField || ""}"
           </span>
-          <span> κλείνει σε </span>
+          <span>{t("applicationForm.countdownMiddle")}</span>
           <span className="font-semibold">{countdownText}</span>
           <span>
-            . Ολοκληρώστε την {formMode === "edit" ? "επανυποβολή" : "υποβολή"} της
-            αίτησης εγκαίρως.
+            {t("applicationForm.countdownSuffix", {
+              action:
+                formMode === "edit"
+                  ? t("applicationForm.countdownActionResubmit")
+                  : t("applicationForm.countdownActionSubmit"),
+            })}
           </span>
         </div>
       )}
@@ -763,7 +771,7 @@ export default function Form({ academicYear }) {
             disabled={isFirstStep || loading}
             className="rounded-md bg-white dark:bg-[var(--color-bg-card)] px-4 py-2 text-sm font-semibold text-patras-buccaneer dark:text-white border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-primary)] dark:hover:text-[var(--color-text-inverse)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Προηγούμενο
+            {t("applicationForm.prev")}
           </button>
         </div>
 
@@ -795,7 +803,7 @@ export default function Form({ academicYear }) {
                 aria-disabled={nextDisabled || loading}
                 className="rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
               >
-                Επόμενο
+                {t("applicationForm.next")}
               </button>
               <Tooltip
                 anchorRef={nextButtonRef}
@@ -803,7 +811,7 @@ export default function Form({ academicYear }) {
                 placement="top-center"
                 className="bg-white dark:bg-[var(--color-bg-card)] border border-gray-300 dark:border-[var(--color-border)] text-gray-700 dark:text-[var(--color-text-secondary)] text-xs px-2 py-1 rounded-lg shadow-lg whitespace-nowrap min-w-max"
               >
-                Συμπληρώστε όλα τα υποχρεωτικά πεδία για να συνεχίσετε
+                {t("applicationForm.nextTooltip")}
               </Tooltip>
             </span>
           )}

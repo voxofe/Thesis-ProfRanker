@@ -1,8 +1,10 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { KeyRound } from "lucide-react";
+import { useLanguage } from "../contexts";
 
 export default function UserMenu({ currentUser, initials, roleLabel, onLogout }) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [showNameTooltip, setShowNameTooltip] = useState(false);
   const wrapperRef = useRef(null);
@@ -63,13 +65,13 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
               <div
                 ref={fullNameRef}
                 className="text-sm font-semibold text-patras-buccaneer dark:text-[var(--color-text-primary)] truncate"
-                title={showNameTooltip ? (fullName || "Χρήστης") : undefined}
+                title={showNameTooltip ? (fullName || t("userMenu.user")) : undefined}
               >
-                {fullName || "Χρήστης"}
+                {fullName || t("userMenu.user")}
               </div>
               {showNameTooltip && (
                 <div className="pointer-events-none absolute right-0 top-full z-10 mt-1 hidden max-w-64 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs text-gray-700 shadow-md group-hover:block dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)]">
-                  {fullName || "Χρήστης"}
+                  {fullName || t("userMenu.user")}
                 </div>
               )}
             </div>
@@ -83,7 +85,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
             role="menuitem"
           >
             <KeyRound className="w-4 h-4 text-patras-buccaneer dark:text-[var(--color-text-secondary)]" aria-hidden="true" />
-            <span className="font-medium">Αλλαγή κωδικού</span>
+            <span className="font-medium">{t("userMenu.changePassword")}</span>
           </Link>
           <div className="border-t dark:border-[var(--color-border)]" />
           <button
@@ -95,7 +97,7 @@ export default function UserMenu({ currentUser, initials, roleLabel, onLogout })
             className="w-full flex items-center justify-end gap-2 px-4 py-3 text-sm text-gray-700 text-right hover:bg-patras-albescentWhite/40 dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-primary)] dark:hover:text-[var(--color-text-inverse)]"
             role="menuitem"
           >
-            <span className="font-medium">Αποσύνδεση</span>
+            <span className="font-medium">{t("userMenu.logout")}</span>
             <svg
               width={24}
               height={24}

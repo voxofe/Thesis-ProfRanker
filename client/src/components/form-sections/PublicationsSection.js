@@ -1,9 +1,11 @@
 import React from "react";
 import { useFormData } from "../../contexts/FormDataContext.js";
+import { useLanguage } from "../../contexts";
 import Publication from "../Publication.js";
 
 export default function PublicationsSection({ readOnly = false }) {
   const { formData, handleChange } = useFormData();
+  const { t } = useLanguage();
 
   const addNewPublication = () => {
     if (readOnly) return;
@@ -21,7 +23,7 @@ export default function PublicationsSection({ readOnly = false }) {
   return (
     <div className="overflow-hidden"> 
       <legend className="text-sm/6 font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">
-        Επιστημονικές δημοσιεύσεις
+        {t("sections.publications.title")}
       </legend>
       <div className="">
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-8 pt-1 pb-0 sm:pb-2"></div>
@@ -35,10 +37,10 @@ export default function PublicationsSection({ readOnly = false }) {
           ))}
           {formData.publications.length === 0 && (
             <div className="text-center text-gray-500 dark:text-[var(--color-text-muted)] py-8">
-              <p>Δεν έχετε προσθέσει ακόμη κάποια επιστημονική δημοσίευση.</p>
+              <p>{t("sections.publications.empty")}</p>
               {!readOnly && (
                 <p className="text-sm mt-2">
-                  Χρησιμοποιήστε το κουμπί παρακάτω για να προσθέσετε μία.
+                  {t("sections.publications.emptyHint")}
                 </p>
               )}
             </div>
@@ -51,7 +53,7 @@ export default function PublicationsSection({ readOnly = false }) {
               type="button"
               className="rounded-md bg-patras-buccaneer px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-patras-sanguineBrown focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             >
-              + Προσθήκη νέας
+              {t("sections.publications.addNew")}
             </button>
           </div>
         )}

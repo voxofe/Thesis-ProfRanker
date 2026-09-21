@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../contexts";
 import InputField from "../components/InputField";
 import PageTitle from "../components/PageTitle";
 
@@ -11,6 +12,7 @@ export default function Login() {
   const [message, setMessage] = useState({ type: "", text: "" });
 
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -45,17 +47,14 @@ export default function Login() {
       .catch((err) => {
         const status = err?.response?.status;
         const serverError = (err?.response?.data?.error || "").toLowerCase();
-        let text = "Προέκυψε σφάλμα κατά τη σύνδεση. Παρακαλώ δοκιμάστε ξανά.";
+        let text = t("login.genericError");
 
         if (!err?.response) {
-          text =
-            "Δεν ήταν δυνατή η επικοινωνία με τον διακομιστή. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.";
+          text = t("common.serverUnreachable");
         } else if (status === 401 || status === 404 || serverError.includes("invalid credentials") || serverError.includes("user not found")) {
-          text =
-            "Τα στοιχεία σύνδεσης δεν είναι σωστά. Ελέγξτε email και κωδικό και δοκιμάστε ξανά.";
+          text = t("login.invalidCredentials");
         } else if (status >= 500) {
-          text =
-            "Η σύνδεση δεν ήταν δυνατή λόγω τεχνικού προβλήματος. Παρακαλώ δοκιμάστε ξανά σε λίγο.";
+          text = t("login.serverError");
         }
 
         console.log("Login error:", err);
@@ -72,7 +71,7 @@ export default function Login() {
   return (
     <div className="flex flex-col justify-start pt-4 sm:px-6 lg:px-8 -mt-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <PageTitle>Σύνδεση στην εφαρμογή</PageTitle>
+        <PageTitle>{t("login.pageTitle")}</PageTitle>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -99,7 +98,7 @@ export default function Login() {
             )}
 
             <InputField
-              label="Email"
+              label={t("common.email")}
               id="email"
               name="email"
               type="text"
@@ -109,7 +108,7 @@ export default function Login() {
             />
 
             <InputField
-              label="Κωδικός πρόσβασης"
+              label={t("common.password")}
               id="password"
               name="password"
               type="password"
@@ -127,10 +126,10 @@ export default function Login() {
                 {isLoading ? (
                   <span className="inline-flex items-center gap-2">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" aria-hidden="true" />
-                    <span>Σύνδεση</span>
+                    <span>{t("login.submit")}</span>
                   </span>
                 ) : (
-                  "Σύνδεση"
+                  t("login.submit")
                 )}
               </button>
             </div>
@@ -142,7 +141,7 @@ export default function Login() {
               onClick={handleRegisterClick}
               className="flex w-full justify-center rounded-md bg-white dark:bg-[var(--color-bg-card)] px-3 py-2 text-sm font-semibold text-patras-buccaneer dark:text-[var(--color-text-secondary)] border border-patras-buccaneer shadow-sm hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-primary)] dark:hover:text-[var(--color-text-inverse)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer"
             >
-              Δεν έχετε λογαριασμό; Εγγραφείτε
+              {t("login.noAccount")}
             </button>
           </div>
 
@@ -153,7 +152,7 @@ export default function Login() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="bg-white dark:bg-[var(--color-bg-card)] px-2 text-gray-500 dark:text-[var(--color-text-muted)]">
-                  Πρόγραμμα Απόκτησης Διδακτικής Εμπειρίας
+                  {t("common.programShort")}
                 </span>
               </div>
             </div>

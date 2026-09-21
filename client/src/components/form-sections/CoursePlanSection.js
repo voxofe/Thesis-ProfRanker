@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useFormData } from "../../contexts/FormDataContext";
 import { usePositions } from "../../contexts/PositionsContext";
+import { useLanguage } from "../../contexts";
 import TooltipGray from "../TooltipGray";
 import { WeeklyScheduleTable, COURSE_SCHEDULE_WEEK_FIELDS } from "../WeeklyScheduleTable";
 
@@ -42,33 +43,33 @@ function AutoGrowTextarea({ value, onChange, placeholder, id, rows = 12 }) {
 const COURSE_PLAN_FIELDS = [
   {
     key: "generalDescription",
-    label: "Γενική περιγραφή μαθήματος",
-    placeholder: "Συμπληρώστε γενική περιγραφή για το μάθημα...",
+    labelKey: "courses.planGeneralDescription",
+    placeholderKey: "courses.phGeneralDescription",
   },
   {
     key: "learningObjectives",
-    label: "Μαθησιακοί στόχοι",
-    placeholder: "Συμπληρώστε μαθησιακούς στόχους...",
+    labelKey: "courses.planLearningObjectives",
+    placeholderKey: "courses.phLearningObjectives",
   },
   {
     key: "deliveryMethods",
-    label: "Τρόπος παράδοσης & διδακτικές μέθοδοι",
-    placeholder: "Συμπληρώστε τρόπο παράδοσης και διδακτικές μεθόδους...",
+    labelKey: "courses.planDeliveryMethods",
+    placeholderKey: "courses.phDeliveryMethods",
   },
   {
     key: "bibliographyMaterial",
-    label: "Βιβλιογραφία - Εκπαιδευτικό υλικό",
-    placeholder: "Συμπληρώστε βιβλιογραφία και εκπαιδευτικό υλικό...",
+    labelKey: "courses.planBibliography",
+    placeholderKey: "courses.phBibliography",
   },
   {
     key: "learningOutcomes",
-    label: "Μαθησιακά αποτελέσματα",
-    placeholder: "Συμπληρώστε μαθησιακά αποτελέσματα...",
+    labelKey: "courses.planLearningOutcomes",
+    placeholderKey: "courses.phLearningOutcomes",
   },
   {
     key: "assessmentMethodsCriteria",
-    label: "Μέθοδοι και κριτήρια αξιολόγησης",
-    placeholder: "Συμπληρώστε μεθόδους και κριτήρια αξιολόγησης...",
+    labelKey: "courses.planAssessment",
+    placeholderKey: "courses.phAssessment",
   },
 ];
 
@@ -77,6 +78,7 @@ const ALL_REQUIRED_FIELDS = [...COURSE_PLAN_FIELDS, ...COURSE_SCHEDULE_WEEK_FIEL
 export default function CoursePlanSection() {
   const { formData, handleCoursePlanFieldChange } = useFormData();
   const { positions = [] } = usePositions();
+  const { t } = useLanguage();
   const tabsViewportRef = useRef(null);
   const [activeCourseId, setActiveCourseId] = useState(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -150,7 +152,7 @@ export default function CoursePlanSection() {
     return (
       <section className="space-y-3">
         <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-[var(--color-warning)] dark:bg-[var(--color-warning)] dark:text-[var(--color-warning)]">
-          Επιλέξτε πρώτα επιστημονικό πεδίο στο προηγούμενο βήμα.
+          {t("courses.selectFieldFirst")}
         </p>
       </section>
     );
@@ -160,7 +162,7 @@ export default function CoursePlanSection() {
     return (
       <section className="space-y-3">
         <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-[var(--color-warning)] dark:bg-[var(--color-warning)] dark:text-[var(--color-warning)]">
-          Δεν υπάρχουν μαθήματα για την επιλεγμένη θέση.
+          {t("courses.noCoursesForPosition")}
         </p>
       </section>
     );
@@ -171,12 +173,12 @@ export default function CoursePlanSection() {
       <div className="space-y-2">
         <div>
           <label className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">
-            Μαθήματα πεδίου:{" "}
+            {t("courses.fieldCourses")}{" "}
             <span className="font-semibold underline text-patras-buccaneer dark:text-[var(--color-primary)]">
               {selectedPosition?.scientificField || ""}
             </span>{" "}
-            ({courses.length} συνολικά)
-            <TooltipGray content="Συμπληρώστε το σχεδιάγραμμα διδασκαλίας για όλα τα μαθήματα του επιστημονικού πεδίου">
+            {t("courses.totalCount", { count: courses.length })}
+            <TooltipGray content={t("courses.planTooltip")}>
               <span className="ml-2 inline-flex h-5 w-5 cursor-help items-center justify-center rounded-full border border-gray-300 text-xs text-gray-600 dark:border-[var(--color-border)] dark:text-[var(--color-text-muted)]">
                 i
               </span>
@@ -191,7 +193,7 @@ export default function CoursePlanSection() {
             onClick={() => scrollTabsBy(-220)}
             disabled={!canScrollLeft}
             className="h-8 w-8 shrink-0 rounded-full border border-gray-300 text-gray-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[var(--color-border)] dark:text-[var(--color-text-secondary)]"
-            aria-label="Προηγούμενες καρτέλες μαθημάτων"
+            aria-label={t("courses.prevTabs")}
           >
             {"<"}
           </button>
@@ -213,10 +215,10 @@ export default function CoursePlanSection() {
                             ? "border-green-300 text-green-800 hover:border-green-500"
                           : "border-gray-300 bg-white text-gray-700 hover:border-patras-buccaneer dark:border-[var(--color-border)] dark:bg-[var(--color-bg-card)] dark:text-[var(--color-text-secondary)] dark:hover:border-[var(--color-primary)]"
                     }`}
-                    title={course.name || `Μάθημα ${index + 1}`}
+                    title={course.name || t("courses.courseFallback", { n: index + 1 })}
                   >
                     <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                      {course.name || `Μάθημα ${index + 1}`}
+                      {course.name || t("courses.courseFallback", { n: index + 1 })}
                       {isComplete ? <span aria-hidden="true">✓</span> : null}
                     </span>
                   </button>
@@ -230,7 +232,7 @@ export default function CoursePlanSection() {
             onClick={() => scrollTabsBy(220)}
             disabled={!canScrollRight}
             className="h-8 w-8 shrink-0 rounded-full border border-gray-300 text-gray-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[var(--color-border)] dark:text-[var(--color-text-secondary)]"
-            aria-label="Επόμενες καρτέλες μαθημάτων"
+            aria-label={t("courses.nextTabs")}
           >
             {">"}
           </button>
@@ -241,11 +243,11 @@ export default function CoursePlanSection() {
       <div className="space-y-2">
         <div>
           <label className="block text-sm/6 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">
-            Σχεδιάγραμμα διδασκαλίας για{" "}
+            {t("courses.scheduleFor")}{" "}
             <span className="font-semibold underline text-patras-buccaneer dark:text-[var(--color-primary)]">
-              {activeCourse?.name || "Χωρίς τίτλο"}
+              {activeCourse?.name || t("courses.untitled")}
             </span>{" "}
-            (Μάθημα {courses.findIndex((course) => String(course.id) === String(activeCourse?.id)) + 1}/{courses.length})
+            {t("courses.courseCounter", { current: courses.findIndex((course) => String(course.id) === String(activeCourse?.id)) + 1, total: courses.length })}
           </label>
         </div>
 
@@ -258,7 +260,7 @@ export default function CoursePlanSection() {
                   return (
                     <div key={`${activeCourse.id}-${field.key}`} className="space-y-3 pb-3">
                       <label className="block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">
-                        {field.label} <span className="text-red-500">*</span>
+                        {t(field.labelKey)} <span className="text-red-500">*</span>
                       </label>
                       <AutoGrowTextarea
                         id={`course-plan-${activeCourse.id}-${field.key}`}
@@ -266,7 +268,7 @@ export default function CoursePlanSection() {
                         onChange={(nextValue) =>
                           handleCoursePlanFieldChange(activeCourse.id, field.key, nextValue)
                         }
-                        placeholder={field.placeholder}
+                        placeholder={t(field.placeholderKey)}
                         rows={2}
                       />
                     </div>

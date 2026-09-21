@@ -11,6 +11,7 @@ import PageTitle from "../components/PageTitle";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { usePositions } from "../contexts/PositionsContext";
+import { useLanguage } from "../contexts";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -42,32 +43,32 @@ const formatPoints = (value, maxValue) => {
   );
 };
 
-const thesisRelevanceLabel = (score) => {
+const thesisRelevanceLabel = (score, t) => {
   if (score === null || score === undefined) return "";
-  if (score <= 4) return "Πολύ χαμηλή συνάφεια";
-  if (score <= 8) return "Χαμηλή συνάφεια";
-  if (score <= 12) return "Μέτρια συνάφεια";
-  if (score <= 16) return "Υψηλή συνάφεια";
-  return "Πολύ υψηλή συνάφεια";
+  if (score <= 4) return t("applicationScore.relevanceVeryLow");
+  if (score <= 8) return t("applicationScore.relevanceLow");
+  if (score <= 12) return t("applicationScore.relevanceMedium");
+  if (score <= 16) return t("applicationScore.relevanceHigh");
+  return t("applicationScore.relevanceVeryHigh");
 };
 
 const thesisRelevanceRanges = [
-  { min: 0, max: 4, label: "Πολύ χαμηλή συνάφεια" },
-  { min: 5, max: 8, label: "Χαμηλή συνάφεια" },
-  { min: 9, max: 12, label: "Μέτρια συνάφεια" },
-  { min: 13, max: 16, label: "Υψηλή συνάφεια" },
-  { min: 17, max: 20, label: "Πολύ υψηλή συνάφεια" },
+  { min: 0, max: 4, labelKey: "applicationScore.relevanceVeryLow" },
+  { min: 5, max: 8, labelKey: "applicationScore.relevanceLow" },
+  { min: 9, max: 12, labelKey: "applicationScore.relevanceMedium" },
+  { min: 13, max: 16, labelKey: "applicationScore.relevanceHigh" },
+  { min: 17, max: 20, labelKey: "applicationScore.relevanceVeryHigh" },
 ];
 
 const coursePlanRelevanceRanges = [
-  { min: 0, max: 5, label: "Πολύ χαμηλή συνάφεια" },
-  { min: 6, max: 10, label: "Χαμηλή συνάφεια" },
-  { min: 11, max: 15, label: "Μέτρια συνάφεια" },
-  { min: 16, max: 20, label: "Υψηλή συνάφεια" },
-  { min: 21, max: 25, label: "Πολύ υψηλή συνάφεια" },
+  { min: 0, max: 5, labelKey: "applicationScore.relevanceVeryLow" },
+  { min: 6, max: 10, labelKey: "applicationScore.relevanceLow" },
+  { min: 11, max: 15, labelKey: "applicationScore.relevanceMedium" },
+  { min: 16, max: 20, labelKey: "applicationScore.relevanceHigh" },
+  { min: 21, max: 25, labelKey: "applicationScore.relevanceVeryHigh" },
 ];
 
-const renderThesisRelevanceTooltip = (score) => {
+const renderThesisRelevanceTooltip = (score, t) => {
   if (score === null || score === undefined) return null;
   return (
     <div className="text-xs text-gray-800 dark:text-[var(--color-text-primary)]">
@@ -75,7 +76,7 @@ const renderThesisRelevanceTooltip = (score) => {
         const isActive = score >= range.min && score <= range.max;
         return (
           <div key={`${range.min}-${range.max}`} className={isActive ? "font-semibold" : ""}>
-            {range.min}-{range.max}: {range.label}
+            {range.min}-{range.max}: {t(range.labelKey)}
           </div>
         );
       })}
@@ -83,7 +84,7 @@ const renderThesisRelevanceTooltip = (score) => {
   );
 };
 
-const renderCoursePlanRelevanceTooltip = (score) => {
+const renderCoursePlanRelevanceTooltip = (score, t) => {
   if (score === null || score === undefined) return null;
   return (
     <div className="text-xs text-gray-800 dark:text-[var(--color-text-primary)]">
@@ -91,7 +92,7 @@ const renderCoursePlanRelevanceTooltip = (score) => {
         const isActive = score >= range.min && score <= range.max;
         return (
           <div key={`${range.min}-${range.max}`} className={isActive ? "font-semibold" : ""}>
-            {range.min}-{range.max}: {range.label}
+            {range.min}-{range.max}: {t(range.labelKey)}
           </div>
         );
       })}
@@ -123,6 +124,7 @@ const AiIndicatorIcon = ({ className = "h-4 w-4" }) => (
 
 export default function ApplicationScore() {
   const { currentUser } = useAuth();
+  const { t } = useLanguage();
   const { id } = useParams();
   const { positions = [] } = usePositions();
   const [applicantData, setApplicantData] = useState();
@@ -306,63 +308,63 @@ export default function ApplicationScore() {
   const documentItems = [
     {
       key: "cv",
-      label: "Βιογραφικό σημείωμα",
+      label: t("applicationScore.docCv"),
       value: applicantData?.documents?.cv,
     },
     {
       key: "bioSupportingDocuments",
-      label: "Εγγράφα που τεκμηριώνουν τα διαλαμβανόμενα στο βιογραφικό",
+      label: t("applicationScore.docBioSupporting"),
       value: applicantData?.documents?.bioSupportingDocuments || [],
       isMulti: true,
     },
     {
       key: "coursePlan",
-      label: "Σχεδιάγραμμα διδασκαλίας",
+      label: t("applicationScore.docCoursePlan"),
       value: applicantData?.documents?.coursePlan,
     },
     {
       key: "phd",
-      label: "Διδακτορικό δίπλωμα",
+      label: t("applicationScore.docPhd"),
       value: applicantData?.documents?.phd,
     },
     {
       key: "doatap",
-      label: "Έγγραφο αναγνώρισης ΔΟΑΤΑΠ",
+      label: t("applicationScore.docDoatap"),
       value: applicantData?.documents?.doatap,
     },
     {
       key: "employmentCertificates",
-      label: "Βεβαιώσεις προϋπηρεσίας από τον Φορέα / Συμβάσεις ως τεκμήρια μεταδιδακτορικής εργασιακής εμπειρίας (εξαιρείται η διδακτική εμπειρία)",
+      label: t("applicationScore.docEmploymentCertificates"),
       value: applicantData?.documents?.employmentCertificates || [],
       isMulti: true,
     },
     {
       key: "publicEmployeePermission",
-      label: "Πρωτοκολλημένη αίτηση για έκδοση σχετικής άδειας από το αρμόδιο όργανο για δημοσίους υπαλλήλους",
+      label: t("applicationScore.docPublicEmployeePermission"),
       value: applicantData?.documents?.publicEmployeePermission,
     },
     {
       key: "euCitizenGreekLanguageCertificate",
-      label: "Πιστοποιητικό ελληνομάθειας Δ΄ επιπέδου από το Κέντρο Ελληνικής Γλώσσας",
+      label: t("applicationScore.docEuCitizenGreekLanguageCertificate"),
       value: applicantData?.documents?.euCitizenGreekLanguageCertificate,
     },
     {
       key: "notParticipatedDeclaration",
-      label: "Υπεύθυνη δήλωση μη προηγούμενης συμμετοχής",
+      label: t("applicationScore.docNotParticipatedDeclaration"),
       value: applicantData?.documents?.notParticipatedDeclaration,
     },
     ...(requiresMilitaryDoc
       ? [
           {
             key: "military",
-            label: `Υπεύθυνη δήλωση εκπλήρωσης στρατιωτικών υποχρεώσεων ή νόμιμης απαλλαγής από αυτές ή αναβολής για το ακαδημαϊκό έτος ${academicYear}`,
+            label: t("applicationScore.docMilitary", { year: academicYear }),
             value: applicantData?.documents?.military,
           },
         ]
       : []),
     {
       key: "responsibleDeclaration",
-      label: "Υπεύθυνη δήλωση σχετικά με τους περιορισμούς της Πράξης",
+      label: t("applicationScore.docResponsibleDeclaration"),
       value: applicantData?.documents?.responsibleDeclaration,
     },
   ];
@@ -461,9 +463,7 @@ export default function ApplicationScore() {
 
   const handleEditClick = () => {
     if (!isPositionCurrentlyActive()) {
-      window.alert(
-        "Η περίοδος αιτήσεων για αυτή τη θέση έχει ολοκληρωθεί. Δεν επιτρέπονται πια επεξεργασία ή διαγραφή. Η σελίδα θα ανανεωθεί."
-      );
+      window.alert(t("applicationScore.periodEndedAlert"));
       window.location.reload();
       return;
     }
@@ -473,13 +473,11 @@ export default function ApplicationScore() {
   const handleDeleteApplication = async () => {
     if (deleting) return;
     if (!isPositionCurrentlyActive()) {
-      window.alert(
-        "Η περίοδος αιτήσεων για αυτή τη θέση έχει ολοκληρωθεί. Δεν επιτρέπονται πια επεξεργασία ή διαγραφή. Η σελίδα θα ανανεωθεί."
-      );
+      window.alert(t("applicationScore.periodEndedAlert"));
       window.location.reload();
       return;
     }
-    const confirmed = window.confirm("Θέλετε σίγουρα να διαγράψετε αυτή την αίτηση;");
+    const confirmed = window.confirm(t("applicationScore.confirmDelete"));
     if (!confirmed) return;
     const token = localStorage.getItem("token");
     if (!token || !editApplicationId) return;
@@ -510,12 +508,12 @@ export default function ApplicationScore() {
       <PageTitle className="mb-1">
         {isAdmin && applicantName ? (
           <>
-            Αίτηση & Βαθμολογία: <span className="text-lg font-semibold">{applicantName}
+            {t("applicationScore.pageTitlePrefix")}<span className="text-lg font-semibold">{applicantName}
             {applicantData?.scientificField ? ` - ${applicantData.scientificField}` : ""}
             </span>
           </>
         ) : (
-          "Αίτηση & Βαθμολογία"
+          t("applicationScore.pageTitle")
         )}
       </PageTitle>
       {canEditApplication && (
@@ -526,7 +524,7 @@ export default function ApplicationScore() {
             className="w-full flex items-center justify-between gap-3 text-patras-buccaneer dark:text-[var(--color-text-secondary)]"
           >
             <span className="text-sm text-center flex-1">
-              Μπορείτε να επεξεργαστείτε ή να διαγράψετε την αίτηση έως{" "}
+              {t("applicationScore.editHintPrefix")}{" "}
               <span className="font-semibold">
                 {toDDMMYYYYHHMM(endDate, endTime) || "—"}
               </span>
@@ -544,7 +542,7 @@ export default function ApplicationScore() {
                 }}
                 className="inline-flex shrink-0 items-center justify-center rounded-md bg-patras-buccaneer px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-patras-sanguineBrown"
               >
-                Επεξεργασία αίτησης
+                {t("applicationScore.editApplication")}
               </Link>
               <button
                 type="button"
@@ -552,7 +550,7 @@ export default function ApplicationScore() {
                 disabled={deleting}
                 className="inline-flex shrink-0 items-center justify-center rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Διαγραφή αίτησης
+                {t("applicationScore.deleteApplication")}
               </button>
             </div>
           )}
@@ -569,7 +567,7 @@ export default function ApplicationScore() {
                 : "text-patras-buccaneer dark:text-[var(--color-text-secondary)] hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-bg-muted)]"
             }`}
           >
-            Αίτηση
+            {t("applicationScore.tabApplication")}
           </button>
           <button
             type="button"
@@ -580,7 +578,7 @@ export default function ApplicationScore() {
                 : "text-patras-buccaneer dark:text-[var(--color-text-secondary)] hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-bg-muted)]"
             }`}
           >
-            Βαθμολογία
+            {t("applicationScore.tabScore")}
           </button>
         </div>
       </div>
@@ -588,31 +586,31 @@ export default function ApplicationScore() {
       {activeTab === "application" ? (
         
         <div>
-           <h1 className="text-xl font-light mb-3 dark:text-[var(--color-text-primary)]">Στοιχεία θέσης</h1>
+           <h1 className="text-xl font-light mb-3 dark:text-[var(--color-text-primary)]">{t("applicationScore.positionDetailsHeading")}</h1>
             <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
               <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
                 <thead className="bg-patras-buccaneer">
                   <tr>
                     <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                      Σχολή
+                      {t("applicationScore.colSchool")}
                     </th>
                     <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                      Τμήμα
+                      {t("applicationScore.colDepartment")}
                     </th>
                     <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                      Επιστημονικό πεδίο
+                      {t("applicationScore.colScientificField")}
                     </th>
                     <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                      Έναρξη αιτήσεων
+                      {t("applicationScore.colStart")}
                     </th>
                     <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                      Λήξη αιτήσεων
+                      {t("applicationScore.colEnd")}
                     </th>
                     <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                      Υποβολή αίτησης
+                      {t("applicationScore.colSubmit")}
                     </th>
                     <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider">
-                      Μαθήματα
+                      {t("applicationScore.colCourses")}
                     </th>
                   </tr>
                 </thead>
@@ -639,13 +637,13 @@ export default function ApplicationScore() {
                         <TooltipGray
                           content={
                             hasResubmissionDate
-                              ? "Τελευταία επανυποβολή"
-                              : "Αρχική υποβολή"
+                              ? t("applicationScore.lastResubmission")
+                              : t("applicationScore.initialSubmission")
                           }
                         >
                           <span
                             className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-patras-buccaneer/50 text-[10px] font-semibold text-patras-buccaneer/80 dark:text-[var(--color-text-muted)]"
-                            aria-label="Πληροφορίες ημερομηνίας υποβολής"
+                            aria-label={t("applicationScore.submitDateInfoAria")}
                           >
                             i
                           </span>
@@ -662,28 +660,28 @@ export default function ApplicationScore() {
                 </tbody>
               </table>
             </div>
-          <h1 className="text-xl font-light mb-3 dark:text-[var(--color-text-primary)]">Στοιχεία υποψηφίου</h1>
+          <h1 className="text-xl font-light mb-3 dark:text-[var(--color-text-primary)]">{t("applicationScore.candidateDetailsHeading")}</h1>
           <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
             <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
               <thead className="bg-patras-buccaneer">
                 <tr>
                   <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                    Όνομα
+                    {t("applicationScore.colFirstName")}
                   </th>
                   <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                    Επώνυμο
+                    {t("applicationScore.colLastName")}
                   </th>
                   <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                    Διδακτορικός τίτλος
+                    {t("applicationScore.colPhdTitle")}
                   </th>
                   <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                    Ημερομηνία λήψης διδακτορικού τίτλου
+                    {t("applicationScore.colPhdDate")}
                   </th>
                   <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider">
-                    Mεταδιδακτορική εργασιακή εμπειρία
+                    {t("applicationScore.colWorkExperience")}
                   </th>
                   <th className="px-6 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider border-l border-patras-albescentWhite">
-                    Σχεδιάγραμμα διδασκαλίας
+                    {t("applicationScore.colCoursePlan")}
                   </th>
                 </tr>
               </thead>
@@ -711,10 +709,10 @@ export default function ApplicationScore() {
                     {applicantData?.workExperience
                       ? `${applicantData?.workExperience} ${
                           applicantData?.workExperience === 1
-                            ? "χρόνος"
-                            : "χρόνια"
+                            ? t("applicationScore.yearSingular")
+                            : t("applicationScore.yearPlural")
                         }`
-                      : "Καμία"}
+                      : t("applicationScore.none")}
                   </td>
                   <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)] text-center align-middle border-l border-patras-albescentWhite whitespace-nowrap">
                     <button
@@ -722,7 +720,7 @@ export default function ApplicationScore() {
                       onClick={() => setIsCoursePlanDetailsOpen(true)}
                       className="bg-patras-buccaneer text-white px-4 py-2 rounded-md hover:bg-patras-sanguineBrown transition-colors"
                     >
-                      Προβολή
+                      {t("applicationScore.view")}
                     </button>
                   </td>
                 </tr>
@@ -732,17 +730,17 @@ export default function ApplicationScore() {
 
            
 
-            <h1 className="text-xl font-light mb-3 dark:text-[var(--color-text-primary)]">Υποβληθέντα δικαιολογητικά</h1>
+            <h1 className="text-xl font-light mb-3 dark:text-[var(--color-text-primary)]">{t("applicationScore.submittedDocsHeading")}</h1>
             <div className="relative overflow-visible shadow-md rounded-lg border border-patras-capePalliser/50 mb-5">
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white dark:bg-[var(--color-bg-card)]">
                 <thead className="bg-patras-buccaneer">
                   <tr>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider border-r border-patras-albescentWhite">
-                      Έγγραφο
+                      {t("applicationScore.colDocument")}
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">
-                      Αρχείο
+                      {t("applicationScore.colFile")}
                     </th>
                   </tr>
                 </thead>
@@ -759,7 +757,7 @@ export default function ApplicationScore() {
                             return (
                             <VaultFileActions
                               key={`${doc.key}-${file.id || index}`}
-                              file={{ name: file?.name || "Έγγραφο" }}
+                              file={{ name: file?.name || t("applicationScore.fileFallback") }}
                               onView={() => {
                                 const viewUrl = buildDownloadUrl(file);
                                 handleView(viewUrl, docKey);
@@ -786,12 +784,12 @@ export default function ApplicationScore() {
                 ) : (
                   <div>
                     <div className="mb-3 flex flex-wrap items-center gap-3">
-                      <h1 className="text-xl font-light dark:text-[var(--color-text-primary)]">Αξιολόγηση αίτησης</h1>
+                      <h1 className="text-xl font-light dark:text-[var(--color-text-primary)]">{t("applicationScore.evaluationHeading")}</h1>
                       <span className="inline-flex items-center gap-1.5 text-xs text-gray-600 dark:text-[var(--color-text-secondary)]">
                         <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer">
                           <AiIndicatorIcon className="h-3.5 w-3.5" />
                         </span>
-                        <span>Κριτήρια των οποίων ο υπολογισμός έγινε με χρήση εργαλείων AI/LLM</span>
+                        <span>{t("applicationScore.aiNote")}</span>
                       </span>
                     </div>
                     <div className="overflow-x-auto shadow-md rounded-lg border border-patras-capePalliser/50">
@@ -800,19 +798,17 @@ export default function ApplicationScore() {
                         <thead className="bg-patras-buccaneer">
                           <tr>
                             <th className="px-6 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">
-                              Κριτήριο
+                              {t("applicationScore.colCriterion")}
                             </th>
                             <th className="px-6 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">
-                              Βαθμολόγηση
+                              {t("applicationScore.colScoring")}
                             </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-patras-cameo">
                           <tr className="">
                             <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)]">
-                              Συνάφεια σχεδιαγράμματος διδασκαλίας και καινοτόμων
-                              μεθοδολογιών/θεωριών & βιβλιογραφίας με την περιγραφή του
-                              συνόλου των μαθημάτων του Επιστημονικού πεδίου
+                              {t("applicationScore.critCoursePlanRelevance")}
                             </td>
                             <td className="px-6 py-4 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               <span className="inline-flex items-center justify-center gap-2">
@@ -823,12 +819,12 @@ export default function ApplicationScore() {
                                 {applicantData?.coursePlanRelevancePoints !== null &&
                                 applicantData?.coursePlanRelevancePoints !== undefined ? (
                                   <TooltipGray
-                                    content={renderCoursePlanRelevanceTooltip(applicantData?.coursePlanRelevancePoints)}
+                                    content={renderCoursePlanRelevanceTooltip(applicantData?.coursePlanRelevancePoints, t)}
                                     className="w-auto max-w-xs whitespace-nowrap"
                                   >
                                     <span
                                       className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer cursor-help"
-                                      aria-label="Σημείωση συνάφειας σχεδιαγράμματος διδασκαλίας"
+                                      aria-label={t("applicationScore.coursePlanRelevanceAria")}
                                     >
                                       <AiIndicatorIcon className="h-3.5 w-3.5" />
                                     </span>
@@ -839,7 +835,7 @@ export default function ApplicationScore() {
                           </tr>
                           <tr className="">
                             <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)]">
-                              Δομή, οργάνωση, κατανομή ύλης
+                              {t("applicationScore.critStructure")}
                             </td>
                             <td className="px-6 py-4 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               {formatPoints(
@@ -850,8 +846,7 @@ export default function ApplicationScore() {
                           </tr>
                           <tr className="">
                             <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)]">
-                              Συνάφεια διδακτορικής διατριβής/δημοσιευμένου έργου με το
-                              επιστημονικό πεδίο
+                              {t("applicationScore.critThesisRelevance")}
                             </td>
                             <td className="px-6 py-4 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               <span className="inline-flex items-center justify-center gap-2">
@@ -862,12 +857,12 @@ export default function ApplicationScore() {
                                 {applicantData?.thesisRelevancePoints !== null &&
                                 applicantData?.thesisRelevancePoints !== undefined ? (
                                   <TooltipGray
-                                    content={renderThesisRelevanceTooltip(applicantData?.thesisRelevancePoints)}
+                                    content={renderThesisRelevanceTooltip(applicantData?.thesisRelevancePoints, t)}
                                     className="w-auto max-w-xs whitespace-nowrap"
                                   >
                                     <span
                                       className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-patras-albescentWhite text-patras-buccaneer cursor-help"
-                                      aria-label="Σημείωση συνάφειας διδακτορικής διατριβής"
+                                      aria-label={t("applicationScore.thesisRelevanceAria")}
                                     >
                                       <AiIndicatorIcon className="h-3.5 w-3.5" />
                                     </span>
@@ -889,7 +884,7 @@ export default function ApplicationScore() {
                           </tr>
                           <tr className="">
                             <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)]">
-                              Μεταδιδακτορική εργασιακή εμπειρία
+                              {t("applicationScore.critWorkExperience")}
                             </td>
                             <td className="px-6 py-4 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               {formatPoints(
@@ -900,13 +895,7 @@ export default function ApplicationScore() {
                           </tr>
                           <tr className="">
                             <td className="px-6 py-4 text-patras-buccaneer dark:text-[var(--color-text-primary)]">
-                              Προσαύξηση κατά 20% επί της συνολικής βαθμολογίας της
-                              υποψηφιότητας, εφόσον ο υποψήφιος δεν έχει επιλεγεί σε άλλο
-                              πρόγραμμα Απόκτησης Ακαδημαϊκής Διδακτικής Εμπειρίας, στο
-                              πλαίσιο των προηγούμενων προσκλήσεων ΕΔΒΜ 20 (ακαδ. έτος
-                              2016‐2017), ΕΔΒΜ 45 (ακαδ. έτος 2017‐2018), ΕΔΒΜ 82 (ακαδ.
-                              έτος 2018‐2019), καθώς και της ΕΔΒΜ 96 (ακαδ. έτη 2019‐2020
-                              και 2020‐2021) του ΕΠ ΑΝΑΔ ΕΔΒΜ 2014‐2020
+                              {t("applicationScore.critNotPastProgram")}
                             </td>
                             <td className="px-6 py-4 text-center text-patras-buccaneer dark:text-[var(--color-text-primary)]">
                               {formatPoints(
@@ -916,7 +905,7 @@ export default function ApplicationScore() {
                             </td>
                           </tr>
                           <tr className="bg-patras-buccaneer font-semibold bg-wh">
-                            <td className="px-6 py-4 text-white">Συνολικά μόρια</td>
+                            <td className="px-6 py-4 text-white">{t("applicationScore.totalPoints")}</td>
                             <td className="px-6 py-4 text-center text-white">
                               {formatPoints(
                                 applicantData?.totalPoints,

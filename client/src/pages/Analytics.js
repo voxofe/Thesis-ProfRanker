@@ -21,7 +21,7 @@ import {
 } from "recharts";
 import LoadingIndicator from "../components/LoadingIndicator";
 import PageTitle from "../components/PageTitle";
-import { useTheme } from "../contexts";
+import { useTheme, useLanguage } from "../contexts";
 
 const API_BASE_URL = (
   process.env.REACT_APP_API_URL ||
@@ -60,7 +60,8 @@ function ChartContainer({ title, children }) {
 }
 
 function EmptyChartState() {
-  return <p className="text-sm text-patras-buccaneer/70 dark:text-[var(--color-text-muted)]">Δεν υπάρχουν διαθέσιμα δεδομένα.</p>;
+  const { t } = useLanguage();
+  return <p className="text-sm text-patras-buccaneer/70 dark:text-[var(--color-text-muted)]">{t("analytics.noData")}</p>;
 }
 
 function UnifiedTooltip({ title, rows }) {
@@ -94,6 +95,7 @@ function BarChartCard({
   fixedHeight,
   tooltipVariant = "default",
 }) {
+  const { t } = useLanguage();
   if (!data.length) {
     return (
       <ChartContainer title={title}>
@@ -153,7 +155,7 @@ function BarChartCard({
                       title={String(row?.name ?? label ?? "")}
                       rows={[
                         {
-                          text: `${count} ${count === 1 ? "αίτηση" : "αιτήσεις"}`,
+                          text: `${count} ${count === 1 ? t("analytics.applicationSingular") : t("analytics.applicationPlural")}`,
                         },
                       ]}
                     />
@@ -165,10 +167,10 @@ function BarChartCard({
                   const years = row?.name ?? label ?? "0";
                   return (
                     <UnifiedTooltip
-                      title={`${years} χρόνια`}
+                      title={`${years} ${t("analytics.yearsSuffix")}`}
                       rows={[
                         {
-                          text: `${applicants} ${applicants === 1 ? "υποψήφιος/α" : "υποψήφιοι"}`,
+                          text: `${applicants} ${applicants === 1 ? t("analytics.candidateSingular") : t("analytics.candidatePlural")}`,
                         },
                       ]}
                     />
@@ -180,7 +182,7 @@ function BarChartCard({
                     title={String(row?.name ?? label ?? "")}
                     rows={[
                       {
-                        label: "Τιμή",
+                        label: t("analytics.value"),
                         value: row?.valueLabel ?? row?.value ?? 0,
                       },
                     ]}
@@ -201,13 +203,14 @@ function BarChartCard({
         </ResponsiveContainer>
       </div>
       <div className="pt-2 text-sm font-medium text-patras-buccaneer/80 dark:text-[var(--color-text-secondary)]">
-        Σύνολο: {resolvedTotal}
+        {t("analytics.total")}: {resolvedTotal}
       </div>
     </ChartContainer>
   );
 }
 
 function PublicationCountCard({ title, data }) {
+  const { t } = useLanguage();
   if (!data.length) {
     return (
       <ChartContainer title={title}>
@@ -252,8 +255,8 @@ function PublicationCountCard({ title, data }) {
                 const count = Number(row?.value ?? 0);
                 return (
                   <UnifiedTooltip
-                    title={`${row?.name ?? 0} δημοσιεύσεις`}
-                    rows={[{ text: `${count} ${count === 1 ? "αίτηση" : "αιτήσεις"}` }]}
+                    title={`${row?.name ?? 0} ${t("analytics.publicationsSuffix")}`}
+                    rows={[{ text: `${count} ${count === 1 ? t("analytics.applicationSingular") : t("analytics.applicationPlural")}` }]}
                   />
                 );
               }}
@@ -271,13 +274,14 @@ function PublicationCountCard({ title, data }) {
         </ResponsiveContainer>
       </div>
       <div className="pt-2 text-sm font-medium text-patras-buccaneer/80 dark:text-[var(--color-text-secondary)]">
-        Σύνολο: {total} αιτήσεις
+        {t("analytics.total")}: {total} {t("analytics.applicationPlural")}
       </div>
     </ChartContainer>
   );
 }
 
 function WorkExperienceVerticalCard({ title, data, fixedHeight = 300 }) {
+  const { t } = useLanguage();
   if (!data.length) {
     return (
       <ChartContainer title={title}>
@@ -305,10 +309,10 @@ function WorkExperienceVerticalCard({ title, data, fixedHeight = 300 }) {
                 const years = row?.name ?? label ?? "0";
                 return (
                   <UnifiedTooltip
-                    title={`${years} χρόνια`}
+                    title={`${years} ${t("analytics.yearsSuffix")}`}
                     rows={[
                       {
-                        text: `${applicants} ${applicants === 1 ? "υποψήφιος/α" : "υποψήφιοι"}`,
+                        text: `${applicants} ${applicants === 1 ? t("analytics.candidateSingular") : t("analytics.candidatePlural")}`,
                       },
                     ]}
                   />
@@ -328,13 +332,14 @@ function WorkExperienceVerticalCard({ title, data, fixedHeight = 300 }) {
         </ResponsiveContainer>
       </div>
       <div className="pt-2 text-sm font-medium text-patras-buccaneer/80 dark:text-[var(--color-text-secondary)]">
-        Σύνολο: {total}
+        {t("analytics.total")}: {total}
       </div>
     </ChartContainer>
   );
 }
 
 function RelevanceHistogramCard({ title, data }) {
+  const { t } = useLanguage();
   if (!data.length) {
     return (
       <ChartContainer title={title}>
@@ -366,8 +371,8 @@ function RelevanceHistogramCard({ title, data }) {
                 const count = Number(row?.value ?? 0);
                 return (
                   <UnifiedTooltip
-                    title={`${row?.points ?? 0} μόρια συνάφειας`}
-                    rows={[{ text: `${count} ${count === 1 ? "αίτηση" : "αιτήσεις"}` }]}
+                    title={`${row?.points ?? 0} ${t("analytics.relevancePointsSuffix")}`}
+                    rows={[{ text: `${count} ${count === 1 ? t("analytics.applicationSingular") : t("analytics.applicationPlural")}` }]}
                   />
                 );
               }}
@@ -386,13 +391,14 @@ function RelevanceHistogramCard({ title, data }) {
         </ResponsiveContainer>
       </div>
       <div className="pt-2 text-sm font-medium text-patras-buccaneer/80 dark:text-[var(--color-text-secondary)]">
-        Σύνολο: {total}
+        {t("analytics.total")}: {total}
       </div>
     </ChartContainer>
   );
 }
 
 function DistributionAreaCard({ title, data }) {
+  const { t } = useLanguage();
   if (!data.length) {
     return (
       <ChartContainer title={title}>
@@ -425,10 +431,10 @@ function DistributionAreaCard({ title, data }) {
                 const applicationsCount = Number(row?.value ?? 0);
                 return (
                   <UnifiedTooltip
-                    title={`${row?.score ?? 0} μόρια`}
+                    title={`${row?.score ?? 0} ${t("analytics.pointsSuffix")}`}
                     rows={[
                       {
-                        text: `${applicationsCount} ${applicationsCount === 1 ? "αίτηση" : "αιτήσεις"}`,
+                        text: `${applicationsCount} ${applicationsCount === 1 ? t("analytics.applicationSingular") : t("analytics.applicationPlural")}`,
                       },
                     ]}
                   />
@@ -451,25 +457,26 @@ function DistributionAreaCard({ title, data }) {
         </ResponsiveContainer>
       </div>
       <div className="pt-2 text-sm font-medium text-patras-buccaneer/80 dark:text-[var(--color-text-secondary)]">
-        Σύνολο: {total}
+        {t("analytics.total")}: {total}
       </div>
     </ChartContainer>
   );
 }
 
 function GenderPieCard({ data, totalCount }) {
+  const { t } = useLanguage();
   const pieColors = ["#7f3b2e", "#b97f58", "#d7b39c", "#e9d5c6"];
 
   if (!data.length) {
     return (
-      <ChartContainer title="Φύλο">
+      <ChartContainer title={t("analytics.genderTitle")}>
         <EmptyChartState />
       </ChartContainer>
     );
   }
 
   return (
-    <ChartContainer title="Φύλο">
+    <ChartContainer title={t("analytics.genderTitle")}>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div style={{ width: "100%", height: 280 }}>
           <ResponsiveContainer>
@@ -497,7 +504,7 @@ function GenderPieCard({ data, totalCount }) {
                     <UnifiedTooltip
                       rows={[
                         {
-                          label: row?.name || "Χωρίς δήλωση",
+                          label: row?.name || t("analytics.notDeclared"),
                           value: row?.valueLabel ?? row?.value ?? 0,
                         },
                       ]}
@@ -523,27 +530,28 @@ function GenderPieCard({ data, totalCount }) {
           ))}
         </div>
       </div>
-      <div className="pt-2 text-sm font-medium text-patras-buccaneer/80 dark:text-[var(--color-text-secondary)]">Σύνολο: {totalCount}</div>
+      <div className="pt-2 text-sm font-medium text-patras-buccaneer/80 dark:text-[var(--color-text-secondary)]">{t("analytics.total")}: {totalCount}</div>
     </ChartContainer>
   );
 }
 
 function SubmissionTimelineCard({ timeline, isDarkMode }) {
+  const { t } = useLanguage();
   const granularity = timeline?.granularity || "month";
   const series = Array.isArray(timeline?.series) ? timeline.series : [];
 
   if (!series.length) {
     return (
-      <ChartContainer title="Ρυθμός υποβολής αιτήσεων">
+      <ChartContainer title={t("analytics.timelineTitle")}>
         <EmptyChartState />
       </ChartContainer>
     );
   }
 
   const granularityLabelMap = {
-    day: "ανά ημέρα",
-    week: "ανά εβδομάδα",
-    month: "ανά μήνα",
+    day: t("analytics.perDay"),
+    week: t("analytics.perWeek"),
+    month: t("analytics.perMonth"),
   };
 
   const chartData = series.map((point) => ({
@@ -560,9 +568,9 @@ function SubmissionTimelineCard({ timeline, isDarkMode }) {
     : TIMELINE_CUMULATIVE_COLOR_LIGHT;
 
   return (
-    <ChartContainer title="Ρυθμός υποβολής αιτήσεων">
+    <ChartContainer title={t("analytics.timelineTitle")}>
       <div className="mb-2 text-xs text-patras-buccaneer/70 dark:text-[var(--color-text-muted)]">
-        Ανάλυση {granularityLabelMap[granularity] || "ανά περίοδο"}
+        {t("analytics.analysisPrefix")} {granularityLabelMap[granularity] || t("analytics.perPeriod")}
       </div>
       <div style={{ width: "100%", height: 320 }}>
         <ResponsiveContainer>
@@ -577,18 +585,18 @@ function SubmissionTimelineCard({ timeline, isDarkMode }) {
                   const key = item?.dataKey;
                   if (key === "applications") {
                     return {
-                      label: "Υποβολές περιόδου",
+                      label: t("analytics.periodSubmissions"),
                       value: Number(item?.value ?? 0),
                     };
                   }
                   if (key === "cumulative") {
                     return {
-                      label: "Συνολικές υποβολές",
+                      label: t("analytics.cumulativeSubmissions"),
                       value: Number(item?.value ?? 0),
                     };
                   }
                   return {
-                    label: String(key || "Τιμή"),
+                    label: String(key || t("analytics.value")),
                     value: Number(item?.value ?? 0),
                   };
                 });
@@ -599,8 +607,8 @@ function SubmissionTimelineCard({ timeline, isDarkMode }) {
               verticalAlign="bottom"
               wrapperStyle={{ paddingTop: 16, color: CHART_TICK_COLOR }}
               formatter={(value) => {
-                if (value === "applications") return <span style={{ color: timelinePeriodColor }}>Υποβολές περιόδου</span>;
-                if (value === "cumulative") return <span style={{ color: timelineCumulativeColor }}>Συνολικές υποβολές</span>;
+                if (value === "applications") return <span style={{ color: timelinePeriodColor }}>{t("analytics.periodSubmissions")}</span>;
+                if (value === "cumulative") return <span style={{ color: timelineCumulativeColor }}>{t("analytics.cumulativeSubmissions")}</span>;
                 return <span style={{ color: CHART_TICK_COLOR }}>{value}</span>;
               }}
             />
@@ -638,6 +646,7 @@ function normalizeSelectValue(nextValue) {
 
 export default function Analytics() {
   const { isDarkMode } = useTheme();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [analytics, setAnalytics] = useState(null);
@@ -650,7 +659,7 @@ export default function Analytics() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      setError("Απαιτείται σύνδεση ως διαχειριστής.");
+      setError(t("analytics.needLogin"));
       setLoading(false);
       return;
     }
@@ -673,7 +682,7 @@ export default function Analytics() {
       })
       .catch((err) => {
         const serverError = err?.response?.data?.error;
-        setError(serverError || "Αδυναμία φόρτωσης analytics.");
+        setError(serverError || t("analytics.loadFailed"));
       })
       .finally(() => setLoading(false));
   }, [filters]);
@@ -716,7 +725,7 @@ export default function Analytics() {
     const value = Number(row.count || 0);
     const pct = totalGenderCount ? (value / totalGenderCount) * 100 : 0;
     return {
-      name: row.label || row.name || "Χωρίς δήλωση",
+      name: row.label || row.name || t("analytics.notDeclared"),
       value,
       valueLabel: `${value} (${pct.toFixed(1)}%)`,
     };
@@ -758,7 +767,7 @@ export default function Analytics() {
   const departmentOptions = departments.map((department) => ({ value: department, label: department }));
   const positionSelectOptions = useMemo(
     () => [
-      { id: "", label: "Όλες", __isExtra: true },
+      { id: "", label: t("analytics.allFem"), __isExtra: true },
       ...positions.map((position) => ({
         id: String(position.id),
         school: position.school,
@@ -772,16 +781,16 @@ export default function Analytics() {
   return (
     <div className="space-y-6">
     <div className="pt-0">
-      <PageTitle className="mb-6">Στατιστικά</PageTitle>
+      <PageTitle className="mb-6">{t("analytics.pageTitle")}</PageTitle>
       </div>
 
       <div className="mb-6 rounded-lg border border-patras-capePalliser/50 bg-white dark:bg-[var(--color-bg-card)] shadow-md overflow-visible">
 
         <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
           <CustomSelect
-            label="Σχολή"
+            label={t("analytics.school")}
             value={filters.school || "select"}
-            placeholder="Όλες"
+            placeholder={t("analytics.allFem")}
             options={schoolOptions}
             onChange={(value) => {
               const safeValue = normalizeSelectValue(value);
@@ -795,9 +804,9 @@ export default function Analytics() {
           />
 
           <CustomSelect
-            label="Τμήμα"
+            label={t("analytics.department")}
             value={filters.department || "select"}
-            placeholder="Όλα"
+            placeholder={t("analytics.allNeut")}
             options={departmentOptions}
             onChange={(value) => {
               const safeValue = normalizeSelectValue(value);
@@ -824,8 +833,8 @@ export default function Analytics() {
                   school: selectedPosition?.school || prev.school,
                 }));
               }}
-              label="Θέση"
-              placeholder="Αναζήτηση θέσης..."
+              label={t("analytics.positionLabel")}
+              placeholder={t("analytics.positionPlaceholder")}
               maxResults={100}
               style="mb-0"
               showAllOnFocus
@@ -848,7 +857,7 @@ export default function Analytics() {
               }
               className="inline-flex w-full items-center justify-center rounded-md bg-white dark:bg-[var(--color-bg-card)] px-4 py-2 text-sm font-semibold text-patras-buccaneer dark:text-[var(--color-text-secondary)] border border-patras-buccaneer dark:border-[var(--color-border-accent)] shadow-sm hover:bg-patras-albescentWhite dark:hover:bg-[var(--color-bg-muted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-patras-buccaneer dark:focus-visible:outline-[var(--color-primary)]"
             >
-              Επαναφορά
+              {t("analytics.reset")}
             </button>
           </div>
         </div>
@@ -865,18 +874,18 @@ export default function Analytics() {
       ) : (
         <>
           <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-            <StatCard title="Αριθμός υποψηφίων" value={summary.distinctApplicants || 0} />
-            <StatCard title="Συνολικές αιτήσεις" value={summary.totalApplications || 0} />
+            <StatCard title={t("analytics.statApplicants")} value={summary.distinctApplicants || 0} />
+            <StatCard title={t("analytics.statTotalApplications")} value={summary.totalApplications || 0} />
             <StatCard
-              title="Μ.Ο. συνολικών μορίων"
+              title={t("analytics.statAvgPoints")}
               value={summary.avgTotalPoints ?? 0}
             />
             <StatCard
-              title="Μ.Ο. χρόνων εμπειρίας"
+              title={t("analytics.statAvgExperience")}
               value={summary.avgWorkExperienceYears ?? 0}
             />
             <StatCard
-              title="Μ.Ο. δημοσιεύσεων ανά αίτηση"
+              title={t("analytics.statAvgPublications")}
               value={summary.avgPublicationsPerApplication ?? 0}
             />
           </div>
@@ -884,7 +893,7 @@ export default function Analytics() {
           <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
             <GenderPieCard data={genderChartData} totalCount={totalGenderCount} />
             <BarChartCard
-              title="Έτος λήψης διδακτορικού τίτλου"
+              title={t("analytics.chartPhdYear")}
               data={phdYearChartData}
               layout="horizontal"
               tooltipVariant="phdYear"
@@ -900,23 +909,23 @@ export default function Analytics() {
             />
             */}
             <WorkExperienceVerticalCard
-              title="Χρόνια μεταδιδακτορικής εργασιακής εμπειρίας"
+              title={t("analytics.chartWorkExperience")}
               data={workExperienceChartData}
               fixedHeight={300}
             />
             <DistributionAreaCard
-              title="Κατανομή μορίων ανά αίτηση"
+              title={t("analytics.chartScoreDistribution")}
               data={scorePointChartData}
             />
           </div>
 
           <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
             <RelevanceHistogramCard
-              title="Κατανομή μορίων συνάφειας ανά αίτηση"
+              title={t("analytics.chartRelevanceDistribution")}
               data={relevancePointChartData}
             />
             <PublicationCountCard
-              title="Δημοσιεύσεις ανά αίτηση"
+              title={t("analytics.chartPublications")}
               data={publicationCountChartData}
             />
           </div>
